@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  NODE_ENV: development
+
+jobs:
+  validate:
+    name: Validate the changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout the code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - name: 📦 Init Node, pnpm
+        uses: ./.github/workflows/actions/init
+
+      - name: ✅ Run linting
+        run: pnpm run lint
+
+      - name: ✅ Run build
+        run: pnpm run build

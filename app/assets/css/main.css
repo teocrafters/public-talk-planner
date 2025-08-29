@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: "Nunito Sans", sans-serif;
+  --font-serif: "Literata", serif;
+  --font-mono: "Fira Code", monospace;
+}
