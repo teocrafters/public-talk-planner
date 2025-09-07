@@ -1,0 +1,61 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signingIn": "Signing in...",
+    "signInToAccount": "Sign in to your account",
+    "signInToContinue": "Please sign in to continue",
+    "forgotPassword": "Forgot your password?",
+    "authenticationError": "Authentication Error",
+    "invalidCredentials": "Invalid email or password",
+    "emailAddress": "Email address",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "emailRequired": "Email address is required",
+    "passwordRequired": "Password is required",
+    "invalidEmail": "Invalid email format"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeUser": "Welcome, {email}!",
+    "userDashboard": "This is your protected user dashboard.",
+    "accessDashboard": "Access your dashboard and manage your talks"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "meta": {
+    "signIn": {
+      "title": "Sign In - Public Talk Planner",
+      "description": "Sign in to access your talk planning dashboard and manage your presentations."
+    },
+    "dashboard": {
+      "title": "Dashboard - Public Talk Planner",
+      "description": "Manage your talks and presentations"
+    }
+  },
+  "errors": {
+    "unexpectedError": "An unexpected error occurred",
+    "networkError": "Network connection error",
+    "tryAgain": "Try again",
+    "contactSupport": "Contact support"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email address",
+    "minLength": "Minimum {count} characters",
+    "maxLength": "Maximum {count} characters"
+  }
+}

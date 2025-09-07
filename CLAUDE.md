@@ -210,3 +210,167 @@ export function useApi<T>(endpoint: string): ComputedRef<T | null>
 2. Test build process with `pnpm build`
 3. Verify database migrations are applied
 4. Test production build locally with `pnpm preview`
+
+## Internationalization (i18n) Rules
+
+### Language Standards
+
+**UI Language**: Polish (Primary)
+- All user-facing text must be in Polish
+- Use `$t()` function for all UI text
+- Never hardcode Polish text directly in components
+- Maintain consistent formal/informal tone (informal "Ty" form)
+
+**Code & Documentation**: English (Strict)
+- All code, comments, and documentation in English only
+- Variable names, function names: English camelCase
+- Git commit messages: English
+- API endpoints and technical terms: English
+- Error logging and console messages: English
+
+### Translation Key Structure
+
+**Hierarchical Organization**:
+```
+common.*          # Shared UI elements (buttons, labels)
+auth.*           # Authentication flows
+dashboard.*      # Dashboard and main app
+navigation.*     # Navigation elements  
+meta.*           # SEO meta tags and descriptions
+errors.*         # Error messages and validation
+validation.*     # Form validation messages
+```
+
+**Key Naming Conventions**:
+- Use English-based descriptive keys: `auth.signInButton` not `auth.przyciskLogowania`
+- Dot notation for hierarchy: `auth.form.emailLabel`
+- Context-specific grouping: `errors.validation.required`
+- Consistent naming patterns: `action.resource` (e.g., `create.account`, `delete.item`)
+
+### Component Integration Patterns
+
+**Required Usage**:
+```vue
+<template>
+  <!-- ✅ Correct: Using $t() for UI text -->
+  <button>{{ $t('common.submit') }}</button>
+  <input :placeholder="$t('auth.enterEmail')" />
+  
+  <!-- ❌ Wrong: Hardcoded Polish text -->
+  <button>Zatwierdź</button>
+  <input placeholder="Wprowadź email" />
+</template>
+
+<script setup>
+// ✅ Always import useI18n in components with translations
+const { $t } = useI18n()
+
+// ✅ Use interpolation for dynamic content
+const welcomeMessage = computed(() => 
+  $t('dashboard.welcomeUser', { email: user.value?.email })
+)
+</script>
+```
+
+**SEO Meta Tags**:
+```typescript
+// ✅ Correct: i18n meta tags
+useSeoMeta({
+  title: $t('meta.dashboard.title'),
+  description: $t('meta.dashboard.description')
+})
+
+// ❌ Wrong: Hardcoded meta tags
+useSeoMeta({
+  title: 'Panel główny - Planer Wystąpień',
+  description: 'Zarządzaj wystąpieniami'
+})
+```
+
+### Translation File Management
+
+**File Structure**:
+```
+locales/
+├── pl.json    # Primary Polish translations
+└── en.json    # English fallback (for development)
+```
+
+**Translation Quality Standards**:
+- Natural Polish expressions, not literal translations
+- Consistent technical terminology
+- Proper Polish grammar and declension
+- Context-aware translations (formal vs informal)
+- UTF-8 encoding with Polish diacritical marks (ą, ć, ę, ł, ń, ó, ś, ź, ż)
+
+**Example Translation Patterns**:
+```json
+{
+  "auth": {
+    "signIn": "Zaloguj się",
+    "signOut": "Wyloguj się", 
+    "emailAddress": "Adres email",
+    "forgotPassword": "Zapomniałeś hasła?"
+  },
+  "dashboard": {
+    "welcomeUser": "Witaj, {email}!",
+    "userDashboard": "To jest Twój chroniony panel użytkownika."
+  }
+}
+```
+
+### Development Workflow
+
+**Adding New UI Text**:
+1. Add translation key to `locales/pl.json`
+2. Use `$t('key')` in component, never hardcode text
+3. Test with missing translation detection
+4. Verify Polish character rendering
+
+**Before Committing**:
+1. Run `pnpm typecheck` to catch i18n typing errors
+2. Verify no hardcoded Polish text remains in components
+3. Check translation file JSON syntax validity
+4. Test critical user flows with Polish UI
+
+**Quality Checks**:
+- Use browser dev tools to check for missing translation warnings
+- Verify interpolation works correctly: `$t('key', { variable })`
+- Test responsive design with longer Polish text
+- Validate Polish character encoding in all browsers
+
+### Technical Configuration
+
+**Nuxt i18n Module Settings**:
+- Default locale: `'pl'` (Polish primary)
+- Fallback locale: `'pl'` (consistent experience)  
+- Strategy: `'no_prefix'` (no URL prefixes)
+- Lazy loading: Enabled for performance
+- SEO optimization: Automatic hreflang generation
+
+**TypeScript Integration**:
+```typescript
+// ✅ Use proper typing for translation keys
+interface TranslationSchema {
+  auth: {
+    signIn: string
+    emailAddress: string
+  }
+}
+```
+
+### Error Prevention
+
+**Common Mistakes to Avoid**:
+- ❌ Mixing Polish and English in same component
+- ❌ Hardcoding Polish text instead of using `$t()`
+- ❌ Using English variable names in Polish translation keys
+- ❌ Forgetting to add `useI18n()` in components
+- ❌ Not testing with missing translations
+- ❌ Inconsistent formal/informal tone across UI
+
+**Validation Rules**:
+- All user-visible text must use translation functions
+- No Polish text should appear directly in Vue templates
+- Translation keys must be in English and descriptive
+- All new components must include i18n integration from start

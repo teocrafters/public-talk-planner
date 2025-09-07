@@ -1,0 +1,61 @@
+{
+  "common": {
+    "welcome": "Witamy",
+    "email": "Adres email",
+    "password": "Hasło",
+    "submit": "Zatwierdź",
+    "cancel": "Anuluj",
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "success": "Sukces"
+  },
+  "auth": {
+    "signIn": "Zaloguj się",
+    "signOut": "Wyloguj się",
+    "signingIn": "Logowanie...",
+    "signInToAccount": "Zaloguj się do swojego konta",
+    "signInToContinue": "Zaloguj się, aby kontynuować",
+    "forgotPassword": "Zapomniałeś hasła?",
+    "authenticationError": "Błąd uwierzytelnienia",
+    "invalidCredentials": "Nieprawidłowy email lub hasło",
+    "emailAddress": "Adres email",
+    "enterEmail": "Wprowadź swój adres email",
+    "enterPassword": "Wprowadź swoje hasło",
+    "emailRequired": "Adres email jest wymagany",
+    "passwordRequired": "Hasło jest wymagane",
+    "invalidEmail": "Nieprawidłowy format adresu email"
+  },
+  "dashboard": {
+    "title": "Panel główny",
+    "welcomeUser": "Witaj, {email}!",
+    "userDashboard": "To jest Twój chroniony panel użytkownika.",
+    "accessDashboard": "Uzyskaj dostęp do swojego panelu i zarządzaj swoimi wystąpieniami"
+  },
+  "navigation": {
+    "home": "Strona główna",
+    "dashboard": "Panel główny",
+    "settings": "Ustawienia"
+  },
+  "meta": {
+    "signIn": {
+      "title": "Logowanie - Planer Wystąpień Publicznych",
+      "description": "Zaloguj się, aby uzyskać dostęp do swojego panelu planowania wystąpień i zarządzać swoimi prezentacjami."
+    },
+    "dashboard": {
+      "title": "Panel główny - Planer Wystąpień Publicznych", 
+      "description": "Zarządzaj swoimi wystąpieniami i prezentacjami"
+    }
+  },
+  "errors": {
+    "unexpectedError": "Wystąpił nieoczekiwany błąd",
+    "networkError": "Błąd połączenia z serwerem",
+    "tryAgain": "Spróbuj ponownie",
+    "contactSupport": "Skontaktuj się z pomocą techniczną"
+  },
+  "validation": {
+    "required": "To pole jest wymagane",
+    "email": "Wprowadź prawidłowy adres email",
+    "minLength": "Minimum {count} znaków",
+    "maxLength": "Maksimum {count} znaków"
+  }
+}

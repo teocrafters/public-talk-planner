@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 
+export * from "./auth-schema"
 export const publicTalks = sqliteTable("public_talks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   no: integer("no").notNull(),
