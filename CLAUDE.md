@@ -34,13 +34,63 @@ pnpm typecheck    # Run TypeScript type checking
 pnpm db:generate  # Generate Drizzle migrations
 ```
 
-## Tech Stack
+## Architecture
 
 **Nuxt 4 Full-Stack Application** for **Cloudflare Deployment**:
+- Serverless-first approach using Cloudflare Workers
+- TypeScript-first development for type safety
+- Component-driven development with reusable UI elements
+- Responsive design with mobile-first approach
+- SEO-optimized with server-side rendering
 - **Frontend**: Nuxt 4 + Vue 3 + TypeScript + @nuxt/ui (Tailwind CSS)
 - **Backend**: Nitro server + Drizzle ORM + D1 Database
+- **Authentication**: Better Auth for secure user management
+- **Internationalization**: @nuxtjs/i18n with Polish primary language
 - **Deployment**: Cloudflare Workers + NuxtHub + D1
-- **Tooling**: ESLint + Prettier + TypeScript
+- **Build tool**: Vite (via Nuxt)
+- **Package manager**: pnpm
+- **Developer tools**: ESLint + Prettier + TypeScript
+- **Testing**: Playwright for E2E testing
+
+## Code Style
+
+- TypeScript: Strict mode with exactOptionalPropertyTypes, noUncheckedIndexedAccess
+- Imports: ALWAYS Use consistent-type-imports
+- USE tabs for indentation (2 spaces for YAML/JSON/MD)
+- USE double quotes, no semicolons, trailing commas
+- DO NOT use JSDoc docstrings for documenting TypeScript definitions
+- ALWAYS keep 100 character line limit
+- USE descriptive variable/function names
+- PREFER functional programming patterns
+- NEVER use `@ts-expect-error` or `@ts-ignore` to suppress type errors
+- ALWAYS declare types function parameters and return values
+- AVOID `any` - find for necessary types instead or create them if missing
+- HANDLE potential undefined values explicitly
+- AVOID enums - use const objects instead
+- USE discriminated unions to model data with different shapes
+- PREFER types over interfaces except for public APIs
+- AVOID magic numbers: Use constants with descriptive names for numerical or string literals.
+- AVOID primitive obsession: Encapsulate data in composite types
+- PREFER immutability: Use `readonly` for immutable properties, `as const` for literals
+- VALIDATE at boundaries: Use classes with internal validation instead of function-level validation
+- USE Result types instead of throwing errors for library code
+- KEEP functions short (less than 20 lines) and single-purpose
+- USE early returns to avoid deeply nested blocks
+- USE arrow functions for simple cases (less than 3 instructions)
+- USE default parameters instead of null/undefined checks
+- USE RO-RO pattern (Receive Object, Return Object) for multiple parameters
+- SEPARATE logical sections with blank lines, not with comments
+- Use comments ONLY when it's describe a architectural decision. DO NOT use comments to explain the code
+- USE named exports over default exports when possible (remember about frontend frameworks exceptions)
+
+### Naming Conventions
+
+- camelCase: Variables and function names (`myVariable`, `myFunction()`)
+- PascalCase: Classes, types, and interfaces (`MyClass`, `MyInterface`)
+- ALL_CAPS: Constants and enum values (`MAX_COUNT`, `Color.RED`)
+- kebab-case: File and directory names
+- Generic types: Prefix with `T` (`TKey`, `TValue`, `TData`, `TError`)
+- In CamelCase names, use "URL" (not "Url"), "API" (not "Api"), "ID" (not "Id")
 
 ## Development Rules & Best Practices
 
@@ -184,6 +234,24 @@ export function useApi<T>(endpoint: string): ComputedRef<T | null>
 - Implement proper loading states
 - Use `v-memo` for expensive list renders
 - Optimize images and assets
+
+## Testing
+
+- Vitest for unit testing and API integration tests
+- Playwright for E2E tests and UI-focused integration tests
+- When writing tests, do it one test case at a time
+- Use `expect(VALUE).toXyz(...)` instead of storing in variables
+- Omit "should" from test names (e.g., `it("validates input")` not `it("should validate input")`)
+- Test files: `*.test.ts` or `*.spec.ts`
+- Mock external dependencies appropriately
+
+## Security
+
+- Use appropriate data types that limit exposure of sensitive information
+- Never commit secrets or API keys to repository
+- Use environment variables for sensitive data
+- Validate all user inputs on both client and server
+- Follow principle of least privilege
 
 ### Development Workflow
 
@@ -374,3 +442,90 @@ interface TranslationSchema {
 - No Polish text should appear directly in Vue templates
 - Translation keys must be in English and descriptive
 - All new components must include i18n integration from start
+
+## Git Workflow
+
+### Commit Standards
+
+- **Conventional commits**: Use format `<type>(<scope>): <description> [AI]`
+- **Granular commits**: One logical change per commit
+- **AI tagging**: ALWAYS add `[AI]` suffix to AI-generated commits
+- **Clear messages**: Explain WHY changes were made, not just what
+- **Issue linking**: Reference ticket numbers with `fixes #123`, `refs #123`
+- **Standard scopes**: `ui`, `api`, `auth`, `i18n`, `test`, `docs`, `deps`, `config`
+- **Breaking changes**: Use `!` after type or `BREAKING CHANGE:` footer
+- **Commit frequently**: After creating component, fixing bug, or significant progress
+- **Review AI code**: Never merge code you don't understand
+
+### Common Types
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `style`: Code formatting
+- `docs`: Documentation
+- `test`: Adding tests
+- `chore`: Dependencies, tooling
+
+### Pre-commit Process
+
+- ALWAYS run `pnpm ci` before committing (see package.json for available CI command)
+- Fix linting errors with `pnpm lint:fix`
+- Run `pnpm typecheck` to verify type safety
+- NEVER use `git push --force` on the main branch
+- Use `git push --force-with-lease` for feature branches if needed
+- Always verify current branch before force operations
+
+## Common Pitfalls
+
+- Trying to use `npm` instead of `pnpm`
+- Not following the established project structure
+- Working in the wrong directory
+- Using incorrect import patterns
+- Writing tests without proper analysis and planning, even when directly requested
+- Using scoped styles instead of Tailwind classes
+- Making large refactors in a single commit
+- Mixing Polish and English text in components
+- Hardcoding Polish text instead of using `$t()`
+- Not running type checks before committing
+
+## Files to NOT Modify
+
+These files should NEVER be modified without explicit permission:
+
+- `.gitignore` and `.npmignore` files
+- Lock files (e.g., `pnpm-lock.yaml`)
+- Environment configuration files (`.env.*`)
+- Generated type definitions (`.d.ts`)
+- Core configuration files (e.g., `nuxt.config.ts`, `wrangler.toml`, `drizzle.config.ts`)
+- Migration files in `server/database/migrations/`
+
+## Configuration
+
+When adding new configuration options, update all relevant places:
+
+1. Environment variables in `.env.example`
+2. Configuration schemas if using config validation
+3. Documentation in README.md
+
+All configuration keys use consistent naming and MUST be documented.
+
+## Anchor Comments System
+
+Use specially formatted comments throughout the codebase to provide inline knowledge that can be easily searched:
+
+- Use `AGENT-NOTE:`, `AGENT-TODO:`, or `AGENT-QUESTION:` (all-caps prefix) for comments aimed at all agents and developers
+- Keep them concise (≤ 120 chars)
+- **Important:** Before scanning files, always first try to locate existing anchors `AGENT-*` in relevant subdirectories
+- **Update relevant anchors** when modifying associated code
+- **Do not remove `AGENT-NOTE`s** without explicit human instruction
+
+Example:
+
+```typescript
+// AGENT-NOTE: Performance-critical path; avoid extra allocations
+async function renderDashboard(...): Promise<void> {
+  // Implementation
+}
+```

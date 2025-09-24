@@ -13,6 +13,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "typecheck": "nuxt typecheck",
+    "ci": "pnpm lint && pnpm typecheck && pnpm build",
+    "check:fix": "pnpm lint:fix && pnpm format",
     "db:generate": "drizzle-kit generate",
     "auth:schema": "pnpm dlx @better-auth/cli generate --config scripts/auth-cli.ts --output server/database/auth-schema.ts -y"
   },
