@@ -20,13 +20,13 @@
   "packageRules": [
     {
       "matchPackageNames": ["*"],
-      "commitMessagePrefix": ":arrow_up: chore: ",
+      "commitMessagePrefix": "chore: ",
       "commitMessageAction": "update "
     },
     {
       "groupName": "pnpm",
       "matchPackageNames": ["pnpm"],
-      "commitMessagePrefix": ":pushpin: build: ",
+      "commitMessagePrefix": "build: ",
       "commitMessageAction": "update ",
       "automerge": true,
       "matchUpdateTypes": ["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"]
@@ -34,7 +34,7 @@
     {
       "matchManagers": ["nvm"],
       "groupName": "node",
-      "commitMessagePrefix": ":pushpin: build: ",
+      "commitMessagePrefix": "build: ",
       "commitMessageAction": "update ",
       "matchUpdateTypes": ["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"],
       "assignees": ["grixu"],
@@ -43,14 +43,14 @@
     {
       "groupName": "terraform",
       "matchManagers": ["terraform"],
-      "commitMessagePrefix": ":construction_worker: ci: ",
+      "commitMessagePrefix": "ci: ",
       "commitMessageAction": "update ",
       "automerge": false
     },
     {
       "groupName": "github-actions",
       "matchManagers": ["github-actions"],
-      "commitMessagePrefix": ":construction_worker: ci: ",
+      "commitMessagePrefix": "ci: ",
       "commitMessageAction": "update ",
       "automerge": true
     }
