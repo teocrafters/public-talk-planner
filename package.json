@@ -33,9 +33,9 @@
   },
   "devDependencies": {
     "@playwright/test": "1.55.1",
-    "drizzle-kit": "0.31.4",
+    "drizzle-kit": "0.31.5",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.13",
-    "wrangler": "4.40.1"
+    "wrangler": "4.40.2"
   }
 }
