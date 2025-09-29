@@ -7,7 +7,9 @@
     "cancel": "Anuluj",
     "loading": "Ładowanie...",
     "error": "Błąd",
-    "success": "Sukces"
+    "success": "Sukces",
+    "sending": "Wysyłanie...",
+    "or": "lub"
   },
   "auth": {
     "signIn": "Zaloguj się",
@@ -23,7 +25,33 @@
     "enterPassword": "Wprowadź swoje hasło",
     "emailRequired": "Adres email jest wymagany",
     "passwordRequired": "Hasło jest wymagane",
-    "invalidEmail": "Nieprawidłowy format adresu email"
+    "invalidEmail": "Nieprawidłowy format adresu email",
+    "register": "Zarejestruj się",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "congregation": "Zbór",
+    "selectCongregation": "Wybierz zbór",
+    "confirmPassword": "Potwierdź hasło",
+    "passwordMismatch": "Hasła nie są identyczne",
+    "emailVerification": "Weryfikacja e-mail",
+    "checkEmail": "Sprawdź swoją skrzynkę e-mail",
+    "resendEmail": "Wyślij ponownie",
+    "emailNotVerified": "Adres e-mail nie został zweryfikowany",
+    "backToLogin": "Powrót do logowania",
+    "password": "Hasło",
+    "validation": {
+      "firstNameRequired": "Imię jest wymagane",
+      "firstNameTooLong": "Imię nie może być dłuższe niż 50 znaków",
+      "lastNameRequired": "Nazwisko jest wymagane", 
+      "lastNameTooLong": "Nazwisko nie może być dłuższe niż 50 znaków",
+      "emailRequired": "Adres email jest wymagany",
+      "emailInvalid": "Nieprawidłowy format adresu email",
+      "passwordTooShort": "Hasło musi mieć co najmniej 8 znaków",
+      "passwordTooLong": "Hasło nie może być dłuższe niż 128 znaków",
+      "confirmPasswordRequired": "Potwierdzenie hasła jest wymagane",
+      "passwordMismatch": "Hasła nie są identyczne",
+      "congregationRequired": "Wybór zboru jest wymagany"
+    }
   },
   "dashboard": {
     "title": "Panel główny",
@@ -36,6 +64,36 @@
     "dashboard": "Panel główny",
     "settings": "Ustawienia"
   },
+  "registration": {
+    "title": "Utwórz nowe konto",
+    "description": "Zarejestruj się, aby rozpocząć planowanie wystąpień",
+    "success": "Konto zostało utworzone pomyślnie",
+    "successTitle": "Rejestracja zakończona pomyślnie",
+    "activationEmailSent": "Link aktywacyjny został wysłany na Twój adres e-mail",
+    "checkEmailActivation": "Sprawdź swoją skrzynkę pocztową i kliknij link aktywacyjny, aby aktywować konto",
+    "verificationSent": "Link weryfikacyjny został wysłany na Twój adres e-mail",
+    "checkEmail": "Sprawdź swoją skrzynkę pocztową i kliknij link weryfikacyjny, aby aktywować konto",
+    "haveAccount": "Masz już konto?",
+    "noAccount": "Nie masz konta?",
+    "registering": "Rejestracja...",
+    "error": "Wystąpił błąd podczas rejestracji"
+  },
+  "congregation": {
+    "selectTitle": "Wybierz swój zbór",
+    "placeholder": "Wybierz zbór z listy"
+  },
+  "passkey": {
+    "setupTitle": "Skonfiguruj klucz dostępu",
+    "setupDescription": "Bezpieczne logowanie bez hasła za pomocą odcisku palca lub Face ID",
+    "setupNow": "Skonfiguruj teraz",
+    "remindLater": "Przypomnij później",
+    "setupSuccess": "Klucz dostępu został skonfigurowany pomyślnie",
+    "setupError": "Wystąpił błąd podczas konfiguracji klucza dostępu",
+    "loginWith": "Zaloguj się kluczem dostępu",
+    "loginError": "Logowanie kluczem dostępu nie powiodło się",
+    "notSupported": "Twoja przeglądarka nie obsługuje kluczy dostępu",
+    "benefits": "Szybsze i bezpieczniejsze logowanie bez hasła"
+  },
   "meta": {
     "signIn": {
       "title": "Logowanie - Planer Wystąpień Publicznych",
@@ -44,6 +102,14 @@
     "dashboard": {
       "title": "Panel główny - Planer Wystąpień Publicznych", 
       "description": "Zarządzaj swoimi wystąpieniami i prezentacjami"
+    },
+    "register": {
+      "title": "Rejestracja - Planer Wystąpień Publicznych",
+      "description": "Utwórz nowe konto, aby rozpocząć planowanie i zarządzanie wystąpieniami publicznymi"
+    },
+    "emailVerification": {
+      "title": "Weryfikacja e-mail - Planer Wystąpień Publicznych",
+      "description": "Zweryfikuj swój adres e-mail, aby aktywować konto"
     }
   },
   "errors": {

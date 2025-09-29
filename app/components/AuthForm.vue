@@ -107,6 +107,34 @@
         {{ loading ? t('auth.signingIn') : submitText }}
       </button>
     </div>
+
+    <!-- Passkey Login Button -->
+    <ClientOnly>
+      <div v-if="showPasskeyOption" class="space-y-3">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300 dark:border-gray-600" />
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              {{ t('common.or') }}
+            </span>
+          </div>
+        </div>
+
+        <UButton
+          type="button"
+          variant="outline"
+          block
+          :loading="passkeyLoading"
+          :disabled="passkeyLoading"
+          icon="i-heroicons-finger-print"
+          @click="handlePasskeyLogin"
+        >
+          {{ t('passkey.loginWith') }}
+        </UButton>
+      </div>
+    </ClientOnly>
   </form>
 </template>
 
@@ -115,15 +143,27 @@ interface AuthFormProps {
   title?: string
   description?: string
   submitText?: string
+  enablePasskey?: boolean
 }
 
 interface AuthFormEmits {
   submit: [credentials: { email: string; password: string }]
   'forgot-password': []
+  'passkey-success': []
 }
 
-const props = defineProps<AuthFormProps>()
+const props = withDefaults(defineProps<AuthFormProps>(), {
+  title: undefined,
+  description: undefined,
+  submitText: undefined,
+  enablePasskey: true
+})
+
 const { t } = useI18n()
+const { signIn } = useAuth()
+const { isSupported: isWebAuthnSupported } = useWebAuthn()
+const toast = useToast()
+
 const submitText = computed(() => props.submitText || t('auth.signIn'))
 
 const emit = defineEmits<AuthFormEmits>()
@@ -137,6 +177,12 @@ const formData = reactive({
 const showPassword = ref(false)
 const loading = ref(false)
 const error = ref<string | null>(null)
+const passkeyLoading = ref(false)
+
+// Show passkey option only if WebAuthn is supported and enabled
+const showPasskeyOption = computed(() => {
+  return props.enablePasskey && isWebAuthnSupported.value
+})
 
 // Form validation
 const isFormValid = computed(() => {
@@ -161,6 +207,43 @@ const handleSubmit = async () => {
     error.value = err instanceof Error ? err.message : t('errors.unexpectedError')
   } finally {
     loading.value = false
+  }
+}
+
+// Handle passkey login
+const handlePasskeyLogin = async () => {
+  if (!isWebAuthnSupported.value) {
+    toast.add({
+      title: t('common.error'),
+      description: t('passkey.notSupported'),
+      color: 'error'
+    })
+    return
+  }
+
+  try {
+    passkeyLoading.value = true
+    error.value = null
+
+    const result = await signIn.passkey()
+
+    if (result?.error) {
+      throw new Error(result.error.message || t('passkey.loginError'))
+    }
+
+    // Success - emit event for parent to handle
+    emit('passkey-success')
+  } catch (err) {
+    console.error('Passkey login error:', err)
+    const message = err instanceof Error ? err.message : t('passkey.loginError')
+
+    toast.add({
+      title: t('common.error'),
+      description: message,
+      color: 'error'
+    })
+  } finally {
+    passkeyLoading.value = false
   }
 }
 

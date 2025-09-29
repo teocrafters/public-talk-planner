@@ -16,7 +16,18 @@
         :description="t('dashboard.accessDashboard')"
         @submit="handleSignIn"
         @forgot-password="handleForgotPassword"
+        @passkey-success="handlePasskeySuccess"
       />
+      
+      <div class="text-center">
+        <p class="text-sm text-gray-600">
+          {{ t('registration.noAccount') }}
+          <NuxtLink to="/register" class="font-medium text-primary-600 hover:text-primary-500">
+            {{ t('auth.register') }}
+          </NuxtLink>
+        </p>
+      </div>
+      
     </div>
   </div>
 </template>
@@ -34,6 +45,7 @@ definePageMeta({
 
 const { t } = useI18n()
 const { signIn } = useAuth()
+
 const authFormRef = ref()
 
 // SEO meta with i18n
@@ -62,9 +74,7 @@ const handleSignIn = async (credentials: { email: string; password: string }) =>
       return
     }
     
-    // Success - redirect to user dashboard
-    // The auth middleware will handle the redirect automatically
-    // but we can also programmatically navigate for better UX
+    // Success - redirect directly to user dashboard
     await navigateTo('/user')
   } catch (error) {
     console.error('Authentication error:', error)
@@ -73,6 +83,11 @@ const handleSignIn = async (credentials: { email: string; password: string }) =>
   } finally {
     authFormRef.value.setLoading(false)
   }
+}
+
+const handlePasskeySuccess = async () => {
+  // Passkey login successful - redirect to user dashboard
+  await navigateTo('/user')
 }
 
 const handleForgotPassword = () => {

@@ -12,8 +12,8 @@
             </p>
             <div class="mt-6">
               <button
-                @click="handleSignOut"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                @click="handleSignOut"
               >
                 {{ t('auth.signOut') }}
               </button>
@@ -22,6 +22,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Passkey Setup Prompt -->
+    <PasskeyPrompt ref="passkeyPromptRef" :auto-show="true" />
   </div>
 </template>
 
@@ -34,6 +37,25 @@ definePageMeta({
   }
 })
 
+const { t } = useI18n()
+const { user, signOut, client } = useAuth()
+
+const passkeyPromptRef = ref()
+
+// Server-side passkey check with useState for SSR (used by PasskeyPrompt component)
+await useState('user-has-passkeys', async () => {
+  // Only check if user is authenticated
+  if (!user.value) return false
+  
+  try {
+    const passkeys = await client.passkey.listUserPasskeys()
+    return Array.isArray(passkeys) && passkeys.length > 0
+  } catch (error) {
+    console.warn('Server-side passkey check failed:', error)
+    return null // null indicates we should fallback to client-side check
+  }
+})
+
 // SEO meta for the user dashboard
 useSeoMeta({
   title: t('meta.dashboard.title'),
@@ -42,9 +64,6 @@ useSeoMeta({
   ogDescription: t('meta.dashboard.description'),
   robots: 'noindex, nofollow' // Don't index protected pages
 })
-
-const { t } = useI18n()
-const { user, signOut } = useAuth()
 
 const handleSignOut = async () => {
   try {

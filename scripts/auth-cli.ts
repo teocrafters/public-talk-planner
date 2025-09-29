@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/d1"
-import { serverAuth } from "./auth"
+import { serverAuth } from "../server/utils/auth"
 
 // @ts-expect-error - Global variable
 global.useDrizzle = function useDrizzle() {

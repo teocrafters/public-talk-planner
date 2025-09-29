@@ -6,6 +6,7 @@ import type {
   ClientOptions,
 } from 'better-auth/client'
 import type { RouteLocationRaw } from 'vue-router'
+import { passkeyClient } from 'better-auth/client/plugins'
 
 interface RuntimeAuthConfig {
   redirectUserTo: RouteLocationRaw | string
@@ -21,6 +22,9 @@ export function useAuth() {
     fetchOptions: {
       headers,
     },
+    plugins: [
+      passkeyClient()
+    ]
   })
 
   const options = defu(useRuntimeConfig().public.auth as Partial<RuntimeAuthConfig>, {
