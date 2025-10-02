@@ -27,7 +27,7 @@
     "drizzle-orm": "0.44.5",
     "eslint": "9.36.0",
     "nuxt": "4.1.2",
-    "resend": "6.1.1",
+    "resend": "6.1.2",
     "typescript": "5.9.3",
     "vue": "3.5.22",
     "vue-router": "4.5.1",
@@ -38,7 +38,7 @@
     "@playwright/test": "1.55.1",
     "drizzle-kit": "0.31.5",
     "prettier": "3.6.2",
-    "tailwindcss": "4.1.13",
+    "tailwindcss": "4.1.14",
     "wrangler": "4.40.3"
   }
 }
