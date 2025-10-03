@@ -39,6 +39,6 @@
     "drizzle-kit": "0.31.5",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.14",
-    "wrangler": "4.40.3"
+    "wrangler": "4.41.0"
   }
 }
