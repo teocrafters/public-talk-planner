@@ -2,7 +2,7 @@ import AdmZip from "adm-zip"
 import { createClient } from "@libsql/client"
 import { drizzle } from "drizzle-orm/libsql"
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core"
-import { sql, count, eq } from "drizzle-orm"
+import { sql, eq } from "drizzle-orm"
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -96,8 +96,8 @@ async function analyzeJwpub() {
 				return {
 					no,
 					title: row.Title,
-					hasMultimedia: row.image_count > 0,
-					hasVideo: row.video_count > 0,
+					multimediaCount: row.image_count,
+					videoCount: row.video_count,
 					status: null,
 				}
 			})
@@ -106,8 +106,8 @@ async function analyzeJwpub() {
 
 		console.log("\n📊 Extraction Statistics:")
 		console.log(`Total talks extracted: ${talks.length}`)
-		console.log(`Talks with multimedia: ${talks.filter((t) => t.hasMultimedia).length}`)
-		console.log(`Talks with videos: ${talks.filter((t) => t.hasVideo).length}`)
+		console.log(`Talks with multimedia: ${talks.filter((t) => t.multimediaCount > 0).length}`)
+		console.log(`Talks with videos: ${talks.filter((t) => t.videoCount > 0).length}`)
 
 		if (talks.length !== 187) {
 			console.warn(`⚠️  Warning: Expected 187 talks, but got ${talks.length}`)
@@ -126,7 +126,7 @@ async function analyzeJwpub() {
 			const talk = talks.find((t) => t.no === no)
 			if (talk) {
 				console.log(
-					`  #${talk.no}: ${talk.hasMultimedia ? "✅" : "❌"} multimedia, ${talk.hasVideo ? "✅" : "❌"} video`,
+					`  #${talk.no}: ${talk.multimediaCount} photos, ${talk.videoCount} videos`,
 				)
 			}
 		}

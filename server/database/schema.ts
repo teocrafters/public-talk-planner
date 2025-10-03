@@ -5,8 +5,8 @@ export const publicTalks = sqliteTable("public_talks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   no: integer("no").notNull(),
   title: text("title").notNull(),
-  hasMultimedia: integer("has_multimedia", { mode: "boolean" }).notNull(),
-  hasVideo: integer("has_video", { mode: "boolean" }).notNull(),
+  multimediaCount: integer("multimedia_count").notNull().default(0),
+  videoCount: integer("video_count").notNull().default(0),
   status: text("status").$type<"circuit_overseer" | "will_be_replaced" | null>(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })

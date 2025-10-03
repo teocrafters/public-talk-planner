@@ -6,8 +6,8 @@ import { publicTalks } from "../database/schema"
 const PublicTalkSchema = z.object({
 	no: z.number().int().positive(),
 	title: z.string().min(1),
-	hasMultimedia: z.boolean(),
-	hasVideo: z.boolean(),
+	multimediaCount: z.number().int().min(0),
+	videoCount: z.number().int().min(0),
 	status: z.enum(["circuit_overseer", "will_be_replaced"]).nullable(),
 })
 
@@ -42,8 +42,8 @@ export default defineTask({
 				await db.insert(publicTalks).values({
 					no: talk.no,
 					title: talk.title,
-					hasMultimedia: talk.hasMultimedia,
-					hasVideo: talk.hasVideo,
+					multimediaCount: talk.multimediaCount,
+					videoCount: talk.videoCount,
 					status: talk.status,
 					createdAt: new Date(),
 				})
@@ -54,7 +54,7 @@ export default defineTask({
 			return { result: "success", count: validatedTalks.length }
 		} catch (error: unknown) {
 			if (error instanceof z.ZodError) {
-				const issues = (error as any).issues || []
+				const issues = error.issues || []
 				console.error("Validation errors:", JSON.stringify(issues, null, 2))
 				throw new Error(`Zod validation failed: ${issues.length} errors found`)
 			}
