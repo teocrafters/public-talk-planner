@@ -3,7 +3,10 @@
     "sequential-thinking": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "env": {}
     },
     "figma": {
@@ -15,13 +18,16 @@
       "url": "https://mcp.nuxt.space/sse"
     },
     "nuxt-ui": {
-      "type": "sse",
+      "type": "http",
       "url": "https://ui.nuxt.com/mcp"
     },
     "playwright-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
     },
     "cloudflare-docs": {
       "type": "sse",
@@ -30,6 +36,14 @@
     "context7": {
       "type": "sse",
       "url": "https://mcp.context7.com/sse"
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ],
+      "env": {}
     }
   }
 }
