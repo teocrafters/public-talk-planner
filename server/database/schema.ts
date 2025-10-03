@@ -7,5 +7,6 @@ export const publicTalks = sqliteTable("public_talks", {
   title: text("title").notNull(),
   hasMultimedia: integer("has_multimedia", { mode: "boolean" }).notNull(),
   hasVideo: integer("has_video", { mode: "boolean" }).notNull(),
+  status: text("status").$type<"circuit_overseer" | "will_be_replaced" | null>(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
