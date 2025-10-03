@@ -27,3 +27,5 @@ logs
 test-results
 
 .serena
+
+*.jwpub
