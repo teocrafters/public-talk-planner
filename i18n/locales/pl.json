@@ -1,5 +1,6 @@
 {
   "common": {
+    "appTitle": "Planer Wystąpień",
     "welcome": "Witamy",
     "email": "Adres email",
     "password": "Hasło",
@@ -62,7 +63,19 @@
   "navigation": {
     "home": "Strona główna",
     "dashboard": "Panel główny",
+    "publicTalks": "Wykłady publiczne",
     "settings": "Ustawienia"
+  },
+  "publicTalks": {
+    "title": "Wykłady publiczne",
+    "searchPlaceholder": "Szukaj po numerze lub nazwie...",
+    "sortBy": "Sortuj według",
+    "sortAscending": "Numer (rosnąco)",
+    "sortDescending": "Numer (malejąco)",
+    "totalTalks": "{count} wykładów",
+    "noResults": "Nie znaleziono wykładów",
+    "loading": "Ładowanie wykładów...",
+    "detailsComingSoon": "Szczegóły wkrótce dostępne"
   },
   "registration": {
     "title": "Utwórz nowe konto",
@@ -110,6 +123,10 @@
     "emailVerification": {
       "title": "Weryfikacja e-mail - Planer Wystąpień Publicznych",
       "description": "Zweryfikuj swój adres e-mail, aby aktywować konto"
+    },
+    "publicTalks": {
+      "title": "Wykłady publiczne - Planer Wystąpień Publicznych",
+      "description": "Przeglądaj listę 187 wykładów publicznych z możliwością wyszukiwania i sortowania"
     }
   },
   "errors": {

@@ -1,5 +1,6 @@
 {
   "common": {
+    "appTitle": "Talk Planner",
     "welcome": "Welcome",
     "email": "Email address",
     "password": "Password",
@@ -34,7 +35,19 @@
   "navigation": {
     "home": "Home",
     "dashboard": "Dashboard",
+    "publicTalks": "Public Talks",
     "settings": "Settings"
+  },
+  "publicTalks": {
+    "title": "Public Talks",
+    "searchPlaceholder": "Search by number or title...",
+    "sortBy": "Sort by",
+    "sortAscending": "Number (ascending)",
+    "sortDescending": "Number (descending)",
+    "totalTalks": "{count} talks",
+    "noResults": "No talks found",
+    "loading": "Loading talks...",
+    "detailsComingSoon": "Details coming soon"
   },
   "meta": {
     "signIn": {
@@ -44,6 +57,10 @@
     "dashboard": {
       "title": "Dashboard - Public Talk Planner",
       "description": "Manage your talks and presentations"
+    },
+    "publicTalks": {
+      "title": "Public Talks - Public Talk Planner",
+      "description": "Browse 187 public talks with search and sort capabilities"
     }
   },
   "errors": {
