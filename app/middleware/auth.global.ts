@@ -1,33 +1,35 @@
-import { defu } from 'defu'
+import { defu } from "defu"
 
-type MiddlewareOptions = false | {
-  /**
-   * Only apply auth middleware to guest or user
-   */
-  only?: 'guest' | 'user'
-  /**
-   * Redirect authenticated user to this route
-   */
-  redirectUserTo?: string
-  /**
-   * Redirect guest to this route
-   */
-  redirectGuestTo?: string
-}
+type MiddlewareOptions =
+  | false
+  | {
+      /**
+       * Only apply auth middleware to guest or user
+       */
+      only?: "guest" | "user"
+      /**
+       * Redirect authenticated user to this route
+       */
+      redirectUserTo?: string
+      /**
+       * Redirect guest to this route
+       */
+      redirectGuestTo?: string
+    }
 
-declare module '#app' {
+declare module "#app" {
   interface PageMeta {
     auth?: MiddlewareOptions
   }
 }
 
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
     auth?: MiddlewareOptions
   }
 }
 
-export default defineNuxtRouteMiddleware(async (to) => {
+export default defineNuxtRouteMiddleware(async to => {
   // If auth is disabled, skip middleware
   if (to.meta?.auth === false) {
     return
@@ -38,7 +40,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const { only, redirectUserTo, redirectGuestTo } = defu(to.meta?.auth, options)
 
   // If guest mode, redirect if authenticated
-  if (only === 'guest' && loggedIn.value) {
+  if (only === "guest" && loggedIn.value) {
     // Avoid infinite redirect
     if (to.path === redirectUserTo) {
       return

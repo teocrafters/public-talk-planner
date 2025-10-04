@@ -1,8 +1,8 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { organization } from "better-auth/plugins";
+import { betterAuth } from "better-auth"
+import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { organization } from "better-auth/plugins"
 import { passkey } from "better-auth/plugins/passkey"
-import { sendVerificationEmail } from "./email";
+import { sendVerificationEmail } from "./email"
 
 let _auth: ReturnType<typeof betterAuth>
 
@@ -25,13 +25,10 @@ export function serverAuth() {
       },
       delete: key => hubKV().del(`_auth:${key}`),
     },
-    plugins: [
-      organization(),
-      passkey()
-    ],
+    plugins: [organization(), passkey()],
     emailVerification: {
       sendVerificationEmail: async ({ user, url }, _request) => {
-        await sendVerificationEmail(user.email, url);
+        await sendVerificationEmail(user.email, url)
       },
     },
   })

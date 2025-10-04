@@ -1,101 +1,100 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+  <div
+    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
       <div class="text-center">
         <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-          {{ t('common.welcome') }}
+          {{ t("common.welcome") }}
         </h1>
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {{ t('auth.signInToContinue') }}
+          {{ t("auth.signInToContinue") }}
         </p>
       </div>
-      
+
       <AuthForm
         ref="authFormRef"
         :title="t('auth.signInToAccount')"
         :description="t('dashboard.accessDashboard')"
         @submit="handleSignIn"
         @forgot-password="handleForgotPassword"
-        @passkey-success="handlePasskeySuccess"
-      />
-      
+        @passkey-success="handlePasskeySuccess" />
+
       <div class="text-center">
         <p class="text-sm text-gray-600">
-          {{ t('registration.noAccount') }}
-          <NuxtLink to="/register" class="font-medium text-primary-600 hover:text-primary-500">
-            {{ t('auth.register') }}
+          {{ t("registration.noAccount") }}
+          <NuxtLink
+            to="/register"
+            class="font-medium text-primary-600 hover:text-primary-500">
+            {{ t("auth.register") }}
           </NuxtLink>
         </p>
       </div>
-      
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Page meta configuration for auth middleware
-definePageMeta({
-  auth: {
-    only: 'guest',
-    redirectUserTo: '/user'
-  }
-})
+  // Page meta configuration for auth middleware
+  definePageMeta({
+    auth: {
+      only: "guest",
+      redirectUserTo: "/user",
+    },
+  })
 
+  const { t } = useI18n()
+  const { signIn } = useAuth()
 
+  const authFormRef = ref()
 
-const { t } = useI18n()
-const { signIn } = useAuth()
+  // SEO meta with i18n
+  useSeoMeta({
+    title: t("meta.signIn.title"),
+    description: t("meta.signIn.description"),
+    ogTitle: t("meta.signIn.title"),
+    ogDescription: t("meta.signIn.description"),
+    robots: "noindex, nofollow", // Don't index auth pages
+  })
 
-const authFormRef = ref()
+  const handleSignIn = async (credentials: { email: string; password: string }) => {
+    if (!authFormRef.value) return
 
-// SEO meta with i18n
-useSeoMeta({
-  title: t('meta.signIn.title'),
-  description: t('meta.signIn.description'),
-  ogTitle: t('meta.signIn.title'),
-  ogDescription: t('meta.signIn.description'),
-  robots: 'noindex, nofollow' // Don't index auth pages
-})
+    try {
+      authFormRef.value.setLoading(true)
+      authFormRef.value.setError(null)
 
-const handleSignIn = async (credentials: { email: string; password: string }) => {
-  if (!authFormRef.value) return
-  
-  try {
-    authFormRef.value.setLoading(true)
-    authFormRef.value.setError(null)
-    
-    const result = await signIn.email({
-      email: credentials.email,
-      password: credentials.password
-    })
-    
-    if (result.error) {
-      authFormRef.value.setError(result.error.message || t('auth.invalidCredentials'))
-      return
+      const result = await signIn.email({
+        email: credentials.email,
+        password: credentials.password,
+      })
+
+      if (result.error) {
+        authFormRef.value.setError(result.error.message || t("auth.invalidCredentials"))
+        return
+      }
+
+      // Success - redirect directly to user dashboard
+      await navigateTo("/user")
+    } catch (error) {
+      console.error("Authentication error:", error)
+      const message = error instanceof Error ? error.message : t("errors.unexpectedError")
+      authFormRef.value.setError(message)
+    } finally {
+      authFormRef.value.setLoading(false)
     }
-    
-    // Success - redirect directly to user dashboard
-    await navigateTo('/user')
-  } catch (error) {
-    console.error('Authentication error:', error)
-    const message = error instanceof Error ? error.message : t('errors.unexpectedError')
-    authFormRef.value.setError(message)
-  } finally {
-    authFormRef.value.setLoading(false)
   }
-}
 
-const handlePasskeySuccess = async () => {
-  // Passkey login successful - redirect to user dashboard
-  await navigateTo('/user')
-}
+  const handlePasskeySuccess = async () => {
+    // Passkey login successful - redirect to user dashboard
+    await navigateTo("/user")
+  }
 
-const handleForgotPassword = () => {
-  // TODO: Implement forgot password flow
-  // This could navigate to a forgot password page or show a modal
-  console.log('Forgot password functionality not yet implemented')
-  
-  // For now, show a helpful message
-  authFormRef.value?.setError(t('errors.contactSupport'))
-}
+  const handleForgotPassword = () => {
+    // TODO: Implement forgot password flow
+    // This could navigate to a forgot password page or show a modal
+    console.log("Forgot password functionality not yet implemented")
+
+    // For now, show a helpful message
+    authFormRef.value?.setError(t("errors.contactSupport"))
+  }
 </script>
