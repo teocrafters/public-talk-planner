@@ -47,7 +47,48 @@
     "totalTalks": "{count} talks",
     "noResults": "No talks found",
     "loading": "Loading talks...",
-    "detailsComingSoon": "Details coming soon"
+    "detailsComingSoon": "Details coming soon",
+    "status": {
+      "circuit_overseer": "Reserved for Circuit Overseers",
+      "will_be_replaced": "Will be replaced",
+      "none": "No status"
+    },
+    "actions": {
+      "menu": "Actions",
+      "blockForOverseer": "Reserve for Circuit Overseers",
+      "markForReplacement": "Mark for replacement",
+      "clearStatus": "Clear status",
+      "edit": "Edit talk",
+      "add": "Add talk"
+    },
+    "confirmations": {
+      "blockTitle": "Confirm reservation",
+      "blockMessage": "Are you sure you want to reserve this talk for circuit overseers?",
+      "replaceTitle": "Confirm marking",
+      "replaceMessage": "Are you sure you want to mark this talk for replacement?",
+      "clearTitle": "Clear status",
+      "clearMessage": "Are you sure you want to remove the status from this talk?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "modal": {
+      "editTitle": "Edit talk",
+      "addTitle": "Add talk",
+      "talkNumber": "Talk number",
+      "talkTitle": "Talk title",
+      "multimediaCount": "Number of illustrations",
+      "videoCount": "Number of videos",
+      "save": "Save changes",
+      "add": "Add talk",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "statusUpdated": "Talk status has been updated",
+      "talkUpdated": "Talk has been updated",
+      "talkCreated": "Talk has been added",
+      "duplicateNumber": "A talk with this number already exists",
+      "permissionDenied": "You do not have permission to perform this action"
+    }
   },
   "meta": {
     "signIn": {
@@ -73,6 +114,14 @@
     "required": "This field is required",
     "email": "Enter a valid email address",
     "minLength": "Minimum {count} characters",
-    "maxLength": "Maximum {count} characters"
+    "maxLength": "Maximum {count} characters",
+    "multimediaCountRange": "Number of illustrations must be between 0 and 50",
+    "videoCountRange": "Number of videos must be between 0 and 20",
+    "mustBeInteger": "Value must be an integer",
+    "talkNumberRequired": "Talk number is required",
+    "talkNumberTooLong": "Talk number cannot be longer than 10 characters",
+    "titleRequired": "Title is required",
+    "titleTooShort": "Title must be at least 3 characters",
+    "titleTooLong": "Title cannot be longer than 500 characters"
   }
 }

@@ -43,7 +43,7 @@
     "validation": {
       "firstNameRequired": "Imię jest wymagane",
       "firstNameTooLong": "Imię nie może być dłuższe niż 50 znaków",
-      "lastNameRequired": "Nazwisko jest wymagane", 
+      "lastNameRequired": "Nazwisko jest wymagane",
       "lastNameTooLong": "Nazwisko nie może być dłuższe niż 50 znaków",
       "emailRequired": "Adres email jest wymagany",
       "emailInvalid": "Nieprawidłowy format adresu email",
@@ -75,7 +75,48 @@
     "totalTalks": "{count} wykładów",
     "noResults": "Nie znaleziono wykładów",
     "loading": "Ładowanie wykładów...",
-    "detailsComingSoon": "Szczegóły wkrótce dostępne"
+    "detailsComingSoon": "Szczegóły wkrótce dostępne",
+    "status": {
+      "circuit_overseer": "Zablokowany pod nadzorców obwodu",
+      "will_be_replaced": "Do wymiany",
+      "none": "Brak statusu"
+    },
+    "actions": {
+      "menu": "Akcje",
+      "blockForOverseer": "Zablokuj pod nadzorców obwodu",
+      "markForReplacement": "Oznacz do wymiany",
+      "clearStatus": "Usuń status",
+      "edit": "Edytuj wykład",
+      "add": "Dodaj wykład"
+    },
+    "confirmations": {
+      "blockTitle": "Potwierdź blokadę",
+      "blockMessage": "Czy na pewno chcesz zablokować ten wykład pod nadzorców obwodu?",
+      "replaceTitle": "Potwierdź oznaczenie",
+      "replaceMessage": "Czy na pewno chcesz oznaczyć ten wykład do wymiany?",
+      "clearTitle": "Usuń status",
+      "clearMessage": "Czy na pewno chcesz usunąć status z tego wykładu?",
+      "confirm": "Potwierdź",
+      "cancel": "Anuluj"
+    },
+    "modal": {
+      "editTitle": "Edytuj wykład",
+      "addTitle": "Dodaj wykład",
+      "talkNumber": "Numer wykładu",
+      "talkTitle": "Tytuł wykładu",
+      "multimediaCount": "Liczba ilustracji",
+      "videoCount": "Liczba filmów",
+      "save": "Zapisz zmiany",
+      "add": "Dodaj wykład",
+      "cancel": "Anuluj"
+    },
+    "messages": {
+      "statusUpdated": "Status wykładu został zaktualizowany",
+      "talkUpdated": "Wykład został zaktualizowany",
+      "talkCreated": "Wykład został dodany",
+      "duplicateNumber": "Wykład o tym numerze już istnieje",
+      "permissionDenied": "Nie masz uprawnień do wykonania tej akcji"
+    }
   },
   "registration": {
     "title": "Utwórz nowe konto",
@@ -113,7 +154,7 @@
       "description": "Zaloguj się, aby uzyskać dostęp do swojego panelu planowania wystąpień i zarządzać swoimi prezentacjami."
     },
     "dashboard": {
-      "title": "Panel główny - Planer Wystąpień Publicznych", 
+      "title": "Panel główny - Planer Wystąpień Publicznych",
       "description": "Zarządzaj swoimi wystąpieniami i prezentacjami"
     },
     "register": {
@@ -139,6 +180,14 @@
     "required": "To pole jest wymagane",
     "email": "Wprowadź prawidłowy adres email",
     "minLength": "Minimum {count} znaków",
-    "maxLength": "Maksimum {count} znaków"
+    "maxLength": "Maksimum {count} znaków",
+    "multimediaCountRange": "Liczba ilustracji musi być między 0 a 50",
+    "videoCountRange": "Liczba filmów musi być między 0 a 20",
+    "mustBeInteger": "Wartość musi być liczbą całkowitą",
+    "talkNumberRequired": "Numer wykładu jest wymagany",
+    "talkNumberTooLong": "Numer wykładu nie może być dłuższy niż 10 znaków",
+    "titleRequired": "Tytuł jest wymagany",
+    "titleTooShort": "Tytuł musi mieć co najmniej 3 znaki",
+    "titleTooLong": "Tytuł nie może być dłuższy niż 500 znaków"
   }
 }

@@ -4,79 +4,79 @@ import { z } from "zod"
 import { publicTalks } from "../database/schema"
 
 const PublicTalkSchema = z.object({
-	no: z.number().int().positive(),
-	title: z.string().min(1),
-	multimediaCount: z.number().int().min(0),
-	videoCount: z.number().int().min(0),
-	status: z.enum(["circuit_overseer", "will_be_replaced"]).nullable(),
+  no: z.union([z.number().int().positive(), z.string().min(1)]).transform(val => String(val)),
+  title: z.string().min(1),
+  multimediaCount: z.number().int().min(0),
+  videoCount: z.number().int().min(0),
+  status: z.enum(["circuit_overseer", "will_be_replaced"]).nullable(),
 })
 
 const PublicTalksArraySchema = z.array(PublicTalkSchema)
 
 export default defineTask({
-	meta: {
-		name: "db:seed-public-talks",
-		description: "Seed public talks from JSON data file",
-	},
-	async run() {
-		console.log("Starting public talks seeding...")
+  meta: {
+    name: "db:seed-public-talks",
+    description: "Seed public talks from JSON data file",
+  },
+  async run() {
+    console.log("Starting public talks seeding...")
 
-		try {
-			const dataPath = join(process.cwd(), "server", "data", "public-talks.json")
-			const data = await readFile(dataPath, "utf-8")
-			const talks = JSON.parse(data)
+    try {
+      const dataPath = join(process.cwd(), "server", "data", "public-talks.json")
+      const data = await readFile(dataPath, "utf-8")
+      const talks = JSON.parse(data)
 
-			console.log("Validating talk data with Zod...")
-			console.log(`Found ${talks.length} talks in JSON file`)
-			const validatedTalks = PublicTalksArraySchema.parse(talks)
-			console.log(`Validation passed for ${validatedTalks.length} talks`)
+      console.log("Validating talk data with Zod...")
+      console.log(`Found ${talks.length} talks in JSON file`)
+      const validatedTalks = PublicTalksArraySchema.parse(talks)
+      console.log(`Validation passed for ${validatedTalks.length} talks`)
 
-			const db = useDrizzle()
+      const db = useDrizzle()
 
-			console.log("Deleting existing public talks...")
-			await db.delete(publicTalks)
-			console.log("Deleted existing public talks")
+      console.log("Deleting existing public talks...")
+      await db.delete(publicTalks)
+      console.log("Deleted existing public talks")
 
-			console.log(`Inserting ${validatedTalks.length} talks...`)
-			for (const talk of validatedTalks) {
-				await db.insert(publicTalks).values({
-					no: talk.no,
-					title: talk.title,
-					multimediaCount: talk.multimediaCount,
-					videoCount: talk.videoCount,
-					status: talk.status,
-					createdAt: new Date(),
-				})
-			}
+      console.log(`Inserting ${validatedTalks.length} talks...`)
+      for (const talk of validatedTalks) {
+        await db.insert(publicTalks).values({
+          no: talk.no,
+          title: talk.title,
+          multimediaCount: talk.multimediaCount,
+          videoCount: talk.videoCount,
+          status: talk.status,
+          createdAt: new Date(),
+        })
+      }
 
-			console.log(`✅ Seeded ${validatedTalks.length} public talks successfully`)
+      console.log(`✅ Seeded ${validatedTalks.length} public talks successfully`)
 
-			return { result: "success", count: validatedTalks.length }
-		} catch (error: unknown) {
-			if (error instanceof z.ZodError) {
-				const issues = error.issues || []
-				console.error("Validation errors:", JSON.stringify(issues, null, 2))
-				throw new Error(`Zod validation failed: ${issues.length} errors found`)
-			}
+      return { result: "success", count: validatedTalks.length }
+    } catch (error: unknown) {
+      if (error instanceof z.ZodError) {
+        const issues = error.issues || []
+        console.error("Validation errors:", JSON.stringify(issues, null, 2))
+        throw new Error(`Zod validation failed: ${issues.length} errors found`)
+      }
 
-			if (error instanceof SyntaxError) {
-				console.error("JSON parsing failed:", error.message)
-				throw new Error("Invalid JSON in public-talks.json file")
-			}
+      if (error instanceof SyntaxError) {
+        console.error("JSON parsing failed:", error.message)
+        throw new Error("Invalid JSON in public-talks.json file")
+      }
 
-			if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-				console.error("File not found: server/data/public-talks.json")
-				throw new Error(
-					"public-talks.json not found. Run the analysis script first: node scripts/analyze-jwpub.cjs",
-				)
-			}
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        console.error("File not found: server/data/public-talks.json")
+        throw new Error(
+          "public-talks.json not found. Run the analysis script first: node scripts/analyze-jwpub.cjs"
+        )
+      }
 
-			console.error("Unexpected error during seeding:", error)
-			if (error instanceof Error) {
-				console.error("Error message:", error.message)
-				console.error("Error stack:", error.stack)
-			}
-			throw error
-		}
-	},
+      console.error("Unexpected error during seeding:", error)
+      if (error instanceof Error) {
+        console.error("Error message:", error.message)
+        console.error("Error stack:", error.stack)
+      }
+      throw error
+    }
+  },
 })
