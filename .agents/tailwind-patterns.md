@@ -90,7 +90,8 @@ Styling guidelines and patterns for Tailwind CSS 4 with Nuxt UI 4 design system 
 
 ## Class Organization Convention
 
-- ORDER classes as: layout → sizing → spacing → typography → colors → effects → interactions → states
+- ORDER classes as: layout → sizing → spacing → typography → colors → effects → interactions →
+  states
 - GROUP related utilities together for better readability
 - MAINTAIN consistent ordering across all components
 - USE line breaks for long class lists to improve readability

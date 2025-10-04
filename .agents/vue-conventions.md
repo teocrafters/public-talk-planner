@@ -59,7 +59,7 @@ Framework-specific patterns and best practices for Vue 3 components in Nuxt 4.
 ## Nuxt UI Integration
 
 - PREFER Nuxt UI components over custom implementations
-- USE `UButton`, `UInput`, `UCard`, `UFormGroup` for standard UI elements
+- USE `UButton`, `UInput`, `UCard`, `UFormField` for standard UI elements
 - USE `UIcon` component for all icons instead of manual `<svg>` tags
 - UTILIZE template slots for flexible content structure
 - CONFIGURE component props for theming and variants
@@ -67,6 +67,15 @@ Framework-specific patterns and best practices for Vue 3 components in Nuxt 4.
 - CREATE custom components only when Nuxt UI lacks functionality
 - FOLLOW Nuxt UI naming conventions and patterns
 - USE Nuxt UI color and size variants consistently
+
+### Nuxt UI 4 Specific Guidelines
+
+- **ALWAYS** verify component API via Nuxt UI MCP before implementation
+- **REFERENCE** @.agents/nuxt-ui-4-integration.md for comprehensive Nuxt UI 4 patterns
+- **USE** proper slot structure for UModal (#content, #header, #body, #footer)
+- **USE** `onSelect` event handler on UDropdownMenu items, NOT click or onClick
+- **IMPORT** TypeScript types from '@nuxt/ui' (e.g., `DropdownMenuItem`, `ButtonProps`)
+- **VERIFY** component names (UDropdownMenu not UDropdown, UFormField not UFormGroup)
 
 ### Icon Usage Guidelines
 

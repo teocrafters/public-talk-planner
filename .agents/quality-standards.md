@@ -1,6 +1,9 @@
 # Code Style Guidelines
 
-Core coding standards for the grixu.dev blog project. See @.agents/vue-conventions.md for Vue-specific patterns, @.agents/official-vue-components.md for defineModel() API, @.agents/tailwind-patterns.md for styling guidelines, and @.agents/official-tailwind.md for v4 features.
+Core coding standards for the grixu.dev blog project. See @.agents/vue-conventions.md for
+Vue-specific patterns, @.agents/official-vue-components.md for defineModel() API,
+@.agents/tailwind-patterns.md for styling guidelines, and @.agents/official-tailwind.md for v4
+features.
 
 ## Error Handling
 

@@ -1,18 +1,21 @@
 # Official Tailwind CSS v4 Reference
 
-Official Tailwind CSS v4 features, breaking changes, and upgrade guidance. For general Tailwind patterns and project conventions, see @.agents/tailwind-patterns.md.
+Official Tailwind CSS v4 features, breaking changes, and upgrade guidance. For general Tailwind
+patterns and project conventions, see @.agents/tailwind-patterns.md.
 
 ## Core v4 Principles
 
 - **Always use Tailwind CSS v4.1+** - Ensure the codebase is using the latest version
 - **Do not use deprecated or removed utilities** - ALWAYS use the replacement (see tables below)
-- **Never use `@apply`** - Use CSS variables, the `--spacing()` function, or framework components instead
+- **Never use `@apply`** - Use CSS variables, the `--spacing()` function, or framework components
+  instead
 
 ## Upgrading to Tailwind CSS v4
 
 ### Before Upgrading
 
-- **Always read the upgrade documentation first** - Read https://tailwindcss.com/docs/upgrade-guide and https://tailwindcss.com/blog/tailwindcss-v4 before starting an upgrade.
+- **Always read the upgrade documentation first** - Read https://tailwindcss.com/docs/upgrade-guide
+  and https://tailwindcss.com/blog/tailwindcss-v4 before starting an upgrade.
 - Ensure the git repository is in a clean state before starting
 
 ### Upgrade Process
@@ -60,19 +63,16 @@ Official Tailwind CSS v4 features, breaking changes, and upgrade guidance. For g
 
 ## Gradient Utilities
 
-- **ALWAYS Use `bg-linear-*` instead of `bg-gradient-*` utilities** - The gradient utilities were renamed in v4
+- **ALWAYS Use `bg-linear-*` instead of `bg-gradient-*` utilities** - The gradient utilities were
+  renamed in v4
 - Use the new `bg-radial` or `bg-radial-[<position>]` to create radial gradients
 - Use the new `bg-conic` or `bg-conic-*` to create conic gradients
 
 ```html
 <!-- ✅ Use the new gradient utilities -->
 <div class="h-14 bg-linear-to-br from-violet-500 to-fuchsia-500"></div>
-<div
-  class="size-18 bg-radial-[at_50%_75%] from-sky-200 via-blue-400 to-indigo-900 to-90%"
-></div>
-<div
-  class="size-24 bg-conic-180 from-indigo-600 via-indigo-50 to-indigo-600"
-></div>
+<div class="size-18 bg-radial-[at_50%_75%] from-sky-200 via-blue-400 to-indigo-900 to-90%"></div>
+<div class="size-24 bg-conic-180 from-indigo-600 via-indigo-50 to-indigo-600"></div>
 
 <!-- ❌ Do not use bg-gradient-* utilities -->
 <div class="h-14 bg-gradient-to-br from-violet-500 to-fuchsia-500"></div>
@@ -165,12 +165,8 @@ Use the new composable mask utilities for image and gradient masks:
 <!-- ✅ Linear gradient masks on specific sides -->
 <div class="mask-t-from-50%">Top fade</div>
 <div class="mask-b-from-20% mask-b-to-80%">Bottom gradient</div>
-<div class="mask-linear-from-white mask-linear-to-black/60">
-  Fade from white to black
-</div>
+<div class="mask-linear-from-white mask-linear-to-black/60">Fade from white to black</div>
 
 <!-- ✅ Radial gradient masks -->
-<div class="mask-radial-[100%_100%] mask-radial-from-75% mask-radial-at-left">
-  Radial mask
-</div>
+<div class="mask-radial-[100%_100%] mask-radial-from-75% mask-radial-at-left">Radial mask</div>
 ```

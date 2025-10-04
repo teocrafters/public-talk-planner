@@ -514,6 +514,7 @@ Example pattern: `// AGENT-NOTE: Performance-critical path; avoid extra allocati
 
 ## Frontend development
 
+- @.agents/nuxt-ui-4-integration.md
 - @.agents/i18n-patterns.md
 - @.agents/official-tailwind.md
 - @.agents/official-vue-components.md
