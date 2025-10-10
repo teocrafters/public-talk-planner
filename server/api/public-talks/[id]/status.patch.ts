@@ -1,8 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { publicTalks } from "../../../database/schema"
-import { AUDIT_EVENTS } from "../../../../types/audit-events"
-import type { AuditEventDetails } from "../../../../types/audit-events"
 
 export default defineEventHandler(async event => {
   await requireRole("marker")(event)

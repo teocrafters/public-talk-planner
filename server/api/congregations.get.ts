@@ -1,5 +1,4 @@
 import { organization } from "../database/auth-schema"
-import type { Congregation } from "../../types/registration"
 
 export default defineEventHandler(async (_event): Promise<Congregation[]> => {
   const db = useDrizzle()

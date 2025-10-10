@@ -1,5 +1,3 @@
-import { AUDIT_EVENTS } from "../../types/audit-events"
-
 export function useAuditLog() {
   const logEvent = async (
     action: string,

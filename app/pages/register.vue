@@ -52,8 +52,6 @@
 </template>
 
 <script setup lang="ts">
-  import type { RegistrationFormData } from "../../types/registration"
-
   definePageMeta({
     auth: false,
     layout: false,

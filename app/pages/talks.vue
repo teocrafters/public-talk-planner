@@ -11,6 +11,7 @@
       </div>
       <UButton
         v-if="canEditTalks"
+        data-testid="add-talk-button"
         icon="i-heroicons-plus"
         size="md"
         class="w-full sm:w-auto"
@@ -22,12 +23,14 @@
     <div class="flex flex-col sm:flex-row gap-4">
       <UInput
         v-model="searchQuery"
+        data-testid="search-input"
         :placeholder="t('publicTalks.searchPlaceholder')"
         icon="i-heroicons-magnifying-glass"
         class="flex-1" />
 
       <USelect
         v-model="sortOrder"
+        data-testid="sort-select"
         :items="sortOptions"
         value-key="value"
         class="w-full sm:w-48" />
@@ -54,6 +57,7 @@
       <UCard
         v-for="talk in filteredTalks"
         :key="talk.id"
+        data-testid="talk-card"
         class="hover:shadow-md transition-shadow">
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
@@ -108,6 +112,7 @@
 
     <UAlert
       v-else
+      data-testid="no-results-alert"
       color="info"
       :title="t('publicTalks.noResults')"
       icon="i-heroicons-information-circle" />

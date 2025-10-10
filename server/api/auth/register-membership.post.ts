@@ -1,7 +1,6 @@
 import { generateId } from "better-auth"
 import { z } from "zod"
 import { member } from "../../database/auth-schema"
-import type { MembershipResponse } from "../../../types/registration"
 
 const membershipRequestSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
