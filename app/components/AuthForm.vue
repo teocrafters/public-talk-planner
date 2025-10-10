@@ -21,6 +21,7 @@
     <!-- Error Display -->
     <div
       v-if="error"
+      data-testid="auth-error-message"
       class="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
       <div class="flex">
         <div class="flex-shrink-0">
@@ -55,9 +56,10 @@
             type="email"
             autocomplete="email"
             required
+            data-testid="auth-email-input"
             :disabled="loading"
             class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm"
-            :placeholder="t('auth.enterEmail')" />
+            :placeholder="t('auth.enterEmail')" >
         </div>
       </div>
 
@@ -75,9 +77,10 @@
             :type="showPassword ? 'text' : 'password'"
             autocomplete="current-password"
             required
+            data-testid="auth-password-input"
             :disabled="loading"
             class="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm"
-            :placeholder="t('auth.enterPassword')" />
+            :placeholder="t('auth.enterPassword')" >
           <button
             type="button"
             :disabled="loading"
@@ -109,6 +112,7 @@
     <div>
       <button
         type="submit"
+        data-testid="auth-submit-button"
         :disabled="loading || !isFormValid"
         class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-primary-500 dark:hover:bg-primary-600">
         <span
@@ -206,6 +210,10 @@
       formData.password.length > 0 &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
     )
+  }, {
+    onTrack: () => {
+      console.log("isFormValid", isFormValid.value)
+    }
   })
 
   // Submit handler

@@ -148,6 +148,7 @@
 
         <UForm
           id="talk-form"
+          data-testid="talk-form"
           :schema="schema"
           :state="formState"
           class="space-y-4"
@@ -159,6 +160,7 @@
             required>
             <UInput
               v-model="formState.no"
+              data-testid="talk-no-input"
               :placeholder="t('publicTalks.modal.talkNumber')"
               :disabled="isSubmitting"
               class="w-full" />
@@ -179,6 +181,7 @@
             required>
             <UInput
               v-model="formState.title"
+              data-testid="talk-title-input"
               :placeholder="t('publicTalks.modal.talkTitle')"
               :disabled="isSubmitting"
               class="w-full" />
@@ -191,6 +194,7 @@
               required>
               <UInput
                 v-model.number="formState.multimediaCount"
+                data-testid="talk-multimedia-input"
                 type="number"
                 min="0"
                 max="50"
@@ -204,6 +208,7 @@
               required>
               <UInput
                 v-model.number="formState.videoCount"
+                data-testid="talk-video-input"
                 type="number"
                 min="0"
                 max="20"
@@ -217,6 +222,7 @@
           <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <UButton
               type="button"
+              data-testid="talk-cancel-button"
               variant="outline"
               color="neutral"
               :disabled="isSubmitting"
@@ -226,6 +232,7 @@
             </UButton>
             <UButton
               type="submit"
+              data-testid="talk-save-button"
               form="talk-form"
               :loading="isSubmitting"
               :disabled="isSubmitting"

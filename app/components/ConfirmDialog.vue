@@ -46,7 +46,10 @@
 </script>
 
 <template>
-  <UModal v-model:open="modelValue" :ui="{ footer: 'justify-between' }">
+  <UModal
+    v-model:open="modelValue"
+    data-testid="confirm-dialog"
+    :ui="{ footer: 'justify-between' }">
     <template #header>
       <div class="flex items-start gap-4">
         <div
@@ -69,6 +72,7 @@
 
     <template #footer="{ close }">
       <UButton
+        data-testid="cancel-button"
         variant="outline"
         color="neutral"
         class="w-full sm:w-auto"
@@ -76,6 +80,7 @@
         {{ cancelText }}
       </UButton>
       <UButton
+        data-testid="confirm-button"
         :color="variantConfig.confirmColor"
         class="w-full sm:w-auto"
         @click="handleConfirm">

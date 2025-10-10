@@ -95,7 +95,7 @@
 </script>
 
 <template>
-  <div>
+  <div data-testid="talk-actions-menu">
     <UDropdownMenu
       :items="[menuItems]"
       :content="{ align: 'end' }"
@@ -103,6 +103,7 @@
         content: 'min-w-[48px]',
       }">
       <UButton
+        data-testid="talk-actions-button"
         color="neutral"
         variant="outline"
         :icon="isLoading ? 'i-heroicons-arrow-path' : 'i-heroicons-ellipsis-vertical'"

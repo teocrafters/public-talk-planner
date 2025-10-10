@@ -23,6 +23,7 @@
             </ULink>
 
             <UButton
+              data-testid="logout-button"
               variant="ghost"
               @click="handleSignOut">
               {{ t("auth.signOut") }}

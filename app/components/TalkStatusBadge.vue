@@ -31,6 +31,7 @@
 <template>
   <UBadge
     v-if="statusConfig"
+    data-testid="talk-status-badge"
     :color="statusConfig.color"
     class="gap-1 rounded-sm">
     <UIcon
