@@ -2,8 +2,6 @@ import type { H3Event } from "h3"
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { member } from "../database/schema"
-import { AUDIT_EVENTS } from "../../types/audit-events"
-import type { AuditEventDetails } from "../../types/audit-events"
 
 type Role = "member" | "marker" | "editor" | "admin"
 
