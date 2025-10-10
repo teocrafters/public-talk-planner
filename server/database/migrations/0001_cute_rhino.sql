@@ -1,1 +1,0 @@
-ALTER TABLE `public_talks` ADD `status` text;

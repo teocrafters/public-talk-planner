@@ -1,0 +1,26 @@
+{
+	"organization": {
+		"name": "Test Organization",
+		"slug": "test-org"
+	},
+	"users": [
+		{
+			"email": "admin@test.local",
+			"password": "TestAdmin123!",
+			"name": "Test Admin",
+			"role": "admin"
+		},
+		{
+			"email": "publisher@test.local",
+			"password": "TestPublisher123!",
+			"name": "Test Publisher",
+			"role": "member"
+		},
+		{
+			"email": "talks-manager@test.local",
+			"password": "TestManager123!",
+			"name": "Talks Manager",
+			"role": "editor"
+		}
+	]
+}

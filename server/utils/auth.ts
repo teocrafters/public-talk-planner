@@ -1,16 +1,22 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { organization } from "better-auth/plugins"
+import { admin, organization } from "better-auth/plugins"
 import { passkey } from "better-auth/plugins/passkey"
 import { sendVerificationEmail } from "./email"
 
-let _auth: ReturnType<typeof betterAuth>
+let _auth: ReturnType<typeof getBetterAuth>
 
 export function serverAuth() {
   if (_auth) {
     return _auth
   }
-  _auth = betterAuth({
+
+  _auth = getBetterAuth()
+  return _auth
+}
+
+function getBetterAuth() {
+  return betterAuth({
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,
@@ -25,12 +31,11 @@ export function serverAuth() {
       },
       delete: key => hubKV().del(`_auth:${key}`),
     },
-    plugins: [organization(), passkey()],
+    plugins: [admin(), organization(), passkey()],
     emailVerification: {
       sendVerificationEmail: async ({ user, url }, _request) => {
         await sendVerificationEmail(user.email, url)
       },
     },
   })
-  return _auth
 }

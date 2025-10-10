@@ -1,9 +1,23 @@
+CREATE TABLE `audit_log` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`user_id` text NOT NULL,
+	`user_email` text NOT NULL,
+	`action` text NOT NULL,
+	`resource_type` text NOT NULL,
+	`resource_id` text NOT NULL,
+	`details` text,
+	`ip_address` text,
+	`timestamp` integer NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `public_talks` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`no` integer NOT NULL,
+	`no` text NOT NULL,
 	`title` text NOT NULL,
-	`has_multimedia` integer NOT NULL,
-	`has_video` integer NOT NULL,
+	`multimedia_count` integer DEFAULT 0 NOT NULL,
+	`video_count` integer DEFAULT 0 NOT NULL,
+	`status` text,
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
@@ -19,7 +33,7 @@ CREATE TABLE `account` (
 	`refresh_token_expires_at` integer,
 	`scope` text,
 	`password` text,
-	`created_at` integer DEFAULT (current_timestamp) NOT NULL,
+	`created_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
@@ -49,7 +63,7 @@ CREATE TABLE `member` (
 CREATE TABLE `organization` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`slug` text,
+	`slug` text NOT NULL,
 	`logo` text,
 	`created_at` integer NOT NULL,
 	`metadata` text
@@ -77,8 +91,12 @@ CREATE TABLE `user` (
 	`email` text NOT NULL,
 	`email_verified` integer DEFAULT false NOT NULL,
 	`image` text,
-	`created_at` integer DEFAULT (current_timestamp) NOT NULL,
-	`updated_at` integer DEFAULT (current_timestamp) NOT NULL
+	`created_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+	`updated_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+	`role` text,
+	`banned` integer DEFAULT false,
+	`ban_reason` text,
+	`ban_expires` integer
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
@@ -87,6 +105,6 @@ CREATE TABLE `verification` (
 	`identifier` text NOT NULL,
 	`value` text NOT NULL,
 	`expires_at` integer NOT NULL,
-	`created_at` integer DEFAULT (current_timestamp) NOT NULL,
-	`updated_at` integer DEFAULT (current_timestamp) NOT NULL
+	`created_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+	`updated_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL
 );
