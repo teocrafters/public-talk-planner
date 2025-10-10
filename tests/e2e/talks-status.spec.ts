@@ -8,21 +8,19 @@ test.describe("Public Talks Status Management", () => {
 			await page.goto("/talks")
 
 			// Open actions menu for first talk
-			await page.getByTestId("talk-actions-button").first().click()
+			const actionsButton = page.getByTestId("talk-actions-button").first()
+			await actionsButton.click()
 
-			// Select block option
-			const blockOption = page.getByText(/Zablokuj pod nadzorców obwodu|Block/i)
-			if (await blockOption.isVisible()) {
-				await blockOption.click()
+			// Wait for menu to be visible and select block option
+			await page.getByRole("menu").waitFor({ state: "visible" })
+			await page.getByRole("menuitem", { name: "Zablokuj pod nadzorców obwodu" }).click()
 
-				// Confirm in dialog
-				await page.waitForTimeout(300)
-				await page.getByTestId("confirm-button").click()
+			// Confirm in dialog - wait for dialog to appear
+			await page.getByRole("dialog").waitFor({ state: "visible" })
+			await page.getByTestId("confirm-button").click()
 
-				// Verify status badge appears (warning color)
-				await page.waitForTimeout(500)
-				await expect(page.getByTestId("talk-status-badge").first()).toBeVisible()
-			}
+			// Verify status badge appears (warning color)
+			await expect(page.getByTestId("talk-status-badge").first()).toBeVisible()
 		})
 
 		test("unblock talk", async ({ page }) => {
@@ -32,48 +30,46 @@ test.describe("Public Talks Status Management", () => {
 			const firstTalkMenu = page.getByTestId("talk-actions-button").first()
 			await firstTalkMenu.click()
 
-			const blockOption = page.getByText(/Zablokuj|Block/i)
-			if (await blockOption.isVisible()) {
-				await blockOption.click()
-				await page.waitForTimeout(300)
-				await page.getByTestId("confirm-button").click()
-				await page.waitForTimeout(500)
-			}
+			// Wait for menu and select block option
+			await page.getByRole("menu").waitFor({ state: "visible" })
+			await page.getByRole("menuitem", { name: "Zablokuj pod nadzorców obwodu" }).click()
+
+			await page.getByRole("dialog").waitFor({ state: "visible" })
+			await page.getByTestId("confirm-button").click()
+
+			// Wait for status to be updated
+			await expect(page.getByTestId("talk-status-badge").first()).toBeVisible()
 
 			// Now unblock it
 			await firstTalkMenu.click()
-			const removeStatusOption = page.getByText(/Usuń status|Remove status/i)
-			if (await removeStatusOption.isVisible()) {
-				await removeStatusOption.click()
+			await page.getByRole("menu").waitFor({ state: "visible" })
+			await page.getByRole("menuitem", { name: "Usuń status" }).click()
 
-				// Confirm
-				await page.waitForTimeout(300)
-				await page.getByTestId("confirm-button").click()
+			// Confirm
+			await page.getByRole("dialog").waitFor({ state: "visible" })
+			await page.getByTestId("confirm-button").click()
 
-				// Verify badge removed
-				await page.waitForTimeout(500)
-			}
+			// Verify badge removed - check that it's not visible anymore
+			await expect(page.getByTestId("talk-status-badge").first()).not.toBeVisible()
 		})
 
 		test("mark for replacement", async ({ page }) => {
 			await page.goto("/talks")
 
 			// Open actions menu
-			await page.getByTestId("talk-actions-button").first().click()
+			const actionsButton = page.getByTestId("talk-actions-button").first()
+			await actionsButton.click()
 
-			// Select mark for replacement option
-			const replaceOption = page.getByText(/Oznacz do wymiany|Mark for replacement/i)
-			if (await replaceOption.isVisible()) {
-				await replaceOption.click()
+			// Wait for menu and select mark for replacement option
+			await page.getByRole("menu").waitFor({ state: "visible" })
+			await page.getByRole("menuitem", { name: "Oznacz do wymiany" }).click()
 
-				// Confirm
-				await page.waitForTimeout(300)
-				await page.getByTestId("confirm-button").click()
+			// Confirm
+			await page.getByRole("dialog").waitFor({ state: "visible" })
+			await page.getByTestId("confirm-button").click()
 
-				// Verify status badge appears (info color)
-				await page.waitForTimeout(500)
-				await expect(page.getByTestId("talk-status-badge").first()).toBeVisible()
-			}
+			// Verify status badge appears (info color)
+			await expect(page.getByTestId("talk-status-badge").first()).toBeVisible()
 		})
 	})
 

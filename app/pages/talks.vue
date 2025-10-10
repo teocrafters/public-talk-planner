@@ -204,7 +204,9 @@
 
     const index = talks.value.findIndex(talk => talk.id === updatedTalk.id)
     if (index !== -1) {
-      talks.value[index] = updatedTalk
+      const updatedTalks = [...talks.value]
+      updatedTalks[index] = updatedTalk
+      talks.value = updatedTalks
     }
   }
 
