@@ -91,7 +91,7 @@ async function waitForServer(url: string, timeout: number = 120000): Promise<voi
 		}
 
 		attempt++
-		const delay = Math.min(1000, 100 * Math.pow(2, attempt))
+		const delay = attempt * 1000
 		await new Promise(resolve => setTimeout(resolve, delay))
 	}
 
