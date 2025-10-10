@@ -11,7 +11,22 @@ setup("Build and start server", async () => {
 	console.log("Cleaning database...")
 	await rm(".data/hub/d1", { recursive: true, force: true })
 
-	// 2. Start preview server
+  // 2. Kill any lingering Nuxt/Workerd processes if they are still running
+	try {
+		await x("pkill", ["-f", "nuxt"])
+		console.log("Killed lingering nuxt processes")
+	} catch (error) {
+		console.log("pkill nuxt failed", error)
+	}
+
+	try {
+		await x("pkill", ["-f", "workerd"])
+		console.log("Killed lingering workerd processes")
+	} catch (error) {
+		console.log("pkill workerd failed", error)
+	}
+
+	// 3. Start preview server
 	console.log("Starting preview server...")
   const serverProcess = x("pnpm", ["dev"], {
     nodeOptions: {
@@ -26,11 +41,11 @@ setup("Build and start server", async () => {
     startedAt: new Date().toISOString(),
   }))
 
-	// 3. Wait for server
+	// 4. Wait for server
 	console.log("Waiting for server...")
   await waitForServer("http://localhost:3000", 120000)
 
-	// 4. Seed test accounts
+	// 5. Seed test accounts
 	console.log("Seeding test accounts...")
 	let seedAccountsAttempts = 0
 	while (seedAccountsAttempts < 3) {
@@ -57,7 +72,7 @@ setup("Build and start server", async () => {
 		}
 	}
 
-	// 5. Seed public talks
+	// 6. Seed public talks
 	console.log("Seeding public talks...")
 	try {
 		const seedTalksResult = await x("curl", [
