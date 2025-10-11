@@ -61,8 +61,13 @@ test.describe("Public Talks Create", () => {
 			await page.getByTestId("talk-save-button").click()
 
 			// Verify validation messages shown
+			// Wait for any validation error text to appear
+			await page.waitForTimeout(200)
+
+			// Check for validation error messages - they appear as text below inputs in Nuxt UI
+			// Use .first() since multiple validation errors will be shown
 			await expect(
-				page.locator('[class*="error"], [color="error"], .text-red-500')
+				page.getByText(/jest wymagany|mieć co najmniej|required|at least/i).first()
 			).toBeVisible()
 		})
 	})
