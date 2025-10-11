@@ -54,11 +54,9 @@ test.describe("Public Talks Display", () => {
 		const sortSelect = page.getByTestId("sort-select")
 		await sortSelect.click()
 
-		// Try to find ascending option
-		const ascendingOption = page.getByText(/rosnąco|ascending/i)
-		if (await ascendingOption.isVisible()) {
-			await ascendingOption.click()
-		}
+		// Find and click ascending option
+		const ascendingOption = page.getByRole("option", { name: /rosnąco|ascending/i })
+		await ascendingOption.click()
 
 		await page.waitForTimeout(500)
 
@@ -73,11 +71,9 @@ test.describe("Public Talks Display", () => {
 		const sortSelect = page.getByTestId("sort-select")
 		await sortSelect.click()
 
-		// Try to find descending option
-		const descendingOption = page.getByText(/malejąco|descending/i)
-		if (await descendingOption.isVisible()) {
-			await descendingOption.click()
-		}
+		// Find and click descending option
+		const descendingOption = page.getByRole("option", { name: /malejąco|descending/i })
+		await descendingOption.click()
 
 		await page.waitForTimeout(500)
 
