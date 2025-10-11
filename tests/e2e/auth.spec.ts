@@ -1,46 +1,55 @@
 import { test, expect } from "../fixtures"
 
 test.describe("Authentication", () => {
-	test("login flow", async ({ page }) => {
-		await page.goto("/login")
+  test("login flow", async ({ page }) => {
+    await page.goto("/login")
 
-		// Fill login form
-		await page.getByTestId("auth-email-input").fill("admin@test.local")
-		await page.getByTestId("auth-password-input").fill("TestAdmin123!")
+    // Fill login form
+    await page.getByTestId("auth-email-input").fill("admin@test.local")
+    await page.getByTestId("auth-password-input").fill("TestAdmin123!")
 
-		// Submit form
-		await page.getByTestId("auth-submit-button").click()
+    // Submit form
+    await page.getByTestId("auth-submit-button").click()
 
-		// Verify redirect to homepage
-		await page.waitForURL("/")
+    // Verify redirect to homepage
+    await page.waitForURL("/")
 
-		// Verify user session active (should see authenticated content)
-		await expect(page.locator("body")).toContainText("Wykłady publiczne")
-	})
+    // Verify user session active (should see authenticated content)
+    await expect(page.locator("body")).toContainText("Wykłady publiczne")
+  })
 
-	test("error handling - invalid credentials", async ({ page }) => {
-		await page.goto("/login")
+  test("error handling - invalid credentials", async ({ page }) => {
+    await page.goto("/login")
 
-		await page.getByTestId("auth-email-input").fill("invalid@test.local")
-		await page.getByTestId("auth-password-input").fill("WrongPassword123!")
+    await page.getByTestId("auth-email-input").fill("invalid@test.local")
+    await page.getByTestId("auth-password-input").fill("WrongPassword123!")
 
-		await page.getByTestId("auth-submit-button").click()
+    await page.getByTestId("auth-submit-button").click()
 
-		// Verify error message displayed
-		await expect(page.getByTestId("auth-error-message")).toBeVisible()
+    // Verify error message displayed
+    await expect(page.getByTestId("auth-error-message")).toBeVisible()
   })
 
   test.describe("Logout flow", () => {
-		test.use({ storageState: ".auth/admin.json" })
+    test.use({ storageState: ".auth/admin.json" })
 
-		test("logout with admin", async ({ page }) => {
-			await page.goto("/user")
+    test("logout with admin", async ({ page }) => {
+      await page.goto("/user")
 
-			// Click logout button
-			await page.getByTestId("logout-button").click()
+      // Check if we're on mobile or desktop and handle logout accordingly
+      const isMobile = await page.getByTestId("logout-button").isHidden()
 
-			// Verify redirect to login page
-			await expect(page).toHaveURL("/")
+      if (isMobile) {
+        // Mobile: Open hamburger menu and click logout from dropdown
+        await page.locator('button:has([class*="bars-3"])').click()
+        await page.getByRole("menuitem", { name: "Wyloguj się" }).click()
+      } else {
+        // Desktop: Click logout button directly
+        await page.getByTestId("logout-button").click()
+      }
+
+      // Verify redirect to login page
+      await expect(page).toHaveURL("/")
     })
 
     test.afterEach(async ({ authenticateAs }) => {
