@@ -210,10 +210,6 @@
       formData.password.length > 0 &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
     )
-  }, {
-    onTrack: () => {
-      console.log("isFormValid", isFormValid.value)
-    }
   })
 
   // Submit handler

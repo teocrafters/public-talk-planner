@@ -54,7 +54,7 @@
   const { signOut } = useAuth()
 
   const handleSignOut = async () => {
-    await signOut({ redirectTo: "/" })
+    await signOut({ redirectTo: "/login" })
   }
 
   const menuItems = [
@@ -74,7 +74,7 @@
       {
         label: t("auth.signOut"),
         icon: "i-heroicons-arrow-right-on-rectangle",
-        click: handleSignOut,
+        onSelect: handleSignOut,
       },
     ],
   ]
