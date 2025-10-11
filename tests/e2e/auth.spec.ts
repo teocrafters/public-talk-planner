@@ -18,20 +18,6 @@ test.describe("Authentication", () => {
 		await expect(page.locator("body")).toContainText("Wykłady publiczne")
 	})
 
-	test.describe("Logout flow", () => {
-		test.use({ storageState: ".auth/admin.json" })
-
-		test("logout with admin", async ({ page }) => {
-			await page.goto("/")
-
-			// Click logout button
-			await page.getByTestId("logout-button").click()
-
-			// Verify redirect to login page
-			await expect(page).toHaveURL("/login")
-		})
-	})
-
 	test("error handling - invalid credentials", async ({ page }) => {
 		await page.goto("/login")
 
@@ -42,5 +28,24 @@ test.describe("Authentication", () => {
 
 		// Verify error message displayed
 		await expect(page.getByTestId("auth-error-message")).toBeVisible()
+  })
+
+  test.describe("Logout flow", () => {
+		test.use({ storageState: ".auth/admin.json" })
+
+		test("logout with admin", async ({ page }) => {
+			await page.goto("/user")
+
+			// Click logout button
+			await page.getByTestId("logout-button").click()
+
+			// Verify redirect to login page
+			await expect(page).toHaveURL("/")
+    })
+
+    test.afterEach(async ({ authenticateAs }) => {
+      // log in again, get new token and save it
+      await authenticateAs.admin()
+    })
 	})
 })

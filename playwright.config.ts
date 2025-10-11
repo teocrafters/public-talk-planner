@@ -24,18 +24,8 @@ export default defineConfig({
 
 		// Auth setup projects - depend on setup
 		{
-			name: "auth-admin",
-			testMatch: /admin\.setup\.ts/,
-			dependencies: ["setup"],
-		},
-		{
-			name: "auth-publisher",
-			testMatch: /publisher\.setup\.ts/,
-			dependencies: ["setup"],
-		},
-		{
-			name: "auth-talks-manager",
-			testMatch: /talks-manager\.setup\.ts/,
+			name: "auth",
+			testMatch: /setup\/auth\.ts/,
 			dependencies: ["setup"],
 		},
 
@@ -47,7 +37,7 @@ export default defineConfig({
 				...devices["Desktop Chrome"],
 				viewport: { width: 1280, height: 720 },
 			},
-			dependencies: ["auth-admin", "auth-publisher", "auth-talks-manager"],
+			dependencies: ["auth"],
 		},
 		{
 			name: "mobile",
@@ -55,7 +45,7 @@ export default defineConfig({
 			use: {
 				...devices["iPhone 14"],
 			},
-			dependencies: ["auth-admin", "auth-publisher", "auth-talks-manager"],
+			dependencies: ["auth"],
     },
 
     // Teardown project - runs last
