@@ -157,6 +157,7 @@
 		})
 
 		emit("saved", response.speaker)
+		isOpen.value = false
 	}
 
 	const handleEdit = async (data: SpeakerEditInput) => {
@@ -176,95 +177,91 @@
 		})
 
 		emit("saved", response.speaker)
+		isOpen.value = false
 	}
 </script>
 
 <template>
-	<UModal v-model:open="isOpen">
+	<UModal v-model:open="isOpen" :ui="{ footer: 'justify-between' }">
 		<UButton data-testid="modal-trigger-speaker" :label="modalTitle" />
 
-		<template #content>
-			<UCard>
-				<template #header>
-					<h3 class="text-lg font-semibold">{{ modalTitle }}</h3>
-				</template>
+    <template #header>
+      <h3 class="text-lg font-semibold">{{ modalTitle }}</h3>
+    </template>
 
-				<UForm
-					id="speaker-form"
-					data-testid="speaker-form"
-					:schema="schema"
-					:state="formState"
-					@submit="onSubmit">
-					<div class="space-y-4">
-						<UFormField
-							name="firstName"
-							:label="t('speakers.modal.firstName')"
-							required>
-							<UInput
-								v-model="formState.firstName"
-								data-testid="speaker-firstname-input" />
-						</UFormField>
+		<template #body>
+			<UForm
+        id="speaker-form"
+        data-testid="speaker-form"
+        :schema="schema"
+        :state="formState"
+        @submit="onSubmit">
+        <div class="space-y-4">
+          <UFormField
+            name="firstName"
+            :label="t('speakers.modal.firstName')"
+            required>
+            <UInput
+              v-model="formState.firstName"
+              data-testid="speaker-firstname-input" />
+          </UFormField>
 
-						<UFormField
-							name="lastName"
-							:label="t('speakers.modal.lastName')"
-							required>
-							<UInput
-								v-model="formState.lastName"
-								data-testid="speaker-lastname-input" />
-						</UFormField>
+          <UFormField
+            name="lastName"
+            :label="t('speakers.modal.lastName')"
+            required>
+            <UInput
+              v-model="formState.lastName"
+              data-testid="speaker-lastname-input" />
+          </UFormField>
 
-						<UFormField
-							name="phone"
-							:label="t('speakers.modal.phone')"
-							required>
-							<UInput
-								v-model="formState.phone"
-								data-testid="speaker-phone-input"
-								placeholder="123-456-789" />
-						</UFormField>
+          <UFormField
+            name="phone"
+            :label="t('speakers.modal.phone')"
+            required>
+            <UInput
+              v-model="formState.phone"
+              data-testid="speaker-phone-input"
+              placeholder="123-456-789" />
+          </UFormField>
 
-						<UFormField
-							name="congregationId"
-							:label="t('speakers.modal.congregation')"
-							required>
-							<USelect
-								v-model="formState.congregationId"
-								data-testid="speaker-congregation-select"
-								:items="congregationItems"
-								value-key="value" />
-						</UFormField>
+          <UFormField
+            name="congregationId"
+            :label="t('speakers.modal.congregation')"
+            required>
+            <USelect
+              v-model="formState.congregationId"
+              data-testid="speaker-congregation-select"
+              :items="congregationItems"
+              value-key="value" />
+          </UFormField>
 
-						<UFormField name="talkIds" :label="t('speakers.modal.talks')">
-							<USelect
-								v-model="formState.talkIds"
-								data-testid="speaker-talks-select"
-								:items="talkItems"
-								value-key="value"
-								multiple />
-						</UFormField>
-					</div>
-				</UForm>
-
-				<template #footer="{ close }">
-					<div class="flex justify-end gap-3">
-						<UButton
-							data-testid="speaker-cancel-button"
-							color="neutral"
-							variant="ghost"
-							@click="close">
-							{{ t("common.cancel") }}
-						</UButton>
-						<UButton
-							data-testid="speaker-save-button"
-							type="submit"
-							form="speaker-form"
-							:loading="isSubmitting">
-							{{ submitButtonText }}
-						</UButton>
-					</div>
-				</template>
-			</UCard>
+          <UFormField name="talkIds" :label="t('speakers.modal.talks')">
+            <USelect
+              v-model="formState.talkIds"
+              data-testid="speaker-talks-select"
+              :items="talkItems"
+              value-key="value"
+              multiple />
+          </UFormField>
+        </div>
+      </UForm>
 		</template>
+    <template #footer="{ close }">
+      <UButton
+        data-testid="speaker-cancel-button"
+        color="neutral"
+        variant="ghost"
+        @click="close">
+        {{ t("common.cancel") }}
+      </UButton>
+      <UButton
+        data-testid="speaker-save-button"
+        type="submit"
+        form="speaker-form"
+        :loading="isSubmitting">
+        {{ submitButtonText }}
+      </UButton>
+    </template>
 	</UModal>
 </template>
