@@ -21,6 +21,12 @@
 			"password": "TestManager123!",
 			"name": "Talks Manager",
 			"role": "editor"
+		},
+		{
+			"email": "speakers-manager@test.local",
+			"password": "TestSpeakers123!",
+			"name": "Speakers Manager",
+			"role": "speakers_manager"
 		}
 	]
 }
