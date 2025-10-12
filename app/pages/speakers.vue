@@ -69,7 +69,7 @@
 						</p>
 						<div v-if="speaker.talks.length > 0" class="mt-2">
 							<p class="text-xs text-dimmed mb-1">{{ t("speakers.talks") }}:</p>
-							<div class="flex flex-wrap gap-2">
+							<div class="flex flex-wrap gap-2" data-testid="speaker-talks-badges">
 								<UBadge
 									v-for="talk in speaker.talks"
 									:key="talk.id"
@@ -113,7 +113,6 @@
 
 <script setup lang="ts">
 	import type { DropdownMenuItem } from "@nuxt/ui"
-	import { formatPhoneNumber } from "../utils/phone"
 
 	interface Speaker {
 		id: string
