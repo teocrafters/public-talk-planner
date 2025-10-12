@@ -14,10 +14,8 @@ export const publicTalks = sqliteTable("public_talks", {
 })
 
 export const auditLog = sqliteTable("audit_log", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id),
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   userEmail: text("user_email").notNull(),
   action: text("action").notNull(),
   resourceType: text("resource_type").notNull(),

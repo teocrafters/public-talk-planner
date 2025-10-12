@@ -8,6 +8,20 @@
       "when": 1760278657242,
       "tag": "0000_real_steel_serpent",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1760288459635,
+      "tag": "0001_sparkling_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1760289735008,
+      "tag": "0002_elite_aqueduct",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,6 @@
 import type { H3Event } from "h3"
 import { getRequestIP } from "h3"
 import { auditLog } from "../database/schema"
-import type { AuditEventType, AuditEventDetails } from "../../types/audit-events"
 
 interface LogAuditEventOptions {
   action: AuditEventType
@@ -23,6 +22,7 @@ export async function logAuditEvent(event: H3Event, options: LogAuditEventOption
   const ipAddress = getRequestIP(event) || null
 
   await db.insert(auditLog).values({
+    id: crypto.randomUUID(),
     userId: session.user.id,
     userEmail: session.user.email,
     action: options.action,
