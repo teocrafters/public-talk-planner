@@ -36,7 +36,41 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "publicTalks": "Public Talks",
+    "speakers": "Speakers",
     "settings": "Settings"
+  },
+  "speakers": {
+    "title": "Speakers",
+    "searchPlaceholder": "Search by name, phone, or congregation...",
+    "totalSpeakers": "{count} speakers",
+    "noResults": "No speakers found",
+    "showArchived": "Show archived",
+    "archived": "Archived",
+    "talks": "Talks",
+    "actions": {
+      "add": "Add Speaker",
+      "edit": "Edit Speaker",
+      "archive": "Archive",
+      "restore": "Restore"
+    },
+    "modal": {
+      "addTitle": "Add Speaker",
+      "editTitle": "Edit Speaker",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phone": "Phone Number",
+      "congregation": "Congregation",
+      "talks": "Talks",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "speakerCreated": "Speaker created",
+      "speakerUpdated": "Speaker updated",
+      "speakerArchived": "Speaker archived",
+      "speakerRestored": "Speaker restored",
+      "archiveError": "Error archiving speaker"
+    }
   },
   "publicTalks": {
     "title": "Public Talks",
@@ -122,6 +156,13 @@
     "talkNumberTooLong": "Talk number cannot be longer than 10 characters",
     "titleRequired": "Title is required",
     "titleTooShort": "Title must be at least 3 characters",
-    "titleTooLong": "Title cannot be longer than 500 characters"
+    "titleTooLong": "Title cannot be longer than 500 characters",
+    "firstNameRequired": "First name is required",
+    "firstNameTooLong": "First name cannot be longer than 100 characters",
+    "lastNameRequired": "Last name is required",
+    "lastNameTooLong": "Last name cannot be longer than 100 characters",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Phone number must be 9 digits (format: XXX-XXX-XXX)",
+    "congregationRequired": "Congregation selection is required"
   }
 }

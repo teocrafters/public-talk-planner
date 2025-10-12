@@ -176,6 +176,39 @@
     "tryAgain": "Spróbuj ponownie",
     "contactSupport": "Skontaktuj się z pomocą techniczną"
   },
+  "speakers": {
+    "title": "Mówcy",
+    "searchPlaceholder": "Szukaj po imieniu, nazwisku, telefonie lub zborze...",
+    "totalSpeakers": "{count} mówców",
+    "noResults": "Nie znaleziono mówców",
+    "showArchived": "Pokaż zarchiwizowanych",
+    "archived": "Zarchiwizowany",
+    "talks": "Wykłady",
+    "actions": {
+      "add": "Dodaj mówcę",
+      "edit": "Edytuj mówcę",
+      "archive": "Archiwizuj",
+      "restore": "Przywróć"
+    },
+    "modal": {
+      "addTitle": "Dodaj mówcę",
+      "editTitle": "Edytuj mówcę",
+      "firstName": "Imię",
+      "lastName": "Nazwisko",
+      "phone": "Numer telefonu",
+      "congregation": "Zbór",
+      "talks": "Wykłady",
+      "save": "Zapisz",
+      "cancel": "Anuluj"
+    },
+    "messages": {
+      "speakerCreated": "Mówca został dodany",
+      "speakerUpdated": "Mówca został zaktualizowany",
+      "speakerArchived": "Mówca został zarchiwizowany",
+      "speakerRestored": "Mówca został przywrócony",
+      "archiveError": "Wystąpił błąd podczas archiwizacji"
+    }
+  },
   "validation": {
     "required": "To pole jest wymagane",
     "email": "Wprowadź prawidłowy adres email",
@@ -188,6 +221,13 @@
     "talkNumberTooLong": "Numer wykładu nie może być dłuższy niż 10 znaków",
     "titleRequired": "Tytuł jest wymagany",
     "titleTooShort": "Tytuł musi mieć co najmniej 3 znaki",
-    "titleTooLong": "Tytuł nie może być dłuższy niż 500 znaków"
+    "titleTooLong": "Tytuł nie może być dłuższy niż 500 znaków",
+    "firstNameRequired": "Imię jest wymagane",
+    "firstNameTooLong": "Imię nie może być dłuższe niż 100 znaków",
+    "lastNameRequired": "Nazwisko jest wymagane",
+    "lastNameTooLong": "Nazwisko nie może być dłuższe niż 100 znaków",
+    "phoneRequired": "Numer telefonu jest wymagany",
+    "phoneInvalid": "Numer telefonu musi mieć 9 cyfr (format: XXX-XXX-XXX)",
+    "congregationRequired": "Wybór zboru jest wymagany"
   }
 }

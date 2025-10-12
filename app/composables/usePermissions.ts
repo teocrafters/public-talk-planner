@@ -1,4 +1,4 @@
-type Role = "member" | "marker" | "editor" | "admin"
+type Role = "member" | "marker" | "speakers_manager" | "editor" | "admin"
 
 interface OrganizationMembership {
   id: string
@@ -11,6 +11,7 @@ interface OrganizationMembership {
 const ROLE_HIERARCHY: Record<Role, number> = {
   member: 1,
   marker: 2,
+  speakers_manager: 2,
   editor: 3,
   admin: 4,
 }
@@ -49,6 +50,10 @@ export function usePermissions() {
 
   const canEditTalks = computed(() => ["editor", "admin"].includes(role.value))
 
+  const canManageSpeakers = computed(() =>
+    ["speakers_manager", "editor", "admin"].includes(role.value),
+  )
+
   const hasRole = (requiredRole: Role): boolean => {
     const userLevel = ROLE_HIERARCHY[role.value]
     const requiredLevel = ROLE_HIERARCHY[requiredRole]
@@ -60,6 +65,7 @@ export function usePermissions() {
     isLoading: readonly(isLoading),
     canMarkTalks,
     canEditTalks,
+    canManageSpeakers,
     hasRole,
     fetchPermissions,
   }
