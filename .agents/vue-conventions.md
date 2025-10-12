@@ -101,6 +101,277 @@ Framework-specific patterns and best practices for Vue 3 components in Nuxt 4.
 - COMPOSE multiple composables for complex state management
 - RETURN reactive values from custom composables
 
+## SSR Data Fetching Patterns
+
+This application uses Server-Side Rendering (SSR), which requires special data fetching patterns to
+ensure data is fetched on the server and properly transferred to the client.
+
+### Critical Rules
+
+- **ALWAYS** use `useFetch()` or `useAsyncData()` for data fetching in components
+- **NEVER** use raw `$fetch()` directly in components (it won't transfer SSR data to client)
+- **ALWAYS** `await` these composables in `<script setup>` for proper SSR hydration
+- **HANDLE** loading, error, and success states appropriately
+
+### Using useFetch()
+
+Use `useFetch()` for simple API calls (most common case):
+
+```vue
+<script setup lang="ts">
+// ✅ Correct: useFetch for SSR-compatible data fetching
+const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+
+// Destructured values are reactive:
+// - data: reactive reference to fetched data (null until loaded)
+// - pending: true while fetching, false when complete
+// - error: contains error object if request fails (null if success)
+// - refresh: function to manually refetch data
+</script>
+
+<template>
+  <!-- Handle all states appropriately -->
+  <div v-if="pending">Loading speakers...</div>
+  <div v-else-if="error">
+    <UAlert color="error" :title="error.message" />
+  </div>
+  <div v-else-if="speakers">
+    <div v-for="speaker in speakers" :key="speaker.id">
+      {{ speaker.firstName }} {{ speaker.lastName }}
+    </div>
+  </div>
+</template>
+```
+
+### Using useAsyncData()
+
+Use `useAsyncData()` for complex async operations or custom fetching logic:
+
+```vue
+<script setup lang="ts">
+// ✅ Use useAsyncData for custom fetch logic
+const { data: userData, pending, error, refresh } = await useAsyncData(
+  'user-profile', // unique key for caching
+  () => $fetch('/api/user/profile', {
+    headers: {
+      'X-Custom-Header': 'value'
+    }
+  })
+)
+
+// ✅ Use useAsyncData for combining multiple data sources
+const { data: combinedData } = await useAsyncData(
+  'dashboard-data',
+  async () => {
+    const [talks, speakers] = await Promise.all([
+      $fetch('/api/talks'),
+      $fetch('/api/speakers')
+    ])
+    return { talks, speakers }
+  }
+)
+</script>
+```
+
+### When to Use Each
+
+**Use `useFetch()`:**
+
+- Simple GET requests to API endpoints
+- When you don't need custom headers or request options
+- Most common use case (90% of the time)
+
+**Use `useAsyncData()`:**
+
+- Custom fetch logic with headers or request options
+- Non-HTTP async operations (e.g., WebSocket, localStorage)
+- Combining multiple data sources
+- More control over caching with unique keys
+
+### Multiple Parallel Requests
+
+Fetch multiple resources in parallel for better performance:
+
+```vue
+<script setup lang="ts">
+// ✅ Multiple parallel requests (execute simultaneously)
+const { data: speakers, pending: speakersPending } = await useFetch<Speaker[]>("/api/speakers")
+const { data: userMembership, pending: membershipPending } = await useFetch("/api/user/membership")
+
+// Both requests execute on server-side during SSR
+// Data is serialized and transferred to client
+// Client receives pre-rendered HTML with both data sets
+</script>
+```
+
+### Reactive Refetching
+
+Refetch data when dependencies change:
+
+```vue
+<script setup lang="ts">
+const route = useRoute()
+
+// ✅ Automatically refetches when route.params.id changes
+const { data: speaker } = await useFetch(
+  () => `/api/speakers/${route.params.id}`
+)
+
+// ✅ Manual refetch using refresh function
+const { data: speakers, refresh } = await useFetch("/api/speakers")
+
+async function handleSpeakerCreated() {
+  await refresh() // Refetch speakers list
+}
+</script>
+```
+
+### Anti-Patterns to Avoid
+
+```vue
+<script setup lang="ts">
+// ❌ Wrong: Direct $fetch() in component doesn't transfer SSR data
+const speakers = await $fetch('/api/speakers')
+// Problem: Data fetched only on client, not during SSR
+// Result: No SEO, loading flicker, slower initial page load
+
+// ❌ Wrong: Using onMounted for data fetching defeats SSR
+const speakers = ref([])
+onMounted(async () => {
+  speakers.value = await $fetch('/api/speakers')
+})
+// Problem: Runs only on client, not during SSR
+
+// ❌ Wrong: Not awaiting useFetch breaks SSR hydration
+const { data } = useFetch('/api/speakers') // Missing await!
+// Problem: SSR won't wait for data, hydration mismatch
+
+// ❌ Wrong: Using fetch() API directly
+onMounted(async () => {
+  const response = await fetch('/api/speakers')
+  const data = await response.json()
+})
+// Problem: Client-only, no SSR, no reactivity
+
+// ✅ Correct: Always use useFetch or useAsyncData with await
+const { data: speakers, pending, error } = await useFetch<Speaker[]>('/api/speakers')
+</script>
+```
+
+### Error Handling
+
+```vue
+<script setup lang="ts">
+const { data: speakers, error } = await useFetch<Speaker[]>("/api/speakers")
+
+// Option 1: Handle in template
+</script>
+
+<template>
+  <div v-if="error">
+    <UAlert color="error" title="Failed to load speakers">
+      {{ error.message }}
+    </UAlert>
+  </div>
+  <div v-else>
+    <!-- Success state -->
+  </div>
+</template>
+
+<script setup lang="ts">
+// Option 2: Handle with watch
+watch(error, (newError) => {
+  if (newError) {
+    console.error('Failed to fetch speakers:', newError)
+    // Show toast notification
+    const toast = useToast()
+    toast.add({
+      title: 'Error',
+      description: 'Failed to load speakers',
+      color: 'error'
+    })
+  }
+})
+</script>
+```
+
+### Loading States
+
+```vue
+<script setup lang="ts">
+const { data: speakers, pending } = await useFetch<Speaker[]>("/api/speakers")
+</script>
+
+<template>
+  <!-- Show skeleton or spinner while loading -->
+  <div v-if="pending">
+    <USkeleton v-for="i in 5" :key="i" class="h-20 mb-4" />
+  </div>
+
+  <!-- Show content when loaded -->
+  <div v-else-if="speakers">
+    <SpeakerCard v-for="speaker in speakers" :key="speaker.id" :speaker="speaker" />
+  </div>
+</template>
+```
+
+### Type Safety
+
+```vue
+<script setup lang="ts">
+import type { Speaker } from '~/server/database/schema'
+
+// ✅ Provide TypeScript types for data
+const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
+
+// TypeScript knows speakers is Ref<Speaker[] | null>
+// Auto-completion and type checking work correctly
+</script>
+```
+
+### Real Example from Codebase
+
+```vue
+<script setup lang="ts">
+// From app/pages/speakers.vue
+import type { Speaker } from "~/server/database/schema"
+
+// Fetch speakers list
+const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+
+// Fetch user membership (for permissions)
+const { data: userMembership } = await useFetch("/api/user/membership")
+
+// Both requests execute during SSR
+// Pre-rendered HTML includes speakers list
+// SEO-friendly, fast initial load
+// Client-side hydration seamless
+</script>
+```
+
+### Why This Matters
+
+**SEO Benefits:**
+- Search engines see fully rendered content with data
+- Better rankings for content-heavy pages
+- Social media previews show actual content
+
+**Performance Benefits:**
+- Faster initial page load (no loading flicker)
+- Data fetched once on server, not again on client
+- Reduced Time to Interactive (TTI)
+
+**User Experience:**
+- Content appears immediately
+- No loading spinners on initial load
+- Seamless navigation with client-side routing
+
+**Hydration:**
+- Server renders with data
+- Client receives pre-rendered HTML
+- Vue picks up where server left off
+- No mismatch errors
+
 ## Performance and Reactivity
 
 - USE `ref()` for primitive reactive values

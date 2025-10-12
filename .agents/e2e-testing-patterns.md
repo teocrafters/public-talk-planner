@@ -52,6 +52,24 @@ Comprehensive End-to-End testing guidelines for the Public Talk Planner project 
 - IMPLEMENT Page Object Models as fixtures, not standalone classes
 - COMBINE multiple fixture modules using `mergeTests()` and `mergeExpects()`
 - EXPORT single `test` and `expect` from `tests/fixtures/index.ts`
+- **ALWAYS** import `test` and `expect` from `tests/fixtures/index.ts`, NOT from `@playwright/test`
+
+### Import Rules
+
+```typescript
+// ✅ Correct: Import from merged fixtures
+import { test, expect } from "../fixtures"
+
+// ❌ Wrong: Direct import from @playwright/test
+import { test, expect } from "@playwright/test"
+```
+
+Why This Matters:
+
+- ENSURES all custom fixtures are available in tests
+- PROVIDES enhanced functionality (e.g., automatic Nuxt hydration waiting)
+- MAINTAINS consistent fixture behavior across all tests
+- ENABLES centralized fixture configuration and updates
 
 ### Fixture Organization
 
@@ -60,6 +78,20 @@ Comprehensive End-to-End testing guidelines for the Public Talk Planner project 
 - EXPORT fixture definitions from domain files
 - MERGE all fixtures in `tests/fixtures/index.ts`
 - IMPORT test and expect from merged fixtures in test files
+
+Example Fixture Structure:
+
+```
+tests/
+├── fixtures/
+│   ├── index.ts              # Merged fixtures (import from here)
+│   ├── auth-fixtures.ts      # Authentication utilities
+│   ├── speakers-fixtures.ts  # Speaker management utilities
+│   └── test-accounts.json    # Test user data
+├── e2e/
+│   ├── speakers.spec.ts      # Import { test, expect } from "../fixtures"
+│   └── talks.spec.ts         # Import { test, expect } from "../fixtures"
+```
 
 ### Fixture Lifecycle
 
@@ -77,6 +109,95 @@ Comprehensive End-to-End testing guidelines for the Public Talk Planner project 
 - RETURN POM instances from fixture definitions
 - ORGANIZE POM methods logically by user workflow
 
+Example Page Object as Fixture:
+
+```typescript
+// speakers-fixtures.ts
+import { test as base } from "@playwright/test"
+
+class SpeakersPage {
+  constructor(private page: Page) {}
+
+  async goto() {
+    await this.page.goto("/speakers")
+  }
+
+  async createSpeaker(firstName: string, lastName: string) {
+    await this.page.getByTestId("speakers-create-button").click()
+    await this.page.getByTestId("speakers-first-name-input").fill(firstName)
+    await this.page.getByTestId("speakers-last-name-input").fill(lastName)
+    await this.page.getByTestId("speakers-submit-button").click()
+  }
+}
+
+export const test = base.extend<{ speakersPage: SpeakersPage }>({
+  speakersPage: async ({ page }, use) => {
+    await use(new SpeakersPage(page))
+  }
+})
+```
+
+### Built-in Enhanced Fixtures
+
+The project includes enhanced fixtures that extend Playwright's default behavior:
+
+**Enhanced `page` Fixture:**
+
+```typescript
+// tests/fixtures/index.ts
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    // Override goto to wait for Nuxt hydration
+    const originalGoto = page.goto.bind(page)
+    page.goto = async (url, options) => {
+      const response = await originalGoto(url, options)
+      // Wait for Nuxt hydration to complete
+      await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false)
+      return response
+    }
+    await use(page)
+  }
+})
+```
+
+Why: Prevents race conditions with non-hydrated Nuxt components
+
+**`authenticateAs` Fixture:**
+
+```typescript
+// tests/fixtures/index.ts
+export const test = base.extend({
+  authenticateAs: async ({ page }, use) => {
+    await use({
+      admin: async () => {
+        await authenticateAs(page, "admin")
+        await page.context().storageState({ path: ".auth/admin.json" })
+      },
+      talksManager: async () => {
+        await authenticateAs(page, "editor")
+        await page.context().storageState({ path: ".auth/talks-manager.json" })
+      }
+    })
+  }
+})
+```
+
+Usage in Tests:
+
+```typescript
+import { test, expect } from "../fixtures"
+
+test("admin can access dashboard", async ({ page, authenticateAs }) => {
+  // Use authenticateAs fixture
+  await authenticateAs.admin()
+
+  // Enhanced page automatically waits for Nuxt hydration
+  await page.goto("http://localhost:3000/dashboard")
+
+  await expect(page.getByTestId("admin-dashboard")).toBeVisible()
+})
+```
+
 ### Why Fixtures Pattern
 
 - AUTOMATIC SETUP/TEARDOWN: Playwright handles lifecycle management automatically
@@ -84,6 +205,7 @@ Comprehensive End-to-End testing guidelines for the Public Talk Planner project 
 - DEPENDENCY INJECTION: Built-in pattern for providing test dependencies
 - PARALLELIZATION: Fixtures respect Playwright's parallel execution model
 - OFFICIAL PATTERN: Follows Playwright's recommended approach for test utilities
+- NUXT INTEGRATION: Custom fixtures handle Nuxt-specific requirements (hydration, auth)
 
 ## ESM Module Requirements
 
@@ -134,6 +256,121 @@ Comprehensive End-to-End testing guidelines for the Public Talk Planner project 
 - CONSISTENCY: Ensures all components follow test ID convention
 - PLANNING: Forces consideration of testing needs during development
 - QUALITY: Improves component API design with testability in mind
+
+## Working with Nuxt Hydration
+
+### The Hydration Challenge
+
+Nuxt applications use Server-Side Rendering (SSR), which means:
+
+1. Server renders the initial HTML with data
+2. Browser displays the static HTML
+3. Vue "hydrates" the HTML (attaches event listeners, makes it interactive)
+4. During hydration, components may not be fully interactive
+
+### Race Condition Problem
+
+```typescript
+// ❌ Problem: Test may run before hydration completes
+test("clicks button", async ({ page }) => {
+  await page.goto("http://localhost:3000/speakers")
+  // Button exists in DOM but might not be interactive yet
+  await page.getByTestId("speakers-create-button").click() // May fail!
+})
+```
+
+### Solution: Enhanced Page Fixture
+
+The project includes an enhanced `page` fixture that automatically waits for hydration:
+
+```typescript
+// tests/fixtures/index.ts
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    const originalGoto = page.goto.bind(page)
+
+    // Override goto to add hydration waiting
+    page.goto = async (url, options) => {
+      const response = await originalGoto(url, options)
+
+      // Wait for Nuxt hydration to complete
+      await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false)
+
+      return response
+    }
+
+    await use(page)
+  }
+})
+```
+
+### How It Works
+
+1. Test calls `page.goto(url)`
+2. Enhanced fixture navigates to the page
+3. **Automatically waits** for `window.useNuxtApp().isHydrating === false`
+4. Returns control to test when page is fully interactive
+5. Test can safely interact with components
+
+### Usage in Tests
+
+```typescript
+import { test, expect } from "../fixtures"
+
+test("interacts with hydrated component", async ({ page }) => {
+  // Enhanced page automatically waits for hydration
+  await page.goto("http://localhost:3000/speakers")
+
+  // Component is now fully hydrated and interactive
+  await page.getByTestId("speakers-create-button").click()
+  await expect(page.getByTestId("speaker-form-modal")).toBeVisible()
+})
+```
+
+### Benefits
+
+- **AUTOMATIC**: No manual waiting in test code
+- **RELIABLE**: Eliminates race conditions with non-hydrated components
+- **CONSISTENT**: All tests benefit from hydration waiting
+- **TRANSPARENT**: Tests don't need to know about hydration mechanics
+
+### When to Use Manual Waiting
+
+In rare cases where you need to test the non-hydrated state:
+
+```typescript
+test("checks static HTML before hydration", async ({ page }) => {
+  // Use direct page.goto without enhanced fixture
+  const originalPage = await context.newPage()
+  await originalPage.goto("http://localhost:3000/speakers")
+
+  // Test static HTML immediately
+  await expect(originalPage.getByTestId("speakers-list")).toBeVisible()
+})
+```
+
+### Anti-Patterns
+
+```typescript
+// ❌ Don't add manual hydration waits in tests
+test("bad approach", async ({ page }) => {
+  await page.goto("http://localhost:3000/speakers")
+  await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false)
+  // Redundant - enhanced fixture already does this
+})
+
+// ❌ Don't use arbitrary timeouts
+test("worse approach", async ({ page }) => {
+  await page.goto("http://localhost:3000/speakers")
+  await page.waitForTimeout(2000) // Flaky and slow
+})
+
+// ✅ Use enhanced fixture (automatic)
+test("correct approach", async ({ page }) => {
+  await page.goto("http://localhost:3000/speakers")
+  // Hydration complete - ready to interact
+})
+```
 
 ## Test Development Workflow
 
