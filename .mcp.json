@@ -18,10 +18,12 @@
       "type": "http",
       "url": "https://ui.nuxt.com/mcp"
     },
-    "playwright-mcp": {
-      "type": "stdio",
+    "playwright-test": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
+      "args": [
+        "playwright",
+        "run-test-mcp-server"
+      ]
     },
     "cloudflare-docs": {
       "type": "sse",
