@@ -43,6 +43,10 @@ export const test = base.extend({
       talksManager: async () => {
         await authenticateAs(page, "editor")
         await page.context().storageState({ path: ".auth/talks-manager.json" })
+      },
+      speakersManager: async () => {
+        await authenticateAs(page, "speakers_manager")
+        await page.context().storageState({ path: ".auth/speakers-manager.json" })
       }
     })
 	},

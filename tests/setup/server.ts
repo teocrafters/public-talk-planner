@@ -81,8 +81,32 @@ setup("Build and start server", async () => {
 			"http://localhost:3000/_nitro/tasks/seed-public-talks",
 		])
 		console.log("Seed public talks response:", seedTalksResult.stdout)
+
+		// Check for errors
+		if (seedTalksResult.stdout.includes('"error":true')) {
+			throw new Error("Seed public talks returned an error")
+		}
 	} catch (error) {
 		console.error("Failed to seed public talks:", error)
+		throw error
+	}
+
+	// 7. Seed speakers
+	console.log("Seeding speakers...")
+	try {
+		const seedSpeakersResult = await x("curl", [
+			"-X",
+			"POST",
+			"http://localhost:3000/_nitro/tasks/seed-speakers",
+		])
+		console.log("Seed speakers response:", seedSpeakersResult.stdout)
+
+		// Check for errors
+		if (seedSpeakersResult.stdout.includes('"error":true')) {
+			throw new Error("Seed speakers returned an error")
+		}
+	} catch (error) {
+		console.error("Failed to seed speakers:", error)
 		throw error
 	}
 

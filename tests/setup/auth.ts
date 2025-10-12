@@ -11,5 +11,9 @@ setup.describe("authentication", () => {
 
   setup("as talks manager", async ({ authenticateAs }) => {
 	await authenticateAs.talksManager()
-})
+	})
+
+	setup("as speakers manager", async ({ authenticateAs }) => {
+		await authenticateAs.speakersManager()
+	})
 })

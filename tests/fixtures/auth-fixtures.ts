@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test"
 import { expect } from "@playwright/test"
 import testAccounts from "./test-accounts.json" with { type: "json" }
 
-type Role = "admin" | "member" | "editor"
+type Role = "admin" | "member" | "editor" | "speakers_manager"
 
 /**
  * Authenticates user with specified role and returns the page.
