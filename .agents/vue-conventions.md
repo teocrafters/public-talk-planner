@@ -151,6 +151,23 @@ Framework-specific patterns and best practices for Vue 3 components in Nuxt 4.
 - AVOID complex lifecycle logic in Vue components
 - REFERENCE project testing patterns for comprehensive testing guidelines
 
+### Component Testing Attributes
+
+- ADD data-testid attributes to ALL interactive elements during component development
+- USE data-testid as primary selector for E2E tests
+- FOLLOW naming convention: `{feature}-{element}-{type}` in kebab-case
+- APPLY test IDs to form inputs, buttons, links, menus, dialogs, and dynamic content
+- DOCUMENT all data-testid values in component file
+- VERIFY test ID presence before marking component complete
+- REFERENCE @.agents/test-ready-component-checklist.md for comprehensive verification
+
+### Why Test Attributes Matter
+
+- STABILITY: Test IDs remain unchanged during refactoring or styling updates
+- MAINTAINABILITY: Eliminates brittle selectors based on CSS classes or text content
+- CLARITY: Explicit test attributes separate testing concerns from implementation
+- EFFICIENCY: Prevents retroactive updates to components after tests are written
+
 ## Auto-Import Conventions
 
 - LEVERAGE Nuxt 4 auto-imports for Vue APIs (ref, computed, watch)

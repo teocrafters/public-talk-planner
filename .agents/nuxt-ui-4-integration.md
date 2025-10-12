@@ -473,6 +473,43 @@ Before committing component code:
 - [ ] Validated props and slots match current API
 - [ ] Confirmed no deprecated patterns are used
 
+## Testing Integration
+
+### data-testid Requirements
+
+- ADD data-testid attributes to ALL interactive Nuxt UI components
+- APPLY test IDs on component root or trigger elements
+- USE consistent naming: `{feature}-{element}-{type}` in kebab-case
+- VERIFY test IDs are accessible in DOM for E2E tests
+
+### Component Testing Patterns
+
+- ADD data-testid to UButton trigger elements
+- ADD data-testid to UInput fields for form testing
+- ADD data-testid to UModal containers and action buttons
+- ADD data-testid to UDropdownMenu triggers and containers
+- ADD data-testid to UCard containers when testing content areas
+
+### Fixture Considerations
+
+- IMPLEMENT Page Object Models for complex Nuxt UI interactions
+- CREATE fixtures for common UI patterns (modals, dropdowns, forms)
+- USE Playwright's `test.extend()` for reusable Nuxt UI utilities
+- DOCUMENT fixture integration requirements for UI components
+
+### Why Testing Integration Matters
+
+- CONSISTENCY: Nuxt UI components follow same testing patterns as custom components
+- RELIABILITY: Test IDs ensure stable selectors across UI library updates
+- MAINTAINABILITY: Centralized fixture patterns reduce test code duplication
+- DOCUMENTATION: Clear test ID documentation aids fixture development
+
+### Reference Files
+
+- Comprehensive E2E patterns: @.agents/e2e-testing-patterns.md
+- Component checklist: @.agents/test-ready-component-checklist.md
+- Component conventions: @.agents/vue-conventions.md
+
 ## Additional Resources
 
 - Use `mcp__nuxt-ui__list_components` to see all available components

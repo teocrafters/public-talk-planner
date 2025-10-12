@@ -264,6 +264,45 @@ Performance:
 - Test files: `*.test.ts` or `*.spec.ts`
 - Mock external dependencies appropriately
 
+### E2E Testing with Playwright
+
+Test Selector Requirements:
+
+- ADD data-testid attributes to ALL interactive elements during component development
+- USE data-testid as primary selector strategy, NEVER use CSS classes, attributes, or text content
+- FOLLOW naming convention: `{feature}-{element}-{type}` in kebab-case
+- DOCUMENT all data-testid values in component files
+- VERIFY test IDs exist before marking component complete
+
+Fixture Pattern Requirements:
+
+- USE Playwright's `test.extend()` API for all reusable test utilities
+- ORGANIZE fixtures in `tests/fixtures/` directory with domain-specific files
+- IMPLEMENT Page Object Models as fixtures, not standalone classes
+- COMBINE fixtures using `mergeTests()` and export from `tests/fixtures/index.ts`
+- IMPORT test and expect from merged fixtures in all test files
+
+Component Development Rules:
+
+- IMPLEMENT component with data-testid attributes from start
+- CREATE or UPDATE fixtures for reusable patterns
+- WRITE tests only after component is test-ready with all test IDs
+- REFERENCE @.agents/test-ready-component-checklist.md before marking complete
+
+Module Syntax Requirements:
+
+- USE `import` statements exclusively in all test files
+- ADD `with { type: "json" }` assertion for JSON imports
+- NEVER use `require()` in test files
+- FOLLOW project's ESM module standard
+
+Comprehensive E2E Guidelines:
+
+- REFERENCE @.agents/e2e-testing-patterns.md for complete testing patterns
+- FOLLOW three-step workflow: component first, fixtures second, tests third
+- ENSURE test isolation and independence using fixtures
+- LEVERAGE Playwright's built-in features over custom solutions
+
 ## Security
 
 - Use appropriate data types that limit exposure of sensitive information
