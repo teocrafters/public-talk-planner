@@ -19,6 +19,27 @@ export interface AuditEventDetails {
     multimediaCount: number
     videoCount: number
   }
+  [AUDIT_EVENTS.SPEAKER_CREATED]: {
+    speakerId: string
+    firstName: string
+    lastName: string
+    congregationId: string
+    talkCount: number
+  }
+  [AUDIT_EVENTS.SPEAKER_EDITED]: {
+    speakerId: string
+    changes: Record<string, { old: any; new: any }>
+  }
+  [AUDIT_EVENTS.SPEAKER_ARCHIVED]: {
+    speakerId: string
+    firstName: string
+    lastName: string
+  }
+  [AUDIT_EVENTS.SPEAKER_RESTORED]: {
+    speakerId: string
+    firstName: string
+    lastName: string
+  }
   [AUDIT_EVENTS.PERMISSION_DENIED]: {
     attemptedAction: string
     requiredRole: string

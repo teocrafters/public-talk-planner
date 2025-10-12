@@ -21,6 +21,29 @@ CREATE TABLE `public_talks` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `speaker_talks` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`speaker_id` text NOT NULL,
+	`talk_id` integer NOT NULL,
+	`created_at` integer NOT NULL,
+	FOREIGN KEY (`speaker_id`) REFERENCES `speakers`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`talk_id`) REFERENCES `public_talks`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `speaker_talks_speaker_talk_unique` ON `speaker_talks` (`speaker_id`,`talk_id`);--> statement-breakpoint
+CREATE TABLE `speakers` (
+	`id` text PRIMARY KEY NOT NULL,
+	`first_name` text NOT NULL,
+	`last_name` text NOT NULL,
+	`phone` text NOT NULL,
+	`congregation_id` text NOT NULL,
+	`archived` integer DEFAULT false NOT NULL,
+	`archived_at` integer,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`congregation_id`) REFERENCES `organization`(`id`) ON UPDATE no action ON DELETE restrict
+);
+--> statement-breakpoint
 CREATE TABLE `account` (
 	`id` text PRIMARY KEY NOT NULL,
 	`account_id` text NOT NULL,
@@ -85,6 +108,21 @@ CREATE TABLE `passkey` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `session` (
+	`id` text PRIMARY KEY NOT NULL,
+	`expires_at` integer NOT NULL,
+	`token` text NOT NULL,
+	`created_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+	`updated_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+	`ip_address` text,
+	`user_agent` text,
+	`user_id` text NOT NULL,
+	`impersonated_by` text,
+	`active_organization_id` text,
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `session_token_unique` ON `session` (`token`);--> statement-breakpoint
 CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,

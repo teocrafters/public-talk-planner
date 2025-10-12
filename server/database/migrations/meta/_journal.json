@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1759690130320,
-      "tag": "0000_mean_yellow_claw",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1759690130321,
-      "tag": "0001_add_session_table",
+      "when": 1760278657242,
+      "tag": "0000_real_steel_serpent",
       "breakpoints": true
     }
   ]

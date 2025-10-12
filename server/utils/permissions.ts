@@ -3,11 +3,12 @@ import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { member } from "../database/schema"
 
-type Role = "member" | "marker" | "editor" | "admin"
+type Role = "member" | "marker" | "speakers_manager" | "editor" | "admin"
 
 const ROLE_HIERARCHY: Record<Role, number> = {
   member: 1,
   marker: 2,
+  speakers_manager: 2,
   editor: 3,
   admin: 4,
 }
