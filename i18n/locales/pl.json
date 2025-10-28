@@ -181,6 +181,7 @@
     "title": "Mówcy",
     "searchPlaceholder": "Szukaj po imieniu, nazwisku, telefonie lub zborze...",
     "totalSpeakers": "{count} mówców",
+    "totalSpeakersWithArchived": "{count} mówców ({archived} zarchiwizowanych)",
     "noResults": "Nie znaleziono mówców",
     "showArchived": "Pokaż zarchiwizowanych",
     "archived": "Zarchiwizowany",
@@ -199,6 +200,7 @@
       "phone": "Numer telefonu",
       "congregation": "Zbór",
       "talks": "Wykłady",
+      "selectTalks": "Wybierz wykłady",
       "save": "Zapisz",
       "cancel": "Anuluj"
     },

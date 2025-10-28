@@ -70,6 +70,17 @@
 			})) || [],
 	)
 
+	const selectedTalkNumbers = computed(() => {
+		if (!formState.value.talkIds || formState.value.talkIds.length === 0) {
+			return ""
+		}
+
+		return formState.value.talkIds
+			.map((id) => publicTalks.value?.find((t) => t.id === id)?.no)
+			.filter(Boolean)
+			.join(", ")
+	})
+
 	const initialFormState = computed(() => {
 		if (props.mode === "edit" && props.speaker) {
 			return {
@@ -183,8 +194,6 @@
 
 <template>
 	<UModal v-model:open="isOpen" :ui="{ footer: 'justify-between' }">
-		<UButton data-testid="modal-trigger-speaker" :label="modalTitle" />
-
     <template #header>
       <h3 class="text-lg font-semibold">{{ modalTitle }}</h3>
     </template>
@@ -203,7 +212,8 @@
             required>
             <UInput
               v-model="formState.firstName"
-              data-testid="speaker-firstname-input" />
+              data-testid="speaker-firstname-input"
+              class="w-full" />
           </UFormField>
 
           <UFormField
@@ -212,7 +222,8 @@
             required>
             <UInput
               v-model="formState.lastName"
-              data-testid="speaker-lastname-input" />
+              data-testid="speaker-lastname-input"
+              class="w-full" />
           </UFormField>
 
           <UFormField
@@ -222,7 +233,8 @@
             <UInput
               v-model="formState.phone"
               data-testid="speaker-phone-input"
-              placeholder="123-456-789" />
+              placeholder="123-456-789"
+              class="w-full" />
           </UFormField>
 
           <UFormField
@@ -233,7 +245,8 @@
               v-model="formState.congregationId"
               data-testid="speaker-congregation-select"
               :items="congregationItems"
-              value-key="value" />
+              value-key="value"
+              class="w-full" />
           </UFormField>
 
           <UFormField name="talkIds" :label="t('speakers.modal.talks')">
@@ -242,7 +255,17 @@
               data-testid="speaker-talks-select"
               :items="talkItems"
               value-key="value"
-              multiple />
+              class="w-full"
+              multiple>
+              <template #default>
+                <span v-if="selectedTalkNumbers" class="truncate">
+                  {{ selectedTalkNumbers }}
+                </span>
+                <span v-else class="text-muted truncate">
+                  {{ t('speakers.modal.selectTalks') }}
+                </span>
+              </template>
+            </USelect>
           </UFormField>
         </div>
       </UForm>

@@ -6,7 +6,14 @@
 					{{ t("speakers.title") }}
 				</h1>
 				<p class="mt-2 text-sm text-muted">
-					{{ t("speakers.totalSpeakers", { count: speakers?.length || 0 }) }}
+					{{
+						archivedCount > 0
+							? t("speakers.totalSpeakersWithArchived", {
+									count: activeSpeakersCount,
+									archived: archivedCount,
+								})
+							: t("speakers.totalSpeakers", { count: activeSpeakersCount })
+					}}
 				</p>
 			</div>
 			<UButton
@@ -177,6 +184,16 @@
 		}
 
 		return filtered
+	})
+
+	const activeSpeakersCount = computed(() => {
+		if (!speakers.value) return 0
+		return speakers.value.filter((s) => !s.archived).length
+	})
+
+	const archivedCount = computed(() => {
+		if (!speakers.value) return 0
+		return speakers.value.filter((s) => s.archived).length
 	})
 
 	const getSpeakerActions = (speaker: Speaker): DropdownMenuItem[] => {
