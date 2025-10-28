@@ -111,6 +111,7 @@ app/                 # Frontend application code
 ├── pages/          # File-based routing (auto-generated routes)
 ├── components/     # Reusable Vue components
 ├── composables/    # Vue composables and business logic
+├── utils/          # Client-side utilities (auto-imported)
 └── assets/         # Static assets and global styles
 
 server/             # Backend server code
@@ -118,7 +119,93 @@ server/             # Backend server code
 ├── database/       # Database schema and migrations
 ├── tasks/          # Background task definitions
 └── utils/          # Server utilities and helpers
+
+shared/             # Universal code (both server and client)
+├── types/          # Shared TypeScript type definitions
+└── utils/          # Pure functions and constants
 ```
+
+### Nuxt 4 Auto-Import System
+
+Nuxt 4 automatically imports components, composables, and utilities from specific directories.
+
+Directory Auto-Imports:
+
+- `app/components/` - Vue components are auto-imported in templates
+- `app/composables/` - Vue composables are auto-imported everywhere
+- `app/utils/` - Client-side utilities are auto-imported everywhere
+- `server/utils/` - Server-side utilities are auto-imported in server context
+- `shared/` - Universal code imported explicitly (not auto-imported by default)
+
+Built-in Auto-Imports:
+
+- Vue APIs: `ref`, `computed`, `watch`, `reactive`, `onMounted`, etc.
+- Nuxt utilities: `navigateTo`, `useRoute`, `useRouter`, `useFetch`, `useAsyncData`, etc.
+- Nuxt modules: APIs from installed Nuxt modules (e.g., `useI18n` from `@nuxtjs/i18n`)
+
+Configuration:
+
+- CHECK `nuxt.config.ts` for custom auto-import directories
+- CONFIGURE additional directories using `imports.dirs` array in nuxt.config
+- DISABLE auto-imports for specific directories if needed
+
+Example Custom Configuration:
+
+```typescript
+export default defineNuxtConfig({
+  imports: {
+    dirs: ['stores'] // Auto-import from stores directory
+  }
+})
+```
+
+Best Practices:
+
+- RELY on auto-imports for Vue APIs and Nuxt utilities (no manual imports needed)
+- USE explicit imports from `shared/` directory for universal code
+- AVOID creating custom utils when Nuxt or VueUse provides equivalent functionality
+- CHECK nuxt.config.ts before assuming a directory is auto-imported
+
+### Shared Code Pattern
+
+The `shared/` directory contains universal code that works in both server and client contexts.
+
+Directory Structure:
+
+- `shared/types/` - TypeScript type definitions and interfaces
+- `shared/utils/` - Pure functions, constants, and validation schemas
+
+Requirements:
+
+- NEVER import Vue-specific code (ref, reactive, components)
+- NEVER import Nitro-specific code (defineEventHandler, H3 utilities)
+- USE only pure TypeScript/JavaScript
+- WRITE framework-agnostic code
+
+Use Cases:
+
+- Constants: `export const AUDIT_EVENTS = { ... } as const`
+- Type definitions: `export type AuditEventType = ...`
+- Validation schemas: Zod schemas used by both client and server
+- Pure utility functions: data transformations, formatters, calculators
+
+Import Pattern:
+
+```typescript
+// ✅ Explicit imports from shared directory
+import { AUDIT_EVENTS } from '~/shared/utils/audit-events'
+import type { AuditEventDetails } from '~/shared/types/audit-events'
+
+// Use in both server and client code
+const eventType = AUDIT_EVENTS.TALK_CREATED
+```
+
+Why Use Shared Directory:
+
+- CONSISTENCY: Same types and constants across server and client
+- TYPE SAFETY: Single source of truth for TypeScript definitions
+- MAINTAINABILITY: Update once, apply everywhere
+- NO DUPLICATION: Avoid copying code between app/ and server/
 
 ### TypeScript Patterns
 
@@ -208,6 +295,119 @@ Pages and Layouts:
 - Use dynamic routes with proper parameter validation
 - Implement proper SEO with `useSeoMeta()`
 
+### SSR Data Fetching
+
+This application uses Server-Side Rendering (SSR). Always use Nuxt's SSR-compatible data fetching
+composables to ensure data is fetched on the server and properly transferred to the client.
+
+Critical Rules:
+
+- **ALWAYS** use `useFetch()` or `useAsyncData()` for data fetching in components
+- **NEVER** use raw `$fetch()` directly in components (it won't transfer SSR data to client)
+- **ALWAYS** `await` these composables in `<script setup>` for proper SSR hydration
+- **HANDLE** loading and error states using destructured values
+
+Using useFetch():
+
+```vue
+<script setup lang="ts">
+// ✅ Correct: useFetch for SSR-compatible data fetching
+const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+
+// Access reactive data in template
+// - data: reactive reference to fetched data
+// - pending: true while fetching, false when complete
+// - error: contains error object if request fails
+// - refresh: function to manually refetch data
+</script>
+
+<template>
+  <div v-if="pending">Loading...</div>
+  <div v-else-if="error">Error: {{ error.message }}</div>
+  <div v-else>
+    <div v-for="speaker in speakers" :key="speaker.id">
+      {{ speaker.firstName }} {{ speaker.lastName }}
+    </div>
+  </div>
+</template>
+```
+
+Using useAsyncData():
+
+```vue
+<script setup lang="ts">
+// ✅ Use useAsyncData for complex async operations or custom fetching logic
+const { data: userData, pending, error } = await useAsyncData(
+  'user-profile', // unique key for caching
+  () => $fetch('/api/user/profile', {
+    headers: { 'X-Custom-Header': 'value' }
+  })
+)
+</script>
+```
+
+When to Use Each:
+
+- USE `useFetch()` for simple API calls (most common case)
+- USE `useAsyncData()` when you need:
+  - Custom fetch logic with headers or request options
+  - Non-HTTP async operations
+  - More control over caching with unique keys
+  - Multiple data sources combined
+
+Anti-Patterns to Avoid:
+
+```vue
+<script setup lang="ts">
+// ❌ Wrong: Direct $fetch() in component doesn't transfer SSR data
+const speakers = await $fetch('/api/speakers')
+
+// ❌ Wrong: Using onMounted for data fetching defeats SSR
+onMounted(async () => {
+  const data = await $fetch('/api/speakers')
+  speakers.value = data
+})
+
+// ❌ Wrong: Not awaiting useFetch breaks SSR hydration
+const { data } = useFetch('/api/speakers') // Missing await!
+</script>
+```
+
+Best Practices:
+
+- DESTRUCTURE return values for clear code: `const { data, pending, error, refresh }`
+- PROVIDE TypeScript types for data: `useFetch<Speaker[]>(...)`
+- HANDLE all states: loading (`pending`), error (`error`), success (`data`)
+- USE `refresh()` function to manually refetch when data changes
+- AVOID fetching in `onMounted` - use `useFetch`/`useAsyncData` instead
+- CHECK data exists before accessing properties: `v-if="data"` or optional chaining
+
+Example from Codebase:
+
+```vue
+<script setup lang="ts">
+// Real example from app/pages/speakers.vue
+const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+
+// Permission checks use usePermissions composable
+const { canManageSpeakers, fetchPermissions } = usePermissions()
+onMounted(async () => {
+  await fetchPermissions()
+})
+
+// Data is fetched on server-side during SSR
+// Permissions are fetched client-side using BetterAuth organization API
+// Client receives pre-rendered HTML with data already available
+</script>
+```
+
+Why This Matters:
+
+- **SEO**: Search engines see fully rendered content with data
+- **PERFORMANCE**: Faster initial page load with server-rendered data
+- **UX**: No loading flicker - content appears immediately
+- **HYDRATION**: Client-side Vue picks up where server left off
+
 ### Cloudflare & NuxtHub Patterns
 
 Configuration:
@@ -281,6 +481,58 @@ Fixture Pattern Requirements:
 - IMPLEMENT Page Object Models as fixtures, not standalone classes
 - COMBINE fixtures using `mergeTests()` and export from `tests/fixtures/index.ts`
 - IMPORT test and expect from merged fixtures in all test files
+
+Fixture Usage in Tests:
+
+```typescript
+// ✅ Correct: Import test and expect from merged fixtures
+import { test, expect } from "../fixtures"
+
+test("displays speakers list", async ({ page }) => {
+  // Enhanced page fixture automatically waits for Nuxt hydration
+  await page.goto("http://localhost:3000/speakers")
+
+  // Use data-testid selectors for stability
+  await expect(page.getByTestId("speakers-list")).toBeVisible()
+})
+
+test("authenticates as admin", async ({ page, authenticateAs }) => {
+  // Use authenticateAs fixture for role-based authentication
+  await authenticateAs.admin()
+
+  await page.goto("http://localhost:3000/admin")
+  await expect(page.getByTestId("admin-dashboard")).toBeVisible()
+})
+```
+
+Available Fixtures:
+
+- `page` - Enhanced page that waits for Nuxt hydration after navigation
+- `authenticateAs` - Object with role-based authentication methods:
+  - `authenticateAs.admin()` - Authenticate as admin user
+  - `authenticateAs.publisher()` - Authenticate as publisher user
+  - `authenticateAs.talksManager()` - Authenticate as talks manager
+  - `authenticateAs.speakersManager()` - Authenticate as speakers manager
+
+Fixture Anti-Patterns:
+
+```typescript
+// ❌ Wrong: Importing directly from @playwright/test
+import { test, expect } from "@playwright/test"
+
+// ❌ Wrong: Creating standalone Page Object classes
+class SpeakersPage {
+  constructor(private page: Page) {}
+  async goto() { await this.page.goto("/speakers") }
+}
+
+// ✅ Correct: Implement Page Objects as fixtures
+export const test = base.extend<{ speakersPage: SpeakersPage }>({
+  speakersPage: async ({ page }, use) => {
+    await use(new SpeakersPage(page))
+  }
+})
+```
 
 Component Development Rules:
 

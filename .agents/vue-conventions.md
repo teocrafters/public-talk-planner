@@ -196,7 +196,7 @@ Fetch multiple resources in parallel for better performance:
 <script setup lang="ts">
 // ✅ Multiple parallel requests (execute simultaneously)
 const { data: speakers, pending: speakersPending } = await useFetch<Speaker[]>("/api/speakers")
-const { data: userMembership, pending: membershipPending } = await useFetch("/api/user/membership")
+const { data: talks, pending: talksPending } = await useFetch<Talk[]>("/api/talks")
 
 // Both requests execute on server-side during SSR
 // Data is serialized and transferred to client
