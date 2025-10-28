@@ -22,6 +22,13 @@
               {{ t("navigation.publicTalks") }}
             </ULink>
 
+            <ULink
+              to="/speakers"
+              active-class="text-primary"
+              inactive-class="text-muted hover:text-default">
+              {{ t("navigation.speakers") }}
+            </ULink>
+
             <UButton
               data-testid="logout-button"
               variant="ghost"
@@ -68,6 +75,11 @@
         label: t("navigation.publicTalks"),
         to: "/talks",
         icon: "i-heroicons-document-text",
+      },
+      {
+        label: t("navigation.speakers"),
+        to: "/speakers",
+        icon: "i-heroicons-user-group",
       },
     ],
     [
