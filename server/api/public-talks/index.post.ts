@@ -2,7 +2,7 @@ import { createError } from "h3"
 import { publicTalks } from "../../database/schema"
 
 export default defineEventHandler(async event => {
-  await requireRole("editor")(event)
+  await requirePermission({ talks: ["create"] })(event)
 
   const body = await readBody(event)
 

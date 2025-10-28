@@ -7,7 +7,7 @@ interface ArchiveSpeakerRequest {
 }
 
 export default defineEventHandler(async (event) => {
-	await requireRole("speakers_manager")(event)
+	await requirePermission({ speakers: ["archive"] })(event)
 
 	const speakerId = getRouterParam(event, "id")
 	if (!speakerId) {

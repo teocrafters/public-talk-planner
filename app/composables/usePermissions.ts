@@ -1,72 +1,72 @@
-type Role = "member" | "marker" | "speakers_manager" | "editor" | "admin"
-
-interface OrganizationMembership {
-  id: string
-  organizationId: string
-  userId: string
-  role: string
-  createdAt: Date
-}
-
-const ROLE_HIERARCHY: Record<Role, number> = {
-  member: 1,
-  marker: 2,
-  speakers_manager: 2,
-  editor: 3,
-  admin: 4,
-}
+type Role = "publisher" | "manager" | "admin"
 
 export function usePermissions() {
-  const { user } = useAuth()
-  const role = ref<Role>("member")
-  const isLoading = ref(false)
+	const { user, client } = useAuth()
+	const role = useState<Role>("permissions:role", () => "publisher")
+	const permissionCache = useState<Map<string, boolean>>("permissions:cache", () => new Map())
+	const isLoading = useState<boolean>("permissions:loading", () => false)
+	const isFetched = useState<boolean>("permissions:fetched", () => false)
 
   const fetchPermissions = async () => {
-    if (!user.value?.id) {
-      role.value = "member"
-      return
-    }
+		if (isFetched.value || isLoading.value) {
+			return
+		}
 
-    isLoading.value = true
-    try {
-      const response = await $fetch<OrganizationMembership[]>("/api/user/membership", {
-        method: "GET",
-      })
+		if (!user.value?.id) {
+			role.value = "publisher"
+			isFetched.value = true
+			return
+		}
 
-      if (response && response.length > 0 && response[0]) {
-        role.value = response[0].role as Role
-      } else {
-        role.value = "member"
-      }
-    } catch (error) {
-      console.error("Failed to fetch user permissions:", error)
-      role.value = "member"
-    } finally {
-      isLoading.value = false
-    }
-  }
+		isLoading.value = true
+		try {
+			const { data: activeMember } = await client.organization.getActiveMember()
 
-  const canMarkTalks = computed(() => ["marker", "editor", "admin"].includes(role.value))
+			if (activeMember?.role) {
+				role.value = activeMember.role as Role
+			} else {
+				role.value = "publisher"
+			}
 
-  const canEditTalks = computed(() => ["editor", "admin"].includes(role.value))
+			const permissionsToCheck = [
+				{ key: "speakers:list", permissions: { speakers: ["list"] } },
+				{ key: "speakers:create", permissions: { speakers: ["create"] } },
+				{ key: "speakers:update", permissions: { speakers: ["update"] } },
+				{ key: "speakers:archive", permissions: { speakers: ["archive"] } },
+				{ key: "talks:create", permissions: { talks: ["create"] } },
+				{ key: "talks:update", permissions: { talks: ["update"] } },
+				{ key: "talks:archive", permissions: { talks: ["archive"] } },
+				{ key: "talks:flag", permissions: { talks: ["flag"] } },
+      ]
 
-  const canManageSpeakers = computed(() =>
-    ["speakers_manager", "editor", "admin"].includes(role.value),
-  )
+			for (const check of permissionsToCheck) {
+        const { data } = await client.organization.hasPermission({
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					permissions: check.permissions as any,
+				})
+        permissionCache.value.set(check.key, data?.success ?? false)
+			}
 
-  const hasRole = (requiredRole: Role): boolean => {
-    const userLevel = ROLE_HIERARCHY[role.value]
-    const requiredLevel = ROLE_HIERARCHY[requiredRole]
-    return userLevel >= requiredLevel
-  }
+			isFetched.value = true
+		} catch (error) {
+			console.error("Failed to fetch user permissions:", error)
+			role.value = "publisher"
+		} finally {
+			isLoading.value = false
+		}
+	}
 
-  return {
-    role: readonly(role),
-    isLoading: readonly(isLoading),
-    canMarkTalks,
-    canEditTalks,
-    canManageSpeakers,
-    hasRole,
-    fetchPermissions,
-  }
+	const can = (resource: "speakers" | "talks", action: string) => {
+		return computed(() => {
+      const permission = permissionCache.value.get(`${resource}:${action}`)
+      return permission ?? false
+    })
+	}
+
+	return {
+		role: readonly(role),
+		isLoading: readonly(isLoading),
+		can,
+		fetchPermissions,
+	}
 }

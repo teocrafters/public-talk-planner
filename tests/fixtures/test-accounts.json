@@ -14,19 +14,13 @@
 			"email": "publisher@test.local",
 			"password": "TestPublisher123!",
 			"name": "Test Publisher",
-			"role": "member"
+			"role": "publisher"
 		},
 		{
-			"email": "talks-manager@test.local",
+			"email": "manager@test.local",
 			"password": "TestManager123!",
-			"name": "Talks Manager",
-			"role": "editor"
-		},
-		{
-			"email": "speakers-manager@test.local",
-			"password": "TestSpeakers123!",
-			"name": "Speakers Manager",
-			"role": "speakers_manager"
+			"name": "Test Manager",
+			"role": "manager"
 		}
 	]
 }

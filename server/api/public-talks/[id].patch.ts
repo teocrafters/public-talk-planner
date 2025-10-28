@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm"
 import { publicTalks } from "../../database/schema"
 
 export default defineEventHandler(async event => {
-  await requireRole("editor")(event)
+  await requirePermission({ talks: ["update"] })(event)
 
   const id = parseInt(getRouterParam(event, "id") || "")
   if (isNaN(id)) {

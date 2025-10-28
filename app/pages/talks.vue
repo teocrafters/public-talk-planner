@@ -10,7 +10,7 @@
         </p>
       </div>
       <UButton
-        v-if="canEditTalks"
+        v-if="canUpdateTalks"
         data-testid="add-talk-button"
         icon="i-heroicons-plus"
         size="md"
@@ -54,6 +54,7 @@
     <div
       v-else-if="filteredTalks.length > 0"
       class="space-y-3">
+      <ClientOnly>
       <UCard
         v-for="talk in filteredTalks"
         :key="talk.id"
@@ -98,16 +99,18 @@
             </div>
 
             <TalkActionsMenu
-              v-if="canMarkTalks"
+              v-if="canFlagTalks || canUpdateTalks"
               :key="talk.id"
               :talk="talk"
-              :user-role="role"
+              :can-flag="canFlagTalks"
+              :can-update="canUpdateTalks"
               @status-changed="handleStatusChanged"
               @edit-requested="() => handleEditRequested(talk)"
               @confirm-requested="handleConfirmRequested" />
           </div>
         </div>
       </UCard>
+      </ClientOnly>
     </div>
 
     <UAlert
@@ -157,7 +160,10 @@
 
   const { data: talks, pending, error, refresh } = await useFetch<PublicTalk[]>("/api/public-talks")
 
-  const { role, canMarkTalks, canEditTalks, fetchPermissions } = usePermissions()
+  const { can, fetchPermissions } = usePermissions()
+
+  const canUpdateTalks = can("talks", "update")
+  const canFlagTalks = can("talks", "flag")
 
   const searchQuery = ref("")
   const sortOrder = ref<"asc" | "desc">("asc")
@@ -282,9 +288,7 @@
     }
   }
 
-  onMounted(async () => {
-    await fetchPermissions()
-  })
+  await fetchPermissions()
 
   useSeoMeta({
     title: t("meta.publicTalks.title"),

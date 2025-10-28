@@ -11,7 +11,7 @@ interface UpdateSpeakerRequest {
 }
 
 export default defineEventHandler(async (event) => {
-	await requireRole("speakers_manager")(event)
+	await requirePermission({ speakers: ["update"] })(event)
 
 	const speakerId = getRouterParam(event, "id")
 	if (!speakerId) {

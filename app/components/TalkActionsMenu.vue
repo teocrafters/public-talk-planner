@@ -13,7 +13,8 @@
 
   interface Props {
     talk: PublicTalk
-    userRole: string
+    canFlag: boolean
+    canUpdate: boolean
   }
 
   const props = defineProps<Props>()
@@ -28,14 +29,10 @@
 
   const isLoading = ref(false)
 
-  const canMark = computed(() => ["marker", "editor", "admin"].includes(props.userRole))
-
-  const canEdit = computed(() => ["editor", "admin"].includes(props.userRole))
-
   const menuItems = computed(() => {
     const items: Array<DropdownMenuItem> = []
 
-    if (canMark.value) {
+    if (props.canFlag) {
       items.push({
         label: t("publicTalks.actions.blockForOverseer"),
         icon: "i-heroicons-lock-closed",
@@ -59,7 +56,7 @@
       }
     }
 
-    if (canEdit.value) {
+    if (props.canUpdate) {
       items.push({
         label: t("publicTalks.actions.edit"),
         icon: "i-heroicons-pencil-square",

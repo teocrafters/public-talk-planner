@@ -11,7 +11,7 @@ interface CreateSpeakerRequest {
 }
 
 export default defineEventHandler(async (event) => {
-	await requireRole("speakers_manager")(event)
+	await requirePermission({ speakers: ["create"] })(event)
 
 	const body = (await readBody(event)) as CreateSpeakerRequest
 

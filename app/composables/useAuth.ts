@@ -2,7 +2,8 @@ import { defu } from "defu"
 import { createAuthClient } from "better-auth/client"
 import type { InferSessionFromClient, InferUserFromClient, ClientOptions } from "better-auth/client"
 import type { RouteLocationRaw } from "vue-router"
-import { passkeyClient } from "better-auth/client/plugins"
+import { passkeyClient, organizationClient } from "better-auth/client/plugins"
+import { ac, publisher, manager, admin } from "~~/shared/utils/permissions/declare"
 
 interface RuntimeAuthConfig {
   redirectUserTo: RouteLocationRaw | string
@@ -18,7 +19,17 @@ export function useAuth() {
     fetchOptions: {
       headers,
     },
-    plugins: [passkeyClient()],
+    plugins: [
+      passkeyClient(),
+      organizationClient({
+        ac,
+        roles: {
+          publisher,
+          manager,
+          admin,
+        }
+      })
+    ],
   })
 
   const options = defu(useRuntimeConfig().public.auth as Partial<RuntimeAuthConfig>, {

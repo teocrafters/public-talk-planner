@@ -19,7 +19,9 @@ interface SpeakerWithRelations {
 	}>
 }
 
-export default defineEventHandler(async (): Promise<SpeakerWithRelations[]> => {
+export default defineEventHandler(async (event): Promise<SpeakerWithRelations[]> => {
+	await requirePermission({ speakers: ["list"] })(event)
+
 	const db = useDrizzle()
 
 	const speakersData = await db

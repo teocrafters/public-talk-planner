@@ -1,3 +1,5 @@
+import type { AUDIT_EVENTS } from "../utils/audit-events"
+
 export type AuditEventType = (typeof AUDIT_EVENTS)[keyof typeof AUDIT_EVENTS]
 
 export interface AuditEventDetails {
@@ -42,7 +44,8 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.PERMISSION_DENIED]: {
     attemptedAction: string
-    requiredRole: string
+    requiredPermissions?: Record<string, string[]>
+    requiredRole?: string
     userRole: string
   }
   [AUDIT_EVENTS.UNAUTHORIZED_ACCESS]: {

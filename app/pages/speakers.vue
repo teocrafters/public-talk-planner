@@ -133,14 +133,20 @@
 	}
 
 	definePageMeta({
-		auth: {
-			only: "user",
-		},
-	})
+    auth: {
+      only: "user",
+      redirectGuestTo: "/",
+    },
+    layout: "authenticated",
+  })
 
 	const { t } = useI18n()
-	const { canManageSpeakers } = usePermissions()
+	const { can, fetchPermissions } = usePermissions()
 	const toast = useToast()
+
+	const canManageSpeakers = computed(
+		() => can("speakers", "create").value || can("speakers", "update").value || can("speakers", "archive").value,
+	)
 
 	const searchQuery = ref("")
 	const showArchived = ref(false)
@@ -218,10 +224,10 @@
 			})
 
 			await refresh()
-		} catch (err: any) {
+		} catch (err: unknown) {
 			toast.add({
 				title: t("common.error"),
-				description: err.message || t("speakers.messages.archiveError"),
+				description: err instanceof Error ? err.message : t("speakers.messages.archiveError"),
 				color: "error",
 			})
 		}
@@ -231,4 +237,6 @@
 		await refresh()
 		editModalOpen.value = false
 	}
+
+  await fetchPermissions()
 </script>
