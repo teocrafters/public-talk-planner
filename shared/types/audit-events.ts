@@ -1,4 +1,6 @@
 import type { AUDIT_EVENTS } from "../utils/audit-events"
+import type { TalkUpdateInput } from "../../app/schemas/talk"
+import type { SpeakerEditInput } from "../../app/schemas/speaker"
 
 export type AuditEventType = (typeof AUDIT_EVENTS)[keyof typeof AUDIT_EVENTS]
 
@@ -12,7 +14,7 @@ export interface AuditEventDetails {
   [AUDIT_EVENTS.TALK_EDITED]: {
     talkId: number
     talkNo: string
-    changes: Record<string, { old: any; new: any }>
+    updates: TalkUpdateInput
   }
   [AUDIT_EVENTS.TALK_CREATED]: {
     talkId: number
@@ -30,7 +32,7 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.SPEAKER_EDITED]: {
     speakerId: string
-    changes: Record<string, { old: any; new: any }>
+    updates: SpeakerEditInput
   }
   [AUDIT_EVENTS.SPEAKER_ARCHIVED]: {
     speakerId: string
