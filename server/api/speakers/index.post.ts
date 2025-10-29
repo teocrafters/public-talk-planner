@@ -1,35 +1,13 @@
 import { createError } from "h3"
-import { eq } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
-
-interface CreateSpeakerRequest {
-	firstName: string
-	lastName: string
-	phone: string
-	congregationId: string
-	talkIds?: number[]
-}
+import { createSpeakerSchema } from "../../../app/schemas/speaker"
+import { validateBody } from "../../utils/validation"
 
 export default defineEventHandler(async (event) => {
 	await requirePermission({ speakers: ["create"] })(event)
 
-	const body = (await readBody(event)) as CreateSpeakerRequest
-
-	if (!body || !body.firstName || !body.lastName || !body.phone || !body.congregationId) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: "Bad Request",
-			message: "First name, last name, phone, and congregation are required",
-		})
-	}
-
-	if (!/^\d{9}$/.test(body.phone)) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: "Bad Request",
-			message: "Phone number must be exactly 9 digits",
-		})
-	}
+	const body = await validateBody(event, createSpeakerSchema)
 
 	const db = useDrizzle()
 
@@ -43,7 +21,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 400,
 			statusMessage: "Bad Request",
-			message: "Invalid congregation ID",
+			message: "errors.congregationNotFound",
 		})
 	}
 
@@ -57,7 +35,7 @@ export default defineEventHandler(async (event) => {
 			throw createError({
 				statusCode: 400,
 				statusMessage: "Bad Request",
-				message: "One or more talk IDs are invalid",
+				message: "errors.talksInvalid",
 			})
 		}
 	}
@@ -68,8 +46,8 @@ export default defineEventHandler(async (event) => {
 		.insert(speakers)
 		.values({
 			id: speakerId,
-			firstName: body.firstName.trim(),
-			lastName: body.lastName.trim(),
+			firstName: body.firstName,
+			lastName: body.lastName,
 			phone: body.phone,
 			congregationId: body.congregationId,
 			archived: false,
@@ -84,12 +62,12 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 500,
 			statusMessage: "Internal Server Error",
-			message: "Failed to create speaker",
+			message: "errors.speakerCreateFailed",
 		})
 	}
 
 	if (body.talkIds && body.talkIds.length > 0) {
-		const talkAssignments = body.talkIds.map((talkId) => ({
+		const talkAssignments = body.talkIds.map((talkId: number) => ({
 			speakerId,
 			talkId,
 			createdAt: new Date(),

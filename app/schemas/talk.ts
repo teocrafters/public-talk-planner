@@ -28,6 +28,10 @@ export const createTalkEditSchema = (t: (key: string) => string) => {
   return createTalkSchema(t).omit({ no: true })
 }
 
+export const updateTalkSchema = (t: (key: string) => string) => {
+  return createTalkSchema(t).partial()
+}
+
 export const talkSchema = z.object({
   no: z.string().min(1, "validation.talkNumberRequired").max(10, "validation.talkNumberTooLong"),
 
@@ -52,10 +56,15 @@ export const talkSchema = z.object({
 
 export const talkEditSchema = talkSchema.omit({ no: true })
 
-export const talkStatusSchema = z.object({
-  status: z.enum(["circuit_overseer", "will_be_replaced"]).nullable(),
-})
+export const talkStatusSchema = (t: (key: string) => string) => {
+  return z.object({
+    status: z.enum(["circuit_overseer", "will_be_replaced"], {
+      message: t("validation.statusInvalid")
+    }).nullable(),
+  })
+}
 
 export type TalkInput = z.infer<typeof talkSchema>
 export type TalkEditInput = z.infer<typeof talkEditSchema>
-export type TalkStatusInput = z.infer<typeof talkStatusSchema>
+export type TalkUpdateInput = z.infer<ReturnType<typeof updateTalkSchema>>
+export type TalkStatusInput = z.infer<ReturnType<typeof talkStatusSchema>>

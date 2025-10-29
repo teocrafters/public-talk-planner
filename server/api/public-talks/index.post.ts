@@ -1,92 +1,51 @@
 import { createError } from "h3"
 import { publicTalks } from "../../database/schema"
+import { createTalkSchema } from "../../../app/schemas/talk"
+import { validateBody } from "../../utils/validation"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ talks: ["create"] })(event)
+export default defineEventHandler(async (event) => {
+	await requirePermission({ talks: ["create"] })(event)
 
-  const body = await readBody(event)
+	const body = await validateBody(event, createTalkSchema)
 
-  if (!body || !body.no || !body.title) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      message: "Talk number and title are required",
-    })
-  }
+	const db = useDrizzle()
 
-  if (typeof body.no !== "string") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      message: "Talk number must be a string",
-    })
-  }
+	const result = await db
+		.insert(publicTalks)
+		.values({
+			no: body.no,
+			title: body.title,
+			multimediaCount: body.multimediaCount,
+			videoCount: body.videoCount,
+			status: null,
+			createdAt: new Date(),
+		})
+		.returning()
 
-  if (typeof body.title !== "string") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      message: "Title must be a string",
-    })
-  }
+	const newTalk = result[0]
+	if (!newTalk) {
+		throw createError({
+			statusCode: 500,
+			statusMessage: "Internal Server Error",
+			message: "errors.talkCreateFailed",
+		})
+	}
 
-  const multimediaCount = body.multimediaCount ?? 0
-  const videoCount = body.videoCount ?? 0
+	await logAuditEvent(event, {
+		action: AUDIT_EVENTS.TALK_CREATED,
+		resourceType: "public_talk",
+		resourceId: newTalk.id.toString(),
+		details: {
+			talkId: newTalk.id,
+			talkNo: newTalk.no,
+			title: newTalk.title,
+			multimediaCount: newTalk.multimediaCount,
+			videoCount: newTalk.videoCount,
+		} satisfies AuditEventDetails[typeof AUDIT_EVENTS.TALK_CREATED],
+	})
 
-  if (typeof multimediaCount !== "number" || multimediaCount < 0) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      message: "Multimedia count must be a non-negative number",
-    })
-  }
-
-  if (typeof videoCount !== "number" || videoCount < 0) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      message: "Video count must be a non-negative number",
-    })
-  }
-
-  const db = useDrizzle()
-
-  const result = await db
-    .insert(publicTalks)
-    .values({
-      no: body.no,
-      title: body.title,
-      multimediaCount,
-      videoCount,
-      status: body.status || null,
-      createdAt: new Date(),
-    })
-    .returning()
-
-  const newTalk = result[0]
-  if (!newTalk) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Internal Server Error",
-      message: "Failed to create talk",
-    })
-  }
-
-  await logAuditEvent(event, {
-    action: AUDIT_EVENTS.TALK_CREATED,
-    resourceType: "public_talk",
-    resourceId: newTalk.id.toString(),
-    details: {
-      talkId: newTalk.id,
-      talkNo: newTalk.no,
-      title: newTalk.title,
-      multimediaCount: newTalk.multimediaCount,
-      videoCount: newTalk.videoCount,
-    } satisfies AuditEventDetails[typeof AUDIT_EVENTS.TALK_CREATED],
-  })
-
-  return {
-    success: true,
-    talk: newTalk,
-  }
+	return {
+		success: true,
+		talk: newTalk,
+	}
 })

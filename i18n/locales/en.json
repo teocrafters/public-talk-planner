@@ -142,7 +142,18 @@
     "unexpectedError": "An unexpected error occurred",
     "networkError": "Network connection error",
     "tryAgain": "Try again",
-    "contactSupport": "Contact support"
+    "contactSupport": "Contact support",
+    "speakerIdRequired": "Speaker ID is required",
+    "speakerNotFound": "Speaker not found",
+    "congregationNotFound": "Congregation not found",
+    "talksInvalid": "One or more talk IDs are invalid",
+    "speakerUpdateFailed": "Failed to update speaker",
+    "speakerCreateFailed": "Failed to create speaker",
+    "talkIdInvalid": "Invalid talk ID",
+    "talkNotFound": "Talk not found",
+    "talkUpdateFailed": "Failed to update talk",
+    "talkCreateFailed": "Failed to create talk",
+    "talkRetrieveFailed": "Failed to retrieve updated talk"
   },
   "validation": {
     "required": "This field is required",
@@ -163,6 +174,8 @@
     "lastNameTooLong": "Last name cannot be longer than 100 characters",
     "phoneRequired": "Phone number is required",
     "phoneInvalid": "Phone number must be 9 digits (format: XXX-XXX-XXX)",
-    "congregationRequired": "Congregation selection is required"
+    "congregationRequired": "Congregation selection is required",
+    "archivedInvalid": "Archived flag must be a boolean",
+    "statusInvalid": "Invalid status value. Must be 'circuit_overseer', 'will_be_replaced', or null"
   }
 }

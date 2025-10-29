@@ -175,7 +175,18 @@
     "unexpectedError": "Wystąpił nieoczekiwany błąd",
     "networkError": "Błąd połączenia z serwerem",
     "tryAgain": "Spróbuj ponownie",
-    "contactSupport": "Skontaktuj się z pomocą techniczną"
+    "contactSupport": "Skontaktuj się z pomocą techniczną",
+    "speakerIdRequired": "Identyfikator mówcy jest wymagany",
+    "speakerNotFound": "Nie znaleziono mówcy",
+    "congregationNotFound": "Nie znaleziono zboru",
+    "talksInvalid": "Jeden lub więcej identyfikatorów wykładów jest nieprawidłowych",
+    "speakerUpdateFailed": "Aktualizacja mówcy nie powiodła się",
+    "speakerCreateFailed": "Tworzenie mówcy nie powiodło się",
+    "talkIdInvalid": "Nieprawidłowy identyfikator wykładu",
+    "talkNotFound": "Nie znaleziono wykładu",
+    "talkUpdateFailed": "Aktualizacja wykładu nie powiodła się",
+    "talkCreateFailed": "Tworzenie wykładu nie powiodło się",
+    "talkRetrieveFailed": "Nie udało się pobrać zaktualizowanego wykładu"
   },
   "speakers": {
     "title": "Mówcy",
@@ -231,6 +242,8 @@
     "lastNameTooLong": "Nazwisko nie może być dłuższe niż 100 znaków",
     "phoneRequired": "Numer telefonu jest wymagany",
     "phoneInvalid": "Numer telefonu musi mieć 9 cyfr (format: XXX-XXX-XXX)",
-    "congregationRequired": "Wybór zboru jest wymagany"
+    "congregationRequired": "Wybór zboru jest wymagany",
+    "archivedInvalid": "Flaga archiwizacji musi być wartością logiczną",
+    "statusInvalid": "Nieprawidłowa wartość statusu. Dopuszczalne: 'circuit_overseer', 'will_be_replaced' lub null"
   }
 }

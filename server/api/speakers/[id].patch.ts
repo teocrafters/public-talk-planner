@@ -1,14 +1,8 @@
 import { createError } from "h3"
 import { eq, sql } from "drizzle-orm"
 import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
-
-interface UpdateSpeakerRequest {
-	firstName?: string
-	lastName?: string
-	phone?: string
-	congregationId?: string
-	talkIds?: number[]
-}
+import { editSpeakerSchema } from "../../../app/schemas/speaker"
+import { validateBody } from "../../utils/validation"
 
 export default defineEventHandler(async (event) => {
 	await requirePermission({ speakers: ["update"] })(event)
@@ -18,11 +12,11 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 400,
 			statusMessage: "Bad Request",
-			message: "Speaker ID is required",
+			message: "errors.speakerIdRequired",
 		})
 	}
 
-	const body = (await readBody(event)) as UpdateSpeakerRequest
+	const body = await validateBody(event, editSpeakerSchema)
 
 	const db = useDrizzle()
 
@@ -36,15 +30,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 404,
 			statusMessage: "Not Found",
-			message: "Speaker not found",
-		})
-	}
-
-	if (body.phone && !/^\d{9}$/.test(body.phone)) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: "Bad Request",
-			message: "Phone number must be exactly 9 digits",
+			message: "errors.speakerNotFound",
 		})
 	}
 
@@ -59,7 +45,7 @@ export default defineEventHandler(async (event) => {
 			throw createError({
 				statusCode: 400,
 				statusMessage: "Bad Request",
-				message: "Invalid congregation ID",
+				message: "errors.congregationNotFound",
 			})
 		}
 	}
@@ -74,39 +60,28 @@ export default defineEventHandler(async (event) => {
 			throw createError({
 				statusCode: 400,
 				statusMessage: "Bad Request",
-				message: "One or more talk IDs are invalid",
+				message: "errors.talksInvalid",
 			})
 		}
 	}
 
-	const changes: Record<string, { old: any; new: any }> = {}
 	const updateData: Partial<typeof speakers.$inferInsert> = {
 		updatedAt: new Date(),
 	}
 
-	if (body.firstName !== undefined && body.firstName !== existingSpeaker[0].firstName) {
-		changes.firstName = { old: existingSpeaker[0].firstName, new: body.firstName }
-		updateData.firstName = body.firstName.trim()
+	if (body.firstName !== undefined) {
+		updateData.firstName = body.firstName
 	}
 
-	if (body.lastName !== undefined && body.lastName !== existingSpeaker[0].lastName) {
-		changes.lastName = { old: existingSpeaker[0].lastName, new: body.lastName }
-		updateData.lastName = body.lastName.trim()
+	if (body.lastName !== undefined) {
+		updateData.lastName = body.lastName
 	}
 
-	if (body.phone !== undefined && body.phone !== existingSpeaker[0].phone) {
-		changes.phone = { old: existingSpeaker[0].phone, new: body.phone }
+	if (body.phone !== undefined) {
 		updateData.phone = body.phone
 	}
 
-	if (
-		body.congregationId !== undefined &&
-		body.congregationId !== existingSpeaker[0].congregationId
-	) {
-		changes.congregationId = {
-			old: existingSpeaker[0].congregationId,
-			new: body.congregationId,
-		}
+	if (body.congregationId !== undefined) {
 		updateData.congregationId = body.congregationId
 	}
 
@@ -121,7 +96,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 500,
 			statusMessage: "Internal Server Error",
-			message: "Failed to update speaker",
+			message: "errors.speakerUpdateFailed",
 		})
 	}
 
@@ -129,7 +104,7 @@ export default defineEventHandler(async (event) => {
 		await db.delete(speakerTalks).where(eq(speakerTalks.speakerId, speakerId))
 
 		if (body.talkIds.length > 0) {
-			const talkAssignments = body.talkIds.map((talkId) => ({
+			const talkAssignments = body.talkIds.map((talkId: number) => ({
 				speakerId,
 				talkId,
 				createdAt: new Date(),
@@ -137,21 +112,16 @@ export default defineEventHandler(async (event) => {
 
 			await db.insert(speakerTalks).values(talkAssignments)
 		}
-
-		changes.talkIds = {
-			old: "talks updated",
-			new: `${body.talkIds.length} talks assigned`,
-		}
 	}
 
-	if (Object.keys(changes).length > 0) {
+	if (Object.keys(body).length > 0) {
 		await logAuditEvent(event, {
 			action: AUDIT_EVENTS.SPEAKER_EDITED,
 			resourceType: "speaker",
 			resourceId: speakerId,
 			details: {
 				speakerId,
-				changes,
+				updates: body,
 			} satisfies AuditEventDetails[typeof AUDIT_EVENTS.SPEAKER_EDITED],
 		})
 	}

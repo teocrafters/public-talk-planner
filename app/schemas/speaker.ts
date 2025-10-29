@@ -35,5 +35,12 @@ export const editSpeakerSchema = (t: (key: string) => string) => {
 	return createSpeakerSchema(t).partial()
 }
 
+export const archiveSpeakerSchema = (t: (key: string) => string) => {
+	return z.object({
+		archived: z.boolean({ message: t("validation.archivedInvalid") }),
+	})
+}
+
 export type SpeakerInput = z.infer<ReturnType<typeof createSpeakerSchema>>
 export type SpeakerEditInput = z.infer<ReturnType<typeof editSpeakerSchema>>
+export type SpeakerArchiveInput = z.infer<ReturnType<typeof archiveSpeakerSchema>>

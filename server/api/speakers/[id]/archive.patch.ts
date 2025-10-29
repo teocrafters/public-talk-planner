@@ -1,10 +1,8 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { speakers, organization, speakerTalks, publicTalks } from "../../../database/schema"
-
-interface ArchiveSpeakerRequest {
-	archived: boolean
-}
+import { archiveSpeakerSchema } from "../../../../app/schemas/speaker"
+import { validateBody } from "../../../utils/validation"
 
 export default defineEventHandler(async (event) => {
 	await requirePermission({ speakers: ["archive"] })(event)
@@ -14,19 +12,11 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 400,
 			statusMessage: "Bad Request",
-			message: "Speaker ID is required",
+			message: "errors.speakerIdRequired",
 		})
 	}
 
-	const body = (await readBody(event)) as ArchiveSpeakerRequest
-
-	if (typeof body.archived !== "boolean") {
-		throw createError({
-			statusCode: 400,
-			statusMessage: "Bad Request",
-			message: "Archived flag must be a boolean",
-		})
-	}
+	const body = await validateBody(event, archiveSpeakerSchema)
 
 	const db = useDrizzle()
 
@@ -40,7 +30,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 404,
 			statusMessage: "Not Found",
-			message: "Speaker not found",
+			message: "errors.speakerNotFound",
 		})
 	}
 
@@ -59,7 +49,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 500,
 			statusMessage: "Internal Server Error",
-			message: "Failed to update speaker",
+			message: "errors.speakerUpdateFailed",
 		})
 	}
 
