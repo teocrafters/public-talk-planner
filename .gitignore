@@ -32,6 +32,7 @@ logs
 /.auth/
 
 .serena
+requirements/
 
 *.jwpub
 
