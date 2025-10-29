@@ -252,10 +252,104 @@ Migration Workflow:
 API Routes:
 
 - Place API routes in `server/api/` directory
-- Use proper HTTP methods and status codes
-- Always validate request bodies with TypeScript types
+- Use proper HTTP methods:
+  - POST for creating resources (accepts body)
+  - PUT for complete replacement (accepts body)
+  - PATCH for partial updates (accepts body)
+  - GET for retrieving (no body)
+  - DELETE for removing (no body)
+- VALIDATE all request bodies with Zod schemas:
+  - IMPORT schema factory from `app/schemas/`
+  - USE `validateBody(event, schemaFactory)` utility from `server/utils/validation`
+  - RETURN validation errors with i18n keys automatically via utility
 - Return consistent response formats
-- Handle errors gracefully with proper error messages
+- Handle errors gracefully with proper status codes
+
+#### Zod Schema Patterns
+
+Schema Structure:
+
+- CREATE schemas in `app/schemas/` directory
+- USE factory pattern accepting translation function `t: (key: string) => string`
+- EMBED i18n keys in error messages: `t("validation.fieldRequired")`
+- EXPORT TypeScript types using `z.infer<ReturnType<typeof schemaFactory>>`
+- DEFINE separate schemas for create/update operations (use `.partial()` for updates)
+
+Example Schema:
+
+```typescript
+// app/schemas/resource.ts
+import { z } from "zod"
+
+export const createResourceSchema = (t: (key: string) => string) => {
+  return z.object({
+    name: z
+      .string()
+      .min(1, t("validation.nameRequired"))
+      .max(100, t("validation.nameTooLong"))
+      .transform((s) => s.trim()),
+
+    email: z.string().email(t("validation.emailInvalid")),
+
+    phone: z.string().regex(/^\d{9}$/, t("validation.phoneInvalid")),
+  })
+}
+
+export const updateResourceSchema = (t: (key: string) => string) => {
+  return createResourceSchema(t).partial()
+}
+
+export type ResourceInput = z.infer<ReturnType<typeof createResourceSchema>>
+export type ResourceUpdateInput = z.infer<ReturnType<typeof updateResourceSchema>>
+```
+
+#### API Validation Usage
+
+Endpoint Implementation Pattern:
+
+```typescript
+// server/api/resources/index.post.ts
+import { createResourceSchema } from "~/app/schemas/resource"
+import { validateBody } from "~/server/utils/validation"
+
+export default defineEventHandler(async (event) => {
+  await requirePermission({ resources: ["create"] })(event)
+
+  // Validate and parse request body - throws on error
+  const body = await validateBody(event, createResourceSchema)
+
+  // body is fully typed as ResourceInput
+  const db = useDrizzle()
+  const result = await db.insert(resources).values({
+    id: crypto.randomUUID(),
+    name: body.name, // Already trimmed by schema transform
+    email: body.email,
+    phone: body.phone,
+    createdAt: new Date(),
+  })
+
+  return { success: true, resource: result[0] }
+})
+```
+
+Validation Error Response Format:
+
+When validation fails, `validateBody()` automatically returns:
+
+```json
+{
+  "statusCode": 400,
+  "statusMessage": "Validation Error",
+  "data": {
+    "errors": [
+      { "field": "name", "messageKey": "validation.nameRequired" },
+      { "field": "email", "messageKey": "validation.emailInvalid" }
+    ]
+  }
+}
+```
+
+Frontend can use `messageKey` values to display translated error messages via `$t(error.messageKey)`.
 
 Background Tasks:
 
@@ -622,7 +716,7 @@ Hierarchical Organization:
 - `navigation.*` - Navigation elements
 - `meta.*` - SEO meta tags and descriptions
 - `errors.*` - Error messages and validation
-- `validation.*` - Form validation messages
+- `validation.*` - API and form validation messages (field-specific errors)
 
 Key Naming Conventions:
 
@@ -630,6 +724,13 @@ Key Naming Conventions:
 - Dot notation for hierarchy: `auth.form.emailLabel`
 - Context-specific grouping: `errors.validation.required`
 - Consistent naming patterns: `action.resource` (e.g., `create.account`, `delete.item`)
+
+Validation Key Examples:
+
+- Field requirements: `validation.firstNameRequired`, `validation.emailRequired`
+- Format validation: `validation.phoneInvalid`, `validation.emailInvalid`
+- Length constraints: `validation.firstNameTooLong`, `validation.passwordTooShort`
+- Business rules: `validation.congregationRequired`, `validation.dateInPast`
 
 ### Component Integration Patterns
 
