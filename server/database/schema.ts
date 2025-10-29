@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core"
-import { user, organization } from "./auth-schema"
+import { organization } from "./auth-schema"
 
 export * from "./auth-schema"
 
@@ -41,20 +41,27 @@ export const speakers = sqliteTable("speakers", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
-export const speakerTalks = sqliteTable("speaker_talks", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  speakerId: text("speaker_id")
-    .notNull()
-    .references(() => speakers.id, { onDelete: "cascade" }),
-  talkId: integer("talk_id")
-    .notNull()
-    .references(() => publicTalks.id, { onDelete: "cascade" }),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-}, (table) => {
-  return {
-    speakerTalkUnique: uniqueIndex("speaker_talks_speaker_talk_unique").on(table.speakerId, table.talkId),
+export const speakerTalks = sqliteTable(
+  "speaker_talks",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    speakerId: text("speaker_id")
+      .notNull()
+      .references(() => speakers.id, { onDelete: "cascade" }),
+    talkId: integer("talk_id")
+      .notNull()
+      .references(() => publicTalks.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  table => {
+    return {
+      speakerTalkUnique: uniqueIndex("speaker_talks_speaker_talk_unique").on(
+        table.speakerId,
+        table.talkId
+      ),
+    }
   }
-})
+)
 
 export type Speaker = typeof speakers.$inferSelect
 export type NewSpeaker = typeof speakers.$inferInsert
