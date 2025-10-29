@@ -14,3 +14,9 @@ export default withNuxt()
       "unicorn/filename-case": "off",
     },
   })
+  .append({
+    files: ["tests/seed.spec.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  })
