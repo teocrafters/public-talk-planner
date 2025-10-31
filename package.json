@@ -50,6 +50,6 @@
     "tailwindcss": "4.1.16",
     "tinyexec": "1.0.1",
     "vitest": "4.0.5",
-    "wrangler": "4.45.2"
+    "wrangler": "4.45.3"
   }
 }
