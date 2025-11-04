@@ -33,7 +33,7 @@
     "drizzle-orm": "0.44.7",
     "eslint": "9.39.1",
     "nuxt": "4.2.0",
-    "resend": "6.4.0",
+    "resend": "6.4.1",
     "typescript": "5.9.3",
     "vue": "3.5.22",
     "vue-router": "4.6.3",
@@ -48,8 +48,8 @@
     "drizzle-kit": "0.31.6",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.16",
-    "tinyexec": "1.0.1",
-    "vitest": "4.0.6",
-    "wrangler": "4.45.3"
+    "tinyexec": "1.0.2",
+    "vitest": "4.0.7",
+    "wrangler": "4.45.4"
   }
 }
