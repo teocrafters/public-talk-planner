@@ -1,8 +1,8 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { speakers, organization, speakerTalks, publicTalks } from "../../../database/schema"
-import { archiveSpeakerSchema } from "../../../../app/schemas/speaker"
 import { validateBody } from "../../../utils/validation"
+import { archiveSpeakerSchema } from "#shared/utils/schemas"
 
 export default defineEventHandler(async (event) => {
 	await requirePermission({ speakers: ["archive"] })(event)

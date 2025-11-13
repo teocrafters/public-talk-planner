@@ -1,0 +1,207 @@
+<script setup lang="ts">
+	import type { DateValue } from "@internationalized/date"
+
+	type DateRange = { start: DateValue | undefined; end: DateValue | undefined }
+
+	interface ScheduledMeeting {
+		id: string
+		date: Date
+		meetingProgramName: string
+		partName: string
+		speakerFirstName: string
+		speakerLastName: string
+		talkNumber: string | null
+		talkTitle: string | null
+		isCircuitOverseerVisit: boolean
+	}
+
+	definePageMeta({
+		auth: {
+			only: "user",
+			redirectGuestTo: "/",
+		},
+		layout: "authenticated",
+		middleware: ["weekend-meetings-manager"],
+	})
+
+	const { t } = useI18n()
+
+	// Fetch schedules for calendar range (3 months)
+	const { data: schedules, refresh } = await useFetch<ScheduledMeeting[]>("/api/schedules", {
+		query: {
+			startDate: dayjs().subtract(1, "month").toDate().toISOString(),
+			endDate: dayjs().add(3, "month").toDate().toISOString(),
+		},
+	})
+
+	// Responsive months display - start with mobile size
+	const windowWidth = ref(1)
+	const numberOfMonths = computed(() => {
+		if (windowWidth.value >= 1024) return 3
+		if (windowWidth.value >= 640) return 2
+		return 1
+	})
+
+	onMounted(() => {
+		if (typeof window !== "undefined") {
+			windowWidth.value = window.innerWidth
+			window.addEventListener("resize", () => {
+				windowWidth.value = window.innerWidth
+			})
+		}
+	})
+
+	// Calendar logic
+	const selectedDateForModal = ref<number | null>(null)
+	const showScheduleModal = ref(false)
+
+  function isSundayUnscheduled(date: DateValue): boolean {
+    if (!("day" in date)) return false
+    const dayjsDate = dayjs(date.toString())
+
+		if (dayjsDate.day() !== 0) return false // Not Sunday
+		if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return false // Past date
+
+		const scheduled = schedules.value?.find(s => dayjs(s.date).isSame(dayjsDate, "day"))
+		return !scheduled
+	}
+
+	function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
+		// Only handle single date selection
+		if (!date || Array.isArray(date) || (typeof date === "object" && "start" in date)) return
+		if (!date || !("day" in date)) return
+
+		const dayjsDate = dayjs(date.toString())
+
+		if (dayjsDate.day() !== 0) return // Not Sunday
+		if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return // Past date
+
+		selectedDateForModal.value = dayjsDate.unix()
+		showScheduleModal.value = true
+	}
+
+	// Configuration: Number of weeks to display in unscheduled Sundays list
+	const WEEKS_TO_SHOW = 26
+
+	const unscheduledSundays = computed(() => {
+		const sundays: Date[] = []
+
+		// Start from today at noon to avoid timezone boundary issues
+		const todayAtNoon = dayjs().utc().hour(12).minute(0).second(0).millisecond(0)
+
+		const currentDayOfWeek = todayAtNoon.day() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+		const daysUntilSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek
+
+		let currentSunday = todayAtNoon.add(daysUntilSunday, "day")
+
+		for (let week = 0; week < WEEKS_TO_SHOW; week++) {
+			const sundayDate = currentSunday.toDate()
+
+			const isScheduled = schedules.value?.some(s => isSameDay(s.date, sundayDate))
+
+			if (!isScheduled) {
+				sundays.push(sundayDate)
+			}
+
+			currentSunday = currentSunday.add(7, "day")
+		}
+
+		return sundays
+	})
+
+	function handleModalSaved(): void {
+		refresh()
+		showScheduleModal.value = false
+	}
+
+	function handleSundayClick(sunday: Date): void {
+		selectedDateForModal.value = dateToUnixTimestamp(sunday)
+		showScheduleModal.value = true
+	}
+
+	useSeoMeta({
+		title: t("meta.meetings.managePublicTalks.title"),
+		description: t("meta.meetings.managePublicTalks.description"),
+		ogTitle: t("meta.meetings.managePublicTalks.title"),
+		ogDescription: t("meta.meetings.managePublicTalks.description"),
+		robots: "noindex, nofollow",
+	})
+</script>
+
+<template>
+	<div class="space-y-6">
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+			<div>
+				<h1 data-testid="calendar-title" class="text-3xl font-bold tracking-tight text-default">
+					{{ t("meetings.managePublicTalks.title") }}
+				</h1>
+				<p class="mt-2 text-sm text-muted">
+					{{ t("meetings.managePublicTalks.description") }}
+				</p>
+			</div>
+			<UButton
+				data-testid="back-to-list-button"
+				variant="outline"
+				icon="i-heroicons-list-bullet"
+				size="md"
+				class="w-full sm:w-auto"
+				@click="navigateTo('/meetings/list')">
+				{{ t("meetings.backToList") }}
+			</UButton>
+		</div>
+
+		<ClientOnly>
+			<UCalendar
+				data-testid="schedule-calendar"
+				color="primary"
+        :week-starts-on="1"
+				:number-of-months="numberOfMonths"
+				@update:model-value="handleDateClick">
+				<template #day="{ day }">
+					<UChip :show="isSundayUnscheduled(day)" :color="isSundayUnscheduled(day) ? 'warning' : 'success'" size="2xs">
+						{{ day.day }}
+					</UChip>
+				</template>
+			</UCalendar>
+
+			<template #fallback>
+				<div class="h-80 flex items-center justify-center">
+					<USkeleton class="h-full w-full" />
+				</div>
+			</template>
+		</ClientOnly>
+
+		<!-- Unscheduled Sundays List -->
+		<div class="mt-8">
+			<h2 class="text-xl font-semibold mb-4">{{ t("meetings.unscheduled") }}</h2>
+			<div v-if="unscheduledSundays.length === 0" data-testid="no-unscheduled">
+				<UAlert
+					color="success"
+					:title="t('meetings.allScheduled')"
+					icon="i-heroicons-check-circle">
+					{{ t("meetings.allScheduledDescription") }}
+				</UAlert>
+			</div>
+			<div v-else data-testid="unscheduled-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+				<UCard
+					v-for="sunday in unscheduledSundays"
+					:key="sunday.toISOString()"
+					:data-testid="`unscheduled-item-${sunday.toISOString().split('T')[0]}`"
+					class="cursor-pointer hover:shadow-md transition-shadow hover:bg-elevated"
+					@click="handleSundayClick(sunday)">
+					<div class="flex items-center gap-2">
+						<UIcon name="i-heroicons-calendar-days" class="text-warning" />
+						<p class="text-sm font-medium">
+							{{ formatDatePL(sunday) }}
+						</p>
+					</div>
+				</UCard>
+			</div>
+		</div>
+
+		<ScheduleModal
+			v-model:open="showScheduleModal"
+			:date="selectedDateForModal"
+			@saved="handleModalSaved" />
+	</div>
+</template>

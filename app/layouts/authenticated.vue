@@ -29,6 +29,13 @@
               {{ t("navigation.speakers") }}
             </ULink>
 
+            <ULink
+              to="/meetings/list"
+              active-class="text-primary"
+              inactive-class="text-muted hover:text-default">
+              {{ t("navigation.meetings") }}
+            </ULink>
+
             <UButton
               data-testid="logout-button"
               variant="ghost"
@@ -80,6 +87,11 @@
         label: t("navigation.speakers"),
         to: "/speakers",
         icon: "i-heroicons-user-group",
+      },
+      {
+        label: t("navigation.meetings"),
+        to: "/meetings/list",
+        icon: "i-heroicons-calendar-days",
       },
     ],
     [

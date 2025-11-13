@@ -28,7 +28,7 @@ export const test = base.extend({
   },
 
   /**
-   * Test fixture that provides a page authenticated as admin.
+   * Test fixture that provides a page authenticated as different roles.
    */
   authenticateAs: async ({ page }, use) => {
     await use({
@@ -37,15 +37,15 @@ export const test = base.extend({
         await page.context().storageState({ path: ".auth/admin.json" })
       },
       publisher: async () => {
-        await authenticateAs(page, "member")
+        await authenticateAs(page, "publisher")
         await page.context().storageState({ path: ".auth/publisher.json" })
       },
       talksManager: async () => {
-        await authenticateAs(page, "editor")
+        await authenticateAs(page, "manager")
         await page.context().storageState({ path: ".auth/talks-manager.json" })
       },
       speakersManager: async () => {
-        await authenticateAs(page, "speakers_manager")
+        await authenticateAs(page, "manager")
         await page.context().storageState({ path: ".auth/speakers-manager.json" })
       }
     })

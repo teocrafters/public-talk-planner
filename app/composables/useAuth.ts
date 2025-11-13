@@ -3,7 +3,7 @@ import { createAuthClient } from "better-auth/client"
 import type { InferSessionFromClient, InferUserFromClient, ClientOptions } from "better-auth/client"
 import type { RouteLocationRaw } from "vue-router"
 import { passkeyClient, organizationClient } from "better-auth/client/plugins"
-import { ac, publisher, manager, admin } from "~~/shared/utils/permissions/declare"
+import { ac, publisher, manager, admin } from "#shared/utils/permissions/declare"
 
 interface RuntimeAuthConfig {
   redirectUserTo: RouteLocationRaw | string

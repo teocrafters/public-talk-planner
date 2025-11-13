@@ -110,6 +110,25 @@ setup("Build and start server", async () => {
 		throw error
 	}
 
+	// 8. Seed meeting programs and scheduled meetings
+	console.log("Seeding meeting programs...")
+	try {
+		const seedMeetingProgramsResult = await x("curl", [
+			"-X",
+			"POST",
+			"http://localhost:3000/_nitro/tasks/seed-meeting-programs",
+		])
+		console.log("Seed meeting programs response:", seedMeetingProgramsResult.stdout)
+
+		// Check for errors
+		if (seedMeetingProgramsResult.stdout.includes('"error":true')) {
+			throw new Error("Seed meeting programs returned an error")
+		}
+	} catch (error) {
+		console.error("Failed to seed meeting programs:", error)
+		throw error
+	}
+
 	console.log("Global setup complete!")
 })
 

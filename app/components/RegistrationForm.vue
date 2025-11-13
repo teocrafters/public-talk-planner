@@ -108,7 +108,7 @@
 
 <script setup lang="ts">
   import type { FormSubmitEvent } from "@nuxt/ui"
-  import { createRegistrationFormSchema } from "../schemas/registration"
+  import { createRegistrationFormSchema } from "#shared/utils/schemas"
 
   defineProps<{
     title?: string

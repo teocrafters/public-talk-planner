@@ -37,6 +37,7 @@
     "dashboard": "Dashboard",
     "publicTalks": "Public Talks",
     "speakers": "Speakers",
+    "meetings": "Meetings",
     "settings": "Settings"
   },
   "speakers": {
@@ -176,6 +177,73 @@
     "phoneInvalid": "Phone number must be 9 digits (format: XXX-XXX-XXX)",
     "congregationRequired": "Congregation selection is required",
     "archivedInvalid": "Archived flag must be a boolean",
-    "statusInvalid": "Invalid status value. Must be 'circuit_overseer', 'will_be_replaced', or null"
+    "statusInvalid": "Invalid status value. Must be 'circuit_overseer', 'will_be_replaced', or null",
+    "dateRequired": "Date is required",
+    "dateMustBeSunday": "Date must be a Sunday",
+    "meetingProgramRequired": "Meeting program is required",
+    "partRequired": "Program part is required",
+    "speakerRequired": "Speaker is required",
+    "customTalkTitleTooLong": "Custom talk title cannot be longer than 200 characters",
+    "talkIdOrCustomTitleRequired": "You must select a talk or enter a custom talk title"
+  },
+  "meetings": {
+    "title": "Weekend Meetings",
+    "description": "Browse scheduled weekend meetings with public talks",
+    "managePublicTalks": "Manage Public Talks",
+    "speaker": "Speaker",
+    "talk": "Talk",
+    "selectTalk": "Select a talk",
+    "customTalk": "Custom Talk",
+    "customTalkPlaceholder": "Enter custom talk title",
+    "circuitOverseerVisit": "Circuit Overseer Visit",
+    "schedule": "Schedule",
+    "unscheduled": "Unscheduled Sundays",
+    "noSchedules": "No scheduled meetings",
+    "noSchedulesDescription": "There are no scheduled weekend meetings yet.",
+    "allScheduled": "All Sundays scheduled",
+    "allScheduledDescription": "All upcoming Sundays have scheduled meetings.",
+    "backToList": "Back to list",
+    "noTalk": "No talk",
+    "managePublicTalks": {
+      "title": "Manage Public Talks",
+      "description": "Schedule weekend meetings with public talks"
+    },
+    "modal": {
+      "title": "Schedule Meeting"
+    },
+    "messages": {
+      "scheduleCreated": "Meeting scheduled successfully",
+      "scheduleUpdated": "Meeting updated successfully",
+      "scheduleDeleted": "Meeting deleted successfully"
+    },
+    "validationWarning": {
+      "title": "Validation Warning",
+      "message": "The selected speaker does not have this talk in their list. Do you want to continue anyway?",
+      "confirm": "Yes, schedule anyway"
+    }
+  },
+  "meta": {
+    "signIn": {
+      "title": "Sign In - Public Talk Planner",
+      "description": "Sign in to access your talk planning dashboard and manage your presentations."
+    },
+    "dashboard": {
+      "title": "Dashboard - Public Talk Planner",
+      "description": "Manage your talks and presentations"
+    },
+    "publicTalks": {
+      "title": "Public Talks - Public Talk Planner",
+      "description": "Browse 187 public talks with search and sort capabilities"
+    },
+    "meetings": {
+      "list": {
+        "title": "Weekend Meetings - Public Talk Planner",
+        "description": "Browse and manage scheduled weekend meetings with public talks"
+      },
+      "managePublicTalks": {
+        "title": "Manage Public Talks - Public Talk Planner",
+        "description": "Schedule weekend meetings with public talks on the calendar"
+      }
+    }
   }
 }

@@ -50,6 +50,35 @@ export interface AuditEventDetails {
     requiredRole?: string
     userRole: string
   }
+  [AUDIT_EVENTS.SCHEDULE_CREATED]: {
+    scheduleId: string
+    date: Date
+    meetingProgramId: number
+    partId: number
+    speakerId: string
+    talkId: number | null
+    customTalkTitle: string | null
+    isCircuitOverseerVisit: boolean
+  }
+  [AUDIT_EVENTS.SCHEDULE_UPDATED]: {
+    scheduleId: string
+    date: Date
+    meetingProgramId: number
+    partId: number
+    changes: Record<string, unknown>
+  }
+  [AUDIT_EVENTS.SCHEDULE_DELETED]: {
+    scheduleId: string
+    date: Date
+    meetingProgramId: number
+    partId: number
+  }
+  [AUDIT_EVENTS.SCHEDULE_VALIDATION_OVERRIDDEN]: {
+    scheduleId: string
+    date: Date
+    validationReason: string
+    overriddenBy: string
+  }
   [AUDIT_EVENTS.UNAUTHORIZED_ACCESS]: {
     attemptedAction: string
     path: string

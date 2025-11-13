@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { unformatPhoneNumber } from "../utils/phone"
 
 export const createSpeakerSchema = (t: (key: string) => string) => {
 	return z.object({

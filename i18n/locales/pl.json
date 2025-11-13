@@ -65,6 +65,7 @@
     "dashboard": "Panel główny",
     "publicTalks": "Wykłady publiczne",
     "speakers": "Mówcy",
+    "meetings": "Zebrania",
     "settings": "Ustawienia"
   },
   "publicTalks": {
@@ -244,6 +245,81 @@
     "phoneInvalid": "Numer telefonu musi mieć 9 cyfr (format: XXX-XXX-XXX)",
     "congregationRequired": "Wybór zboru jest wymagany",
     "archivedInvalid": "Flaga archiwizacji musi być wartością logiczną",
-    "statusInvalid": "Nieprawidłowa wartość statusu. Dopuszczalne: 'circuit_overseer', 'will_be_replaced' lub null"
+    "statusInvalid": "Nieprawidłowa wartość statusu. Dopuszczalne: 'circuit_overseer', 'will_be_replaced' lub null",
+    "dateRequired": "Data jest wymagana",
+    "dateMustBeSunday": "Data musi być niedzielą",
+    "meetingProgramRequired": "Program zebrania jest wymagany",
+    "partRequired": "Część programu jest wymagana",
+    "speakerRequired": "Mówca jest wymagany",
+    "customTalkTitleTooLong": "Tytuł własnego wykładu nie może być dłuższy niż 200 znaków",
+    "talkIdOrCustomTitleRequired": "Musisz wybrać wykład lub wprowadzić tytuł własnego wykładu"
+  },
+  "meetings": {
+    "title": "Zebrania w weekend",
+    "description": "Przeglądaj zaplanowane zebrania w weekend z wykładami publicznymi",
+    "managePublicTalks": "Zarządzaj wykładami publicznymi",
+    "speaker": "Mówca",
+    "talk": "Wykład",
+    "selectTalk": "Wybierz wykład",
+    "customTalk": "Własny wykład",
+    "customTalkPlaceholder": "Wprowadź tytuł własnego wykładu",
+    "circuitOverseerVisit": "Wizyta nadzorcy obwodu",
+    "schedule": "Zaplanuj",
+    "unscheduled": "Niezaplanowane niedziele",
+    "noSchedules": "Brak zaplanowanych zebrań",
+    "noSchedulesDescription": "Nie ma jeszcze żadnych zaplanowanych zebrań w weekend.",
+    "allScheduled": "Wszystkie niedziele zaplanowane",
+    "allScheduledDescription": "Wszystkie nadchodzące niedziele mają zaplanowane zebrania.",
+    "backToList": "Powrót do listy",
+    "noTalk": "Brak wykładu",
+    "managePublicTalks": {
+      "title": "Zarządzaj wykładami publicznymi",
+      "description": "Planuj zebrania w weekend z wykładami publicznymi"
+    },
+    "modal": {
+      "title": "Zaplanuj zebranie"
+    },
+    "messages": {
+      "scheduleCreated": "Zebranie zostało zaplanowane",
+      "scheduleUpdated": "Zebranie zostało zaktualizowane",
+      "scheduleDeleted": "Zebranie zostało usunięte"
+    },
+    "validationWarning": {
+      "title": "Ostrzeżenie walidacji",
+      "message": "Wybrany mówca nie ma tego wykładu na swojej liście. Czy chcesz kontynuować mimo to?",
+      "confirm": "Tak, zaplanuj mimo to"
+    }
+  },
+  "meta": {
+    "signIn": {
+      "title": "Logowanie - Planer Wystąpień Publicznych",
+      "description": "Zaloguj się, aby uzyskać dostęp do swojego panelu planowania wystąpień i zarządzać swoimi prezentacjami."
+    },
+    "dashboard": {
+      "title": "Panel główny - Planer Wystąpień Publicznych",
+      "description": "Zarządzaj swoimi wystąpieniami i prezentacjami"
+    },
+    "register": {
+      "title": "Rejestracja - Planer Wystąpień Publicznych",
+      "description": "Utwórz nowe konto, aby rozpocząć planowanie i zarządzanie wystąpieniami publicznymi"
+    },
+    "emailVerification": {
+      "title": "Weryfikacja e-mail - Planer Wystąpień Publicznych",
+      "description": "Zweryfikuj swój adres e-mail, aby aktywować konto"
+    },
+    "publicTalks": {
+      "title": "Wykłady publiczne - Planer Wystąpień Publicznych",
+      "description": "Przeglądaj listę 187 wykładów publicznych z możliwością wyszukiwania i sortowania"
+    },
+    "meetings": {
+      "list": {
+        "title": "Zebrania w weekend - Planer Wystąpień Publicznych",
+        "description": "Przeglądaj i zarządzaj zaplanowanymi zebraniami w weekend z wykładami publicznymi"
+      },
+      "managePublicTalks": {
+        "title": "Zarządzaj wykładami publicznymi - Planer Wystąpień Publicznych",
+        "description": "Planuj zebrania w weekend z wykładami publicznymi na kalendarzu"
+      }
+    }
   }
 }

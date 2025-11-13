@@ -1,7 +1,7 @@
 import { createError } from "h3"
 import { publicTalks } from "../../database/schema"
-import { createTalkSchema } from "../../../app/schemas/talk"
 import { validateBody } from "../../utils/validation"
+import { createTalkSchema } from "#shared/utils/schemas"
 
 export default defineEventHandler(async (event) => {
 	await requirePermission({ talks: ["create"] })(event)

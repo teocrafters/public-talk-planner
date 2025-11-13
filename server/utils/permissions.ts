@@ -1,14 +1,6 @@
 import type { H3Event } from "h3"
 import { createError } from "h3"
 
-type SpeakersAction = "list" | "create" | "update" | "archive"
-type TalksAction = "create" | "update" | "archive" | "flag"
-
-type PermissionsMap = {
-	speakers?: SpeakersAction[]
-	talks?: TalksAction[]
-}
-
 export async function hasPermission(
 	event: H3Event,
 	permissions: PermissionsMap,

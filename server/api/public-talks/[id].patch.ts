@@ -1,8 +1,8 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { publicTalks } from "../../database/schema"
-import { updateTalkSchema } from "../../../app/schemas/talk"
 import { validateBody } from "../../utils/validation"
+import { updateTalkSchema } from "#shared/utils/schemas"
 
 export default defineEventHandler(async (event) => {
 	await requirePermission({ talks: ["update"] })(event)

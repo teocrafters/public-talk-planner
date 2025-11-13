@@ -1,8 +1,7 @@
 <script setup lang="ts">
 	import type { FormSubmitEvent } from "#ui/types"
-	import { createSpeakerSchema, editSpeakerSchema } from "../schemas/speaker"
-	import type { SpeakerInput, SpeakerEditInput } from "../schemas/speaker"
-	import { formatPhoneNumber, unformatPhoneNumber } from "../utils/phone"
+	import { createSpeakerSchema, editSpeakerSchema } from "#shared/utils/schemas"
+	import type { SpeakerInput, SpeakerEditInput } from "#shared/utils/schemas"
 
 	interface Speaker {
 		id: string

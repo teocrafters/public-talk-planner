@@ -1,8 +1,8 @@
 import { createError } from "h3"
 import { eq, sql } from "drizzle-orm"
 import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
-import { createSpeakerSchema } from "../../../app/schemas/speaker"
 import { validateBody } from "../../utils/validation"
+import { createSpeakerSchema } from "#shared/utils/schemas"
 
 export default defineEventHandler(async (event) => {
 	await requirePermission({ speakers: ["create"] })(event)

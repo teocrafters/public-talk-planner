@@ -7,7 +7,7 @@ export function usePermissions() {
 	const isLoading = useState<boolean>("permissions:loading", () => false)
 	const isFetched = useState<boolean>("permissions:fetched", () => false)
 
-  const fetchPermissions = async () => {
+	const fetchPermissions = async () => {
 		if (isFetched.value || isLoading.value) {
 			return
 		}
@@ -37,14 +37,26 @@ export function usePermissions() {
 				{ key: "talks:update", permissions: { talks: ["update"] } },
 				{ key: "talks:archive", permissions: { talks: ["archive"] } },
 				{ key: "talks:flag", permissions: { talks: ["flag"] } },
-      ]
+				{ key: "weekend_meetings:schedule_public_talks", permissions: { weekend_meetings: ["schedule_public_talks"] } },
+				{ key: "weekend_meetings:schedule_all", permissions: { weekend_meetings: ["schedule_all"] } },
+				{ key: "weekend_meetings:list", permissions: { weekend_meetings: ["list"] } },
+				{ key: "weekend_meetings:list_history", permissions: { weekend_meetings: ["list_history"] } },
+			]
 
-			for (const check of permissionsToCheck) {
-        const { data } = await client.organization.hasPermission({
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					permissions: check.permissions as any,
-				})
-        permissionCache.value.set(check.key, data?.success ?? false)
+			// Admin users have all permissions
+			if (role.value === "admin") {
+				for (const check of permissionsToCheck) {
+					permissionCache.value.set(check.key, true)
+				}
+			} else {
+				// Non-admin users need to check permissions via API
+				for (const check of permissionsToCheck) {
+					const { data } = await client.organization.hasPermission({
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						permissions: check.permissions as any,
+					})
+					permissionCache.value.set(check.key, data?.success ?? false)
+				}
 			}
 
 			isFetched.value = true
@@ -56,11 +68,11 @@ export function usePermissions() {
 		}
 	}
 
-	const can = (resource: "speakers" | "talks", action: string) => {
+	const can = (resource: "speakers" | "talks" | "weekend_meetings", action: string) => {
 		return computed(() => {
-      const permission = permissionCache.value.get(`${resource}:${action}`)
-      return permission ?? false
-    })
+			const permission = permissionCache.value.get(`${resource}:${action}`)
+			return permission ?? false
+		})
 	}
 
 	return {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import type { FormSubmitEvent } from "#ui/types"
-  import { createTalkSchema, createTalkEditSchema } from "../schemas/talk"
-  import type { TalkInput, TalkEditInput } from "../schemas/talk"
+  import { createTalkSchema, createTalkEditSchema } from "#shared/utils/schemas"
+  import type { TalkInput, TalkEditInput } from "#shared/utils/schemas"
 
   interface PublicTalk {
     id: number

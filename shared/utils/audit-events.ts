@@ -7,6 +7,10 @@ export const AUDIT_EVENTS = {
   SPEAKER_EDITED: "speaker_edited",
   SPEAKER_ARCHIVED: "speaker_archived",
   SPEAKER_RESTORED: "speaker_restored",
+  SCHEDULE_CREATED: "schedule_created",
+  SCHEDULE_UPDATED: "schedule_updated",
+  SCHEDULE_DELETED: "schedule_deleted",
+  SCHEDULE_VALIDATION_OVERRIDDEN: "schedule_validation_overridden",
   PERMISSION_DENIED: "permission_denied",
   UNAUTHORIZED_ACCESS: "unauthorized_access",
 } as const
