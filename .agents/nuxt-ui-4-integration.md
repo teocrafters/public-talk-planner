@@ -294,6 +294,47 @@ function validate(data: typeof state) {
 </template>
 ```
 
+### UModal with Forms Pattern
+
+**Critical**: When using forms inside modals, place UForm in the `#body` slot with a ref attribute, and trigger submission from the `#footer` button using that ref.
+
+#### Why This Pattern
+
+- SEPARATES form logic from modal structure clearly
+- ALLOWS submit buttons in footer to trigger form validation via ref
+- PROVIDES proper loading states during form submission
+- MAINTAINS clean separation between form fields and modal actions
+
+#### Correct Structure Rules
+
+- PLACE UForm ONLY inside `#body` slot of UModal (not wrapping footer)
+- ADD `ref` attribute to UForm component with unique name
+- DEFINE form ref using `useTemplateRef` composable in script setup
+- PLACE submit button in `#footer` slot of UModal (separate from UForm)
+- TRIGGER form submission with `@click="form?.submit()"` on submit button
+- HANDLE `@submit` event on UForm for actual form processing logic
+- USE `type="submit"` attribute on submit button for semantic HTML
+- DISABLE buttons using `isLoading` ref state during form submission
+- NEVER wrap `#footer` slot with UForm component
+
+#### Key Points
+
+- **UForm Location**: Only in `#body` slot of UModal, not wrapping footer
+- **Form Ref**: Use `const form = useTemplateRef('form')` to get form instance
+- **Ref Attribute**: Add `ref="form"` to UForm component
+- **Submit Button**: In `#footer` slot, calls `form?.submit()` to trigger validation
+- **Loading State**: Use `isLoading` ref and pass to `:loading` or `:disabled` props
+- **Close Modal**: Set `open.value = false` after successful submission
+- **Error Handling**: Handle errors within submit handler with try-catch
+- **FormSubmitEvent**: Type-safe event parameter with validated data in `event.data`
+- **Form Reset**: Reset state properties after successful submission if needed
+
+#### Reference Files
+
+- Vue form patterns: @.agents/vue-conventions.md
+- Validation patterns: @AGENTS.md (Zod Schema Patterns section)
+- i18n integration: @.agents/i18n-patterns.md
+
 ### UInput Patterns
 
 #### With Slots

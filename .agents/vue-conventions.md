@@ -444,6 +444,9 @@ const { data: userMembership } = await useFetch("/api/user/membership")
 - LEVERAGE Nuxt 4 auto-imports for Vue APIs (ref, computed, watch)
 - USE auto-imported composables without explicit imports
 - RELY on Nuxt component auto-discovery
+- DO NOT import from `shared/utils/` or `shared/types/` directories (auto-imported)
+- DO NOT import from `app/utils/` directory (auto-imported)
+- DO NOT import Zod schemas from `shared/utils/schemas/` (auto-imported)
 - CONFIGURE custom auto-imports in nuxt.config when needed
 - AVOID manual imports for commonly used Vue utilities
 - TRUST TypeScript to infer auto-imported function types

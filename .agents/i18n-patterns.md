@@ -44,6 +44,322 @@ Comprehensive guidelines for implementing internationalization in the Public Tal
 - USE consistent parameter names across related translation keys: `{count}`, `{date}`, `{author}`
 - ESCAPE user content when necessary to prevent XSS vulnerabilities
 
+## Translation Key Validation Rules
+
+**Critical**: Always verify that translation keys exist in both Polish (primary) and English (fallback) translation files before using them in components.
+
+### Why Key Validation Matters
+
+- PREVENTS runtime errors from missing translation keys
+- ENSURES consistent user experience across all locales
+- CATCHES typos and key mismatches during development
+- MAINTAINS translation file synchronization
+- AVOIDS displaying raw key strings to users
+
+### Validation Workflow
+
+#### Before Committing
+
+1. **Verify key exists in both locale files**:
+   - Check `i18n/locales/pl.json` for Polish translation
+   - Check `i18n/locales/en.json` for English fallback
+   - Ensure keys are identical in both files
+
+2. **Test key usage in component**:
+   - Run application in development mode
+   - Navigate to pages using the new keys
+   - Check browser console for missing translation warnings
+   - Verify Polish text displays correctly
+
+3. **Validate key structure**:
+   - Ensure hierarchical nesting is consistent
+   - Verify key follows project naming conventions
+   - Check for typos in key path
+
+#### Development Process
+
+```vue
+<script setup lang="ts">
+const { t } = useI18n()
+
+// ✅ Before using a key, verify it exists in translation files
+const title = computed(() => t("pages.meetings.create.title"))
+// Check: i18n/locales/pl.json has "pages.meetings.create.title"
+// Check: i18n/locales/en.json has "pages.meetings.create.title"
+</script>
+```
+
+### Type-Safe Key Patterns
+
+#### Using Constants for Keys
+
+Create constants file for frequently used keys to catch typos at compile time:
+
+```typescript
+// shared/constants/i18n-keys.ts
+export const I18N_KEYS = {
+	COMMON: {
+		SAVE: "common.save",
+		CANCEL: "common.cancel",
+		DELETE: "common.delete",
+		EDIT: "common.edit",
+	},
+	VALIDATION: {
+		REQUIRED: "validation.required",
+		EMAIL_INVALID: "validation.emailInvalid",
+		PHONE_INVALID: "validation.phoneInvalid",
+	},
+	MEETINGS: {
+		CREATE_TITLE: "pages.meetings.create.title",
+		LIST_TITLE: "pages.meetings.list.title",
+	},
+} as const
+
+// Usage in component
+import { I18N_KEYS } from "~/shared/constants/i18n-keys"
+
+const title = computed(() => t(I18N_KEYS.MEETINGS.CREATE_TITLE))
+```
+
+#### Using TypeScript Type Inference (Advanced)
+
+For projects with TypeScript strict mode, consider generating types from translation files:
+
+```typescript
+// types/i18n.d.ts (generated or manually maintained)
+type TranslationKeys =
+	| "common.save"
+	| "common.cancel"
+	| "validation.required"
+	| "pages.meetings.create.title"
+
+// Use in component with type checking
+const key: TranslationKeys = "common.save"
+const text = t(key) // Type-safe
+```
+
+### Validation in API Integration
+
+When using i18n keys in API validation errors:
+
+```typescript
+// server/api/meetings/index.post.ts
+import { createMeetingSchema } from "~/app/schemas/meeting"
+
+export default defineEventHandler(async (event) => {
+	// Schema uses i18n keys for error messages
+	const body = await validateBody(event, createMeetingSchema)
+
+	// Verify all validation keys exist in translation files:
+	// - validation.titleRequired
+	// - validation.dateRequired
+	// - validation.speakerRequired
+})
+```
+
+Translation file verification:
+
+```json
+// i18n/locales/pl.json
+{
+	"validation": {
+		"titleRequired": "Tytuł jest wymagany",
+		"dateRequired": "Data jest wymagana",
+		"speakerRequired": "Prelegent jest wymagany"
+	}
+}
+```
+
+### Anti-Patterns to Avoid
+
+#### Dynamic Key Generation
+
+```vue
+<script setup lang="ts">
+// ❌ Wrong: Dynamic key generation makes validation impossible
+const errorCode = "404"
+const errorMessage = t(`errors.${errorCode}`) // Can't verify key exists
+
+// ❌ Wrong: String concatenation for keys
+const prefix = "common"
+const action = "save"
+const text = t(`${prefix}.${action}`) // Breaks type safety
+
+// ✅ Correct: Use explicit keys with conditional logic
+const errorMessage = computed(() => {
+	switch (errorCode) {
+		case "404":
+			return t("errors.notFound") // Verifiable key
+		case "500":
+			return t("errors.serverError") // Verifiable key
+		default:
+			return t("errors.unknown") // Verifiable key
+	}
+})
+```
+
+#### Skipping Fallback Locale
+
+```json
+// ❌ Wrong: Key only in Polish, missing English fallback
+// i18n/locales/pl.json
+{
+  "meetings": {
+    "newKey": "Nowy klucz"
+  }
+}
+
+// i18n/locales/en.json
+{
+  "meetings": {
+    // Missing "newKey" - breaks fallback!
+  }
+}
+
+// ✅ Correct: Key exists in both locales
+// i18n/locales/pl.json
+{
+  "meetings": {
+    "newKey": "Nowy klucz"
+  }
+}
+
+// i18n/locales/en.json
+{
+  "meetings": {
+    "newKey": "New key"
+  }
+}
+```
+
+#### Using Keys Before Adding to Translation Files
+
+```vue
+<script setup lang="ts">
+// ❌ Wrong: Using key that doesn't exist yet
+const title = computed(() => t("pages.schedule.new.title"))
+// Key not added to i18n/locales/*.json files yet!
+
+// ✅ Correct Workflow:
+// 1. Add key to i18n/locales/pl.json: "pages.schedule.new.title": "Nowy harmonogram"
+// 2. Add key to i18n/locales/en.json: "pages.schedule.new.title": "New schedule"
+// 3. Use key in component: t("pages.schedule.new.title")
+</script>
+```
+
+### Missing Key Detection
+
+#### Development Mode Warnings
+
+Enable missing translation warnings in `nuxt.config.ts`:
+
+```typescript
+export default defineNuxtConfig({
+	i18n: {
+		detectBrowserLanguage: false,
+		strategy: "no_prefix",
+		defaultLocale: "pl",
+		lazy: true,
+		langDir: "locales",
+		locales: [
+			{ code: "pl", file: "pl.json" },
+			{ code: "en", file: "en.json" },
+		],
+		// Enable missing translation warnings
+		vueI18n: "./i18n.config.ts",
+	},
+})
+```
+
+```typescript
+// i18n.config.ts
+export default {
+	legacy: false,
+	locale: "pl",
+	fallbackLocale: "en",
+	// Log missing translations in development
+	missing: (locale: string, key: string) => {
+		if (process.env.NODE_ENV === "development") {
+			console.warn(`[i18n] Missing translation: ${key} (locale: ${locale})`)
+		}
+	},
+}
+```
+
+#### Browser Console Monitoring
+
+During development, monitor browser console for warnings:
+
+```
+[i18n] Missing translation: pages.meetings.new.title (locale: pl)
+```
+
+This indicates the key needs to be added to translation files.
+
+### Pre-Commit Checklist
+
+Before committing code with new i18n keys:
+
+- [ ] Added key to `i18n/locales/pl.json` (primary locale)
+- [ ] Added key to `i18n/locales/en.json` (fallback locale)
+- [ ] Verified key path matches exactly in both files
+- [ ] Tested component in browser to confirm translation displays
+- [ ] Checked browser console for missing translation warnings
+- [ ] Verified Polish characters render correctly (ą, ć, ę, ł, ń, ó, ś, ź, ż)
+- [ ] Confirmed no hardcoded Polish text remains in component
+
+### CI/CD Integration (Advanced)
+
+For larger projects, consider automated validation:
+
+```bash
+# package.json script
+"scripts": {
+  "i18n:validate": "node scripts/validate-i18n-keys.js"
+}
+```
+
+```javascript
+// scripts/validate-i18n-keys.js
+const fs = require("fs")
+const path = require("path")
+
+const pl = JSON.parse(fs.readFileSync("i18n/locales/pl.json", "utf-8"))
+const en = JSON.parse(fs.readFileSync("i18n/locales/en.json", "utf-8"))
+
+function getKeys(obj, prefix = "") {
+	return Object.keys(obj).flatMap((key) => {
+		const fullKey = prefix ? `${prefix}.${key}` : key
+		return typeof obj[key] === "object" ? getKeys(obj[key], fullKey) : [fullKey]
+	})
+}
+
+const plKeys = new Set(getKeys(pl))
+const enKeys = new Set(getKeys(en))
+
+const missingInEn = [...plKeys].filter((key) => !enKeys.has(key))
+const missingInPl = [...enKeys].filter((key) => !plKeys.has(key))
+
+if (missingInEn.length > 0) {
+	console.error("❌ Keys missing in en.json:", missingInEn)
+	process.exit(1)
+}
+
+if (missingInPl.length > 0) {
+	console.error("❌ Keys missing in pl.json:", missingInPl)
+	process.exit(1)
+}
+
+console.log("✅ All i18n keys are synchronized")
+```
+
+### Reference Files
+
+- Core i18n rules: @AGENTS.md (Internationalization section)
+- Component integration: @.agents/vue-conventions.md
+- Date formatting with i18n: @.agents/date-time-patterns.md
+- Validation schemas: @AGENTS.md (Zod Schema Patterns section)
+
 ## Date and Number Formatting Rules
 
 - FORMAT dates using `d(date, formatKey)` with registered datetime formats

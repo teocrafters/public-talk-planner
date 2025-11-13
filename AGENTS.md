@@ -95,7 +95,7 @@ Nuxt 4 Full-Stack Application for Cloudflare Deployment:
 
 - `camelCase`: Variables and function names (`myVariable`, `myFunction()`)
 - `PascalCase`: Classes, types, and interfaces (`MyClass`, `MyInterface`)
-- `ALL_CAPS`: Constants and enum values (`MAX_COUNT`, `Color.RED`)
+- `ALL_CAPS`: Constants and enum values (`MAX_COUNT`, `Color.RED`) - see Constants Pattern section
 - `kebab-case`: File and directory names
 - Generic types: Prefix with `T` (`TKey`, `TValue`, `TData`, `TError`)
 - In `camelCase` names, use `URL` (not `Url`), `API` (not `Api`), `ID` (not `Id`)
@@ -135,7 +135,9 @@ Directory Auto-Imports:
 - `app/composables/` - Vue composables are auto-imported everywhere
 - `app/utils/` - Client-side utilities are auto-imported everywhere
 - `server/utils/` - Server-side utilities are auto-imported in server context
-- `shared/` - Universal code imported explicitly (not auto-imported by default)
+- `shared/utils/` - Universal utilities are auto-imported in both server and client contexts
+- `shared/types/` - TypeScript types are auto-imported everywhere
+- `shared/utils/schemas/` - Zod schemas are auto-imported everywhere
 
 Built-in Auto-Imports:
 
@@ -143,26 +145,25 @@ Built-in Auto-Imports:
 - Nuxt utilities: `navigateTo`, `useRoute`, `useRouter`, `useFetch`, `useAsyncData`, etc.
 - Nuxt modules: APIs from installed Nuxt modules (e.g., `useI18n` from `@nuxtjs/i18n`)
 
-Configuration:
+Critical Rules:
 
-- CHECK `nuxt.config.ts` for custom auto-import directories
-- CONFIGURE additional directories using `imports.dirs` array in nuxt.config
-- DISABLE auto-imports for specific directories if needed
+- DO NOT import from `shared/utils/` or `shared/types/` directories (auto-imported)
+- DO NOT import from `app/utils/` directory (auto-imported)
+- PLACE all Zod schemas in `shared/utils/schemas/` directory
+- UPDATE `shared/utils/schemas/index.ts` barrel file when adding new schemas
+- RELY on auto-imports for all utilities, types, and schemas
 
-Example Custom Configuration:
+Schema Organization:
 
-```typescript
-export default defineNuxtConfig({
-  imports: {
-    dirs: ['stores'] // Auto-import from stores directory
-  }
-})
-```
+- PLACE all Zod validation schemas in `shared/utils/schemas/` directory
+- EXPORT all schemas from `shared/utils/schemas/index.ts` barrel file
+- USE schema factory pattern with i18n translation function parameter
+- EXPORT TypeScript types using `z.infer<ReturnType<typeof schemaFactory>>`
 
 Best Practices:
 
 - RELY on auto-imports for Vue APIs and Nuxt utilities (no manual imports needed)
-- USE explicit imports from `shared/` directory for universal code
+- NEVER import from auto-imported directories (schemas, shared utils, app utils)
 - AVOID creating custom utils when Nuxt or VueUse provides equivalent functionality
 - CHECK nuxt.config.ts before assuming a directory is auto-imported
 
@@ -186,19 +187,14 @@ Use Cases:
 
 - Constants: `export const AUDIT_EVENTS = { ... } as const`
 - Type definitions: `export type AuditEventType = ...`
-- Validation schemas: Zod schemas used by both client and server
+- Validation schemas: Zod schemas used by both client and server (in `shared/utils/schemas/`)
 - Pure utility functions: data transformations, formatters, calculators
 
-Import Pattern:
+Usage Pattern:
 
-```typescript
-// ✅ Explicit imports from shared directory
-import { AUDIT_EVENTS } from '~/shared/utils/audit-events'
-import type { AuditEventDetails } from '~/shared/types/audit-events'
-
-// Use in both server and client code
-const eventType = AUDIT_EVENTS.TALK_CREATED
-```
+- DO NOT import from `shared/utils/` or `shared/types/` (auto-imported by Nuxt)
+- SIMPLY use exported constants, types, and functions directly
+- ALL exports from shared/ are automatically available everywhere
 
 Why Use Shared Directory:
 
@@ -206,6 +202,18 @@ Why Use Shared Directory:
 - TYPE SAFETY: Single source of truth for TypeScript definitions
 - MAINTAINABILITY: Update once, apply everywhere
 - NO DUPLICATION: Avoid copying code between app/ and server/
+- AUTO-IMPORT: Nuxt automatically imports everything from shared/
+
+### Constants Pattern
+
+- DECLARE all constants with ALL_CAPS naming convention using underscores
+- USE `as const` assertion for type safety and literal type inference
+- PLACE frontend-only constants in `app/utils/` directory
+- PLACE shared constants (server + client) in `shared/utils/` directory
+- EXPORT companion types using `typeof` and `keyof` pattern for type derivation
+- PAIR constants with type definitions in `shared/types/` when creating discriminated unions
+- NEVER define constants directly in components - extract to appropriate utils directory
+- REFERENCE existing pattern: `shared/utils/audit-events.ts` with `AUDIT_EVENTS` constant
 
 ### TypeScript Patterns
 
@@ -231,7 +239,9 @@ Schema Definition:
 - Use descriptive table and column names
 - Always include `createdAt` and `updatedAt` timestamps
 - Use `mode: "timestamp"` for dates, `mode: "boolean"` for booleans
+- Store custom date fields as unix timestamps (integer, seconds) for consistency and timezone safety
 - Export inferred types: `export type TableName = typeof tableName.$inferSelect`
+- REFERENCE @.agents/date-time-patterns.md for unix timestamp patterns and dayjs utility usage
 
 Database Access:
 
@@ -269,68 +279,27 @@ API Routes:
 
 Schema Structure:
 
-- CREATE schemas in `app/schemas/` directory
+- CREATE schemas in `shared/utils/schemas/` directory
 - USE factory pattern accepting translation function `t: (key: string) => string`
 - EMBED i18n keys in error messages: `t("validation.fieldRequired")`
 - EXPORT TypeScript types using `z.infer<ReturnType<typeof schemaFactory>>`
 - DEFINE separate schemas for create/update operations (use `.partial()` for updates)
+- UPDATE `shared/utils/schemas/index.ts` barrel file to export all schemas
 
-Example Schema:
+Schema File Location:
 
-```typescript
-// app/schemas/resource.ts
-import { z } from "zod"
-
-export const createResourceSchema = (t: (key: string) => string) => {
-  return z.object({
-    name: z
-      .string()
-      .min(1, t("validation.nameRequired"))
-      .max(100, t("validation.nameTooLong"))
-      .transform((s) => s.trim()),
-
-    email: z.string().email(t("validation.emailInvalid")),
-
-    phone: z.string().regex(/^\d{9}$/, t("validation.phoneInvalid")),
-  })
-}
-
-export const updateResourceSchema = (t: (key: string) => string) => {
-  return createResourceSchema(t).partial()
-}
-
-export type ResourceInput = z.infer<ReturnType<typeof createResourceSchema>>
-export type ResourceUpdateInput = z.infer<ReturnType<typeof updateResourceSchema>>
-```
+- PLACE all Zod schemas in `shared/utils/schemas/` directory
+- EXPORT schema from `shared/utils/schemas/index.ts` for auto-import
+- DO NOT import schemas manually (auto-imported by Nuxt)
 
 #### API Validation Usage
 
 Endpoint Implementation Pattern:
 
-```typescript
-// server/api/resources/index.post.ts
-import { createResourceSchema } from "~/app/schemas/resource"
-import { validateBody } from "~/server/utils/validation"
-
-export default defineEventHandler(async (event) => {
-  await requirePermission({ resources: ["create"] })(event)
-
-  // Validate and parse request body - throws on error
-  const body = await validateBody(event, createResourceSchema)
-
-  // body is fully typed as ResourceInput
-  const db = useDrizzle()
-  const result = await db.insert(resources).values({
-    id: crypto.randomUUID(),
-    name: body.name, // Already trimmed by schema transform
-    email: body.email,
-    phone: body.phone,
-    createdAt: new Date(),
-  })
-
-  return { success: true, resource: result[0] }
-})
-```
+- VALIDATE request body using `validateBody(event, schemaFactory)` utility
+- SCHEMAS are auto-imported (no import statement needed)
+- USE schema directly by name (e.g., `createResourceSchema`)
+- BODY is fully typed after validation
 
 Validation Error Response Format:
 
@@ -381,6 +350,20 @@ Components:
 - Use props with TypeScript interfaces
 - Emit events with proper typing
 - Use `@nuxt/ui` components when available
+- When creating forms inside modals, place UForm in `#body` slot with a ref, and trigger submission from `#footer` button via `form?.submit()`
+- REFERENCE @.agents/nuxt-ui-4-integration.md for UModal with Forms pattern details
+
+Error Handling:
+
+- USE `isApiValidationError` type guard from `~/app/utils/error` for all API error validation
+- VALIDATE both runtime structure and TypeScript types with type guards
+- IMPORT `isApiValidationError` before handling API errors in try-catch blocks
+- CHECK error type with type guard before accessing error properties
+- DISPLAY error messages from `error.data.message` field after validation
+- INTEGRATE with i18n for translating error messages when messageKey provided
+- HANDLE generic errors with fallback messages when type guard fails
+- NEVER assume error structure without type guard validation
+- NEVER use loose type checking with `any` or optional chaining for API errors
 
 Pages and Layouts:
 
@@ -821,6 +804,9 @@ Validation Rules:
 - No Polish text should appear directly in Vue templates
 - Translation keys must be in English and descriptive
 - All new components must include i18n integration from start
+- VERIFY all translation keys exist in both `i18n/locales/pl.json` and `i18n/locales/en.json` before committing
+- CHECK browser console for missing translation warnings during development
+- REFERENCE @.agents/i18n-patterns.md for comprehensive key validation workflow and best practices
 
 ## Git Workflow
 
@@ -907,6 +893,7 @@ Example pattern: `// AGENT-NOTE: Performance-critical path; avoid extra allocati
 ## Frontend development
 
 - @.agents/nuxt-ui-4-integration.md
+- @.agents/date-time-patterns.md
 - @.agents/i18n-patterns.md
 - @.agents/official-tailwind.md
 - @.agents/official-vue-components.md
