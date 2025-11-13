@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@internationalized/date':
-        specifier: ^3.10.0
+        specifier: 3.10.0
         version: 3.10.0
       '@nuxt/eslint':
         specifier: 1.10.0
@@ -27,7 +27,7 @@ importers:
         specifier: 1.3.34
         version: 1.3.34(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(vue@3.5.24(typescript@5.9.3))
       dayjs:
-        specifier: ^1.11.19
+        specifier: 1.11.19
         version: 1.11.19
       drizzle-orm:
         specifier: 0.44.7
