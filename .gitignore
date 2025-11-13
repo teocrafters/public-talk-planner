@@ -30,9 +30,12 @@ logs
 /playwright-report/
 /playwright/.cache/
 /.auth/
+tests/test-plans/
+tests/test-plan-*
 
 .serena
 requirements/
+.playwright-mcp/
 
 *.jwpub
 
