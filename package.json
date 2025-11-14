@@ -48,7 +48,7 @@
     "@react-email/render": "1.4.0",
     "@types/node": "24.10.1",
     "adm-zip": "0.5.16",
-    "drizzle-kit": "0.31.6",
+    "drizzle-kit": "0.31.7",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.17",
     "tinyexec": "1.0.2",
