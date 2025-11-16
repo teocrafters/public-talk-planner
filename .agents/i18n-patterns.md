@@ -46,7 +46,8 @@ Comprehensive guidelines for implementing internationalization in the Public Tal
 
 ## Translation Key Validation Rules
 
-**Critical**: Always verify that translation keys exist in both Polish (primary) and English (fallback) translation files before using them in components.
+**Critical**: Always verify that translation keys exist in both Polish (primary) and English
+(fallback) translation files before using them in components.
 
 ### Why Key Validation Matters
 
@@ -80,12 +81,12 @@ Comprehensive guidelines for implementing internationalization in the Public Tal
 
 ```vue
 <script setup lang="ts">
-const { t } = useI18n()
+  const { t } = useI18n()
 
-// ✅ Before using a key, verify it exists in translation files
-const title = computed(() => t("pages.meetings.create.title"))
-// Check: i18n/locales/pl.json has "pages.meetings.create.title"
-// Check: i18n/locales/en.json has "pages.meetings.create.title"
+  // ✅ Before using a key, verify it exists in translation files
+  const title = computed(() => t("pages.meetings.create.title"))
+  // Check: i18n/locales/pl.json has "pages.meetings.create.title"
+  // Check: i18n/locales/en.json has "pages.meetings.create.title"
 </script>
 ```
 
@@ -98,21 +99,21 @@ Create constants file for frequently used keys to catch typos at compile time:
 ```typescript
 // shared/constants/i18n-keys.ts
 export const I18N_KEYS = {
-	COMMON: {
-		SAVE: "common.save",
-		CANCEL: "common.cancel",
-		DELETE: "common.delete",
-		EDIT: "common.edit",
-	},
-	VALIDATION: {
-		REQUIRED: "validation.required",
-		EMAIL_INVALID: "validation.emailInvalid",
-		PHONE_INVALID: "validation.phoneInvalid",
-	},
-	MEETINGS: {
-		CREATE_TITLE: "pages.meetings.create.title",
-		LIST_TITLE: "pages.meetings.list.title",
-	},
+  COMMON: {
+    SAVE: "common.save",
+    CANCEL: "common.cancel",
+    DELETE: "common.delete",
+    EDIT: "common.edit",
+  },
+  VALIDATION: {
+    REQUIRED: "validation.required",
+    EMAIL_INVALID: "validation.emailInvalid",
+    PHONE_INVALID: "validation.phoneInvalid",
+  },
+  MEETINGS: {
+    CREATE_TITLE: "pages.meetings.create.title",
+    LIST_TITLE: "pages.meetings.list.title",
+  },
 } as const
 
 // Usage in component
@@ -128,10 +129,10 @@ For projects with TypeScript strict mode, consider generating types from transla
 ```typescript
 // types/i18n.d.ts (generated or manually maintained)
 type TranslationKeys =
-	| "common.save"
-	| "common.cancel"
-	| "validation.required"
-	| "pages.meetings.create.title"
+  | "common.save"
+  | "common.cancel"
+  | "validation.required"
+  | "pages.meetings.create.title"
 
 // Use in component with type checking
 const key: TranslationKeys = "common.save"
@@ -146,14 +147,14 @@ When using i18n keys in API validation errors:
 // server/api/meetings/index.post.ts
 import { createMeetingSchema } from "~/app/schemas/meeting"
 
-export default defineEventHandler(async (event) => {
-	// Schema uses i18n keys for error messages
-	const body = await validateBody(event, createMeetingSchema)
+export default defineEventHandler(async event => {
+  // Schema uses i18n keys for error messages
+  const body = await validateBody(event, createMeetingSchema)
 
-	// Verify all validation keys exist in translation files:
-	// - validation.titleRequired
-	// - validation.dateRequired
-	// - validation.speakerRequired
+  // Verify all validation keys exist in translation files:
+  // - validation.titleRequired
+  // - validation.dateRequired
+  // - validation.speakerRequired
 })
 ```
 
@@ -162,11 +163,11 @@ Translation file verification:
 ```json
 // i18n/locales/pl.json
 {
-	"validation": {
-		"titleRequired": "Tytuł jest wymagany",
-		"dateRequired": "Data jest wymagana",
-		"speakerRequired": "Prelegent jest wymagany"
-	}
+  "validation": {
+    "titleRequired": "Tytuł jest wymagany",
+    "dateRequired": "Data jest wymagana",
+    "speakerRequired": "Prelegent jest wymagany"
+  }
 }
 ```
 
@@ -236,14 +237,14 @@ const errorMessage = computed(() => {
 
 ```vue
 <script setup lang="ts">
-// ❌ Wrong: Using key that doesn't exist yet
-const title = computed(() => t("pages.schedule.new.title"))
-// Key not added to i18n/locales/*.json files yet!
+  // ❌ Wrong: Using key that doesn't exist yet
+  const title = computed(() => t("pages.schedule.new.title"))
+  // Key not added to i18n/locales/*.json files yet!
 
-// ✅ Correct Workflow:
-// 1. Add key to i18n/locales/pl.json: "pages.schedule.new.title": "Nowy harmonogram"
-// 2. Add key to i18n/locales/en.json: "pages.schedule.new.title": "New schedule"
-// 3. Use key in component: t("pages.schedule.new.title")
+  // ✅ Correct Workflow:
+  // 1. Add key to i18n/locales/pl.json: "pages.schedule.new.title": "Nowy harmonogram"
+  // 2. Add key to i18n/locales/en.json: "pages.schedule.new.title": "New schedule"
+  // 3. Use key in component: t("pages.schedule.new.title")
 </script>
 ```
 
@@ -255,34 +256,34 @@ Enable missing translation warnings in `nuxt.config.ts`:
 
 ```typescript
 export default defineNuxtConfig({
-	i18n: {
-		detectBrowserLanguage: false,
-		strategy: "no_prefix",
-		defaultLocale: "pl",
-		lazy: true,
-		langDir: "locales",
-		locales: [
-			{ code: "pl", file: "pl.json" },
-			{ code: "en", file: "en.json" },
-		],
-		// Enable missing translation warnings
-		vueI18n: "./i18n.config.ts",
-	},
+  i18n: {
+    detectBrowserLanguage: false,
+    strategy: "no_prefix",
+    defaultLocale: "pl",
+    lazy: true,
+    langDir: "locales",
+    locales: [
+      { code: "pl", file: "pl.json" },
+      { code: "en", file: "en.json" },
+    ],
+    // Enable missing translation warnings
+    vueI18n: "./i18n.config.ts",
+  },
 })
 ```
 
 ```typescript
 // i18n.config.ts
 export default {
-	legacy: false,
-	locale: "pl",
-	fallbackLocale: "en",
-	// Log missing translations in development
-	missing: (locale: string, key: string) => {
-		if (process.env.NODE_ENV === "development") {
-			console.warn(`[i18n] Missing translation: ${key} (locale: ${locale})`)
-		}
-	},
+  legacy: false,
+  locale: "pl",
+  fallbackLocale: "en",
+  // Log missing translations in development
+  missing: (locale: string, key: string) => {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(`[i18n] Missing translation: ${key} (locale: ${locale})`)
+    }
+  },
 }
 ```
 
@@ -328,26 +329,26 @@ const pl = JSON.parse(fs.readFileSync("i18n/locales/pl.json", "utf-8"))
 const en = JSON.parse(fs.readFileSync("i18n/locales/en.json", "utf-8"))
 
 function getKeys(obj, prefix = "") {
-	return Object.keys(obj).flatMap((key) => {
-		const fullKey = prefix ? `${prefix}.${key}` : key
-		return typeof obj[key] === "object" ? getKeys(obj[key], fullKey) : [fullKey]
-	})
+  return Object.keys(obj).flatMap(key => {
+    const fullKey = prefix ? `${prefix}.${key}` : key
+    return typeof obj[key] === "object" ? getKeys(obj[key], fullKey) : [fullKey]
+  })
 }
 
 const plKeys = new Set(getKeys(pl))
 const enKeys = new Set(getKeys(en))
 
-const missingInEn = [...plKeys].filter((key) => !enKeys.has(key))
-const missingInPl = [...enKeys].filter((key) => !plKeys.has(key))
+const missingInEn = [...plKeys].filter(key => !enKeys.has(key))
+const missingInPl = [...enKeys].filter(key => !plKeys.has(key))
 
 if (missingInEn.length > 0) {
-	console.error("❌ Keys missing in en.json:", missingInEn)
-	process.exit(1)
+  console.error("❌ Keys missing in en.json:", missingInEn)
+  process.exit(1)
 }
 
 if (missingInPl.length > 0) {
-	console.error("❌ Keys missing in pl.json:", missingInPl)
-	process.exit(1)
+  console.error("❌ Keys missing in pl.json:", missingInPl)
+  process.exit(1)
 }
 
 console.log("✅ All i18n keys are synchronized")

@@ -20,10 +20,7 @@
     },
     "playwright-test": {
       "command": "npx",
-      "args": [
-        "playwright",
-        "run-test-mcp-server"
-      ]
+      "args": ["playwright", "run-test-mcp-server"]
     },
     "cloudflare-docs": {
       "type": "sse",
@@ -38,6 +35,11 @@
       "command": "npx",
       "args": ["chrome-devtools-mcp@latest"],
       "env": {}
+    },
+    "MCP SQLite Server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-sqlite", ".data/hub/d1/miniflare-D1DatabaseObject/7b8799eb95f0bb5448e259812996a461ce40142dacbdea254ea597e307767f45.sqlite"]
     }
   }
 }

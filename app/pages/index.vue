@@ -48,13 +48,7 @@
   const authFormRef = ref()
 
   // SEO meta with i18n
-  useSeoMeta({
-    title: t("meta.signIn.title"),
-    description: t("meta.signIn.description"),
-    ogTitle: t("meta.signIn.title"),
-    ogDescription: t("meta.signIn.description"),
-    robots: "noindex, nofollow", // Don't index auth pages
-  })
+  useSeoPage("auth.signIn")
 
   const handleSignIn = async (credentials: { email: string; password: string }) => {
     if (!authFormRef.value) return

@@ -4,11 +4,11 @@
  * @returns formatted phone string
  */
 export function formatPhoneNumber(digits: string): string {
-	if (!digits || digits.length !== 9) {
-		throw new Error("Phone number must be exactly 9 digits")
-	}
+  if (!digits || digits.length !== 9) {
+    throw new Error("Phone number must be exactly 9 digits")
+  }
 
-	return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 9)}`
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 9)}`
 }
 
 /**
@@ -17,5 +17,5 @@ export function formatPhoneNumber(digits: string): string {
  * @returns 9 digits only
  */
 export function unformatPhoneNumber(formatted: string): string {
-	return formatted.replace(/\D/g, "")
+  return formatted.replace(/\D/g, "")
 }

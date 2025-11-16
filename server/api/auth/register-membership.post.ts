@@ -1,10 +1,13 @@
 import { generateId } from "better-auth"
 import { z } from "zod"
 import { member } from "../../database/auth-schema"
+import { publishers } from "../../database/schema"
 
 const membershipRequestSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   congregationId: z.string().min(1, "Congregation ID is required"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
 })
 
 export default defineEventHandler(async (event): Promise<MembershipResponse> => {
@@ -19,7 +22,7 @@ export default defineEventHandler(async (event): Promise<MembershipResponse> => 
     })
   }
 
-  const { userId, congregationId } = validation.data
+  const { userId, congregationId, firstName, lastName } = validation.data
 
   try {
     const db = useDrizzle()
@@ -33,9 +36,28 @@ export default defineEventHandler(async (event): Promise<MembershipResponse> => 
       createdAt: new Date(),
     })
 
+    // Create publisher profile for the user
+    await db.insert(publishers).values({
+      id: crypto.randomUUID(),
+      userId: userId,
+      firstName: firstName,
+      lastName: lastName,
+      isElder: false,
+      isMinisterialServant: false,
+      isRegularPioneer: false,
+      canChairWeekendMeeting: false,
+      conductsWatchtowerStudy: false,
+      backupWatchtowerConductor: false,
+      isReader: false,
+      offersPublicPrayer: false,
+      isCircuitOverseer: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+
     return {
       success: true,
-      message: "Membership created successfully",
+      message: "Membership and publisher profile created successfully",
     } satisfies MembershipResponse
   } catch (error) {
     console.error("Membership creation error:", error)

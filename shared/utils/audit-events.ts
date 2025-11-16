@@ -11,6 +11,12 @@ export const AUDIT_EVENTS = {
   SCHEDULE_UPDATED: "schedule_updated",
   SCHEDULE_DELETED: "schedule_deleted",
   SCHEDULE_VALIDATION_OVERRIDDEN: "schedule_validation_overridden",
+  PUBLISHER_CREATED: "publisher_created",
+  PUBLISHER_UPDATED: "publisher_updated",
+  PUBLISHER_USER_LINKED: "publisher_user_linked",
+  PUBLISHER_USER_UNLINKED: "publisher_user_unlinked",
+  WEEKEND_MEETING_PLANNED: "weekend_meeting_planned",
+  WEEKEND_MEETING_UPDATED: "weekend_meeting_updated",
   PERMISSION_DENIED: "permission_denied",
   UNAUTHORIZED_ACCESS: "unauthorized_access",
 } as const

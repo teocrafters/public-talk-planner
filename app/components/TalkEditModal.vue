@@ -64,7 +64,9 @@
     }
   })
 
-  const schema = computed(() => (props.mode === "add" ? createTalkSchema(t) : createTalkEditSchema(t)))
+  const schema = computed(() =>
+    props.mode === "add" ? createTalkSchema(t) : createTalkEditSchema(t)
+  )
 
   const modalTitle = computed(() =>
     props.mode === "add" ? t("publicTalks.modal.addTitle") : t("publicTalks.modal.editTitle")

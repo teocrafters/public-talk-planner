@@ -56,5 +56,5 @@ test.describe("Authentication", () => {
       // log in again, get new token and save it
       await authenticateAs.admin()
     })
-	})
+  })
 })

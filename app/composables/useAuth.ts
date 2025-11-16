@@ -3,7 +3,13 @@ import { createAuthClient } from "better-auth/client"
 import type { InferSessionFromClient, InferUserFromClient, ClientOptions } from "better-auth/client"
 import type { RouteLocationRaw } from "vue-router"
 import { passkeyClient, organizationClient } from "better-auth/client/plugins"
-import { ac, publisher, manager, admin } from "#shared/utils/permissions/declare"
+import {
+  ac,
+  publisher,
+  public_talk_coordinator,
+  boe_coordinator,
+  admin,
+} from "#shared/utils/permissions/declare"
 
 interface RuntimeAuthConfig {
   redirectUserTo: RouteLocationRaw | string
@@ -12,7 +18,7 @@ interface RuntimeAuthConfig {
 
 export function useAuth() {
   const url = useRequestURL()
-  const headers = import.meta.server ? useRequestHeaders() : undefined
+  const headers = import.meta.server ? { ...useRequestHeaders(), "Origin": url.origin } : undefined
 
   const client = createAuthClient({
     baseURL: url.origin,
@@ -25,10 +31,11 @@ export function useAuth() {
         ac,
         roles: {
           publisher,
-          manager,
+          public_talk_coordinator,
+          boe_coordinator,
           admin,
-        }
-      })
+        },
+      }),
     ],
   })
 

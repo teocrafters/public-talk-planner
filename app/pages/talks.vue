@@ -55,61 +55,61 @@
       v-else-if="filteredTalks.length > 0"
       class="space-y-3">
       <ClientOnly>
-      <UCard
-        v-for="talk in filteredTalks"
-        :key="talk.id"
-        data-testid="talk-card"
-        class="hover:shadow-md transition-shadow">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-2">
-              <span class="text-sm font-medium text-muted shrink-0">
-                {{ talk.no }}
-              </span>
-              <TalkStatusBadge :status="talk.status" />
-            </div>
-            <h3 class="text-lg font-medium text-default break-words">
-              {{ talk.title }}
-            </h3>
-          </div>
-
-          <div class="flex items-center gap-2 shrink-0">
-            <div class="flex gap-2">
-              <UBadge
-                v-if="talk.multimediaCount > 0"
-                color="info"
-                variant="subtle"
-                class="hidden sm:flex">
-                <UIcon
-                  name="i-heroicons-photo"
-                  class="w-4 h-4" />
-                {{ talk.multimediaCount }}
-              </UBadge>
-
-              <UBadge
-                v-if="talk.videoCount > 0"
-                color="secondary"
-                variant="subtle"
-                class="hidden sm:flex">
-                <UIcon
-                  name="i-heroicons-video-camera"
-                  class="w-4 h-4" />
-                {{ talk.videoCount }}
-              </UBadge>
+        <UCard
+          v-for="talk in filteredTalks"
+          :key="talk.id"
+          data-testid="talk-card"
+          class="hover:shadow-md transition-shadow">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-2">
+                <span class="text-sm font-medium text-muted shrink-0">
+                  {{ talk.no }}
+                </span>
+                <TalkStatusBadge :status="talk.status" />
+              </div>
+              <h3 class="text-lg font-medium text-default break-words">
+                {{ talk.title }}
+              </h3>
             </div>
 
-            <TalkActionsMenu
-              v-if="canFlagTalks || canUpdateTalks"
-              :key="talk.id"
-              :talk="talk"
-              :can-flag="canFlagTalks"
-              :can-update="canUpdateTalks"
-              @status-changed="handleStatusChanged"
-              @edit-requested="() => handleEditRequested(talk)"
-              @confirm-requested="handleConfirmRequested" />
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="flex gap-2">
+                <UBadge
+                  v-if="talk.multimediaCount > 0"
+                  color="info"
+                  variant="subtle"
+                  class="hidden sm:flex">
+                  <UIcon
+                    name="i-heroicons-photo"
+                    class="w-4 h-4" />
+                  {{ talk.multimediaCount }}
+                </UBadge>
+
+                <UBadge
+                  v-if="talk.videoCount > 0"
+                  color="secondary"
+                  variant="subtle"
+                  class="hidden sm:flex">
+                  <UIcon
+                    name="i-heroicons-video-camera"
+                    class="w-4 h-4" />
+                  {{ talk.videoCount }}
+                </UBadge>
+              </div>
+
+              <TalkActionsMenu
+                v-if="canFlagTalks || canUpdateTalks"
+                :key="talk.id"
+                :talk="talk"
+                :can-flag="canFlagTalks"
+                :can-update="canUpdateTalks"
+                @status-changed="handleStatusChanged"
+                @edit-requested="() => handleEditRequested(talk)"
+                @confirm-requested="handleConfirmRequested" />
+            </div>
           </div>
-        </div>
-      </UCard>
+        </UCard>
       </ClientOnly>
     </div>
 
@@ -290,11 +290,5 @@
 
   await fetchPermissions()
 
-  useSeoMeta({
-    title: t("meta.publicTalks.title"),
-    description: t("meta.publicTalks.description"),
-    ogTitle: t("meta.publicTalks.title"),
-    ogDescription: t("meta.publicTalks.description"),
-    robots: "noindex, nofollow",
-  })
+  useSeoPage("talks.list")
 </script>

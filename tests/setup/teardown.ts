@@ -1,7 +1,7 @@
-import { test as setup } from '@playwright/test';
+import { test as setup } from "@playwright/test"
 import { x } from "tinyexec"
 import { readFile, rm } from "node:fs/promises"
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs"
 
 setup.setTimeout(120000)
 
@@ -20,20 +20,20 @@ setup("Stop server", async () => {
     console.log("PID file removed")
   }
 
-	await x("pnpm", ["stop"])
+  await x("pnpm", ["stop"])
 
-	// Kill any lingering Nuxt/Workerd processes if they are still running
-	try {
-		await x("pkill", ["-f", "nuxt"])
-		console.log("Killed lingering nuxt processes")
-	} catch (error) {
-		console.log("pkill nuxt failed", error)
-	}
+  // Kill any lingering Nuxt/Workerd processes if they are still running
+  try {
+    await x("pkill", ["-f", "nuxt"])
+    console.log("Killed lingering nuxt processes")
+  } catch (error) {
+    console.log("pkill nuxt failed", error)
+  }
 
-	try {
-		await x("pkill", ["-f", "workerd"])
-		console.log("Killed lingering workerd processes")
-	} catch (error) {
-		console.log("pkill workerd failed", error)
-	}
+  try {
+    await x("pkill", ["-f", "workerd"])
+    console.log("Killed lingering workerd processes")
+  } catch (error) {
+    console.log("pkill workerd failed", error)
+  }
 })

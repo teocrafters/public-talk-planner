@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { DropdownMenuItem } from '@nuxt/ui'
+  import type { DropdownMenuItem } from "@nuxt/ui"
 
   interface PublicTalk {
     id: number
@@ -22,7 +22,9 @@
   const emit = defineEmits<{
     "status-changed": [talk: PublicTalk]
     "edit-requested": [talk: PublicTalk]
-    "confirm-requested": [config: { title: string; message: string; action: string; talkId: number }]
+    "confirm-requested": [
+      config: { title: string; message: string; action: string; talkId: number },
+    ]
   }>()
 
   const { t } = useI18n()

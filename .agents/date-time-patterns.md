@@ -1,6 +1,7 @@
 # Date and Time Patterns
 
-Comprehensive guidelines for date and time operations in the Public Talk Planner project using dayjs utility.
+Comprehensive guidelines for date and time operations in the Public Talk Planner project using dayjs
+utility.
 
 ## Core Principles
 
@@ -85,13 +86,13 @@ import { dateToUnixTimestamp, dayjs } from "~/app/utils/date"
 
 // ✅ Send unix timestamp to API
 const formData = {
-	title: "Meeting",
-	scheduledDate: dateToUnixTimestamp(selectedDate), // seconds
+  title: "Meeting",
+  scheduledDate: dateToUnixTimestamp(selectedDate), // seconds
 }
 
 await $fetch("/api/meetings", {
-	method: "POST",
-	body: formData,
+  method: "POST",
+  body: formData,
 })
 ```
 
@@ -105,8 +106,8 @@ const { data: meetings } = await useFetch<Meeting[]>("/api/meetings")
 
 // Use in template with formatDatePL
 const displayDate = computed(() => {
-	if (!meetings.value?.[0]) return ""
-	return formatDatePL(meetings.value[0].scheduledDate) // Handles unix timestamp
+  if (!meetings.value?.[0]) return ""
+  return formatDatePL(meetings.value[0].scheduledDate) // Handles unix timestamp
 })
 ```
 
@@ -191,26 +192,26 @@ const nowISO = dayjs().toISOString()
 
 ```vue
 <script setup lang="ts">
-import { calendarDateToISO, dayjs } from "~/app/utils/date"
+  import { calendarDateToISO, dayjs } from "~/app/utils/date"
 
-const selectedDate = ref<{ year: number; month: number; day: number } | null>(null)
+  const selectedDate = ref<{ year: number; month: number; day: number } | null>(null)
 
-async function handleSubmit() {
-	if (!selectedDate.value) return
+  async function handleSubmit() {
+    if (!selectedDate.value) return
 
-	// Convert to ISO for storage
-	const isoDate = calendarDateToISO(selectedDate.value)
+    // Convert to ISO for storage
+    const isoDate = calendarDateToISO(selectedDate.value)
 
-	// Or convert to unix timestamp for API
-	const timestamp = dayjs(isoDate).unix()
+    // Or convert to unix timestamp for API
+    const timestamp = dayjs(isoDate).unix()
 
-	await $fetch("/api/meetings", {
-		method: "POST",
-		body: {
-			scheduledDate: timestamp, // Send as unix timestamp
-		},
-	})
-}
+    await $fetch("/api/meetings", {
+      method: "POST",
+      body: {
+        scheduledDate: timestamp, // Send as unix timestamp
+      },
+    })
+  }
 </script>
 ```
 
@@ -218,24 +219,26 @@ async function handleSubmit() {
 
 ```vue
 <script setup lang="ts">
-import { formatDatePL, unixTimestampToDate } from "~/app/utils/date"
-import type { Meeting } from "~/server/database/schema"
+  import { formatDatePL, unixTimestampToDate } from "~/app/utils/date"
+  import type { Meeting } from "~/server/database/schema"
 
-const { data: meetings } = await useFetch<Meeting[]>("/api/meetings")
+  const { data: meetings } = await useFetch<Meeting[]>("/api/meetings")
 
-// Format unix timestamp for display
-const displayDates = computed(() => {
-	return meetings.value?.map((meeting) => ({
-		...meeting,
-		formattedDate: formatDatePL(meeting.scheduledDate), // Handles unix timestamp
-	}))
-})
+  // Format unix timestamp for display
+  const displayDates = computed(() => {
+    return meetings.value?.map(meeting => ({
+      ...meeting,
+      formattedDate: formatDatePL(meeting.scheduledDate), // Handles unix timestamp
+    }))
+  })
 </script>
 
 <template>
-	<div v-for="meeting in displayDates" :key="meeting.id">
-		{{ meeting.formattedDate }}
-	</div>
+  <div
+    v-for="meeting in displayDates"
+    :key="meeting.id">
+    {{ meeting.formattedDate }}
+  </div>
 </template>
 ```
 
@@ -243,25 +246,25 @@ const displayDates = computed(() => {
 
 ```vue
 <script setup lang="ts">
-import { dayjs, dateToUnixTimestamp } from "~/app/utils/date"
+  import { dayjs, dateToUnixTimestamp } from "~/app/utils/date"
 
-const startDate = ref<Date>(new Date())
-const endDate = ref<Date>(new Date())
+  const startDate = ref<Date>(new Date())
+  const endDate = ref<Date>(new Date())
 
-// Calculate range
-const daysBetween = computed(() => {
-	return dayjs(endDate.value).diff(dayjs(startDate.value), "day")
-})
+  // Calculate range
+  const daysBetween = computed(() => {
+    return dayjs(endDate.value).diff(dayjs(startDate.value), "day")
+  })
 
-// Send range as unix timestamps
-async function fetchInRange() {
-	const { data } = await useFetch("/api/meetings/range", {
-		query: {
-			start: dateToUnixTimestamp(startDate.value),
-			end: dateToUnixTimestamp(endDate.value),
-		},
-	})
-}
+  // Send range as unix timestamps
+  async function fetchInRange() {
+    const { data } = await useFetch("/api/meetings/range", {
+      query: {
+        start: dateToUnixTimestamp(startDate.value),
+        end: dateToUnixTimestamp(endDate.value),
+      },
+    })
+  }
 </script>
 ```
 
@@ -274,12 +277,12 @@ async function fetchInRange() {
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core"
 
 export const meetings = sqliteTable("meetings", {
-	id: text("id").primaryKey(),
-	title: text("title").notNull(),
-	// Store as unix timestamp (integer, seconds)
-	scheduledDate: integer("scheduled_date", { mode: "number" }).notNull(),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  // Store as unix timestamp (integer, seconds)
+  scheduledDate: integer("scheduled_date", { mode: "number" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
 // Use in queries
@@ -287,11 +290,11 @@ import { dayjs } from "~/app/utils/date"
 
 const now = dayjs().unix()
 await db.insert(meetings).values({
-	id: crypto.randomUUID(),
-	title: "Meeting",
-	scheduledDate: now,
-	createdAt: new Date(),
-	updatedAt: new Date(),
+  id: crypto.randomUUID(),
+  title: "Meeting",
+  scheduledDate: now,
+  createdAt: new Date(),
+  updatedAt: new Date(),
 })
 ```
 
@@ -305,9 +308,11 @@ const startTimestamp = dayjs("2025-01-01").unix()
 const endTimestamp = dayjs("2025-01-31").unix()
 
 const results = await db
-	.select()
-	.from(meetings)
-	.where(and(gte(meetings.scheduledDate, startTimestamp), lte(meetings.scheduledDate, endTimestamp)))
+  .select()
+  .from(meetings)
+  .where(
+    and(gte(meetings.scheduledDate, startTimestamp), lte(meetings.scheduledDate, endTimestamp))
+  )
 ```
 
 ## Extending the Utility
@@ -336,7 +341,7 @@ export { dayjs }
 
 // Add helper function if needed
 export function getWeekNumber(date: Date | string): number {
-	return dayjs(date).week()
+  return dayjs(date).week()
 }
 ```
 
@@ -367,7 +372,7 @@ const tomorrow = dayjs().add(1, "day")
 // ❌ Wrong: Using milliseconds instead of seconds
 const timestamp = Date.now() // Returns milliseconds
 await $fetch("/api/meetings", {
-	body: { scheduledDate: timestamp }, // Wrong unit!
+  body: { scheduledDate: timestamp }, // Wrong unit!
 })
 
 // ❌ Wrong: Mixing timestamp units
@@ -379,7 +384,7 @@ const unixTimestamp = dayjs().unix() // Returns seconds
 import { dateToUnixTimestamp } from "~/app/utils/date"
 const timestamp = dateToUnixTimestamp(new Date())
 await $fetch("/api/meetings", {
-	body: { scheduledDate: timestamp }, // Seconds
+  body: { scheduledDate: timestamp }, // Seconds
 })
 ```
 
@@ -426,12 +431,12 @@ import { isSameDay, dayjs } from "~/app/utils/date"
 import { expect, test } from "vitest"
 
 test("isSameDay compares dates correctly", () => {
-	const date1 = new Date("2025-01-15T08:00:00Z")
-	const date2 = new Date("2025-01-15T20:00:00Z")
-	const date3 = new Date("2025-01-16T08:00:00Z")
+  const date1 = new Date("2025-01-15T08:00:00Z")
+  const date2 = new Date("2025-01-15T20:00:00Z")
+  const date3 = new Date("2025-01-16T08:00:00Z")
 
-	expect(isSameDay(date1, date2)).toBe(true)
-	expect(isSameDay(date1, date3)).toBe(false)
+  expect(isSameDay(date1, date2)).toBe(true)
+  expect(isSameDay(date1, date3)).toBe(false)
 })
 ```
 
@@ -439,6 +444,3 @@ test("isSameDay compares dates correctly", () => {
 
 - Date utility implementation: `app/utils/date.ts`
 - Database schema with timestamps: `server/database/schema.ts`
-- i18n date formatting: `@.agents/i18n-patterns.md`
-- Drizzle ORM patterns: `@AGENTS.md` (Database section)
-- API validation: `@AGENTS.md` (Server-Side Patterns)

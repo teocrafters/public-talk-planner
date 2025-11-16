@@ -20,5 +20,5 @@ export type ActionsFor<R extends Resource> = Statement[R][number]
 // Uses Partial so each resource is optional
 // Automatically updates when new resources are added to statement
 export type PermissionsMap = Partial<{
-	[K in Resource]: ActionsFor<K>[]
+  [K in Resource]: ActionsFor<K>[]
 }>

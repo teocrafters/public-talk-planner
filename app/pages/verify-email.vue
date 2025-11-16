@@ -48,11 +48,7 @@
   const resending = ref(false)
 
   // SEO meta
-  useSeoMeta({
-    title: t("meta.emailVerification.title"),
-    description: t("meta.emailVerification.description"),
-    robots: "noindex, nofollow",
-  })
+  useSeoPage("auth.verifyEmail")
 
   const resendEmail = async () => {
     try {

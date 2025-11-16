@@ -8,23 +8,23 @@ export const test = base.extend({
    *
    * This prevents race conditions where tests interact with non-hydrated views.
    */
-	page: async ({ page }, use) => {
-		// Store original goto function
-		const originalGoto = page.goto.bind(page)
+  page: async ({ page }, use) => {
+    // Store original goto function
+    const originalGoto = page.goto.bind(page)
 
-		// Override goto to add hydration waiting
-		page.goto = async (url, options) => {
-			// Call original goto
-			const response = await originalGoto(url, options)
+    // Override goto to add hydration waiting
+    page.goto = async (url, options) => {
+      // Call original goto
+      const response = await originalGoto(url, options)
 
-			// Wait for Nuxt hydration to complete
-			await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false)
+      // Wait for Nuxt hydration to complete
+      await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false)
 
-			return response
-		}
+      return response
+    }
 
-		// Provide the enhanced page to tests
-		await use(page)
+    // Provide the enhanced page to tests
+    await use(page)
   },
 
   /**
@@ -40,16 +40,16 @@ export const test = base.extend({
         await authenticateAs(page, "publisher")
         await page.context().storageState({ path: ".auth/publisher.json" })
       },
-      talksManager: async () => {
-        await authenticateAs(page, "manager")
-        await page.context().storageState({ path: ".auth/talks-manager.json" })
+      publicTalkCoordinator: async () => {
+        await authenticateAs(page, "public_talk_coordinator")
+        await page.context().storageState({ path: ".auth/public-talk-coordinator.json" })
       },
-      speakersManager: async () => {
-        await authenticateAs(page, "manager")
-        await page.context().storageState({ path: ".auth/speakers-manager.json" })
-      }
+      boeCoordinator: async () => {
+        await authenticateAs(page, "boe_coordinator")
+        await page.context().storageState({ path: ".auth/boe-coordinator.json" })
+      },
     })
-	},
+  },
 })
 
 export { expect } from "@playwright/test"

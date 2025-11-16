@@ -3,7 +3,12 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { admin, organization } from "better-auth/plugins"
 import { passkey } from "better-auth/plugins/passkey"
 import { sendVerificationEmail } from "./email"
-import { ac, publisher, manager } from "~~/shared/utils/permissions/declare"
+import {
+  ac,
+  publisher,
+  public_talk_coordinator,
+  boe_coordinator,
+} from "~~/shared/utils/permissions/declare"
 import { member as memberTable } from "../database/auth-schema"
 
 let _auth: ReturnType<typeof getBetterAuth>
@@ -39,7 +44,8 @@ function getBetterAuth() {
         ac,
         roles: {
           publisher,
-          manager,
+          public_talk_coordinator,
+          boe_coordinator,
         },
       }),
       passkey(),

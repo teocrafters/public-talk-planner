@@ -6,25 +6,22 @@
     "password": "Password",
     "submit": "Submit",
     "cancel": "Cancel",
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success"
+    "comingSoon": "Coming Soon",
+    "sending": "Sending...",
+    "or": "or"
   },
   "auth": {
     "signIn": "Sign in",
     "signOut": "Sign out",
     "signingIn": "Signing in...",
-    "signInToAccount": "Sign in to your account",
     "signInToContinue": "Please sign in to continue",
     "forgotPassword": "Forgot your password?",
     "authenticationError": "Authentication Error",
     "invalidCredentials": "Invalid email or password",
     "emailAddress": "Email address",
-    "enterEmail": "Enter your email",
-    "enterPassword": "Enter your password",
-    "emailRequired": "Email address is required",
-    "passwordRequired": "Password is required",
-    "invalidEmail": "Invalid email format"
+    "emailVerification": "Email Verification",
+    "resendEmail": "Resend Email",
+    "backToLogin": "Back to Login"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -71,6 +68,33 @@
       "speakerArchived": "Speaker archived",
       "speakerRestored": "Speaker restored",
       "archiveError": "Error archiving speaker"
+    }
+  },
+  "publishers": {
+    "title": "Publishers",
+    "totalPublishers": "{count} publishers",
+    "searchPlaceholder": "Search by name...",
+    "noResults": "No publishers found",
+    "linkedToUser": "Linked to user",
+    "actions": {
+      "add": "Add Publisher",
+      "edit": "Edit Publisher",
+      "linkUser": "Link User",
+      "unlinkUser": "Unlink User"
+    },
+    "capabilities": {
+      "elder": "Elder",
+      "ministerialServant": "Ministerial Servant",
+      "canChairWeekendMeeting": "Can chair weekend meeting",
+      "conductsWatchtowerStudy": "Conducts Watchtower study",
+      "backupWatchtowerConductor": "Backup Watchtower conductor",
+      "reader": "Reader",
+      "offersPublicPrayer": "Offers public prayer",
+      "deliversPublicTalks": "Delivers public talks",
+      "circuitOverseer": "Circuit Overseer"
+    },
+    "messages": {
+      "linkUserFeatureComingSoon": "User linking feature coming soon"
     }
   },
   "publicTalks": {
@@ -125,20 +149,6 @@
       "permissionDenied": "You do not have permission to perform this action"
     }
   },
-  "meta": {
-    "signIn": {
-      "title": "Sign In - Public Talk Planner",
-      "description": "Sign in to access your talk planning dashboard and manage your presentations."
-    },
-    "dashboard": {
-      "title": "Dashboard - Public Talk Planner",
-      "description": "Manage your talks and presentations"
-    },
-    "publicTalks": {
-      "title": "Public Talks - Public Talk Planner",
-      "description": "Browse 187 public talks with search and sort capabilities"
-    }
-  },
   "errors": {
     "unexpectedError": "An unexpected error occurred",
     "networkError": "Network connection error",
@@ -154,7 +164,22 @@
     "talkNotFound": "Talk not found",
     "talkUpdateFailed": "Failed to update talk",
     "talkCreateFailed": "Failed to create talk",
-    "talkRetrieveFailed": "Failed to retrieve updated talk"
+    "talkRetrieveFailed": "Failed to retrieve updated talk",
+    "publisherNotFound": "Publisher not found",
+    "publisherCannotChair": "This publisher cannot chair weekend meetings",
+    "publisherCannotConductWatchtower": "This publisher cannot conduct Watchtower study",
+    "publisherCannotRead": "This publisher cannot read",
+    "publisherCannotPray": "This publisher cannot offer public prayer",
+    "publisherNotCircuitOverseer": "This publisher is not a circuit overseer",
+    "publisherCannotDeliverPublicTalks": "This publisher cannot deliver public talks",
+    "publishersAlreadyAssigned": "One or more publishers are already assigned on this date",
+    "programCreateFailed": "Failed to create meeting program",
+    "partCreateFailed": "Failed to create program part",
+    "programIdRequired": "Program ID is required",
+    "programNotFound": "Meeting program not found",
+    "meetingAlreadyScheduled": "Meeting is already scheduled for this date",
+    "dateMustBeFuture": "Date must be in the future",
+    "userAlreadyLinked": "This user is already linked to another publisher"
   },
   "validation": {
     "required": "This field is required",
@@ -180,17 +205,27 @@
     "statusInvalid": "Invalid status value. Must be 'circuit_overseer', 'will_be_replaced', or null",
     "dateRequired": "Date is required",
     "dateMustBeSunday": "Date must be a Sunday",
+    "dateMustBeFuture": "Date must be in the future",
     "meetingProgramRequired": "Meeting program is required",
     "partRequired": "Program part is required",
     "speakerRequired": "Speaker is required",
+    "publisherRequired": "Publisher is required",
+    "speakerSourceTypeInvalid": "Invalid speaker source type. Must be 'visiting_speaker' or 'local_publisher'",
+    "speakerOrPublisherRequired": "You must select either a visiting speaker or a local publisher",
     "customTalkTitleTooLong": "Custom talk title cannot be longer than 200 characters",
-    "talkIdOrCustomTitleRequired": "You must select a talk or enter a custom talk title"
+    "talkIdOrCustomTitleRequired": "You must select a talk or enter a custom talk title",
+    "publicTalkTitleRequired": "Public talk title is required",
+    "serviceTalkTitleRequired": "Service talk title is required"
   },
   "meetings": {
     "title": "Weekend Meetings",
     "description": "Browse scheduled weekend meetings with public talks",
-    "managePublicTalks": "Manage Public Talks",
+    "managePublicTalksButton": "Manage Public Talks",
+    "manageRestParts": "Manage Other Parts",
     "speaker": "Speaker",
+    "speakerSourceType": "Speaker Type",
+    "visitingSpeaker": "Visiting Speaker",
+    "localPublisher": "Local Speaker",
     "talk": "Talk",
     "selectTalk": "Select a talk",
     "customTalk": "Custom Talk",
@@ -204,12 +239,14 @@
     "allScheduledDescription": "All upcoming Sundays have scheduled meetings.",
     "backToList": "Back to list",
     "noTalk": "No talk",
+    "noTalkTitle": "No talk title",
     "managePublicTalks": {
       "title": "Manage Public Talks",
       "description": "Schedule weekend meetings with public talks"
     },
     "modal": {
-      "title": "Schedule Meeting"
+      "title": "Schedule Meeting",
+      "editTitle": "Edit Meeting"
     },
     "messages": {
       "scheduleCreated": "Meeting scheduled successfully",
@@ -222,27 +259,123 @@
       "confirm": "Yes, schedule anyway"
     }
   },
-  "meta": {
-    "signIn": {
-      "title": "Sign In - Public Talk Planner",
-      "description": "Sign in to access your talk planning dashboard and manage your presentations."
+  "weekendMeetings": {
+    "title": "Weekend Meeting Planning",
+    "plan": "Plan Meeting",
+    "chairman": "Chairman",
+    "watchtowerStudy": "Watchtower Study",
+    "reader": "Reader",
+    "prayer": "Prayer",
+    "circuitOverseer": "Circuit Overseer",
+    "publicTalkTitle": "Public Talk Title",
+    "publicTalkTitlePlaceholder": "Enter public talk title",
+    "circuitOverseerTalk": "Circuit Overseer Service Talk",
+    "circuitOverseerTalkTitle": "Service Talk Title",
+    "circuitOverseerTalkTitlePlaceholder": "Enter service talk title",
+    "parts": {
+      "chairman": "Chairman",
+      "publicTalk": "Public Talk",
+      "watchtowerStudy": "Watchtower Study",
+      "reader": "Reader",
+      "closingPrayer": "Closing Prayer",
+      "circuitOverseerTalk": "Circuit Overseer Service Talk"
+    },
+    "modal": {
+      "planTitle": "Plan Weekend Meeting",
+      "editTitle": "Edit Weekend Meeting",
+      "selectDate": "Select Date",
+      "selectPublishers": "Select Publishers",
+      "isCircuitOverseerVisit": "Circuit Overseer Visit",
+      "overrideDuplicates": "Override Existing",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "meetingPlanned": "Meeting planned successfully",
+      "meetingUpdated": "Meeting updated successfully"
+    }
+  },
+  "seo": {
+    "auth": {
+      "signIn": {
+        "title": "Sign In - Public Talk Planner",
+        "description": "Sign in to access your talk planning dashboard and manage your presentations.",
+        "ogTitle": "Sign In - Public Talk Planner",
+        "ogDescription": "Sign in to your account in the public talk planning system",
+        "ogImage": "/images/og-signin.jpg"
+      },
+      "register": {
+        "title": "Register - Public Talk Planner",
+        "description": "Create a new account to start planning and managing public talks",
+        "ogTitle": "Register - Public Talk Planner",
+        "ogDescription": "Sign up for the public talk planning system",
+        "ogImage": "/images/og-register.jpg"
+      },
+      "verifyEmail": {
+        "title": "Email Verification - Public Talk Planner",
+        "description": "Verify your email address to activate your account",
+        "ogTitle": "Email Verification",
+        "ogDescription": "Activate your account by verifying your email address",
+        "ogImage": "/images/og-verify.jpg"
+      }
     },
     "dashboard": {
       "title": "Dashboard - Public Talk Planner",
-      "description": "Manage your talks and presentations"
+      "description": "Manage your talks and presentations",
+      "ogTitle": "Dashboard",
+      "ogDescription": "Your personal public talk management dashboard",
+      "ogImage": "/images/og-dashboard.jpg"
     },
-    "publicTalks": {
-      "title": "Public Talks - Public Talk Planner",
-      "description": "Browse 187 public talks with search and sort capabilities"
+    "talks": {
+      "list": {
+        "title": "Public Talks - Public Talk Planner",
+        "description": "Browse 187 public talks with search and sort capabilities",
+        "ogTitle": "Public Talks",
+        "ogDescription": "Complete list of public talks with search functionality",
+        "ogImage": "/images/og-talks.jpg"
+      }
+    },
+    "speakers": {
+      "list": {
+        "title": "Speakers - Public Talk Planner",
+        "description": "List of speakers with their talks and contact information",
+        "ogTitle": "Speakers",
+        "ogDescription": "Manage speakers and their public talks",
+        "ogImage": "/images/og-speakers.jpg"
+      }
+    },
+    "publishers": {
+      "list": {
+        "title": "Publishers - Public Talk Planner",
+        "description": "List of local congregation publishers with assigned roles",
+        "ogTitle": "Publishers",
+        "ogDescription": "Manage publishers and their congregation assignments",
+        "ogImage": "/images/og-publishers.jpg"
+      }
     },
     "meetings": {
       "list": {
         "title": "Weekend Meetings - Public Talk Planner",
-        "description": "Browse and manage scheduled weekend meetings with public talks"
+        "description": "Browse and manage weekend meetings with public talks",
+        "ogTitle": "Weekend Meetings",
+        "ogDescription": "Calendar of weekend meetings with public talks",
+        "ogImage": "/images/og-meetings-list.jpg"
       },
-      "managePublicTalks": {
-        "title": "Manage Public Talks - Public Talk Planner",
-        "description": "Schedule weekend meetings with public talks on the calendar"
+      "manage": {
+        "publicTalks": {
+          "title": "Manage Public Talks - Talk Planner",
+          "description": "Schedule weekend meetings with talks on the calendar",
+          "ogTitle": "Manage Public Talks",
+          "ogDescription": "Calendar for scheduling public talks at meetings",
+          "ogImage": "/images/og-manage-talks.jpg"
+        }
+      },
+      "planWeekend": {
+        "title": "Weekend Meeting Planning - Talk Planner",
+        "description": "Plan complete weekend meeting program with assignments",
+        "ogTitle": "Weekend Meeting Planning",
+        "ogDescription": "Complete meeting program editor with brother assignments",
+        "ogImage": "/images/og-plan-weekend.jpg"
       }
     }
   }

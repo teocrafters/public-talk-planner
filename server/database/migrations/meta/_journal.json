@@ -5,29 +5,22 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1760278657242,
-      "tag": "0000_real_steel_serpent",
+      "when": 1763230901768,
+      "tag": "0000_robust_stardust",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "6",
-      "when": 1760288459635,
-      "tag": "0001_sparkling_avengers",
+      "when": 1763232786052,
+      "tag": "0001_stormy_oracle",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "6",
-      "when": 1760289735008,
-      "tag": "0002_elite_aqueduct",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1762949632567,
-      "tag": "0003_mighty_doomsday",
+      "when": 1763239062673,
+      "tag": "0002_dashing_invaders",
       "breakpoints": true
     }
   ]

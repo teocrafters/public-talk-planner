@@ -1,7 +1,7 @@
 import { test as setup } from "../fixtures"
 
 setup.describe("authentication", () => {
-	setup("as admin", async ({ authenticateAs }) => {
+  setup("as admin", async ({ authenticateAs }) => {
     await authenticateAs.admin()
   })
 
@@ -9,11 +9,11 @@ setup.describe("authentication", () => {
     await authenticateAs.publisher()
   })
 
-  setup("as talks manager", async ({ authenticateAs }) => {
-	await authenticateAs.talksManager()
-	})
+  setup("as public talk coordinator", async ({ authenticateAs }) => {
+    await authenticateAs.publicTalkCoordinator()
+  })
 
-	setup("as speakers manager", async ({ authenticateAs }) => {
-		await authenticateAs.speakersManager()
-	})
+  setup("as boe coordinator", async ({ authenticateAs }) => {
+    await authenticateAs.boeCoordinator()
+  })
 })

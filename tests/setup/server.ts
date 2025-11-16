@@ -1,33 +1,33 @@
-import { test as setup } from '@playwright/test';
+import { test as setup } from "@playwright/test"
 import { x } from "tinyexec"
 import { rm, writeFile } from "node:fs/promises"
 
 setup.setTimeout(120000)
 
 setup("Build and start server", async () => {
-	console.log("Starting global setup...")
+  console.log("Starting global setup...")
 
-	// 1. Clean database state
-	console.log("Cleaning database...")
-	await rm(".data/hub/d1", { recursive: true, force: true })
+  // 1. Clean database state
+  console.log("Cleaning database...")
+  await rm(".data/hub/d1", { recursive: true, force: true })
 
   // 2. Kill any lingering Nuxt/Workerd processes if they are still running
-	try {
-		await x("pkill", ["-f", "nuxt"])
-		console.log("Killed lingering nuxt processes")
-	} catch (error) {
-		console.log("pkill nuxt failed", error)
-	}
+  try {
+    await x("pkill", ["-f", "nuxt"])
+    console.log("Killed lingering nuxt processes")
+  } catch (error) {
+    console.log("pkill nuxt failed", error)
+  }
 
-	try {
-		await x("pkill", ["-f", "workerd"])
-		console.log("Killed lingering workerd processes")
-	} catch (error) {
-		console.log("pkill workerd failed", error)
-	}
+  try {
+    await x("pkill", ["-f", "workerd"])
+    console.log("Killed lingering workerd processes")
+  } catch (error) {
+    console.log("pkill workerd failed", error)
+  }
 
-	// 3. Start preview server
-	console.log("Starting preview server...")
+  // 3. Start preview server
+  console.log("Starting preview server...")
   const serverProcess = x("pnpm", ["dev"], {
     nodeOptions: {
       stdio: "ignore",
@@ -35,123 +35,71 @@ setup("Build and start server", async () => {
     },
   })
 
-  await writeFile("tests/setup/server.pid.json", JSON.stringify({
-    pid: serverProcess.pid,
-    port: 3000,
-    startedAt: new Date().toISOString(),
-  }))
+  await writeFile(
+    "tests/setup/server.pid.json",
+    JSON.stringify({
+      pid: serverProcess.pid,
+      port: 3000,
+      startedAt: new Date().toISOString(),
+    })
+  )
 
-	// 4. Wait for server
-	console.log("Waiting for server...")
+  // 4. Wait for server
+  console.log("Waiting for server...")
   await waitForServer("http://localhost:3000", 120000)
 
-	// 5. Seed test accounts
-	console.log("Seeding test accounts...")
-	let seedAccountsAttempts = 0
-	while (seedAccountsAttempts < 3) {
-		try {
-			const seedAccountsResult = await x("curl", [
-				"-X",
-				"POST",
-				"http://localhost:3000/_nitro/tasks/seed-test-accounts",
-			])
-			console.log("Seed accounts response:", seedAccountsResult.stdout)
+  // 5. Run main seeder (handles all database seeding in correct order)
+  console.log("Running main database seeder...")
+  let seedAttempts = 0
+  while (seedAttempts < 3) {
+    try {
+      const seedResult = await x("curl", [
+        "-X",
+        "POST",
+        "http://localhost:3000/_nitro/tasks/seed",
+      ])
+      console.log("Main seeder response:", seedResult.stdout)
 
-			// Check if the response contains an error
-			if (seedAccountsResult.stdout.includes('"error":true')) {
-				throw new Error("Seed accounts returned an error")
-			}
-			break
-		} catch (error) {
-			seedAccountsAttempts++
-			console.error(`Failed to seed test accounts (attempt ${seedAccountsAttempts}/3):`, error)
-			if (seedAccountsAttempts >= 3) {
-				throw error
-			}
-			await new Promise(resolve => setTimeout(resolve, 2000))
-		}
-	}
+      // Check if the response contains an error
+      if (seedResult.stdout.includes('"result":"error"') || seedResult.stdout.includes('"error":true')) {
+        throw new Error("Main seeder returned an error")
+      }
 
-	// 6. Seed public talks
-	console.log("Seeding public talks...")
-	try {
-		const seedTalksResult = await x("curl", [
-			"-X",
-			"POST",
-			"http://localhost:3000/_nitro/tasks/seed-public-talks",
-		])
-		console.log("Seed public talks response:", seedTalksResult.stdout)
+      console.log("✅ Database seeding completed successfully")
+      break
+    } catch (error) {
+      seedAttempts++
+      console.error(`Failed to run main seeder (attempt ${seedAttempts}/3):`, error)
+      if (seedAttempts >= 3) {
+        throw error
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+  }
 
-		// Check for errors
-		if (seedTalksResult.stdout.includes('"error":true')) {
-			throw new Error("Seed public talks returned an error")
-		}
-	} catch (error) {
-		console.error("Failed to seed public talks:", error)
-		throw error
-	}
-
-	// 7. Seed speakers
-	console.log("Seeding speakers...")
-	try {
-		const seedSpeakersResult = await x("curl", [
-			"-X",
-			"POST",
-			"http://localhost:3000/_nitro/tasks/seed-speakers",
-		])
-		console.log("Seed speakers response:", seedSpeakersResult.stdout)
-
-		// Check for errors
-		if (seedSpeakersResult.stdout.includes('"error":true')) {
-			throw new Error("Seed speakers returned an error")
-		}
-	} catch (error) {
-		console.error("Failed to seed speakers:", error)
-		throw error
-	}
-
-	// 8. Seed meeting programs and scheduled meetings
-	console.log("Seeding meeting programs...")
-	try {
-		const seedMeetingProgramsResult = await x("curl", [
-			"-X",
-			"POST",
-			"http://localhost:3000/_nitro/tasks/seed-meeting-programs",
-		])
-		console.log("Seed meeting programs response:", seedMeetingProgramsResult.stdout)
-
-		// Check for errors
-		if (seedMeetingProgramsResult.stdout.includes('"error":true')) {
-			throw new Error("Seed meeting programs returned an error")
-		}
-	} catch (error) {
-		console.error("Failed to seed meeting programs:", error)
-		throw error
-	}
-
-	console.log("Global setup complete!")
+  console.log("Global setup complete!")
 })
 
 async function waitForServer(url: string, timeout: number = 120000): Promise<void> {
-	const startTime = Date.now()
-	let attempt = 0
+  const startTime = Date.now()
+  let attempt = 0
 
-	while (Date.now() - startTime < timeout) {
-		try {
-			const response = await fetch(url)
-			if (response.ok) {
-				console.log(`Server ready after ${attempt + 1} attempts`)
-				return
-			}
-		} catch {
+  while (Date.now() - startTime < timeout) {
+    try {
+      const response = await fetch(url)
+      if (response.ok) {
+        console.log(`Server ready after ${attempt + 1} attempts`)
+        return
+      }
+    } catch {
       // Server not ready, retry
       console.log(`Server not ready, retrying... (${attempt + 1} attempts)`)
-		}
+    }
 
-		attempt++
-		const delay = attempt * 1000
-		await new Promise(resolve => setTimeout(resolve, delay))
-	}
+    attempt++
+    const delay = attempt * 1000
+    await new Promise(resolve => setTimeout(resolve, delay))
+  }
 
-	throw new Error(`Server not ready after ${timeout}ms`)
+  throw new Error(`Server not ready after ${timeout}ms`)
 }

@@ -1,5 +1,5 @@
 CREATE TABLE `audit_log` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`user_email` text NOT NULL,
 	`action` text NOT NULL,
@@ -7,10 +7,39 @@ CREATE TABLE `audit_log` (
 	`resource_id` text NOT NULL,
 	`details` text,
 	`ip_address` text,
-	`timestamp` integer NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
+	`timestamp` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `meeting_program_parts` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`meeting_program_id` integer NOT NULL,
+	`type` text NOT NULL,
+	`name` text,
+	`order` integer NOT NULL,
+	`created_at` integer NOT NULL,
+	FOREIGN KEY (`meeting_program_id`) REFERENCES `meeting_programs`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `meeting_programs` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`type` text NOT NULL,
+	`date` integer NOT NULL,
+	`is_circuit_overseer_visit` integer DEFAULT false NOT NULL,
+	`name` text,
+	`created_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `meeting_scheduled_parts` (
+	`id` text PRIMARY KEY NOT NULL,
+	`meeting_program_part_id` integer NOT NULL,
+	`publisher_id` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`meeting_program_part_id`) REFERENCES `meeting_program_parts`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`publisher_id`) REFERENCES `publishers`(`id`) ON UPDATE no action ON DELETE restrict
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `meeting_scheduled_parts_part_unique` ON `meeting_scheduled_parts` (`meeting_program_part_id`);--> statement-breakpoint
 CREATE TABLE `public_talks` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`no` text NOT NULL,
@@ -21,6 +50,44 @@ CREATE TABLE `public_talks` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `publishers` (
+	`id` text PRIMARY KEY NOT NULL,
+	`first_name` text NOT NULL,
+	`last_name` text NOT NULL,
+	`user_id` text,
+	`is_elder` integer DEFAULT false NOT NULL,
+	`is_ministerial_servant` integer DEFAULT false NOT NULL,
+	`is_regular_pioneer` integer DEFAULT false NOT NULL,
+	`can_chair_weekend_meeting` integer DEFAULT false NOT NULL,
+	`conducts_watchtower_study` integer DEFAULT false NOT NULL,
+	`backup_watchtower_conductor` integer DEFAULT false NOT NULL,
+	`is_reader` integer DEFAULT false NOT NULL,
+	`offers_public_prayer` integer DEFAULT false NOT NULL,
+	`is_circuit_overseer` integer DEFAULT false NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `publishers_user_id_unique` ON `publishers` (`user_id`);--> statement-breakpoint
+CREATE TABLE `scheduled_public_talks` (
+	`id` text PRIMARY KEY NOT NULL,
+	`date` integer NOT NULL,
+	`meeting_program_id` integer NOT NULL,
+	`part_id` integer NOT NULL,
+	`speaker_id` text NOT NULL,
+	`talk_id` integer,
+	`custom_talk_title` text,
+	`override_validation` integer DEFAULT false NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`meeting_program_id`) REFERENCES `meeting_programs`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`part_id`) REFERENCES `meeting_program_parts`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`speaker_id`) REFERENCES `speakers`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`talk_id`) REFERENCES `public_talks`(`id`) ON UPDATE no action ON DELETE restrict
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `unique_public_talk_schedule` ON `scheduled_public_talks` (`date`,`meeting_program_id`,`part_id`);--> statement-breakpoint
 CREATE TABLE `speaker_talks` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`speaker_id` text NOT NULL,

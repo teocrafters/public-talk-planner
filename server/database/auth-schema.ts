@@ -1,13 +1,11 @@
-import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm"
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" })
-    .default(false)
-    .notNull(),
+  emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
   image: text("image"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
@@ -20,7 +18,7 @@ export const user = sqliteTable("user", {
   banned: integer("banned", { mode: "boolean" }).default(false),
   banReason: text("ban_reason"),
   banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
-});
+})
 
 export const session = sqliteTable("session", {
   id: text("id").primaryKey(),
@@ -40,7 +38,7 @@ export const session = sqliteTable("session", {
     .references(() => user.id, { onDelete: "cascade" }),
   impersonatedBy: text("impersonated_by"),
   activeOrganizationId: text("active_organization_id"),
-});
+})
 
 export const account = sqliteTable("account", {
   id: text("id").primaryKey(),
@@ -66,7 +64,7 @@ export const account = sqliteTable("account", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" })
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-});
+})
 
 export const verification = sqliteTable("verification", {
   id: text("id").primaryKey(),
@@ -80,7 +78,7 @@ export const verification = sqliteTable("verification", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-});
+})
 
 export const organization = sqliteTable("organization", {
   id: text("id").primaryKey(),
@@ -89,7 +87,7 @@ export const organization = sqliteTable("organization", {
   logo: text("logo"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   metadata: text("metadata"),
-});
+})
 
 export const member = sqliteTable("member", {
   id: text("id").primaryKey(),
@@ -101,7 +99,7 @@ export const member = sqliteTable("member", {
     .references(() => user.id, { onDelete: "cascade" }),
   role: text("role").default("member").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
+})
 
 export const invitation = sqliteTable("invitation", {
   id: text("id").primaryKey(),
@@ -115,7 +113,7 @@ export const invitation = sqliteTable("invitation", {
   inviterId: text("inviter_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-});
+})
 
 export const passkey = sqliteTable("passkey", {
   id: text("id").primaryKey(),
@@ -131,4 +129,4 @@ export const passkey = sqliteTable("passkey", {
   transports: text("transports"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }),
   aaguid: text("aaguid"),
-});
+})

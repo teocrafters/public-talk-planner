@@ -1,26 +1,32 @@
 {
-	"organization": {
-		"name": "Test Organization",
-		"slug": "test-org"
-	},
-	"users": [
-		{
-			"email": "admin@test.local",
-			"password": "TestAdmin123!",
-			"name": "Test Admin",
-			"role": "admin"
-		},
-		{
-			"email": "publisher@test.local",
-			"password": "TestPublisher123!",
-			"name": "Test Publisher",
-			"role": "publisher"
-		},
-		{
-			"email": "manager@test.local",
-			"password": "TestManager123!",
-			"name": "Test Manager",
-			"role": "manager"
-		}
-	]
+  "organization": {
+    "name": "Żychlin",
+    "slug": "zychlin"
+  },
+  "users": [
+    {
+      "email": "admin@test.local",
+      "password": "TestAdmin123!",
+      "name": "Test Admin",
+      "role": "admin"
+    },
+    {
+      "email": "publisher@test.local",
+      "password": "TestPublisher123!",
+      "name": "Test Publisher",
+      "role": "publisher"
+    },
+    {
+      "email": "public_talk_coordinator@test.local",
+      "password": "TestPublicTalkCoordinator123!",
+      "name": "Test Public Talk Coordinator",
+      "role": "public_talk_coordinator"
+    },
+    {
+      "email": "boe_coordinator@test.local",
+      "password": "TestBOECoordinator123!",
+      "name": "Test BOE Coordinator",
+      "role": "boe_coordinator"
+    }
+  ]
 }

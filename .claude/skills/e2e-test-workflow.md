@@ -1,10 +1,12 @@
 # E2E Test Workflow Skill
 
-Orchestrates the complete E2E test creation workflow from feature analysis to test implementation and healing.
+Orchestrates the complete E2E test creation workflow from feature analysis to test implementation
+and healing.
 
 ## Purpose
 
 USE this skill when:
+
 - A feature has been developed and manually verified
 - You need to create comprehensive E2E tests for new functionality
 - You want to follow a structured approach to test creation
@@ -16,6 +18,7 @@ USE this skill when:
 **Goal**: Understand what was implemented and what needs testing.
 
 **Actions**:
+
 1. Check git staged changes: `git diff --cached --name-only`
 2. Analyze staged files to understand the feature scope
 3. Check `requirements/` directory for latest specifications:
@@ -35,6 +38,7 @@ USE this skill when:
 **Goal**: Create comprehensive test plan using playwright-test-planner agent.
 
 **Actions**:
+
 1. INVOKE playwright-test-planner agent with context:
    - Feature description from analysis
    - User-specified focus areas (if provided)
@@ -56,6 +60,7 @@ USE this skill when:
 **Goal**: Generate E2E tests using playwright-test-generator agent.
 
 **Actions**:
+
 1. INVOKE playwright-test-generator agent with:
    - Test plan from Step 2
    - Feature context
@@ -76,6 +81,7 @@ USE this skill when:
 **Goal**: Run tests and analyze results.
 
 **Actions**:
+
 1. RUN tests: `pnpm exec playwright test`
 2. WAIT for execution to complete
 3. ANALYZE results:
@@ -97,6 +103,7 @@ USE this skill when:
 **Actions**:
 
 #### If App Code is Broken:
+
 1. ANALYZE application code issues
 2. CREATE fix plan:
    - Identify root cause
@@ -109,6 +116,7 @@ USE this skill when:
 5. IF STILL FAILING: Return to beginning of Step 5
 
 #### If Test Code is Broken:
+
 1. INVOKE playwright-test-healer agent with:
    - Failing test file paths
    - Failure messages and stack traces
@@ -138,6 +146,7 @@ USE this skill when:
 ## Failure Recovery
 
 **If stuck in healing loop:**
+
 1. ANALYZE pattern of failures
 2. CHECK if fundamental issue with test approach
 3. ASK USER if:
@@ -146,6 +155,7 @@ USE this skill when:
    - Different testing approach needed
 
 **If agent fails:**
+
 1. DOCUMENT agent failure details
 2. TRY manual intervention if possible
 3. ASK USER for guidance if blocked
@@ -153,16 +163,19 @@ USE this skill when:
 ## Project-Specific Guidelines
 
 **Test Selector Requirements:**
+
 - VERIFY all components have data-testid attributes
 - FOLLOW naming convention: `{feature}-{element}-{type}`
 - REFERENCE @.agents/test-ready-component-checklist.md
 
 **Fixture Integration:**
+
 - USE existing fixtures from `tests/fixtures/`
 - IMPORT test and expect from `tests/fixtures/index.ts`
 - FOLLOW @.agents/e2e-testing-patterns.md
 
 **Module Syntax:**
+
 - USE ESM import statements exclusively
 - ADD `with { type: "json" }` for JSON imports
 - NEVER use `require()` in test files
@@ -171,3 +184,4 @@ USE this skill when:
 
 ```
 User: "I just implemented the meeting schedule feature. Can you create E2E tests for it?"
+```

@@ -133,7 +133,7 @@ class SpeakersPage {
 export const test = base.extend<{ speakersPage: SpeakersPage }>({
   speakersPage: async ({ page }, use) => {
     await use(new SpeakersPage(page))
-  }
+  },
 })
 ```
 
@@ -156,7 +156,7 @@ export const test = base.extend({
       return response
     }
     await use(page)
-  }
+  },
 })
 ```
 
@@ -176,9 +176,9 @@ export const test = base.extend({
       talksManager: async () => {
         await authenticateAs(page, "editor")
         await page.context().storageState({ path: ".auth/talks-manager.json" })
-      }
+      },
     })
-  }
+  },
 })
 ```
 
@@ -300,7 +300,7 @@ export const test = base.extend({
     }
 
     await use(page)
-  }
+  },
 })
 ```
 

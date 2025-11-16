@@ -1,0 +1,1 @@
+ALTER TABLE `publishers` ADD `delivers_public_talks` integer DEFAULT false NOT NULL;

@@ -4,7 +4,8 @@ Pre-test verification checklist ensuring components are fully prepared for End-t
 
 ## Purpose
 
-USE this checklist before marking any component as complete to ensure proper test readiness and consistent testing patterns across the project.
+USE this checklist before marking any component as complete to ensure proper test readiness and
+consistent testing patterns across the project.
 
 ## Component Development Checklist
 
@@ -129,10 +130,3 @@ USE this checklist before marking any component as complete to ensure proper tes
 - [ ] Component behavior remains unchanged after adding test IDs
 - [ ] No console errors or warnings related to test IDs
 - [ ] Component documentation updated with test ID information
-
-## Reference Files
-
-- Comprehensive testing guidelines: @.agents/e2e-testing-patterns.md
-- Component conventions: @.agents/vue-conventions.md
-- Nuxt UI integration: @.agents/nuxt-ui-4-integration.md
-- Project rules: @AGENTS.md

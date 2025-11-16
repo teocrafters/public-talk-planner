@@ -36,8 +36,12 @@ pnpm typecheck    # Run TypeScript type checking
 ### Database
 
 ```bash
-pnpm db:generate  # Generate Drizzle migrations
+pnpm db:generate  # Generate Drizzle migrations (USER must run after schema changes)
 ```
+
+**Important:** After modifying `server/database/schema.ts`, always ask the user to run
+`pnpm db:generate`. Never execute this command automatically. See "Database Patterns with Drizzle"
+section for complete workflow.
 
 ## Architecture
 
@@ -135,9 +139,8 @@ Directory Auto-Imports:
 - `app/composables/` - Vue composables are auto-imported everywhere
 - `app/utils/` - Client-side utilities are auto-imported everywhere
 - `server/utils/` - Server-side utilities are auto-imported in server context
-- `shared/utils/` - Universal utilities are auto-imported in both server and client contexts
-- `shared/types/` - TypeScript types are auto-imported everywhere
-- `shared/utils/schemas/` - Zod schemas are auto-imported everywhere
+- `shared/utils/*.ts` - ONLY direct files in shared/utils are auto-imported
+- `shared/types/*.ts` - ONLY direct files in shared/types are auto-imported
 
 Built-in Auto-Imports:
 
@@ -145,25 +148,49 @@ Built-in Auto-Imports:
 - Nuxt utilities: `navigateTo`, `useRoute`, `useRouter`, `useFetch`, `useAsyncData`, etc.
 - Nuxt modules: APIs from installed Nuxt modules (e.g., `useI18n` from `@nuxtjs/i18n`)
 
-Critical Rules:
+Critical Import Rules:
 
-- DO NOT import from `shared/utils/` or `shared/types/` directories (auto-imported)
+- USE `#shared` alias for ALL imports from `shared/` subdirectories
+- DO NOT import direct files from `shared/utils/` or `shared/types/` (auto-imported)
+- ALWAYS import from subdirectories like `shared/utils/schemas/`, `shared/constants/`, etc.
+- NEVER use `~~/shared` alias (inconsistent, prefer `#shared`)
 - DO NOT import from `app/utils/` directory (auto-imported)
-- PLACE all Zod schemas in `shared/utils/schemas/` directory
-- UPDATE `shared/utils/schemas/index.ts` barrel file when adding new schemas
-- RELY on auto-imports for all utilities, types, and schemas
+
+Auto-Import Examples:
+
+```typescript
+// ✅ Correct: Direct files are auto-imported (no import needed)
+// shared/utils/audit-events.ts exports are available everywhere
+const event = AUDIT_EVENTS.USER_LOGIN
+
+// ✅ Correct: Direct files are auto-imported (no import needed)
+// shared/utils/date.ts exports are available everywhere
+const formatted = formatDatePL(new Date())
+
+// ✅ Correct: Subdirectories require explicit import with #shared
+import { createScheduleSchema } from "#shared/utils/schemas"
+import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+
+// ❌ Wrong: Don't import direct files (they're auto-imported)
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+
+// ❌ Wrong: Don't use ~~/shared alias (use #shared instead)
+import { createScheduleSchema } from "~~/shared/utils/schemas"
+```
 
 Schema Organization:
 
 - PLACE all Zod validation schemas in `shared/utils/schemas/` directory
-- EXPORT all schemas from `shared/utils/schemas/index.ts` barrel file
+- EXPORT all schemas from individual schema files
+- IMPORT schemas using `#shared/utils/schemas` path
 - USE schema factory pattern with i18n translation function parameter
 - EXPORT TypeScript types using `z.infer<ReturnType<typeof schemaFactory>>`
 
 Best Practices:
 
 - RELY on auto-imports for Vue APIs and Nuxt utilities (no manual imports needed)
-- NEVER import from auto-imported directories (schemas, shared utils, app utils)
+- RELY on auto-imports for direct files in `shared/utils/` and `shared/types/`
+- ALWAYS use `#shared` alias for subdirectory imports
 - AVOID creating custom utils when Nuxt or VueUse provides equivalent functionality
 - CHECK nuxt.config.ts before assuming a directory is auto-imported
 
@@ -190,11 +217,37 @@ Use Cases:
 - Validation schemas: Zod schemas used by both client and server (in `shared/utils/schemas/`)
 - Pure utility functions: data transformations, formatters, calculators
 
-Usage Pattern:
+Import Patterns:
 
-- DO NOT import from `shared/utils/` or `shared/types/` (auto-imported by Nuxt)
-- SIMPLY use exported constants, types, and functions directly
-- ALL exports from shared/ are automatically available everywhere
+- DIRECT FILES: Auto-imported (no import statement needed)
+  - `shared/utils/audit-events.ts` - Use `AUDIT_EVENTS` directly
+  - `shared/utils/date.ts` - Use `formatDatePL`, `dayjs` directly
+  - `shared/types/permissions.ts` - Types available everywhere
+
+- SUBDIRECTORIES: Require explicit imports with `#shared` alias
+  - `shared/utils/schemas/` - Import with `#shared/utils/schemas`
+  - `shared/constants/` - Import with `#shared/constants/*`
+  - `shared/utils/permissions/` - Import with `#shared/utils/permissions/*`
+
+Import Examples:
+
+```typescript
+// ✅ Correct: Direct file exports (auto-imported)
+const event = AUDIT_EVENTS.USER_LOGIN // shared/utils/audit-events.ts
+const today = getToday() // shared/utils/date.ts
+
+// ✅ Correct: Subdirectory imports with #shared alias
+import { createScheduleSchema } from "#shared/utils/schemas"
+import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+import { hasPermission } from "#shared/utils/permissions/declare"
+
+// ❌ Wrong: Importing direct files (they're auto-imported)
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import { formatDatePL } from "#shared/utils/date"
+
+// ❌ Wrong: Using ~~/shared alias instead of #shared
+import { createSchema } from "~~/shared/utils/schemas"
+```
 
 Why Use Shared Directory:
 
@@ -204,16 +257,144 @@ Why Use Shared Directory:
 - NO DUPLICATION: Avoid copying code between app/ and server/
 - AUTO-IMPORT: Nuxt automatically imports everything from shared/
 
+### Shared Directory Import Patterns
+
+The `#shared` alias provides consistent imports from the `shared/` directory across the
+application.
+
+#### When to Use #shared Alias
+
+- ALWAYS use `#shared` for imports from `shared/` subdirectories
+- REQUIRED for: schemas, constants, permission utilities, nested utilities
+- CONSISTENT across both server and client contexts
+
+#### Directory Structure and Import Rules
+
+```
+shared/
+├── utils/
+│   ├── audit-events.ts        # ✅ Auto-imported (no import needed)
+│   ├── date.ts                 # ✅ Auto-imported (no import needed)
+│   ├── schemas/                # ❌ Requires #shared import
+│   │   ├── index.ts
+│   │   ├── schedule.ts
+│   │   └── speaker.ts
+│   └── permissions/            # ❌ Requires #shared import
+│       └── declare.ts
+├── constants/                  # ❌ Requires #shared import
+│   ├── meetings.ts
+│   └── speaker-sources.ts
+└── types/
+    └── permissions.ts          # ✅ Auto-imported (no import needed)
+```
+
+#### Rule Explanation
+
+**Auto-Imported (No Import Needed):**
+
+- Direct files in `shared/utils/` (e.g., `audit-events.ts`, `date.ts`)
+- Direct files in `shared/types/` (e.g., `permissions.ts`)
+- Exports from these files are globally available
+
+**Explicit Import Required:**
+
+- Any file in a subdirectory of `shared/` (e.g., `schemas/`, `constants/`, `permissions/`)
+- Use `#shared` alias for these imports
+
+#### Practical Examples
+
+**Component Using Mixed Imports:**
+
+```vue
+<script setup lang="ts">
+  // ✅ Auto-imported: direct files from shared/utils/
+  const today = getToday() // from shared/utils/date.ts
+  const event = AUDIT_EVENTS.USER_LOGIN // from shared/utils/audit-events.ts
+
+  // ✅ Explicit import: subdirectory with #shared
+  import { createScheduleSchema } from "#shared/utils/schemas"
+  import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+
+  const schema = createScheduleSchema(t)
+  const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
+</script>
+```
+
+**API Route Using Schemas:**
+
+```typescript
+// server/api/schedules/index.post.ts
+
+// ✅ Explicit import: schema from subdirectory
+import { createScheduleSchema } from "#shared/utils/schemas"
+
+export default defineEventHandler(async event => {
+	// ✅ Auto-imported: validation utility from shared/utils/
+	const body = await validateBody(event, createScheduleSchema)
+
+	// ... rest of handler
+})
+```
+
+#### Anti-Patterns
+
+```typescript
+// ❌ Wrong: Importing auto-imported direct files
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import { formatDatePL } from "shared/utils/date"
+
+// ❌ Wrong: Using ~~/shared instead of #shared
+import { createSchema } from "~~/shared/utils/schemas"
+
+// ❌ Wrong: Relative imports from shared
+import { SPEAKER_SOURCE_TYPES } from "../../shared/constants/speaker-sources"
+
+// ✅ Correct: Use #shared for subdirectories
+import { createScheduleSchema } from "#shared/utils/schemas"
+import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+
+// ✅ Correct: No import for direct files (auto-imported)
+const event = AUDIT_EVENTS.USER_LOGIN
+const formatted = formatDatePL(new Date())
+```
+
+#### Why This Pattern Matters
+
+- CONSISTENCY: Single import alias (`#shared`) for all explicit imports
+- CLARITY: Clear distinction between auto-imported and explicit imports
+- TYPE SAFETY: TypeScript resolves `#shared` alias correctly
+- MAINTAINABILITY: Easy to refactor and reorganize shared code
+- NO CONFUSION: Eliminates mixing of `~~/shared`, `~/shared`, relative paths
+
 ### Constants Pattern
 
 - DECLARE all constants with ALL_CAPS naming convention using underscores
 - USE `as const` assertion for type safety and literal type inference
 - PLACE frontend-only constants in `app/utils/` directory
-- PLACE shared constants (server + client) in `shared/utils/` directory
+- PLACE shared constants (server + client) in `shared/constants/` directory
+- IMPORT shared constants using `#shared/constants/*` path
 - EXPORT companion types using `typeof` and `keyof` pattern for type derivation
 - PAIR constants with type definitions in `shared/types/` when creating discriminated unions
 - NEVER define constants directly in components - extract to appropriate utils directory
 - REFERENCE existing pattern: `shared/utils/audit-events.ts` with `AUDIT_EVENTS` constant
+
+Shared Constants Example:
+
+```typescript
+// shared/constants/speaker-sources.ts
+export const SPEAKER_SOURCE_TYPES = {
+	VISITING_SPEAKER: "visiting_speaker",
+	LOCAL_PUBLISHER: "local_publisher",
+} as const
+
+export type SpeakerSourceType =
+	(typeof SPEAKER_SOURCE_TYPES)[keyof typeof SPEAKER_SOURCE_TYPES]
+
+// Usage in component or API route
+import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+
+const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
+```
 
 ### TypeScript Patterns
 
@@ -252,10 +433,30 @@ Database Access:
 
 Migration Workflow:
 
+**CRITICAL DATABASE RULES:**
+
+- **NEVER execute .sql files manually** - All database changes MUST be applied through schema
+  modifications in `server/database/schema.ts`
+- **ALWAYS ask the user to generate migrations** - NEVER run `pnpm db:generate` yourself; prompt
+  the user to execute this command after schema changes
+- **NEVER edit migration files manually** - Migration files are generated and should remain
+  unchanged
+
+**Workflow Steps:**
+
 1. Modify schema in `server/database/schema.ts`
-2. Run `pnpm db:generate` to create migration files
-3. Review generated migration before committing
-4. Never edit migration files manually
+2. Prompt user: "Database schema has been updated. Please run `pnpm db:generate` to create
+   migration files."
+3. User runs `pnpm db:generate` to generate migration files
+4. Review generated migration before committing
+5. Commit schema changes and generated migration files together
+
+**Why These Rules Matter:**
+
+- CONSISTENCY: Schema file is the single source of truth for database structure
+- SAFETY: Manual SQL execution can create schema drift and data corruption
+- AUDITABILITY: All database changes are version-controlled through schema and migrations
+- REVERSIBILITY: Drizzle migrations support rollback through proper migration history
 
 ### Server-Side Patterns
 
@@ -318,7 +519,8 @@ When validation fails, `validateBody()` automatically returns:
 }
 ```
 
-Frontend can use `messageKey` values to display translated error messages via `$t(error.messageKey)`.
+Frontend can use `messageKey` values to display translated error messages via
+`$t(error.messageKey)`.
 
 Background Tasks:
 
@@ -350,7 +552,8 @@ Components:
 - Use props with TypeScript interfaces
 - Emit events with proper typing
 - Use `@nuxt/ui` components when available
-- When creating forms inside modals, place UForm in `#body` slot with a ref, and trigger submission from `#footer` button via `form?.submit()`
+- When creating forms inside modals, place UForm in `#body` slot with a ref, and trigger submission
+  from `#footer` button via `form?.submit()`
 - REFERENCE @.agents/nuxt-ui-4-integration.md for UModal with Forms pattern details
 
 Error Handling:
@@ -388,21 +591,23 @@ Using useFetch():
 
 ```vue
 <script setup lang="ts">
-// ✅ Correct: useFetch for SSR-compatible data fetching
-const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+  // ✅ Correct: useFetch for SSR-compatible data fetching
+  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
 
-// Access reactive data in template
-// - data: reactive reference to fetched data
-// - pending: true while fetching, false when complete
-// - error: contains error object if request fails
-// - refresh: function to manually refetch data
+  // Access reactive data in template
+  // - data: reactive reference to fetched data
+  // - pending: true while fetching, false when complete
+  // - error: contains error object if request fails
+  // - refresh: function to manually refetch data
 </script>
 
 <template>
   <div v-if="pending">Loading...</div>
   <div v-else-if="error">Error: {{ error.message }}</div>
   <div v-else>
-    <div v-for="speaker in speakers" :key="speaker.id">
+    <div
+      v-for="speaker in speakers"
+      :key="speaker.id">
       {{ speaker.firstName }} {{ speaker.lastName }}
     </div>
   </div>
@@ -413,13 +618,18 @@ Using useAsyncData():
 
 ```vue
 <script setup lang="ts">
-// ✅ Use useAsyncData for complex async operations or custom fetching logic
-const { data: userData, pending, error } = await useAsyncData(
-  'user-profile', // unique key for caching
-  () => $fetch('/api/user/profile', {
-    headers: { 'X-Custom-Header': 'value' }
-  })
-)
+  // ✅ Use useAsyncData for complex async operations or custom fetching logic
+  const {
+    data: userData,
+    pending,
+    error,
+  } = await useAsyncData(
+    "user-profile", // unique key for caching
+    () =>
+      $fetch("/api/user/profile", {
+        headers: { "X-Custom-Header": "value" },
+      })
+  )
 </script>
 ```
 
@@ -436,17 +646,17 @@ Anti-Patterns to Avoid:
 
 ```vue
 <script setup lang="ts">
-// ❌ Wrong: Direct $fetch() in component doesn't transfer SSR data
-const speakers = await $fetch('/api/speakers')
+  // ❌ Wrong: Direct $fetch() in component doesn't transfer SSR data
+  const speakers = await $fetch("/api/speakers")
 
-// ❌ Wrong: Using onMounted for data fetching defeats SSR
-onMounted(async () => {
-  const data = await $fetch('/api/speakers')
-  speakers.value = data
-})
+  // ❌ Wrong: Using onMounted for data fetching defeats SSR
+  onMounted(async () => {
+    const data = await $fetch("/api/speakers")
+    speakers.value = data
+  })
 
-// ❌ Wrong: Not awaiting useFetch breaks SSR hydration
-const { data } = useFetch('/api/speakers') // Missing await!
+  // ❌ Wrong: Not awaiting useFetch breaks SSR hydration
+  const { data } = useFetch("/api/speakers") // Missing await!
 </script>
 ```
 
@@ -463,18 +673,18 @@ Example from Codebase:
 
 ```vue
 <script setup lang="ts">
-// Real example from app/pages/speakers.vue
-const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+  // Real example from app/pages/speakers.vue
+  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
 
-// Permission checks use usePermissions composable
-const { canManageSpeakers, fetchPermissions } = usePermissions()
-onMounted(async () => {
-  await fetchPermissions()
-})
+  // Permission checks use usePermissions composable
+  const { canManageSpeakers, fetchPermissions } = usePermissions()
+  onMounted(async () => {
+    await fetchPermissions()
+  })
 
-// Data is fetched on server-side during SSR
-// Permissions are fetched client-side using BetterAuth organization API
-// Client receives pre-rendered HTML with data already available
+  // Data is fetched on server-side during SSR
+  // Permissions are fetched client-side using BetterAuth organization API
+  // Client receives pre-rendered HTML with data already available
 </script>
 ```
 
@@ -600,14 +810,16 @@ import { test, expect } from "@playwright/test"
 // ❌ Wrong: Creating standalone Page Object classes
 class SpeakersPage {
   constructor(private page: Page) {}
-  async goto() { await this.page.goto("/speakers") }
+  async goto() {
+    await this.page.goto("/speakers")
+  }
 }
 
 // ✅ Correct: Implement Page Objects as fixtures
 export const test = base.extend<{ speakersPage: SpeakersPage }>({
   speakersPage: async ({ page }, use) => {
     await use(new SpeakersPage(page))
-  }
+  },
 })
 ```
 
@@ -661,7 +873,7 @@ Before Committing:
 2. Run `pnpm typecheck` to ensure no type errors
 3. Run `pnpm format` to ensure consistent formatting
 4. Test critical functionality manually
-5. Generate and review database migrations if schema changed
+5. If schema changed, ask user to run `pnpm db:generate` to generate migrations
 
 Deployment Checklist:
 
@@ -804,7 +1016,8 @@ Validation Rules:
 - No Polish text should appear directly in Vue templates
 - Translation keys must be in English and descriptive
 - All new components must include i18n integration from start
-- VERIFY all translation keys exist in both `i18n/locales/pl.json` and `i18n/locales/en.json` before committing
+- VERIFY all translation keys exist in both `i18n/locales/pl.json` and `i18n/locales/en.json` before
+  committing
 - CHECK browser console for missing translation warnings during development
 - REFERENCE @.agents/i18n-patterns.md for comprehensive key validation workflow and best practices
 
@@ -853,6 +1066,9 @@ Validation Rules:
 - Mixing Polish and English text in components
 - Hardcoding Polish text instead of using `$t()`
 - Not running type checks before committing
+- Executing SQL files manually instead of updating schema
+- Running `pnpm db:generate` without user confirmation
+- Making schema changes without prompting for migration generation
 
 ## Files to NOT Modify
 
@@ -902,3 +1118,7 @@ Example pattern: `// AGENT-NOTE: Performance-critical path; avoid extra allocati
 - @.agents/security-guidelines.md
 - @.agents/tailwind-patterns.md
 - @.agents/vue-conventions.md
+
+## Backend development
+
+- @.agents/database-patterns.md

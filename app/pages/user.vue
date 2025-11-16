@@ -45,11 +45,5 @@
     }
   })
 
-  useSeoMeta({
-    title: t("meta.dashboard.title"),
-    description: t("meta.dashboard.description"),
-    ogTitle: t("meta.dashboard.title"),
-    ogDescription: t("meta.dashboard.description"),
-    robots: "noindex, nofollow",
-  })
+  useSeoPage("dashboard")
 </script>

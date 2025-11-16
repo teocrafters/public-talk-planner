@@ -1,66 +1,66 @@
 [
-	{
-		"id": "speaker-test-001",
-		"firstName": "Jan",
-		"lastName": "Kowalski",
-		"phone": "123456789",
-		"talkIds": [1, 5, 12],
-		"archived": false
-	},
-	{
-		"id": "speaker-test-002",
-		"firstName": "Anna",
-		"lastName": "Nowak",
-		"phone": "987654321",
-		"talkIds": [3, 7, 15],
-		"archived": false
-	},
-	{
-		"id": "speaker-test-003",
-		"firstName": "Piotr",
-		"lastName": "Wiśniewski",
-		"phone": "555666777",
-		"talkIds": [2, 8, 14, 20, 25],
-		"archived": false
-	},
-	{
-		"id": "speaker-test-004",
-		"firstName": "Maria",
-		"lastName": "Dąbrowska",
-		"phone": "111222333",
-		"talkIds": [],
-		"archived": false
-	},
-	{
-		"id": "speaker-test-005",
-		"firstName": "Tomasz",
-		"lastName": "Lewandowski",
-		"phone": "444555666",
-		"talkIds": [10, 18],
-		"archived": true
-	},
-	{
-		"id": "speaker-test-006",
-		"firstName": "Katarzyna",
-		"lastName": "Wójcik",
-		"phone": "777888999",
-		"talkIds": [4, 9, 13],
-		"archived": false
-	},
-	{
-		"id": "speaker-test-007",
-		"firstName": "Andrzej",
-		"lastName": "Kamiński",
-		"phone": "222333444",
-		"talkIds": [6, 11],
-		"archived": true
-	},
-	{
-		"id": "speaker-test-008",
-		"firstName": "Magdalena",
-		"lastName": "Zielińska",
-		"phone": "888999000",
-		"talkIds": [16, 19, 22],
-		"archived": false
-	}
+  {
+    "id": "speaker-test-001",
+    "firstName": "Jan",
+    "lastName": "Kowalski",
+    "phone": "123456789",
+    "talkIds": [1, 5, 12],
+    "archived": false
+  },
+  {
+    "id": "speaker-test-002",
+    "firstName": "Anna",
+    "lastName": "Nowak",
+    "phone": "987654321",
+    "talkIds": [3, 7, 15],
+    "archived": false
+  },
+  {
+    "id": "speaker-test-003",
+    "firstName": "Piotr",
+    "lastName": "Wiśniewski",
+    "phone": "555666777",
+    "talkIds": [2, 8, 14, 20, 25],
+    "archived": false
+  },
+  {
+    "id": "speaker-test-004",
+    "firstName": "Maria",
+    "lastName": "Dąbrowska",
+    "phone": "111222333",
+    "talkIds": [],
+    "archived": false
+  },
+  {
+    "id": "speaker-test-005",
+    "firstName": "Tomasz",
+    "lastName": "Lewandowski",
+    "phone": "444555666",
+    "talkIds": [10, 18],
+    "archived": true
+  },
+  {
+    "id": "speaker-test-006",
+    "firstName": "Katarzyna",
+    "lastName": "Wójcik",
+    "phone": "777888999",
+    "talkIds": [4, 9, 13],
+    "archived": false
+  },
+  {
+    "id": "speaker-test-007",
+    "firstName": "Andrzej",
+    "lastName": "Kamiński",
+    "phone": "222333444",
+    "talkIds": [6, 11],
+    "archived": true
+  },
+  {
+    "id": "speaker-test-008",
+    "firstName": "Magdalena",
+    "lastName": "Zielińska",
+    "phone": "888999000",
+    "talkIds": [16, 19, 22],
+    "archived": false
+  }
 ]

@@ -1,6 +1,10 @@
 import type { AUDIT_EVENTS } from "../utils/audit-events"
-import type { TalkUpdateInput } from "../../app/schemas/talk"
-import type { SpeakerEditInput } from "../../app/schemas/speaker"
+import type {
+  TalkUpdateInput,
+  SpeakerEditInput,
+  PublisherUpdateInput,
+  WeekendMeetingUpdateInput,
+} from "../utils/schemas"
 
 export type AuditEventType = (typeof AUDIT_EVENTS)[keyof typeof AUDIT_EVENTS]
 
@@ -82,5 +86,33 @@ export interface AuditEventDetails {
   [AUDIT_EVENTS.UNAUTHORIZED_ACCESS]: {
     attemptedAction: string
     path: string
+  }
+  [AUDIT_EVENTS.PUBLISHER_CREATED]: {
+    publisherId: string
+    firstName: string
+    lastName: string
+    userId: string | null
+  }
+  [AUDIT_EVENTS.PUBLISHER_UPDATED]: {
+    publisherId: string
+    changes: PublisherUpdateInput
+  }
+  [AUDIT_EVENTS.PUBLISHER_USER_LINKED]: {
+    publisherId: string
+    userId: string | null
+  }
+  [AUDIT_EVENTS.PUBLISHER_USER_UNLINKED]: {
+    publisherId: string
+    userId: string | null
+  }
+  [AUDIT_EVENTS.WEEKEND_MEETING_PLANNED]: {
+    programId: number
+    date: number
+    isCircuitOverseerVisit: boolean
+    parts: Record<string, unknown>
+  }
+  [AUDIT_EVENTS.WEEKEND_MEETING_UPDATED]: {
+    programId: number
+    changes: WeekendMeetingUpdateInput
   }
 }

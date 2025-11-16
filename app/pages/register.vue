@@ -63,11 +63,7 @@
   const registrationSuccess = ref(false)
 
   // SEO meta
-  useSeoMeta({
-    title: t("meta.register.title"),
-    description: t("meta.register.description"),
-    robots: "noindex, nofollow",
-  })
+  useSeoPage("auth.register")
 
   const handleRegistration = async (data: RegistrationFormData) => {
     try {
@@ -82,12 +78,14 @@
         throw new Error(result.error.message)
       }
 
-      // For now, we'll handle organization membership creation via a separate API call
+      // Create organization membership and publisher profile via API
       await $fetch("/api/auth/register-membership", {
         method: "POST",
         body: {
           userId: result.data!.user.id,
           congregationId: data.congregationId,
+          firstName: data.firstName,
+          lastName: data.lastName,
         },
       })
 

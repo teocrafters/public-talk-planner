@@ -6,11 +6,11 @@
     "password": "Hasło",
     "submit": "Zatwierdź",
     "cancel": "Anuluj",
-    "loading": "Ładowanie...",
-    "error": "Błąd",
-    "success": "Sukces",
+    "comingSoon": "Wkrótce dostępne",
     "sending": "Wysyłanie...",
-    "or": "lub"
+    "or": "lub",
+    "error": "Błąd",
+    "success": "Sukces"
   },
   "auth": {
     "signIn": "Zaloguj się",
@@ -150,28 +150,6 @@
     "notSupported": "Twoja przeglądarka nie obsługuje kluczy dostępu",
     "benefits": "Szybsze i bezpieczniejsze logowanie bez hasła"
   },
-  "meta": {
-    "signIn": {
-      "title": "Logowanie - Planer Wystąpień Publicznych",
-      "description": "Zaloguj się, aby uzyskać dostęp do swojego panelu planowania wystąpień i zarządzać swoimi prezentacjami."
-    },
-    "dashboard": {
-      "title": "Panel główny - Planer Wystąpień Publicznych",
-      "description": "Zarządzaj swoimi wystąpieniami i prezentacjami"
-    },
-    "register": {
-      "title": "Rejestracja - Planer Wystąpień Publicznych",
-      "description": "Utwórz nowe konto, aby rozpocząć planowanie i zarządzanie wystąpieniami publicznymi"
-    },
-    "emailVerification": {
-      "title": "Weryfikacja e-mail - Planer Wystąpień Publicznych",
-      "description": "Zweryfikuj swój adres e-mail, aby aktywować konto"
-    },
-    "publicTalks": {
-      "title": "Wykłady publiczne - Planer Wystąpień Publicznych",
-      "description": "Przeglądaj listę 187 wykładów publicznych z możliwością wyszukiwania i sortowania"
-    }
-  },
   "errors": {
     "unexpectedError": "Wystąpił nieoczekiwany błąd",
     "networkError": "Błąd połączenia z serwerem",
@@ -187,7 +165,24 @@
     "talkNotFound": "Nie znaleziono wykładu",
     "talkUpdateFailed": "Aktualizacja wykładu nie powiodła się",
     "talkCreateFailed": "Tworzenie wykładu nie powiodło się",
-    "talkRetrieveFailed": "Nie udało się pobrać zaktualizowanego wykładu"
+    "talkRetrieveFailed": "Nie udało się pobrać zaktualizowanego wykładu",
+    "publisherNotFound": "Nie znaleziono głosiciela",
+    "publisherCannotChair": "Ten głosiciel nie może przewodniczyć zebraniu w weekend",
+    "publisherCannotConductWatchtower": "Ten głosiciel nie może prowadzić studium Strażnicy",
+    "publisherCannotRead": "Ten głosiciel nie może czytać",
+    "publisherCannotPray": "Ten głosiciel nie może prowadzić modlitwy publicznej",
+    "publisherNotCircuitOverseer": "Ten głosiciel nie jest nadzorcą obwodu",
+    "publisherCannotDeliverPublicTalks": "Ten głosiciel nie może przedstawiać wykładów publicznych",
+    "publishersAlreadyAssigned": "Jeden lub więcej głosicieli jest już przydzielonych na ten dzień",
+    "programCreateFailed": "Nie udało się utworzyć programu zebrania",
+    "partCreateFailed": "Nie udało się utworzyć części programu",
+    "programIdRequired": "Identyfikator programu jest wymagany",
+    "programNotFound": "Nie znaleziono programu zebrania",
+    "meetingAlreadyScheduled": "Zebranie na ten dzień jest już zaplanowane",
+    "dateMustBeFuture": "Data musi być w przyszłości",
+    "userAlreadyLinked": "Ten użytkownik jest już powiązany z innym głosicielem",
+    "publicTalkTitleRequired": "Tytuł wykładu publicznego jest wymagany",
+    "serviceTalkTitleRequired": "Tytuł przemówienia służbowego jest wymagany"
   },
   "speakers": {
     "title": "Mówcy",
@@ -224,6 +219,33 @@
       "archiveError": "Wystąpił błąd podczas archiwizacji"
     }
   },
+  "publishers": {
+    "title": "Głosiciele",
+    "totalPublishers": "{count} głosicieli",
+    "searchPlaceholder": "Szukaj po imieniu lub nazwisku...",
+    "noResults": "Nie znaleziono głosicieli",
+    "linkedToUser": "Powiązany z użytkownikiem",
+    "actions": {
+      "add": "Dodaj głosiciela",
+      "edit": "Edytuj głosiciela",
+      "linkUser": "Powiąż użytkownika",
+      "unlinkUser": "Odłącz użytkownika"
+    },
+    "capabilities": {
+      "elder": "Starszy",
+      "ministerialServant": "Sługa zboru",
+      "canChairWeekendMeeting": "Może przewodniczyć zebraniu w weekend",
+      "conductsWatchtowerStudy": "Prowadzi studium Strażnicy",
+      "backupWatchtowerConductor": "Zastępca prowadzącego Strażnicę",
+      "reader": "Czytający",
+      "offersPublicPrayer": "Prowadzi modlitwę publiczną",
+      "deliversPublicTalks": "Przedstawia wykłady publiczne",
+      "circuitOverseer": "Nadzorca obwodu"
+    },
+    "messages": {
+      "linkUserFeatureComingSoon": "Funkcja powiązywania użytkowników będzie wkrótce dostępna"
+    }
+  },
   "validation": {
     "required": "To pole jest wymagane",
     "email": "Wprowadź prawidłowy adres email",
@@ -248,17 +270,29 @@
     "statusInvalid": "Nieprawidłowa wartość statusu. Dopuszczalne: 'circuit_overseer', 'will_be_replaced' lub null",
     "dateRequired": "Data jest wymagana",
     "dateMustBeSunday": "Data musi być niedzielą",
+    "dateMustBeFuture": "Data musi być w przyszłości",
     "meetingProgramRequired": "Program zebrania jest wymagany",
     "partRequired": "Część programu jest wymagana",
     "speakerRequired": "Mówca jest wymagany",
+    "publisherRequired": "Głosiciel jest wymagany",
+    "speakerSourceTypeInvalid": "Nieprawidłowy typ źródła mówcy. Dopuszczalne: 'visiting_speaker' lub 'local_publisher'",
+    "speakerOrPublisherRequired": "Musisz wybrać mówcę przyjezdnego lub lokalnego głosiciela",
     "customTalkTitleTooLong": "Tytuł własnego wykładu nie może być dłuższy niż 200 znaków",
     "talkIdOrCustomTitleRequired": "Musisz wybrać wykład lub wprowadzić tytuł własnego wykładu"
   },
   "meetings": {
     "title": "Zebrania w weekend",
     "description": "Przeglądaj zaplanowane zebrania w weekend z wykładami publicznymi",
-    "managePublicTalks": "Zarządzaj wykładami publicznymi",
+    "managePublicTalksButton": "Planuj wykłady",
+    "manageRestParts": "Planuj zebrania",
+    "managePublicTalks": {
+      "title": "Zarządzaj wykładami publicznymi",
+      "description": "Planuj zebrania w weekend z wykładami publicznymi"
+    },
     "speaker": "Mówca",
+    "speakerSourceType": "Typ mówcy",
+    "visitingSpeaker": "Mówca przyjezdny",
+    "localPublisher": "Lokalny mówca",
     "talk": "Wykład",
     "selectTalk": "Wybierz wykład",
     "customTalk": "Własny wykład",
@@ -272,12 +306,10 @@
     "allScheduledDescription": "Wszystkie nadchodzące niedziele mają zaplanowane zebrania.",
     "backToList": "Powrót do listy",
     "noTalk": "Brak wykładu",
-    "managePublicTalks": {
-      "title": "Zarządzaj wykładami publicznymi",
-      "description": "Planuj zebrania w weekend z wykładami publicznymi"
-    },
+    "noTalkTitle": "Brak tytułu wykładu",
     "modal": {
-      "title": "Zaplanuj zebranie"
+      "title": "Zaplanuj zebranie",
+      "editTitle": "Edytuj zebranie"
     },
     "messages": {
       "scheduleCreated": "Zebranie zostało zaplanowane",
@@ -290,35 +322,123 @@
       "confirm": "Tak, zaplanuj mimo to"
     }
   },
-  "meta": {
-    "signIn": {
-      "title": "Logowanie - Planer Wystąpień Publicznych",
-      "description": "Zaloguj się, aby uzyskać dostęp do swojego panelu planowania wystąpień i zarządzać swoimi prezentacjami."
+  "weekendMeetings": {
+    "title": "Planowanie zebrań w weekend",
+    "plan": "Zaplanuj zebranie",
+    "chairman": "Przewodniczący",
+    "watchtowerStudy": "Studium Strażnicy",
+    "reader": "Lektor",
+    "prayer": "Modlitwa",
+    "circuitOverseer": "Nadzorca obwodu",
+    "publicTalkTitle": "Tytuł wykładu publicznego",
+    "publicTalkTitlePlaceholder": "Wprowadź tytuł wykładu publicznego",
+    "circuitOverseerTalk": "Przemówienie służbowe nadzorcy obwodu",
+    "circuitOverseerTalkTitle": "Tytuł przemówienia służbowego",
+    "circuitOverseerTalkTitlePlaceholder": "Wprowadź tytuł przemówienia służbowego",
+    "parts": {
+      "chairman": "Przewodniczący",
+      "publicTalk": "Wykład publiczny",
+      "watchtowerStudy": "Studium Strażnicy",
+      "reader": "Lektor",
+      "closingPrayer": "Modlitwa końcowa",
+      "circuitOverseerTalk": "Przemówienie służbowe nadzorcy obwodu"
+    },
+    "modal": {
+      "planTitle": "Zaplanuj zebranie w weekend",
+      "editTitle": "Edytuj zebranie w weekend",
+      "selectDate": "Wybierz datę",
+      "selectPublishers": "Wybierz głosicieli",
+      "isCircuitOverseerVisit": "Wizyta nadzorcy obwodu",
+      "overrideDuplicates": "Zastąp istniejące",
+      "save": "Zapisz",
+      "cancel": "Anuluj"
+    },
+    "messages": {
+      "meetingPlanned": "Zebranie zostało zaplanowane",
+      "meetingUpdated": "Zebranie zostało zaktualizowane"
+    }
+  },
+  "seo": {
+    "auth": {
+      "signIn": {
+        "title": "Logowanie - Planer Wystąpień Publicznych",
+        "description": "Zaloguj się, aby uzyskać dostęp do swojego panelu planowania wystąpień i zarządzać swoimi prezentacjami.",
+        "ogTitle": "Logowanie - Planer Wystąpień Publicznych",
+        "ogDescription": "Zaloguj się do swojego konta w systemie planowania wystąpień publicznych",
+        "ogImage": "/images/og-signin.jpg"
+      },
+      "register": {
+        "title": "Rejestracja - Planer Wystąpień Publicznych",
+        "description": "Utwórz nowe konto, aby rozpocząć planowanie i zarządzanie wystąpieniami publicznymi",
+        "ogTitle": "Rejestracja - Planer Wystąpień Publicznych",
+        "ogDescription": "Zarejestruj się w systemie planowania wystąpień publicznych",
+        "ogImage": "/images/og-register.jpg"
+      },
+      "verifyEmail": {
+        "title": "Weryfikacja e-mail - Planer Wystąpień Publicznych",
+        "description": "Zweryfikuj swój adres e-mail, aby aktywować konto",
+        "ogTitle": "Weryfikacja e-mail",
+        "ogDescription": "Aktywuj swoje konto poprzez weryfikację adresu e-mail",
+        "ogImage": "/images/og-verify.jpg"
+      }
     },
     "dashboard": {
       "title": "Panel główny - Planer Wystąpień Publicznych",
-      "description": "Zarządzaj swoimi wystąpieniami i prezentacjami"
+      "description": "Zarządzaj swoimi wystąpieniami i prezentacjami",
+      "ogTitle": "Panel główny",
+      "ogDescription": "Twój osobisty panel zarządzania wystąpieniami publicznymi",
+      "ogImage": "/images/og-dashboard.jpg"
     },
-    "register": {
-      "title": "Rejestracja - Planer Wystąpień Publicznych",
-      "description": "Utwórz nowe konto, aby rozpocząć planowanie i zarządzanie wystąpieniami publicznymi"
+    "talks": {
+      "list": {
+        "title": "Wykłady publiczne - Planer Wystąpień Publicznych",
+        "description": "Przeglądaj listę 187 wykładów publicznych z możliwością wyszukiwania i sortowania",
+        "ogTitle": "Wykłady publiczne",
+        "ogDescription": "Kompletna lista wykładów publicznych z możliwością wyszukiwania",
+        "ogImage": "/images/og-talks.jpg"
+      }
     },
-    "emailVerification": {
-      "title": "Weryfikacja e-mail - Planer Wystąpień Publicznych",
-      "description": "Zweryfikuj swój adres e-mail, aby aktywować konto"
+    "speakers": {
+      "list": {
+        "title": "Mówcy - Planer Wystąpień Publicznych",
+        "description": "Lista mówców z ich wykładami i informacjami kontaktowymi",
+        "ogTitle": "Mówcy",
+        "ogDescription": "Zarządzaj mówcami i ich wykładami publicznymi",
+        "ogImage": "/images/og-speakers.jpg"
+      }
     },
-    "publicTalks": {
-      "title": "Wykłady publiczne - Planer Wystąpień Publicznych",
-      "description": "Przeglądaj listę 187 wykładów publicznych z możliwością wyszukiwania i sortowania"
+    "publishers": {
+      "list": {
+        "title": "Głosiciele - Planer Wystąpień Publicznych",
+        "description": "Lista głosicieli lokalnego zboru z przypisanymi rolami",
+        "ogTitle": "Głosiciele",
+        "ogDescription": "Zarządzaj głosicielami i ich przypisaniami w zborze",
+        "ogImage": "/images/og-publishers.jpg"
+      }
     },
     "meetings": {
       "list": {
         "title": "Zebrania w weekend - Planer Wystąpień Publicznych",
-        "description": "Przeglądaj i zarządzaj zaplanowanymi zebraniami w weekend z wykładami publicznymi"
+        "description": "Przeglądaj i zarządzaj zebraniami w weekend z wykładami",
+        "ogTitle": "Zebrania w weekend",
+        "ogDescription": "Kalendarz zebrań w weekend z wykładami publicznymi",
+        "ogImage": "/images/og-meetings-list.jpg"
       },
-      "managePublicTalks": {
-        "title": "Zarządzaj wykładami publicznymi - Planer Wystąpień Publicznych",
-        "description": "Planuj zebrania w weekend z wykładami publicznymi na kalendarzu"
+      "manage": {
+        "publicTalks": {
+          "title": "Zarządzaj wykładami publicznymi - Planer Wystąpień",
+          "description": "Planuj zebrania w weekend z wykładami na kalendarzu",
+          "ogTitle": "Zarządzaj wykładami publicznymi",
+          "ogDescription": "Kalendarz planowania wykładów publicznych na zebraniach",
+          "ogImage": "/images/og-manage-talks.jpg"
+        }
+      },
+      "planWeekend": {
+        "title": "Planowanie zebrań w weekend - Planer Wystąpień",
+        "description": "Zaplanuj kompletny program zebrania w weekend z przydziałami",
+        "ogTitle": "Planowanie zebrań w weekend",
+        "ogDescription": "Kompletny edytor programu zebrania z przydziałami braci",
+        "ogImage": "/images/og-plan-weekend.jpg"
       }
     }
   }

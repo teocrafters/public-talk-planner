@@ -1,6 +1,7 @@
-import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core"
-import { relations } from "drizzle-orm"
-import { organization } from "./auth-schema"
+import { sqliteTable, text, integer, uniqueIndex, check } from "drizzle-orm/sqlite-core"
+import { relations, sql } from "drizzle-orm"
+import { organization, user } from "./auth-schema"
+import { SPEAKER_SOURCE_TYPES } from "../../shared/constants/speaker-sources"
 
 export * from "./auth-schema"
 
@@ -68,119 +69,216 @@ export type Speaker = typeof speakers.$inferSelect
 export type NewSpeaker = typeof speakers.$inferInsert
 export type SpeakerTalk = typeof speakerTalks.$inferSelect
 
+// Publishers table - Local congregation publishers
+export const publishers = sqliteTable("publishers", {
+  id: text("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  userId: text("user_id")
+    .unique()
+    .references(() => user.id, { onDelete: "set null" }),
+  isElder: integer("is_elder", { mode: "boolean" }).notNull().default(false),
+  isMinisterialServant: integer("is_ministerial_servant", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  isRegularPioneer: integer("is_regular_pioneer", { mode: "boolean" }).notNull().default(false),
+  canChairWeekendMeeting: integer("can_chair_weekend_meeting", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  conductsWatchtowerStudy: integer("conducts_watchtower_study", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  backupWatchtowerConductor: integer("backup_watchtower_conductor", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  isReader: integer("is_reader", { mode: "boolean" }).notNull().default(false),
+  offersPublicPrayer: integer("offers_public_prayer", { mode: "boolean" }).notNull().default(false),
+  deliversPublicTalks: integer("delivers_public_talks", { mode: "boolean" }).notNull().default(false),
+  isCircuitOverseer: integer("is_circuit_overseer", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+})
+
+export type Publisher = typeof publishers.$inferSelect
+export type NewPublisher = typeof publishers.$inferInsert
+
 export const meetingPrograms = sqliteTable("meeting_programs", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	type: text("type").$type<"weekend" | "midweek">().notNull(),
-	name: text("name").notNull(),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  type: text("type").$type<"weekend" | "midweek">().notNull(),
+  date: integer("date", { mode: "number" }).notNull(),
+  isCircuitOverseerVisit: integer("is_circuit_overseer_visit", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  name: text("name"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
 
 export const meetingProgramParts = sqliteTable("meeting_program_parts", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	meetingProgramId: integer("meeting_program_id")
-		.notNull()
-		.references(() => meetingPrograms.id, { onDelete: "cascade" }),
-	name: text("name").notNull(),
-	order: integer("order").notNull(),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  meetingProgramId: integer("meeting_program_id")
+    .notNull()
+    .references(() => meetingPrograms.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  name: text("name"),
+  order: integer("order").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
 
-export const scheduledMeetings = sqliteTable(
-	"scheduled_meetings",
-	{
-		id: text("id").primaryKey(),
-		date: integer("date", { mode: "timestamp" }).notNull(),
-		meetingProgramId: integer("meeting_program_id")
-			.notNull()
-			.references(() => meetingPrograms.id, { onDelete: "restrict" }),
-		partId: integer("part_id")
-			.notNull()
-			.references(() => meetingProgramParts.id, { onDelete: "restrict" }),
-		speakerId: text("speaker_id")
-			.notNull()
-			.references(() => speakers.id, { onDelete: "restrict" }),
-		talkId: integer("talk_id").references(() => publicTalks.id, { onDelete: "restrict" }),
-		customTalkTitle: text("custom_talk_title"),
-		isCircuitOverseerVisit: integer("is_circuit_overseer_visit", { mode: "boolean" })
-			.notNull()
-			.default(false),
-		overrideValidation: integer("override_validation", { mode: "boolean" })
-			.notNull()
-			.default(false),
-		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-	},
-	table => {
-		return {
-			uniqueSchedule: uniqueIndex("unique_schedule").on(
-				table.date,
-				table.meetingProgramId,
-				table.partId
-			),
-		}
-	}
+// Scheduled public talks (renamed from scheduledMeetings)
+export const scheduledPublicTalks = sqliteTable(
+  "scheduled_public_talks",
+  {
+    id: text("id").primaryKey(),
+    date: integer("date", { mode: "timestamp" }).notNull(),
+    meetingProgramId: integer("meeting_program_id")
+      .notNull()
+      .references(() => meetingPrograms.id, { onDelete: "restrict" }),
+    partId: integer("part_id")
+      .notNull()
+      .references(() => meetingProgramParts.id, { onDelete: "restrict" }),
+    // Speaker source type: visiting_speaker or local_publisher
+    speakerSourceType: text("speaker_source_type")
+      .notNull()
+      .default(SPEAKER_SOURCE_TYPES.VISITING_SPEAKER),
+    // Speaker reference (for visiting speakers from external congregations)
+    speakerId: text("speaker_id").references(() => speakers.id, { onDelete: "restrict" }),
+    // Publisher reference (for local congregation publishers)
+    publisherId: text("publisher_id").references(() => publishers.id, { onDelete: "restrict" }),
+    talkId: integer("talk_id").references(() => publicTalks.id, { onDelete: "restrict" }),
+    customTalkTitle: text("custom_talk_title"),
+    overrideValidation: integer("override_validation", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  table => {
+    return {
+      uniqueSchedule: uniqueIndex("unique_public_talk_schedule").on(
+        table.date,
+        table.meetingProgramId,
+        table.partId
+      ),
+      // Ensure exactly one of speakerId or publisherId is set
+      speakerOrPublisherCheck: check(
+        "speaker_or_publisher_check",
+        sql`(speaker_id IS NOT NULL AND publisher_id IS NULL) OR (speaker_id IS NULL AND publisher_id IS NOT NULL)`
+      ),
+    }
+  }
+)
+
+// Meeting scheduled parts - Non-public-talk assignments
+export const meetingScheduledParts = sqliteTable(
+  "meeting_scheduled_parts",
+  {
+    id: text("id").primaryKey(),
+    meetingProgramPartId: integer("meeting_program_part_id")
+      .notNull()
+      .references(() => meetingProgramParts.id, { onDelete: "cascade" }),
+    publisherId: text("publisher_id")
+      .notNull()
+      .references(() => publishers.id, { onDelete: "restrict" }),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  table => {
+    return {
+      uniquePublisherPerPart: uniqueIndex("meeting_scheduled_parts_part_unique").on(
+        table.meetingProgramPartId
+      ),
+    }
+  }
 )
 
 export type MeetingProgram = typeof meetingPrograms.$inferSelect
 export type NewMeetingProgram = typeof meetingPrograms.$inferInsert
 export type MeetingProgramPart = typeof meetingProgramParts.$inferSelect
 export type NewMeetingProgramPart = typeof meetingProgramParts.$inferInsert
-export type ScheduledMeeting = typeof scheduledMeetings.$inferSelect
-export type NewScheduledMeeting = typeof scheduledMeetings.$inferInsert
+export type ScheduledPublicTalk = typeof scheduledPublicTalks.$inferSelect
+export type NewScheduledPublicTalk = typeof scheduledPublicTalks.$inferInsert
+export type MeetingScheduledPart = typeof meetingScheduledParts.$inferSelect
+export type NewMeetingScheduledPart = typeof meetingScheduledParts.$inferInsert
 
-export const scheduledMeetingsRelations = relations(scheduledMeetings, ({ one }) => ({
-	speaker: one(speakers, {
-		fields: [scheduledMeetings.speakerId],
-		references: [speakers.id],
-	}),
-	talk: one(publicTalks, {
-		fields: [scheduledMeetings.talkId],
-		references: [publicTalks.id],
-	}),
-	meetingProgram: one(meetingPrograms, {
-		fields: [scheduledMeetings.meetingProgramId],
-		references: [meetingPrograms.id],
-	}),
-	part: one(meetingProgramParts, {
-		fields: [scheduledMeetings.partId],
-		references: [meetingProgramParts.id],
-	}),
+// Relations
+export const publishersRelations = relations(publishers, ({ one, many }) => ({
+  user: one(user, {
+    fields: [publishers.userId],
+    references: [user.id],
+  }),
+  meetingScheduledParts: many(meetingScheduledParts),
+  scheduledPublicTalks: many(scheduledPublicTalks),
+}))
+
+export const scheduledPublicTalksRelations = relations(scheduledPublicTalks, ({ one }) => ({
+  speaker: one(speakers, {
+    fields: [scheduledPublicTalks.speakerId],
+    references: [speakers.id],
+  }),
+  publisher: one(publishers, {
+    fields: [scheduledPublicTalks.publisherId],
+    references: [publishers.id],
+  }),
+  talk: one(publicTalks, {
+    fields: [scheduledPublicTalks.talkId],
+    references: [publicTalks.id],
+  }),
+  meetingProgram: one(meetingPrograms, {
+    fields: [scheduledPublicTalks.meetingProgramId],
+    references: [meetingPrograms.id],
+  }),
+  part: one(meetingProgramParts, {
+    fields: [scheduledPublicTalks.partId],
+    references: [meetingProgramParts.id],
+  }),
+}))
+
+export const meetingScheduledPartsRelations = relations(meetingScheduledParts, ({ one }) => ({
+  part: one(meetingProgramParts, {
+    fields: [meetingScheduledParts.meetingProgramPartId],
+    references: [meetingProgramParts.id],
+  }),
+  publisher: one(publishers, {
+    fields: [meetingScheduledParts.publisherId],
+    references: [publishers.id],
+  }),
 }))
 
 export const speakersRelations = relations(speakers, ({ one, many }) => ({
-	congregation: one(organization, {
-		fields: [speakers.congregationId],
-		references: [organization.id],
-	}),
-	speakerTalks: many(speakerTalks),
-	scheduledMeetings: many(scheduledMeetings),
+  congregation: one(organization, {
+    fields: [speakers.congregationId],
+    references: [organization.id],
+  }),
+  speakerTalks: many(speakerTalks),
+  scheduledPublicTalks: many(scheduledPublicTalks),
 }))
 
 export const meetingProgramsRelations = relations(meetingPrograms, ({ many }) => ({
-	parts: many(meetingProgramParts),
-	scheduledMeetings: many(scheduledMeetings),
+  parts: many(meetingProgramParts),
+  scheduledPublicTalks: many(scheduledPublicTalks),
 }))
 
 export const meetingProgramPartsRelations = relations(meetingProgramParts, ({ one, many }) => ({
-	meetingProgram: one(meetingPrograms, {
-		fields: [meetingProgramParts.meetingProgramId],
-		references: [meetingPrograms.id],
-	}),
-	scheduledMeetings: many(scheduledMeetings),
+  meetingProgram: one(meetingPrograms, {
+    fields: [meetingProgramParts.meetingProgramId],
+    references: [meetingPrograms.id],
+  }),
+  scheduledPublicTalks: many(scheduledPublicTalks),
+  meetingScheduledParts: many(meetingScheduledParts),
 }))
 
 export const publicTalksRelations = relations(publicTalks, ({ many }) => ({
-	speakerTalks: many(speakerTalks),
-	scheduledMeetings: many(scheduledMeetings),
+  speakerTalks: many(speakerTalks),
+  scheduledPublicTalks: many(scheduledPublicTalks),
 }))
 
 export const speakerTalksRelations = relations(speakerTalks, ({ one }) => ({
-	speaker: one(speakers, {
-		fields: [speakerTalks.speakerId],
-		references: [speakers.id],
-	}),
-	talk: one(publicTalks, {
-		fields: [speakerTalks.talkId],
-		references: [publicTalks.id],
-	}),
+  speaker: one(speakers, {
+    fields: [speakerTalks.speakerId],
+    references: [speakers.id],
+  }),
+  talk: one(publicTalks, {
+    fields: [speakerTalks.talkId],
+    references: [publicTalks.id],
+  }),
 }))

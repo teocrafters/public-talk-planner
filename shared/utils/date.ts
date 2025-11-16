@@ -24,8 +24,8 @@ export { dayjs }
  * @returns ISO 8601 string in UTC (e.g., "2025-01-15T12:00:00.000Z")
  */
 export function calendarDateToISO(date: { year: number; month: number; day: number }): string {
-	const dateString = `${date.year}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`
-	return dayjs.utc(dateString).hour(12).minute(0).second(0).millisecond(0).toISOString()
+  const dateString = `${date.year}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`
+  return dayjs.utc(dateString).hour(12).minute(0).second(0).millisecond(0).toISOString()
 }
 
 /**
@@ -36,7 +36,7 @@ export function calendarDateToISO(date: { year: number; month: number; day: numb
  * @returns true if dates represent the same calendar day
  */
 export function isSameDay(date1: Date | string, date2: Date | string): boolean {
-	return dayjs(date1).isSame(dayjs(date2), "day")
+  return dayjs(date1).isSame(dayjs(date2), "day")
 }
 
 /**
@@ -45,7 +45,7 @@ export function isSameDay(date1: Date | string, date2: Date | string): boolean {
  * @returns Date object representing start of current day
  */
 export function getToday(): Date {
-	return dayjs().startOf("day").toDate()
+  return dayjs().startOf("day").toDate()
 }
 
 /**
@@ -55,7 +55,7 @@ export function getToday(): Date {
  * @returns Formatted string in Polish (e.g., "poniedziałek, 15 stycznia 2025")
  */
 export function formatDatePL(date: Date | string | number): string {
-	return dayjs(typeof date === "number" ? date * 1000 : date).format("dddd, D MMMM YYYY")
+  return dayjs(typeof date === "number" ? date * 1000 : date).format("dddd, D MMMM YYYY")
 }
 
 /**
@@ -65,7 +65,7 @@ export function formatDatePL(date: Date | string | number): string {
  * @returns Unix timestamp in seconds
  */
 export function dateToUnixTimestamp(date: Date): number {
-	return dayjs(date).unix()
+  return dayjs(date).unix()
 }
 
 /**
@@ -75,5 +75,5 @@ export function dateToUnixTimestamp(date: Date): number {
  * @returns Date object
  */
 export function unixTimestampToDate(timestamp: number): Date {
-	return dayjs.unix(timestamp).toDate()
+  return dayjs.unix(timestamp).toDate()
 }

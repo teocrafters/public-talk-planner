@@ -1,6 +1,7 @@
 # Nuxt UI 4 Integration Guide
 
-Comprehensive guidelines for using Nuxt UI 4 components with proper API verification, slot patterns, and event handling.
+Comprehensive guidelines for using Nuxt UI 4 components with proper API verification, slot patterns,
+and event handling.
 
 ## Core Integration Principles
 
@@ -27,15 +28,15 @@ Comprehensive guidelines for using Nuxt UI 4 components with proper API verifica
 // mcp__nuxt-ui__get_component(componentName: "DropdownMenu")
 
 // Step 2: Import required types
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from "@nuxt/ui"
 
 // Step 3: Use verified API patterns
 const items: DropdownMenuItem[] = [
   {
-    label: 'Profile',
-    icon: 'i-lucide-user',
-    onSelect: () => handleProfile()
-  }
+    label: "Profile",
+    icon: "i-lucide-user",
+    onSelect: () => handleProfile(),
+  },
 ]
 ```
 
@@ -55,7 +56,9 @@ const items: DropdownMenuItem[] = [
 
 ```vue
 <template>
-  <UModal v-model:open="isOpen" title="Modal Title">
+  <UModal
+    v-model:open="isOpen"
+    title="Modal Title">
     <!-- Trigger in default slot -->
     <UButton label="Open Modal" />
 
@@ -66,8 +69,12 @@ const items: DropdownMenuItem[] = [
 
     <!-- Footer receives { close } function -->
     <template #footer="{ close }">
-      <UButton label="Cancel" @click="close" />
-      <UButton label="Confirm" @click="handleConfirm" />
+      <UButton
+        label="Cancel"
+        @click="close" />
+      <UButton
+        label="Confirm"
+        @click="handleConfirm" />
     </template>
   </UModal>
 </template>
@@ -111,17 +118,17 @@ Items use `onSelect` callback, NOT `click` or `onClick`:
 
 ```vue
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
+  import type { DropdownMenuItem } from "@nuxt/ui"
 
-const items: DropdownMenuItem[] = [
-  {
-    label: 'Edit',
-    icon: 'i-lucide-pencil',
-    onSelect: () => handleEdit(), // ✅ Correct
-    // onClick: () => handleEdit(), // ❌ Wrong
-    // click: () => handleEdit(),   // ❌ Wrong
-  }
-]
+  const items: DropdownMenuItem[] = [
+    {
+      label: "Edit",
+      icon: "i-lucide-pencil",
+      onSelect: () => handleEdit(), // ✅ Correct
+      // onClick: () => handleEdit(), // ❌ Wrong
+      // click: () => handleEdit(),   // ❌ Wrong
+    },
+  ]
 </script>
 
 <template>
@@ -134,30 +141,30 @@ const items: DropdownMenuItem[] = [
 #### Item Structure with Types
 
 ```typescript
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from "@nuxt/ui"
 
 // Proper typing ensures correct properties
 const items: DropdownMenuItem[] = [
   {
-    label: 'Profile',
-    icon: 'i-lucide-user',
-    onSelect: () => console.log('Profile')
+    label: "Profile",
+    icon: "i-lucide-user",
+    onSelect: () => console.log("Profile"),
   },
   {
-    label: 'Settings',
-    icon: 'i-lucide-cog',
-    kbds: ['meta', 's'],
-    onSelect: () => console.log('Settings')
+    label: "Settings",
+    icon: "i-lucide-cog",
+    kbds: ["meta", "s"],
+    onSelect: () => console.log("Settings"),
   },
   {
-    type: 'separator' // Special item type
+    type: "separator", // Special item type
   },
   {
-    label: 'Logout',
-    icon: 'i-lucide-log-out',
-    color: 'error',
-    onSelect: () => handleLogout()
-  }
+    label: "Logout",
+    icon: "i-lucide-log-out",
+    color: "error",
+    onSelect: () => handleLogout(),
+  },
 ]
 ```
 
@@ -169,24 +176,24 @@ Use nested arrays for grouped items:
 const items: DropdownMenuItem[][] = [
   [
     {
-      label: 'Profile',
-      icon: 'i-lucide-user',
-      onSelect: () => console.log('Profile')
-    }
+      label: "Profile",
+      icon: "i-lucide-user",
+      onSelect: () => console.log("Profile"),
+    },
   ],
   [
     {
-      label: 'Settings',
-      icon: 'i-lucide-cog',
-      onSelect: () => console.log('Settings')
+      label: "Settings",
+      icon: "i-lucide-cog",
+      onSelect: () => console.log("Settings"),
     },
     {
-      label: 'Logout',
-      icon: 'i-lucide-log-out',
-      color: 'error',
-      onSelect: () => handleLogout()
-    }
-  ]
+      label: "Logout",
+      icon: "i-lucide-log-out",
+      color: "error",
+      onSelect: () => handleLogout(),
+    },
+  ],
 ]
 ```
 
@@ -197,17 +204,17 @@ const showBookmarks = ref(true)
 
 const items: DropdownMenuItem[] = [
   {
-    label: 'Show Bookmarks',
-    icon: 'i-lucide-bookmark',
-    type: 'checkbox',
+    label: "Show Bookmarks",
+    icon: "i-lucide-bookmark",
+    type: "checkbox",
     checked: showBookmarks.value,
     onUpdateChecked: (checked: boolean) => {
       showBookmarks.value = checked
     },
     onSelect: (e: Event) => {
       e.preventDefault() // Prevent menu from closing
-    }
-  }
+    },
+  },
 ]
 ```
 
@@ -220,12 +227,16 @@ Use `loading` prop with automatic handling via `loading-auto`:
 ```vue
 <template>
   <!-- Manual loading control -->
-  <UButton :loading="isLoading" @click="handleClick">
+  <UButton
+    :loading="isLoading"
+    @click="handleClick">
     Submit
   </UButton>
 
   <!-- Automatic loading from promise -->
-  <UButton loading-auto @click="asyncHandler">
+  <UButton
+    loading-auto
+    @click="asyncHandler">
     Submit
   </UButton>
 </template>
@@ -236,14 +247,22 @@ Use `loading` prop with automatic handling via `loading-auto`:
 ```vue
 <template>
   <!-- Leading icon -->
-  <UButton icon="i-lucide-search" label="Search" />
-  <UButton leading-icon="i-lucide-search" label="Search" />
+  <UButton
+    icon="i-lucide-search"
+    label="Search" />
+  <UButton
+    leading-icon="i-lucide-search"
+    label="Search" />
 
   <!-- Trailing icon -->
-  <UButton trailing-icon="i-lucide-arrow-right" label="Next" />
+  <UButton
+    trailing-icon="i-lucide-arrow-right"
+    label="Next" />
 
   <!-- Icon only (no label) -->
-  <UButton icon="i-lucide-search" square />
+  <UButton
+    icon="i-lucide-search"
+    square />
 </template>
 ```
 
@@ -260,7 +279,9 @@ Use `loading` prop with automatic handling via `loading-auto`:
     name="email"
     help="We'll never share your email."
     required>
-    <UInput v-model="email" type="email" />
+    <UInput
+      v-model="email"
+      type="email" />
   </UFormField>
 </template>
 ```
@@ -269,25 +290,33 @@ Use `loading` prop with automatic handling via `loading-auto`:
 
 ```vue
 <script setup lang="ts">
-const state = reactive({ email: '' })
+  const state = reactive({ email: "" })
 
-async function onSubmit() {
-  // Form submission logic
-}
+  async function onSubmit() {
+    // Form submission logic
+  }
 
-function validate(data: typeof state) {
-  if (!data.email) return [{ name: 'email', message: 'Required' }]
-  return []
-}
+  function validate(data: typeof state) {
+    if (!data.email) return [{ name: "email", message: "Required" }]
+    return []
+  }
 </script>
 
 <template>
-  <UForm :state="state" :validate="validate" @submit="onSubmit">
-    <UFormField name="email" label="Email" required>
+  <UForm
+    :state="state"
+    :validate="validate"
+    @submit="onSubmit">
+    <UFormField
+      name="email"
+      label="Email"
+      required>
       <UInput v-model="state.email" />
     </UFormField>
 
-    <UButton type="submit" loading-auto>
+    <UButton
+      type="submit"
+      loading-auto>
       Submit
     </UButton>
   </UForm>
@@ -296,7 +325,8 @@ function validate(data: typeof state) {
 
 ### UModal with Forms Pattern
 
-**Critical**: When using forms inside modals, place UForm in the `#body` slot with a ref attribute, and trigger submission from the `#footer` button using that ref.
+**Critical**: When using forms inside modals, place UForm in the `#body` slot with a ref attribute,
+and trigger submission from the `#footer` button using that ref.
 
 #### Why This Pattern
 
@@ -367,11 +397,17 @@ function validate(data: typeof state) {
 ```vue
 <template>
   <!-- Leading icon -->
-  <UInput v-model="value" icon="i-lucide-search" />
-  <UInput v-model="value" leading-icon="i-lucide-search" />
+  <UInput
+    v-model="value"
+    icon="i-lucide-search" />
+  <UInput
+    v-model="value"
+    leading-icon="i-lucide-search" />
 
   <!-- Trailing icon -->
-  <UInput v-model="value" trailing-icon="i-lucide-at-sign" />
+  <UInput
+    v-model="value"
+    trailing-icon="i-lucide-at-sign" />
 </template>
 ```
 
@@ -398,13 +434,13 @@ function validate(data: typeof state) {
 
 ### Component-Specific Events
 
-| Component      | Event Property | Example                                   |
-|----------------|----------------|-------------------------------------------|
-| UDropdownMenu  | `onSelect`     | `{ onSelect: () => handleClick() }`       |
-| UButton        | `@click`       | `<UButton @click="handleClick" />`        |
-| UInput         | `@update:modelValue` | `<UInput v-model="value" />`        |
-| UModal         | `@update:open` | `<UModal v-model:open="isOpen" />`        |
-| UForm          | `@submit`      | `<UForm @submit="handleSubmit" />`        |
+| Component     | Event Property       | Example                             |
+| ------------- | -------------------- | ----------------------------------- |
+| UDropdownMenu | `onSelect`           | `{ onSelect: () => handleClick() }` |
+| UButton       | `@click`             | `<UButton @click="handleClick" />`  |
+| UInput        | `@update:modelValue` | `<UInput v-model="value" />`        |
+| UModal        | `@update:open`       | `<UModal v-model:open="isOpen" />`  |
+| UForm         | `@submit`            | `<UForm @submit="handleSubmit" />`  |
 
 ### Common Event Mistakes
 
@@ -420,13 +456,13 @@ function validate(data: typeof state) {
 
 ```typescript
 // Component-specific types
-import type { DropdownMenuItem } from '@nuxt/ui'
-import type { ButtonProps } from '@nuxt/ui'
-import type { FormSubmitEvent } from '#ui/types'
+import type { DropdownMenuItem } from "@nuxt/ui"
+import type { ButtonProps } from "@nuxt/ui"
+import type { FormSubmitEvent } from "#ui/types"
 
 // Use in component
 const items: DropdownMenuItem[] = []
-const buttonProps: ButtonProps = { color: 'primary' }
+const buttonProps: ButtonProps = { color: "primary" }
 ```
 
 ### Type Safety Best Practices
@@ -460,21 +496,21 @@ const buttonProps: ButtonProps = { color: 'primary' }
 
 ```vue
 <script setup lang="ts">
-// ❌ Wrong: Using click instead of onSelect
-const items = [
-  {
-    label: 'Edit',
-    click: () => handleEdit() // Wrong property name
-  }
-]
+  // ❌ Wrong: Using click instead of onSelect
+  const items = [
+    {
+      label: "Edit",
+      click: () => handleEdit(), // Wrong property name
+    },
+  ]
 
-// ✅ Correct: Using onSelect
-const items: DropdownMenuItem[] = [
-  {
-    label: 'Edit',
-    onSelect: () => handleEdit()
-  }
-]
+  // ✅ Correct: Using onSelect
+  const items: DropdownMenuItem[] = [
+    {
+      label: "Edit",
+      onSelect: () => handleEdit(),
+    },
+  ]
 </script>
 ```
 
@@ -483,21 +519,23 @@ const items: DropdownMenuItem[] = [
 ```vue
 <template>
   <!-- ❌ Wrong: Using @select on UDropdownMenu -->
-  <UDropdownMenu :items="items" @select="handleSelect" />
+  <UDropdownMenu
+    :items="items"
+    @select="handleSelect" />
 
   <!-- ✅ Correct: Using onSelect on items -->
   <UDropdownMenu :items="items" />
 </template>
 
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
+  import type { DropdownMenuItem } from "@nuxt/ui"
 
-const items: DropdownMenuItem[] = [
-  {
-    label: 'Item',
-    onSelect: () => handleSelect() // Correct
-  }
-]
+  const items: DropdownMenuItem[] = [
+    {
+      label: "Item",
+      onSelect: () => handleSelect(), // Correct
+    },
+  ]
 </script>
 ```
 
@@ -556,5 +594,3 @@ Before committing component code:
 - Use `mcp__nuxt-ui__list_components` to see all available components
 - Use `mcp__nuxt-ui__get_component_metadata` for detailed prop/slot/emit info
 - Reference official documentation URLs provided by MCP
-- Check @.agents/vue-conventions.md for general Vue patterns
-- Check @.agents/official-vue-components.md for Vue 3 API patterns

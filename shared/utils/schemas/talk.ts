@@ -2,7 +2,10 @@ import { z } from "zod"
 
 export const createTalkSchema = (t: (key: string) => string) => {
   return z.object({
-    no: z.string().min(1, t("validation.talkNumberRequired")).max(10, t("validation.talkNumberTooLong")),
+    no: z
+      .string()
+      .min(1, t("validation.talkNumberRequired"))
+      .max(10, t("validation.talkNumberTooLong")),
 
     title: z
       .string()
@@ -58,9 +61,11 @@ export const talkEditSchema = talkSchema.omit({ no: true })
 
 export const talkStatusSchema = (t: (key: string) => string) => {
   return z.object({
-    status: z.enum(["circuit_overseer", "will_be_replaced"], {
-      message: t("validation.statusInvalid")
-    }).nullable(),
+    status: z
+      .enum(["circuit_overseer", "will_be_replaced"], {
+        message: t("validation.statusInvalid"),
+      })
+      .nullable(),
   })
 }
 

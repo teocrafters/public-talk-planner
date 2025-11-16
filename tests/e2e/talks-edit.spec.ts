@@ -2,9 +2,8 @@ import { test, expect } from "../fixtures"
 
 test.describe("Public Talks Edit", () => {
   test.describe("with editor role", () => {
-    test.use({ storageState: ".auth/talks-manager.json" })
-
-    test("edit talk title", async ({ page }) => {
+    test("edit talk title", async ({ page, authenticateAs }) => {
+      await authenticateAs.publicTalkCoordinator()
       await page.goto("/talks")
 
       // Get the first talk title before editing
@@ -51,7 +50,8 @@ test.describe("Public Talks Edit", () => {
       expect(updatedTitle).toBeDefined()
     })
 
-    test("edit multimedia count", async ({ page }) => {
+    test("edit multimedia count", async ({ page, authenticateAs }) => {
+      await authenticateAs.publicTalkCoordinator()
       await page.goto("/talks")
 
       // Open edit modal for first talk
@@ -87,7 +87,8 @@ test.describe("Public Talks Edit", () => {
       await expect(page.getByText("Wykład został zaktualizowany", { exact: true })).toBeVisible()
     })
 
-    test("validation errors", async ({ page }) => {
+    test("validation errors", async ({ page, authenticateAs }) => {
+      await authenticateAs.publicTalkCoordinator()
       await page.goto("/talks")
 
       // Open edit modal
@@ -114,9 +115,8 @@ test.describe("Public Talks Edit", () => {
   })
 
   test.describe("permission check with member role", () => {
-    test.use({ storageState: ".auth/publisher.json" })
-
-    test("cannot edit as member", async ({ page }) => {
+    test("cannot edit as member", async ({ page, authenticateAs }) => {
+      await authenticateAs.publisher()
       await page.goto("/talks")
 
       // Verify edit button/menu NOT visible for members

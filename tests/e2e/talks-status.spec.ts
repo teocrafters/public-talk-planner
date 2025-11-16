@@ -3,9 +3,8 @@ import type { Locator } from "@playwright/test"
 
 test.describe("Public Talks Status Management", () => {
   test.describe("with editor role", () => {
-    test.use({ storageState: ".auth/talks-manager.json" })
-
-    test("block for circuit overseer", async ({ page }) => {
+    test("block for circuit overseer", async ({ page, authenticateAs }) => {
+      await authenticateAs.publicTalkCoordinator()
       await page.goto("/talks")
 
       // Find a talk without existing status to avoid conflicts
@@ -58,7 +57,8 @@ test.describe("Public Talks Status Management", () => {
       await expect(statusBadge).toBeVisible()
     })
 
-    test("unblock talk", async ({ page }) => {
+    test("unblock talk", async ({ page, authenticateAs }) => {
+      await authenticateAs.publicTalkCoordinator()
       await page.goto("/talks")
 
       // Find a talk without existing status to avoid conflicts
@@ -128,7 +128,8 @@ test.describe("Public Talks Status Management", () => {
       await expect(statusBadge).not.toBeVisible()
     })
 
-    test("mark for replacement", async ({ page }) => {
+    test("mark for replacement", async ({ page, authenticateAs }) => {
+      await authenticateAs.publicTalkCoordinator()
       await page.goto("/talks")
 
       // Find a talk without existing status to avoid conflicts
@@ -183,13 +184,9 @@ test.describe("Public Talks Status Management", () => {
   })
 
   test.describe("permission check with member role", () => {
-    test.use({ storageState: ".auth/publisher.json" })
-
-    test("cannot manage status as member", async ({ page }) => {
+    test("cannot manage status as member", async ({ page, authenticateAs }) => {
+      await authenticateAs.publisher()
       await page.goto("/talks")
-
-      // Wait for page to load completely
-      await page.waitForLoadState("networkidle")
 
       // Verify actions menu NOT visible - check for the container, not just the button
       const actionsMenus = page.getByTestId("talk-actions-menu")
