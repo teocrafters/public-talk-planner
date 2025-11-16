@@ -90,10 +90,7 @@ export default defineTask({
           .select()
           .from(meetingPrograms)
           .where(
-            and(
-              eq(meetingPrograms.type, "weekend"),
-              eq(meetingPrograms.date, dayjs(sunday).unix())
-            )
+            and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, dayjs(sunday).unix()))
           )
           .get()
 
@@ -135,7 +132,6 @@ export default defineTask({
     }
   },
 })
-
 
 function calculateSundays(count: number): Date[] {
   // Start from today at noon UTC to avoid timezone boundary issues

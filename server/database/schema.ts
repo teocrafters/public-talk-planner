@@ -93,7 +93,9 @@ export const publishers = sqliteTable("publishers", {
     .default(false),
   isReader: integer("is_reader", { mode: "boolean" }).notNull().default(false),
   offersPublicPrayer: integer("offers_public_prayer", { mode: "boolean" }).notNull().default(false),
-  deliversPublicTalks: integer("delivers_public_talks", { mode: "boolean" }).notNull().default(false),
+  deliversPublicTalks: integer("delivers_public_talks", { mode: "boolean" })
+    .notNull()
+    .default(false),
   isCircuitOverseer: integer("is_circuit_overseer", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),

@@ -32,12 +32,12 @@ project.
 ```typescript
 // ✅ Correct: Modify schema in server/database/schema.ts
 export const speakers = sqliteTable("speakers", {
-	id: text("id").primaryKey(),
-	firstName: text("first_name").notNull(),
-	lastName: text("last_name").notNull(),
-	// Add new field here
-	email: text("email"),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  id: text("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  // Add new field here
+  email: text("email"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
 
 // Then prompt user to run: pnpm db:generate
@@ -159,17 +159,17 @@ UPDATE speakers SET first_name = UPPER(first_name) WHERE legacy_format = 1;
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 
 export const speakers = sqliteTable("speakers", {
-	id: text("id").primaryKey(),
-	firstName: text("first_name").notNull(),
-	lastName: text("last_name").notNull(),
-	email: text("email"),
-	phone: text("phone"),
-	congregation: text("congregation"),
-	isArchived: integer("is_archived", { mode: "boolean" }).notNull().default(false),
-	// Unix timestamp for custom date (seconds since epoch)
-	availableFrom: integer("available_from", { mode: "number" }),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  id: text("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  congregation: text("congregation"),
+  isArchived: integer("is_archived", { mode: "boolean" }).notNull().default(false),
+  // Unix timestamp for custom date (seconds since epoch)
+  availableFrom: integer("available_from", { mode: "number" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
 // Export type for use in application code
@@ -194,7 +194,7 @@ export { sql, eq, and, or, gte, lte, desc, asc } from "drizzle-orm"
 import * as schema from "~/server/database/schema"
 
 export function useDrizzle() {
-	return drizzle(hubDatabase(), { schema })
+  return drizzle(hubDatabase(), { schema })
 }
 
 export const tables = schema
@@ -213,28 +213,28 @@ export const tables = schema
 const db = useDrizzle()
 
 await db.transaction(async tx => {
-	// Insert talk
-	const [talk] = await tx
-		.insert(tables.talks)
-		.values({
-			id: crypto.randomUUID(),
-			title: "New Talk",
-			speakerId: speaker.id,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		})
-		.returning()
+  // Insert talk
+  const [talk] = await tx
+    .insert(tables.talks)
+    .values({
+      id: crypto.randomUUID(),
+      title: "New Talk",
+      speakerId: speaker.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .returning()
 
-	// Create schedule entry
-	await tx.insert(tables.schedules).values({
-		id: crypto.randomUUID(),
-		talkId: talk.id,
-		scheduledDate: dateTimestamp,
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	})
+  // Create schedule entry
+  await tx.insert(tables.schedules).values({
+    id: crypto.randomUUID(),
+    talkId: talk.id,
+    scheduledDate: dateTimestamp,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  })
 
-	// If any operation fails, both are rolled back
+  // If any operation fails, both are rolled back
 })
 ```
 
@@ -243,7 +243,6 @@ await db.transaction(async tx => {
 ### Complete Migration Workflow
 
 1. **Modify Schema**
-
    - Edit `server/database/schema.ts`
    - Add, remove, or modify table definitions
    - Update TypeScript types as needed
@@ -256,21 +255,18 @@ await db.transaction(async tx => {
    ```
 
 3. **User Generates Migration**
-
    - User executes `pnpm db:generate`
    - Drizzle analyzes schema differences
    - Generates SQL migration files in `server/database/migrations/`
    - Creates snapshot in `server/database/migrations/meta/`
 
 4. **Review Migration**
-
    - Open generated `.sql` file in `server/database/migrations/`
    - Verify SQL statements match intended changes
    - Check for unintended table drops or data loss
    - Validate foreign key relationships
 
 5. **Test Migration**
-
    - Test migration in local development environment
    - Verify data integrity after migration
    - Test application functionality with new schema
@@ -308,12 +304,10 @@ server/database/migrations/
 When multiple developers work on schema simultaneously:
 
 1. **Pull Latest Changes**
-
    - Always pull latest migrations before creating new ones
    - Resolve git conflicts in schema files first
 
 2. **Regenerate if Needed**
-
    - If migration order conflicts, regenerate migrations
    - Test merged schema thoroughly
 
@@ -337,28 +331,28 @@ When multiple developers work on schema simultaneously:
 import { createSpeakerSchema } from "~/shared/utils/schemas"
 
 export default defineEventHandler(async event => {
-	// Validate input with Zod schema
-	const body = await validateBody(event, createSpeakerSchema)
+  // Validate input with Zod schema
+  const body = await validateBody(event, createSpeakerSchema)
 
-	const db = useDrizzle()
+  const db = useDrizzle()
 
-	// Input is now type-safe and validated
-	const [speaker] = await db
-		.insert(tables.speakers)
-		.values({
-			id: crypto.randomUUID(),
-			firstName: body.firstName,
-			lastName: body.lastName,
-			email: body.email,
-			phone: body.phone,
-			congregation: body.congregation,
-			isArchived: false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		})
-		.returning()
+  // Input is now type-safe and validated
+  const [speaker] = await db
+    .insert(tables.speakers)
+    .values({
+      id: crypto.randomUUID(),
+      firstName: body.firstName,
+      lastName: body.lastName,
+      email: body.email,
+      phone: body.phone,
+      congregation: body.congregation,
+      isArchived: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .returning()
 
-	return speaker
+  return speaker
 })
 ```
 
@@ -375,10 +369,7 @@ Drizzle ORM uses parameterized queries automatically, but always:
 
 ```typescript
 // ✅ Safe: Parameterized query via Drizzle
-const speaker = await db
-	.select()
-	.from(tables.speakers)
-	.where(eq(tables.speakers.id, userId))
+const speaker = await db.select().from(tables.speakers).where(eq(tables.speakers.id, userId))
 
 // ❌ Unsafe: String concatenation with user input (DON'T DO THIS)
 ```
@@ -397,14 +388,14 @@ const speaker = await db
 ```typescript
 // ✅ Optimized: Select specific columns
 const speakers = await db
-	.select({
-		id: tables.speakers.id,
-		firstName: tables.speakers.firstName,
-		lastName: tables.speakers.lastName,
-	})
-	.from(tables.speakers)
-	.where(eq(tables.speakers.isArchived, false))
-	.limit(50)
+  .select({
+    id: tables.speakers.id,
+    firstName: tables.speakers.firstName,
+    lastName: tables.speakers.lastName,
+  })
+  .from(tables.speakers)
+  .where(eq(tables.speakers.isArchived, false))
+  .limit(50)
 ```
 
 ### Batch Operations
@@ -418,18 +409,18 @@ const speakers = await db
 ```typescript
 // ✅ Efficient: Single batch insert
 const newSpeakers = [
-	{ firstName: "John", lastName: "Doe", email: "john@example.com" },
-	{ firstName: "Jane", lastName: "Smith", email: "jane@example.com" },
+  { firstName: "John", lastName: "Doe", email: "john@example.com" },
+  { firstName: "Jane", lastName: "Smith", email: "jane@example.com" },
 ]
 
 await db.insert(tables.speakers).values(
-	newSpeakers.map(speaker => ({
-		id: crypto.randomUUID(),
-		...speaker,
-		isArchived: false,
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	}))
+  newSpeakers.map(speaker => ({
+    id: crypto.randomUUID(),
+    ...speaker,
+    isArchived: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }))
 )
 ```
 

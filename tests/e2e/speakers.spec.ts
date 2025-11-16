@@ -4,7 +4,7 @@ const SPEAKERS_PAGE = "http://localhost:3000/speakers"
 
 test.describe("Speaker Management - CRUD Operations", () => {
   // Disable parallelization for CRUD tests to avoid race conditions on shared data
-  test.describe.configure({ mode: 'serial' })
+  test.describe.configure({ mode: "serial" })
 
   test.beforeEach(async ({ page, authenticateAs }) => {
     await authenticateAs.admin()

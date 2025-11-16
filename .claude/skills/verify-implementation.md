@@ -52,6 +52,7 @@ guidelines.
 
 ```markdown
 Action: Read active requirement information
+
 - Check `requirements/.current-requirement` for active requirement ID
 - Load latest specification from `requirements/[id]/` directory
 - Look for `.latest-spec` file or scan for highest version number
@@ -72,6 +73,7 @@ Display to user:
 
 ```markdown
 Action: Check all files mentioned in specification exist
+
 - Components in `app/components/`
 - Pages in `app/pages/`
 - API endpoints in `server/api/`
@@ -93,6 +95,7 @@ Report:
 
 ```markdown
 Action: Run automated quality checks
+
 1. Execute: `pnpm typecheck`
    - MUST pass with 0 errors
    - Report any TypeScript errors with file locations
@@ -126,8 +129,8 @@ If no errors:
 #### 1.4 Pattern Compliance Check
 
 ```markdown
-Action: Verify code follows project patterns
-Reference files:
+Action: Verify code follows project patterns Reference files:
+
 - @AGENTS.md - Core development guidelines
 - @.agents/vue-conventions.md - Vue component patterns
 - @.agents/date-time-patterns.md - Date/time handling
@@ -136,6 +139,7 @@ Reference files:
 - @.agents/database-patterns.md - Database patterns
 
 Check for:
+
 - Auto-import usage (no imports from `shared/utils/` direct files)
 - `#shared` alias for subdirectory imports
 - TypeScript strict mode compliance
@@ -160,11 +164,8 @@ Report issues:
 #### 1.5 Output Phase 1 Results
 
 ```markdown
-Summary:
-✅ Code Implementation: [X/Y] files verified
-✅ TypeScript: 0 errors
-✅ ESLint: 0 errors
-⚠️ Pattern Issues: [count] found
+Summary: ✅ Code Implementation: [X/Y] files verified ✅ TypeScript: 0 errors ✅ ESLint: 0 errors ⚠️
+Pattern Issues: [count] found
 ```
 
 If critical issues (TypeScript/ESLint errors), STOP here and recommend fixes.
@@ -184,6 +185,7 @@ Ensure all translation keys used in frontend code exist in both Polish (primary)
 
 ```markdown
 Action: Search frontend files for translation key usage
+
 - Search pattern: `t\(['"](.+?)['"]\)` in all .vue, .ts files in `app/`
 - Search pattern: `\$t\(['"](.+?)['"]\)` in all .vue templates
 - Collect all unique translation keys
@@ -205,6 +207,7 @@ Found [X] unique translation keys:
 
 ```markdown
 Action: Read and parse locale files
+
 - Read `i18n/locales/pl.json`
 - Read `i18n/locales/en.json`
 - Parse JSON structures
@@ -214,8 +217,8 @@ Action: Read and parse locale files
 #### 2.3 Validate Key Existence
 
 ```markdown
-Action: Check each key in both locales
-For each key found in code:
+Action: Check each key in both locales For each key found in code:
+
 1. Check if exists in pl.json (primary language)
 2. Check if exists in en.json (fallback language)
 3. Categorize: exists-both, missing-pl, missing-en, missing-both
@@ -225,6 +228,7 @@ For each key found in code:
 
 ```markdown
 Action: Check for unsynchronized keys
+
 - Find keys in pl.json but NOT in en.json
 - Find keys in en.json but NOT in pl.json
 - Report synchronization issues
@@ -234,16 +238,16 @@ Action: Check for unsynchronized keys
 
 For each missing key, provide suggested translation:
 
-```markdown
+````markdown
 ## Missing Key: "publishers.title"
 
-**Severity:** Moderate
-**Location:** app/pages/publishers.vue:42
-**Found in code:** {{ $t('publishers.title') }}
+**Severity:** Moderate **Location:** app/pages/publishers.vue:42 **Found in code:**
+{{ $t('publishers.title') }}
 
 ### Recommended Fix:
 
 Add to `i18n/locales/pl.json`:
+
 ```json
 {
   "publishers": {
@@ -251,8 +255,10 @@ Add to `i18n/locales/pl.json`:
   }
 }
 ```
+````
 
 Add to `i18n/locales/en.json`:
+
 ```json
 {
   "publishers": {
@@ -261,9 +267,10 @@ Add to `i18n/locales/en.json`:
 }
 ```
 
-**Context Analysis:** Based on file name and usage, this appears to be a page title for
-publishers management feature.
-```
+**Context Analysis:** Based on file name and usage, this appears to be a page title for publishers
+management feature.
+
+````
 
 #### 2.6 Output Phase 2 Results
 
@@ -277,7 +284,7 @@ Keys Verified: [X] total
 ⚠️ Unsynchronized: [count]
 
 [Detailed list with fix recommendations follows in report]
-```
+````
 
 ---
 
@@ -285,16 +292,16 @@ Keys Verified: [X] total
 
 ### Goal
 
-Detect mismatches between backend API endpoint definitions and frontend API usage to prevent
-runtime errors.
+Detect mismatches between backend API endpoint definitions and frontend API usage to prevent runtime
+errors.
 
 ### Steps
 
 #### 3.1 Identify Backend API Endpoints
 
 ```markdown
-Action: Scan server/api/ directory
-For each endpoint file:
+Action: Scan server/api/ directory For each endpoint file:
+
 1. Extract HTTP method (from filename: .get.ts, .post.ts, .patch.ts, .delete.ts)
 2. Extract endpoint path (from directory structure)
 3. Find Zod schema validation (look for validateBody calls)
@@ -319,6 +326,7 @@ Found Endpoint: POST /api/publishers
 
 ```markdown
 Action: Search frontend for API calls
+
 - Search for `$fetch(` calls in .vue, .ts files in `app/`
 - Search for `useFetch(` calls in .vue, .ts files in `app/`
 - Extract endpoint URLs
@@ -343,8 +351,8 @@ Found API Call: POST /api/publishers
 #### 3.3 Compare Interfaces
 
 ```markdown
-Action: Match frontend calls to backend endpoints
-For each frontend API call:
+Action: Match frontend calls to backend endpoints For each frontend API call:
+
 1. Find corresponding backend endpoint
 2. Compare request body fields:
    - Missing required fields in frontend
@@ -359,17 +367,15 @@ For each frontend API call:
 
 For each mismatch:
 
-```markdown
+````markdown
 ## API Interface Mismatch: POST /api/publishers
 
-**Severity:** High
-**Backend:** server/api/publishers/index.post.ts
-**Frontend:** app/components/PublisherModal.vue:87
+**Severity:** High **Backend:** server/api/publishers/index.post.ts **Frontend:**
+app/components/PublisherModal.vue:87
 
 ### Issue: Type Mismatch
 
-**Backend expects:** `isElder: boolean`
-**Frontend sends:** `formData.isElder.toString()` (string)
+**Backend expects:** `isElder: boolean` **Frontend sends:** `formData.isElder.toString()` (string)
 
 ### Recommended Fix:
 
@@ -378,17 +384,19 @@ In `app/components/PublisherModal.vue`:
 ```typescript
 // ❌ Wrong:
 const body = {
-  isElder: formData.isElder.toString() // Converts to string
+  isElder: formData.isElder.toString(), // Converts to string
 }
 
 // ✅ Correct:
 const body = {
-  isElder: formData.isElder // Keep as boolean
+  isElder: formData.isElder, // Keep as boolean
 }
 ```
+````
 
 **Why this matters:** Backend validation will fail, causing 400 Bad Request errors.
-```
+
+````
 
 #### 3.5 Output Phase 3 Results
 
@@ -402,7 +410,7 @@ Endpoints Verified: [X]
 ⚠️ Type Inconsistencies: [count]
 
 [Detailed list with fix recommendations follows in report]
-```
+````
 
 ---
 
@@ -424,7 +432,7 @@ Flow testing requires a running development server.
 
 Please execute in a separate terminal:
 
-  pnpm dev
+pnpm dev
 
 Wait for the server to start at: http://localhost:3000
 
@@ -442,6 +450,7 @@ Based on requirement scope, automatically select appropriate test account from
 
 ```markdown
 Action: Determine required test roles
+
 - Read `tests/fixtures/test-accounts.json`
 - Analyze requirement specification for permission requirements
 - Select appropriate account(s):
@@ -465,6 +474,7 @@ Display:
 
 ```markdown
 Action: Initialize browser session
+
 - Use `mcp__chrome-devtools__new_page` with URL: http://localhost:3000
 - Use `mcp__chrome-devtools__take_snapshot` to verify page loaded
 - Use `mcp__chrome-devtools__list_console_messages` to check for startup errors
@@ -474,6 +484,7 @@ Action: Initialize browser session
 
 ```markdown
 Action: Log in with test account
+
 1. Navigate to login page (if not already there)
 2. Take snapshot to identify login form elements
 3. Use `mcp__chrome-devtools__fill_form` to fill:
@@ -501,8 +512,8 @@ Example:
 Based on requirement specification, test each defined user flow:
 
 ```markdown
-Action: Execute feature workflows
-For each flow in specification:
+Action: Execute feature workflows For each flow in specification:
+
 1. Navigate to starting page
 2. Take snapshot to verify UI elements present
 3. Interact with elements using data-testid selectors:
@@ -547,6 +558,7 @@ If requirement involves permissions:
 
 ```markdown
 Action: Test role-based access
+
 1. Test with appropriate role account (logged in)
 2. Verify allowed actions work correctly
 3. Log out
@@ -576,6 +588,7 @@ With publisher account:
 
 ```markdown
 Action: Test validation and error scenarios
+
 1. Submit forms with empty required fields
 2. Submit forms with invalid data
 3. Verify error messages display correctly
@@ -603,6 +616,7 @@ Console: 0 errors, 0 warnings
 
 ```markdown
 Action: Clean up browser session
+
 - Take final snapshot of application state
 - Collect all console messages: `mcp__chrome-devtools__list_console_messages`
 - Close browser: `mcp__chrome-devtools__close_page`
@@ -613,18 +627,12 @@ Action: Clean up browser session
 ```markdown
 ✅ Flow Testing Complete
 
-Authentication: ✅ Passed
-Feature Flows: [X/Y] passed
-Permissions: ✅ Verified
-Error Handling: ✅ Correct
+Authentication: ✅ Passed Feature Flows: [X/Y] passed Permissions: ✅ Verified Error Handling: ✅
+Correct
 
-❌ Issues Found:
-[List any failures with details]
+❌ Issues Found: [List any failures with details]
 
-⚠️ Console Messages:
-Errors: [count]
-Warnings: [count]
-[List significant console output]
+⚠️ Console Messages: Errors: [count] Warnings: [count] [List significant console output]
 ```
 
 ---
@@ -641,6 +649,7 @@ Consolidate all verification results into comprehensive report with actionable f
 
 ```markdown
 Action: Collect findings from all phases
+
 - Phase 1 results: code quality, files, patterns
 - Phase 2 results: i18n keys status
 - Phase 3 results: API interface consistency
@@ -655,13 +664,11 @@ Create report file: `requirements/[requirement-id]/[XX]-verification-report.md`
 
 Report structure:
 
-```markdown
+````markdown
 # Verification Report: [Requirement Name]
 
-**Verification Date:** [ISO-8601 timestamp]
-**Specification Version:** v[X]
-**Implementation Status:** [Complete / Issues Found / Failed]
-**Verified By:** verify-implementation skill
+**Verification Date:** [ISO-8601 timestamp] **Specification Version:** v[X] **Implementation
+Status:** [Complete / Issues Found / Failed] **Verified By:** verify-implementation skill
 
 ---
 
@@ -669,9 +676,7 @@ Report structure:
 
 [2-3 sentence overview of verification results]
 
-**Overall Completion:** [percentage]%
-**Critical Issues:** [count]
-**Total Issues:** [count]
+**Overall Completion:** [percentage]% **Critical Issues:** [count] **Total Issues:** [count]
 **Recommendation:** [Ready for production / Fix issues and re-verify / Major rework needed]
 
 ---
@@ -689,8 +694,7 @@ Report structure:
 - ESLint Errors: [count]
 - Pattern Compliance Issues: [count]
 
-**Details:**
-[Detailed findings]
+**Details:** [Detailed findings]
 
 ---
 
@@ -706,12 +710,11 @@ Report structure:
 
 **Missing Keys:**
 
-| Key | Location | Suggested pl.json | Suggested en.json |
-|-----|----------|-------------------|-------------------|
-| [key] | [file:line] | [translation] | [translation] |
+| Key   | Location    | Suggested pl.json | Suggested en.json |
+| ----- | ----------- | ----------------- | ----------------- |
+| [key] | [file:line] | [translation]     | [translation]     |
 
-**Details:**
-[Detailed findings with fix recommendations]
+**Details:** [Detailed findings with fix recommendations]
 
 ---
 
@@ -727,12 +730,11 @@ Report structure:
 
 **Mismatches Found:**
 
-| Endpoint | Issue | Backend | Frontend | Severity |
-|----------|-------|---------|----------|----------|
-| [endpoint] | [issue] | [expected] | [actual] | [level] |
+| Endpoint   | Issue   | Backend    | Frontend | Severity |
+| ---------- | ------- | ---------- | -------- | -------- |
+| [endpoint] | [issue] | [expected] | [actual] | [level]  |
 
-**Details:**
-[Detailed findings with fix recommendations]
+**Details:** [Detailed findings with fix recommendations]
 
 ---
 
@@ -748,16 +750,16 @@ Report structure:
 
 **Test Results:**
 
-| Flow | Status | Details |
-|------|--------|---------|
+| Flow        | Status  | Details       |
+| ----------- | ------- | ------------- |
 | [flow name] | ✅ / ❌ | [description] |
 
 **Console Output:**
+
 - Errors: [count] - [list significant errors]
 - Warnings: [count] - [list significant warnings]
 
-**Details:**
-[Detailed findings]
+**Details:** [Detailed findings]
 
 ---
 
@@ -806,8 +808,7 @@ Prioritized list of fixes needed before marking complete:
    - Change: [what to do]
    - Command: [if applicable]
 
-2. **[Action]**
-   [...]
+2. **[Action]** [...]
 
 ---
 
@@ -822,30 +823,28 @@ Nice-to-have improvements for consideration:
 ## Next Steps
 
 ### If All Phases Passed:
-✅ Implementation is complete and verified
-✅ Ready for production deployment
-✅ Consider running E2E test suite for additional coverage
+
+✅ Implementation is complete and verified ✅ Ready for production deployment ✅ Consider running
+E2E test suite for additional coverage
 
 ### If Issues Found:
-⚠️ Fix issues listed in "Immediate Actions Required" section
-⚠️ Re-run verification after fixes: invoke verify-implementation skill again
-⚠️ Critical issues must be resolved before deployment
+
+⚠️ Fix issues listed in "Immediate Actions Required" section ⚠️ Re-run verification after fixes:
+invoke verify-implementation skill again ⚠️ Critical issues must be resolved before deployment
 
 ---
 
 ## Verification Metadata
 
-**Skill Version:** verify-implementation v1.0
-**Verification Duration:** [time taken]
-**Tools Used:** ChromeDevTools MCP, TypeScript, ESLint, i18n parser
-**Test Account:** [email used]
+**Skill Version:** verify-implementation v1.0 **Verification Duration:** [time taken] **Tools
+Used:** ChromeDevTools MCP, TypeScript, ESLint, i18n parser **Test Account:** [email used]
 **Browser:** Chrome DevTools Protocol
 
 ---
 
-**Report Generated:** [ISO-8601 timestamp]
-**Report File:** requirements/[id]/[XX]-verification-report.md
-```
+**Report Generated:** [ISO-8601 timestamp] **Report File:**
+requirements/[id]/[XX]-verification-report.md
+````
 
 #### 5.3 Update Metadata
 
@@ -879,18 +878,12 @@ Show concise summary:
 ```markdown
 🎉 VERIFICATION COMPLETE
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall Status: [Complete ✅ / Issues Found ⚠️ / Failed ❌]
-Completion: [percentage]%
-Critical Issues: [count]
-Total Issues: [count]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Overall Status: [Complete ✅ / Issues Found ⚠️ / Failed ❌]
+Completion: [percentage]% Critical Issues: [count] Total Issues: [count]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📊 Phase Results:
-  ✅ Code Implementation: [Passed / Issues / Failed]
-  ✅ i18n Keys: [Passed / Issues / Failed]
-  ✅ API Interfaces: [Passed / Issues / Failed]
-  ✅ Flow Testing: [Passed / Issues / Failed]
+📊 Phase Results: ✅ Code Implementation: [Passed / Issues / Failed] ✅ i18n Keys: [Passed / Issues
+/ Failed] ✅ API Interfaces: [Passed / Issues / Failed] ✅ Flow Testing: [Passed / Issues / Failed]
 
 📁 Full Report: requirements/[id]/[XX]-verification-report.md
 

@@ -259,8 +259,7 @@ Why Use Shared Directory:
 
 ### Shared Directory Import Patterns
 
-The `#shared` alias provides consistent imports from the `shared/` directory across the
-application.
+The `#shared` alias provides consistent imports from the `shared/` directory across the application.
 
 #### When to Use #shared Alias
 
@@ -329,10 +328,10 @@ shared/
 import { createScheduleSchema } from "#shared/utils/schemas"
 
 export default defineEventHandler(async event => {
-	// ✅ Auto-imported: validation utility from shared/utils/
-	const body = await validateBody(event, createScheduleSchema)
+  // ✅ Auto-imported: validation utility from shared/utils/
+  const body = await validateBody(event, createScheduleSchema)
 
-	// ... rest of handler
+  // ... rest of handler
 })
 ```
 
@@ -383,12 +382,11 @@ Shared Constants Example:
 ```typescript
 // shared/constants/speaker-sources.ts
 export const SPEAKER_SOURCE_TYPES = {
-	VISITING_SPEAKER: "visiting_speaker",
-	LOCAL_PUBLISHER: "local_publisher",
+  VISITING_SPEAKER: "visiting_speaker",
+  LOCAL_PUBLISHER: "local_publisher",
 } as const
 
-export type SpeakerSourceType =
-	(typeof SPEAKER_SOURCE_TYPES)[keyof typeof SPEAKER_SOURCE_TYPES]
+export type SpeakerSourceType = (typeof SPEAKER_SOURCE_TYPES)[keyof typeof SPEAKER_SOURCE_TYPES]
 
 // Usage in component or API route
 import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
@@ -437,16 +435,16 @@ Migration Workflow:
 
 - **NEVER execute .sql files manually** - All database changes MUST be applied through schema
   modifications in `server/database/schema.ts`
-- **ALWAYS ask the user to generate migrations** - NEVER run `pnpm db:generate` yourself; prompt
-  the user to execute this command after schema changes
+- **ALWAYS ask the user to generate migrations** - NEVER run `pnpm db:generate` yourself; prompt the
+  user to execute this command after schema changes
 - **NEVER edit migration files manually** - Migration files are generated and should remain
   unchanged
 
 **Workflow Steps:**
 
 1. Modify schema in `server/database/schema.ts`
-2. Prompt user: "Database schema has been updated. Please run `pnpm db:generate` to create
-   migration files."
+2. Prompt user: "Database schema has been updated. Please run `pnpm db:generate` to create migration
+   files."
 3. User runs `pnpm db:generate` to generate migration files
 4. Review generated migration before committing
 5. Commit schema changes and generated migration files together

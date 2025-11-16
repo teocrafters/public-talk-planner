@@ -1,8 +1,17 @@
-import {
-  DEFAULT_MEETING_PROGRAM_ID,
-  DEFAULT_PUBLIC_TALK_PART_ID,
-} from "#shared/constants/meetings"
-import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+import { DEFAULT_MEETING_PROGRAM_ID, DEFAULT_PUBLIC_TALK_PART_ID } from "#shared/constants/meetings"
+import { SPEAKER_SOURCE_TYPES, type SpeakerSourceType } from "#shared/constants/speaker-sources"
+
+interface ScheduleState {
+  date: number
+  meetingProgramId: number
+  partId: number
+  speakerSourceType: SpeakerSourceType
+  speakerId?: string
+  publisherId?: string
+  talkId?: number
+  customTalkTitle?: string
+  overrideValidation: boolean
+}
 
 /**
  * Creates default schedule form state
@@ -11,7 +20,7 @@ import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
  * @param date - Unix timestamp for the scheduled date (default: 0)
  * @returns Default form state object
  */
-export function createDefaultScheduleFormState(date: number = 0) {
+export function createDefaultScheduleFormState(date: number = 0): ScheduleState {
   return {
     date,
     meetingProgramId: DEFAULT_MEETING_PROGRAM_ID,

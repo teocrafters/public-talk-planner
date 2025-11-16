@@ -53,15 +53,14 @@ setup("Build and start server", async () => {
   let seedAttempts = 0
   while (seedAttempts < 3) {
     try {
-      const seedResult = await x("curl", [
-        "-X",
-        "POST",
-        "http://localhost:3000/_nitro/tasks/seed",
-      ])
+      const seedResult = await x("curl", ["-X", "POST", "http://localhost:3000/_nitro/tasks/seed"])
       console.log("Main seeder response:", seedResult.stdout)
 
       // Check if the response contains an error
-      if (seedResult.stdout.includes('"result":"error"') || seedResult.stdout.includes('"error":true')) {
+      if (
+        seedResult.stdout.includes('"result":"error"') ||
+        seedResult.stdout.includes('"error":true')
+      ) {
         throw new Error("Main seeder returned an error")
       }
 

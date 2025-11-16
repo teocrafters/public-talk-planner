@@ -133,9 +133,9 @@
 
     // Find existing program for this date
     selectedProgram.value =
-      (programs.value?.find(p => dayjs.unix(p.date).utc().isSame(dayjs.unix(sundayTimestamp), "day")) as
-        | WeekendProgram
-        | undefined) || null
+      (programs.value?.find(p =>
+        dayjs.unix(p.date).utc().isSame(dayjs.unix(sundayTimestamp), "day")
+      ) as WeekendProgram | undefined) || null
 
     selectedDateForModal.value = sundayTimestamp
     showPlanningModal.value = true

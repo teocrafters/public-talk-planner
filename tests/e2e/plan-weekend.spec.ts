@@ -13,9 +13,7 @@ test.describe("Plan Weekend Page - Permission-Based Access Control", () => {
 
     // Should be redirected to meetings list due to middleware
     await expect(page).toHaveURL(MEETINGS_LIST_PAGE)
-    await expect(
-      page.getByRole("heading", { name: "Zebrania w weekend", level: 1 })
-    ).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Zebrania w weekend", level: 1 })).toBeVisible()
   })
 
   test("allows admin with permission to access", async ({ page, authenticateAs }) => {
@@ -310,9 +308,7 @@ test.describe("Plan Weekend Page - Back Navigation", () => {
 
     // Should navigate to meetings list
     await expect(page).toHaveURL(MEETINGS_LIST_PAGE)
-    await expect(
-      page.getByRole("heading", { name: "Zebrania w weekend", level: 1 })
-    ).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Zebrania w weekend", level: 1 })).toBeVisible()
   })
 })
 

@@ -18,7 +18,7 @@ interface RuntimeAuthConfig {
 
 export function useAuth() {
   const url = useRequestURL()
-  const headers = import.meta.server ? { ...useRequestHeaders(), "Origin": url.origin } : undefined
+  const headers = import.meta.server ? { ...useRequestHeaders(), Origin: url.origin } : undefined
 
   const client = createAuthClient({
     baseURL: url.origin,

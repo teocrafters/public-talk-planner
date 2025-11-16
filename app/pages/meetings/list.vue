@@ -1,22 +1,4 @@
 <script setup lang="ts">
-  interface WeekendMeetingProgram {
-    id: number
-    type: string
-    date: number
-    isCircuitOverseerVisit: boolean
-    parts: Array<{
-      id: number
-      type: string
-      name: string | null
-      order: number
-      assignment?: {
-        personId: string
-        personName: string
-        personType: "speaker" | "publisher"
-      }
-    }>
-  }
-
   definePageMeta({
     auth: {
       only: "user",
@@ -34,7 +16,7 @@
     data: programs,
     pending,
     error,
-  } = await useFetch<WeekendMeetingProgram[]>("/api/weekend-meetings", {
+  } = await useFetch("/api/weekend-meetings", {
     query: {
       startDate: dayjs().subtract(6, "month").unix(),
       endDate: dayjs().add(6, "month").unix(),
@@ -47,7 +29,7 @@
   const groupedByMonth = computed(() => {
     if (!programs.value) return new Map()
 
-    const groups = new Map<string, WeekendMeetingProgram[]>()
+    const groups = new Map<string, WeekendMeetingListItem[]>()
 
     programs.value.forEach(program => {
       const monthKey = dayjs.unix(program.date).format("MMMM YYYY")

@@ -129,12 +129,8 @@
           "name": "meeting_program_parts_meeting_program_id_meeting_programs_id_fk",
           "tableFrom": "meeting_program_parts",
           "tableTo": "meeting_programs",
-          "columnsFrom": [
-            "meeting_program_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_program_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -238,9 +234,7 @@
       "indexes": {
         "meeting_scheduled_parts_part_unique": {
           "name": "meeting_scheduled_parts_part_unique",
-          "columns": [
-            "meeting_program_part_id"
-          ],
+          "columns": ["meeting_program_part_id"],
           "isUnique": true
         }
       },
@@ -249,12 +243,8 @@
           "name": "meeting_scheduled_parts_meeting_program_part_id_meeting_program_parts_id_fk",
           "tableFrom": "meeting_scheduled_parts",
           "tableTo": "meeting_program_parts",
-          "columnsFrom": [
-            "meeting_program_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_program_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -262,12 +252,8 @@
           "name": "meeting_scheduled_parts_publisher_id_publishers_id_fk",
           "tableFrom": "meeting_scheduled_parts",
           "tableTo": "publishers",
-          "columnsFrom": [
-            "publisher_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["publisher_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -458,9 +444,7 @@
       "indexes": {
         "publishers_user_id_unique": {
           "name": "publishers_user_id_unique",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": true
         }
       },
@@ -469,12 +453,8 @@
           "name": "publishers_user_id_user_id_fk",
           "tableFrom": "publishers",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -576,11 +556,7 @@
       "indexes": {
         "unique_public_talk_schedule": {
           "name": "unique_public_talk_schedule",
-          "columns": [
-            "date",
-            "meeting_program_id",
-            "part_id"
-          ],
+          "columns": ["date", "meeting_program_id", "part_id"],
           "isUnique": true
         }
       },
@@ -589,12 +565,8 @@
           "name": "scheduled_public_talks_meeting_program_id_meeting_programs_id_fk",
           "tableFrom": "scheduled_public_talks",
           "tableTo": "meeting_programs",
-          "columnsFrom": [
-            "meeting_program_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_program_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -602,12 +574,8 @@
           "name": "scheduled_public_talks_part_id_meeting_program_parts_id_fk",
           "tableFrom": "scheduled_public_talks",
           "tableTo": "meeting_program_parts",
-          "columnsFrom": [
-            "part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["part_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -615,12 +583,8 @@
           "name": "scheduled_public_talks_speaker_id_speakers_id_fk",
           "tableFrom": "scheduled_public_talks",
           "tableTo": "speakers",
-          "columnsFrom": [
-            "speaker_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["speaker_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -628,12 +592,8 @@
           "name": "scheduled_public_talks_publisher_id_publishers_id_fk",
           "tableFrom": "scheduled_public_talks",
           "tableTo": "publishers",
-          "columnsFrom": [
-            "publisher_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["publisher_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -641,12 +601,8 @@
           "name": "scheduled_public_talks_talk_id_public_talks_id_fk",
           "tableFrom": "scheduled_public_talks",
           "tableTo": "public_talks",
-          "columnsFrom": [
-            "talk_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["talk_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -695,10 +651,7 @@
       "indexes": {
         "speaker_talks_speaker_talk_unique": {
           "name": "speaker_talks_speaker_talk_unique",
-          "columns": [
-            "speaker_id",
-            "talk_id"
-          ],
+          "columns": ["speaker_id", "talk_id"],
           "isUnique": true
         }
       },
@@ -707,12 +660,8 @@
           "name": "speaker_talks_speaker_id_speakers_id_fk",
           "tableFrom": "speaker_talks",
           "tableTo": "speakers",
-          "columnsFrom": [
-            "speaker_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["speaker_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -720,12 +669,8 @@
           "name": "speaker_talks_talk_id_public_talks_id_fk",
           "tableFrom": "speaker_talks",
           "tableTo": "public_talks",
-          "columnsFrom": [
-            "talk_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["talk_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -808,12 +753,8 @@
           "name": "speakers_congregation_id_organization_id_fk",
           "tableFrom": "speakers",
           "tableTo": "organization",
-          "columnsFrom": [
-            "congregation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["congregation_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -924,12 +865,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -998,12 +935,8 @@
           "name": "invitation_organization_id_organization_id_fk",
           "tableFrom": "invitation",
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1011,12 +944,8 @@
           "name": "invitation_inviter_id_user_id_fk",
           "tableFrom": "invitation",
           "tableTo": "user",
-          "columnsFrom": [
-            "inviter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["inviter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1071,12 +1000,8 @@
           "name": "member_organization_id_organization_id_fk",
           "tableFrom": "member",
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1084,12 +1009,8 @@
           "name": "member_user_id_user_id_fk",
           "tableFrom": "member",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1147,9 +1068,7 @@
       "indexes": {
         "organization_slug_unique": {
           "name": "organization_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         }
       },
@@ -1245,12 +1164,8 @@
           "name": "passkey_user_id_user_id_fk",
           "tableFrom": "passkey",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1338,9 +1253,7 @@
       "indexes": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         }
       },
@@ -1349,12 +1262,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1451,9 +1360,7 @@
       "indexes": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },

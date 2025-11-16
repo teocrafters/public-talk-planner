@@ -1,44 +1,10 @@
 <script setup lang="ts">
   import { createScheduleSchema } from "#shared/utils/schemas"
-  import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
-
-  interface Speaker {
-    id: string
-    firstName: string
-    lastName: string
-    congregationName: string
-    archived: boolean
-  }
-
-  interface Publisher {
-    id: string
-    firstName: string
-    lastName: string
-    deliversPublicTalks: boolean
-  }
-
-  interface PublicTalk {
-    id: number
-    no: string
-    title: string
-  }
-
-  interface Schedule {
-    id: string
-    date: Date
-    meetingProgramId: number
-    partId: number
-    speakerSourceType: string
-    speakerId: string | null
-    publisherId: string | null
-    talkId: number | null
-    customTalkTitle: string | null
-    overrideValidation: boolean
-  }
+  import { SPEAKER_SOURCE_TYPES, type SpeakerSourceType } from "#shared/constants/speaker-sources"
 
   interface Props {
     date: number | null
-    schedule?: Schedule | null
+    schedule?: ScheduleWithRelations | null
   }
 
   const props = defineProps<Props>()
@@ -56,17 +22,17 @@
   const showOverrideWarning = ref(false)
 
   // Fetch speakers (non-archived only)
-  const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
+  const { data: speakers } = await useFetch("/api/speakers")
   const activeSpeakers = computed(() => speakers.value?.filter(s => !s.archived) || [])
 
   // Fetch publishers (filter for those who can deliver public talks)
-  const { data: publishers } = await useFetch<Publisher[]>("/api/publishers")
+  const { data: publishers } = await useFetch("/api/publishers")
   const activePublishers = computed(
     () => publishers.value?.filter(p => p.deliversPublicTalks) || []
   )
 
   // Fetch public talks
-  const { data: publicTalks } = await useFetch<PublicTalk[]>("/api/public-talks")
+  const { data: publicTalks } = await useFetch("/api/public-talks")
 
   const speakerItems = computed(
     () =>
@@ -110,7 +76,7 @@
           date: dateToUnixTimestamp(props.schedule.date),
           meetingProgramId: props.schedule.meetingProgramId,
           partId: props.schedule.partId,
-          speakerSourceType: props.schedule.speakerSourceType,
+          speakerSourceType: props.schedule.speakerSourceType as SpeakerSourceType,
           speakerId: props.schedule.speakerId || "",
           publisherId: props.schedule.publisherId || "",
           talkId: props.schedule.talkId || undefined,

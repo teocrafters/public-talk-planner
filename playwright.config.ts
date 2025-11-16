@@ -32,7 +32,7 @@ export default defineConfig({
     // Test projects - depend on auth
     {
       name: "desktop",
-      testMatch: /.*\.spec\.ts/,
+      testMatch: /e2e\/.*\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1280, height: 720 },
@@ -41,7 +41,7 @@ export default defineConfig({
     },
     {
       name: "mobile",
-      testMatch: /.*\.spec\.ts/,
+      testMatch: /e2e\/.*\.spec\.ts/,
       use: {
         ...devices["iPhone 14"],
       },

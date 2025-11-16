@@ -248,7 +248,6 @@ test.describe("Manage Public Talks Page", () => {
       await expect(page.getByTestId("schedule-form")).not.toBeVisible({ timeout: 10000 })
     })
 
-
     test("closes modal when clicking cancel button", async ({ page }) => {
       // Wait for unscheduled list
       const unscheduledList = page.getByTestId("unscheduled-list")
@@ -320,98 +319,102 @@ test.describe("Manage Public Talks Page", () => {
     // data is correctly filled, but the API call doesn't complete successfully despite all
     // validations passing. This might be related to test environment database state or
     // server-side validation that only occurs in test environment.
-    test.fixme("can schedule visiting speaker with approved talk from their list", async ({ page }) => {
-      // Wait for unscheduled list
-      const unscheduledList = page.getByTestId("unscheduled-list")
-      const isVisible = await unscheduledList.isVisible().catch(() => false)
-      if (!isVisible) {
-        test.skip()
+    test.fixme(
+      "can schedule visiting speaker with approved talk from their list",
+      async ({ page }) => {
+        // Wait for unscheduled list
+        const unscheduledList = page.getByTestId("unscheduled-list")
+        const isVisible = await unscheduledList.isVisible().catch(() => false)
+        if (!isVisible) {
+          test.skip()
+        }
+
+        // Click first unscheduled Sunday
+        await page.locator('[data-testid^="unscheduled-item-"]').first().click()
+
+        // Wait for modal to open
+        await expect(page.getByTestId("schedule-form")).toBeVisible()
+
+        // Verify default speaker source type is visiting speaker
+        const speakerSourceSelect = page.getByTestId("speaker-source-type-select")
+        await expect(speakerSourceSelect).toBeVisible()
+
+        // Select a visiting speaker
+        const speakerSelect = page.getByTestId("speaker-select")
+        await speakerSelect.click()
+        await page.waitForSelector('[role="option"]', { timeout: 5000 })
+        await page.locator('[role="option"]').first().click()
+
+        // Wait for dropdown to close
+        await page.waitForTimeout(500)
+
+        // Select an approved talk from dropdown
+        const talkSelect = page.getByTestId("talk-select")
+        await talkSelect.click()
+        await page.waitForSelector('[role="option"]', { timeout: 5000 })
+        await page.locator('[role="option"]').first().click()
+
+        // Wait for form validation to update
+        await page.waitForTimeout(300)
+
+        // Wait for submit button to be enabled
+        const submitButton = page.getByTestId("submit-schedule")
+        await expect(submitButton).toBeEnabled({ timeout: 5000 })
+
+        // Submit form
+        await submitButton.click()
+
+        // Wait for modal to close (successful submission without validation)
+        await expect(page.getByTestId("schedule-form")).not.toBeVisible({ timeout: 10000 })
       }
-
-      // Click first unscheduled Sunday
-      await page.locator('[data-testid^="unscheduled-item-"]').first().click()
-
-      // Wait for modal to open
-      await expect(page.getByTestId("schedule-form")).toBeVisible()
-
-      // Verify default speaker source type is visiting speaker
-      const speakerSourceSelect = page.getByTestId("speaker-source-type-select")
-      await expect(speakerSourceSelect).toBeVisible()
-
-      // Select a visiting speaker
-      const speakerSelect = page.getByTestId("speaker-select")
-      await speakerSelect.click()
-      await page.waitForSelector('[role="option"]', { timeout: 5000 })
-      await page.locator('[role="option"]').first().click()
-
-      // Wait for dropdown to close
-      await page.waitForTimeout(500)
-
-      // Select an approved talk from dropdown
-      const talkSelect = page.getByTestId("talk-select")
-      await talkSelect.click()
-      await page.waitForSelector('[role="option"]', { timeout: 5000 })
-      await page.locator('[role="option"]').first().click()
-
-      // Wait for form validation to update
-      await page.waitForTimeout(300)
-
-      // Wait for submit button to be enabled
-      const submitButton = page.getByTestId("submit-schedule")
-      await expect(submitButton).toBeEnabled({ timeout: 5000 })
-
-      // Submit form
-      await submitButton.click()
-
-      // Wait for modal to close (successful submission without validation)
-      await expect(page.getByTestId("schedule-form")).not.toBeVisible({ timeout: 10000 })
-    })
+    )
 
     // FIXME: Validation override click doesn't reliably trigger in automated tests,
     // though feature works correctly in manual testing and browser debug mode.
     // The override button appears, but click() doesn't trigger the re-submission API call.
-    test.fixme("can schedule visiting speaker with unapproved talk using override", async ({
-      page,
-    }) => {
-      // Wait for unscheduled list
-      const unscheduledList = page.getByTestId("unscheduled-list")
-      const isVisible = await unscheduledList.isVisible().catch(() => false)
-      if (!isVisible) {
-        test.skip()
+    test.fixme(
+      "can schedule visiting speaker with unapproved talk using override",
+      async ({ page }) => {
+        // Wait for unscheduled list
+        const unscheduledList = page.getByTestId("unscheduled-list")
+        const isVisible = await unscheduledList.isVisible().catch(() => false)
+        if (!isVisible) {
+          test.skip()
+        }
+
+        // Click first unscheduled Sunday
+        await page.locator('[data-testid^="unscheduled-item-"]').first().click()
+
+        // Wait for modal to open
+        await expect(page.getByTestId("schedule-form")).toBeVisible()
+
+        // Select a visiting speaker
+        const speakerSelect = page.getByTestId("speaker-select")
+        await speakerSelect.click()
+        await page.locator('[role="option"]').first().click()
+
+        // Enter custom talk title (unapproved talk)
+        await page.getByTestId("custom-talk-input").fill("Niestandardowy wykład bez zatwierdzenia")
+
+        // Submit form
+        await page.getByTestId("submit-schedule").click()
+
+        // Wait for validation warning to appear
+        const confirmOverrideButton = page.getByTestId("confirm-override-button")
+        await expect(confirmOverrideButton).toBeVisible({ timeout: 3000 })
+
+        // Click confirm override to bypass validation
+        await Promise.all([
+          page.waitForResponse(
+            resp => resp.url().includes("/api/schedules") && resp.status() === 200
+          ),
+          confirmOverrideButton.click(),
+        ])
+
+        // Wait for modal to close
+        await expect(page.getByTestId("schedule-form")).not.toBeVisible({ timeout: 5000 })
       }
-
-      // Click first unscheduled Sunday
-      await page.locator('[data-testid^="unscheduled-item-"]').first().click()
-
-      // Wait for modal to open
-      await expect(page.getByTestId("schedule-form")).toBeVisible()
-
-      // Select a visiting speaker
-      const speakerSelect = page.getByTestId("speaker-select")
-      await speakerSelect.click()
-      await page.locator('[role="option"]').first().click()
-
-      // Enter custom talk title (unapproved talk)
-      await page.getByTestId("custom-talk-input").fill("Niestandardowy wykład bez zatwierdzenia")
-
-      // Submit form
-      await page.getByTestId("submit-schedule").click()
-
-      // Wait for validation warning to appear
-      const confirmOverrideButton = page.getByTestId("confirm-override-button")
-      await expect(confirmOverrideButton).toBeVisible({ timeout: 3000 })
-
-      // Click confirm override to bypass validation
-      await Promise.all([
-        page.waitForResponse(
-          resp => resp.url().includes("/api/schedules") && resp.status() === 200
-        ),
-        confirmOverrideButton.click(),
-      ])
-
-      // Wait for modal to close
-      await expect(page.getByTestId("schedule-form")).not.toBeVisible({ timeout: 5000 })
-    })
+    )
   })
 
   test.describe("Scheduling Talks with Local Publishers", () => {
@@ -428,53 +431,56 @@ test.describe("Manage Public Talks Page", () => {
     // FIXME: Intermittent failure - publisher dropdown shows "No data" despite publishers being
     // seeded. Works when run individually but sometimes fails in full test suite, suggesting
     // a race condition with database seeding or API data loading timing.
-    test.fixme("can schedule local publisher with any talk without validation", async ({ page }) => {
-      // Wait for unscheduled list
-      const unscheduledList = page.getByTestId("unscheduled-list")
-      const isVisible = await unscheduledList.isVisible().catch(() => false)
-      if (!isVisible) {
-        test.skip()
+    test.fixme(
+      "can schedule local publisher with any talk without validation",
+      async ({ page }) => {
+        // Wait for unscheduled list
+        const unscheduledList = page.getByTestId("unscheduled-list")
+        const isVisible = await unscheduledList.isVisible().catch(() => false)
+        if (!isVisible) {
+          test.skip()
+        }
+
+        // Click first unscheduled Sunday
+        await page.locator('[data-testid^="unscheduled-item-"]').first().click()
+
+        // Wait for modal to open
+        await expect(page.getByTestId("schedule-form")).toBeVisible()
+
+        // Change speaker source type to local publisher
+        const speakerSourceSelect = page.getByTestId("speaker-source-type-select")
+        await speakerSourceSelect.click()
+        // Select "Wydawca lokalny" option (second option)
+        await page.locator('[role="option"]').nth(1).click()
+
+        // Wait for source type to update
+        await page.waitForTimeout(500)
+
+        // Select a local publisher
+        const publisherSelect = page.getByTestId("publisher-select")
+        await expect(publisherSelect).toBeVisible()
+        await publisherSelect.click()
+
+        // Wait for publisher options to load
+        await page.waitForSelector('[role="option"]', { timeout: 5000 })
+        await page.locator('[role="option"]').first().click()
+
+        // Wait for dropdown to close
+        await page.waitForTimeout(500)
+
+        // Enter any custom talk title (no validation for local publishers)
+        await page.getByTestId("custom-talk-input").fill("Dowolny wykład lokalnego wydawcy")
+
+        // Wait for form validation to update
+        await page.waitForTimeout(300)
+
+        // Submit form
+        await page.getByTestId("submit-schedule").click()
+
+        // Wait for modal to close (no validation warning should appear)
+        await expect(page.getByTestId("schedule-form")).not.toBeVisible({ timeout: 10000 })
       }
-
-      // Click first unscheduled Sunday
-      await page.locator('[data-testid^="unscheduled-item-"]').first().click()
-
-      // Wait for modal to open
-      await expect(page.getByTestId("schedule-form")).toBeVisible()
-
-      // Change speaker source type to local publisher
-      const speakerSourceSelect = page.getByTestId("speaker-source-type-select")
-      await speakerSourceSelect.click()
-      // Select "Wydawca lokalny" option (second option)
-      await page.locator('[role="option"]').nth(1).click()
-
-      // Wait for source type to update
-      await page.waitForTimeout(500)
-
-      // Select a local publisher
-      const publisherSelect = page.getByTestId("publisher-select")
-      await expect(publisherSelect).toBeVisible()
-      await publisherSelect.click()
-
-      // Wait for publisher options to load
-      await page.waitForSelector('[role="option"]', { timeout: 5000 })
-      await page.locator('[role="option"]').first().click()
-
-      // Wait for dropdown to close
-      await page.waitForTimeout(500)
-
-      // Enter any custom talk title (no validation for local publishers)
-      await page.getByTestId("custom-talk-input").fill("Dowolny wykład lokalnego wydawcy")
-
-      // Wait for form validation to update
-      await page.waitForTimeout(300)
-
-      // Submit form
-      await page.getByTestId("submit-schedule").click()
-
-      // Wait for modal to close (no validation warning should appear)
-      await expect(page.getByTestId("schedule-form")).not.toBeVisible({ timeout: 10000 })
-    })
+    )
 
     // FIXME: Intermittent failure - publisher dropdown shows "No data" despite publishers being
     // seeded. Works when run individually but sometimes fails in full test suite, suggesting

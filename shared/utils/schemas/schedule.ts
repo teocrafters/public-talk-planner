@@ -77,9 +77,11 @@ export const createScheduleSchema = (t: (key: string) => string) => {
 export const updateScheduleSchema = (t: (key: string) => string) => {
   return z
     .object({
-      speakerSourceType: z.enum(SPEAKER_SOURCE_TYPE_VALUES, {
-        message: t("validation.speakerSourceTypeInvalid"),
-      }).optional(),
+      speakerSourceType: z
+        .enum(SPEAKER_SOURCE_TYPE_VALUES, {
+          message: t("validation.speakerSourceTypeInvalid"),
+        })
+        .optional(),
 
       speakerId: z.string().min(1, t("validation.speakerRequired")).optional(),
 

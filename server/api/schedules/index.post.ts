@@ -175,7 +175,10 @@ export default defineEventHandler(async event => {
       !body.overrideValidation
     ) {
       const speakerHasTalk = await db.query.speakerTalks.findFirst({
-        where: and(eq(speakerTalks.speakerId, body.speakerId!), eq(speakerTalks.talkId, body.talkId)),
+        where: and(
+          eq(speakerTalks.speakerId, body.speakerId!),
+          eq(speakerTalks.talkId, body.talkId)
+        ),
       })
 
       if (!speakerHasTalk) {

@@ -3,18 +3,6 @@
 
   type DateRange = { start: DateValue | undefined; end: DateValue | undefined }
 
-  interface ScheduledMeeting {
-    id: string
-    date: Date
-    meetingProgramName: string
-    partName: string
-    speakerFirstName: string
-    speakerLastName: string
-    talkNumber: string | null
-    talkTitle: string | null
-    isCircuitOverseerVisit: boolean
-  }
-
   definePageMeta({
     auth: {
       only: "user",
@@ -27,7 +15,7 @@
   const { t } = useI18n()
 
   // Fetch schedules for calendar range (3 months)
-  const { data: schedules, refresh } = await useFetch<ScheduledMeeting[]>("/api/schedules", {
+  const { data: schedules, refresh } = await useFetch("/api/schedules", {
     query: {
       startDate: dayjs().subtract(1, "month").toDate().toISOString(),
       endDate: dayjs().add(3, "month").toDate().toISOString(),
@@ -53,7 +41,7 @@
 
   // Calendar logic
   const selectedDateForModal = ref<number | null>(null)
-  const selectedSchedule = ref<ScheduledMeeting | null>(null)
+  const selectedSchedule = ref<ScheduleWithRelations | null>(null)
   const showScheduleModal = ref(false)
 
   function isSundayUnscheduled(date: DateValue): boolean {
@@ -78,8 +66,9 @@
     if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return // Past date
 
     // Find existing schedule for this date
-    selectedSchedule.value =
-      schedules.value?.find(s => dayjs(s.date).isSame(dayjsDate, "day")) || null
+    selectedSchedule.value = schedules.value?.find(s =>
+      dayjs(s.date).isSame(dayjsDate, "day")
+    ) as unknown as ScheduleWithRelations | null
 
     selectedDateForModal.value = dayjsDate.unix()
     showScheduleModal.value = true
@@ -121,7 +110,9 @@
 
   function handleSundayClick(sunday: Date): void {
     // Find existing schedule for this date
-    selectedSchedule.value = schedules.value?.find(s => isSameDay(s.date, sunday)) || null
+    selectedSchedule.value = schedules.value?.find(s =>
+      isSameDay(s.date, sunday)
+    ) as unknown as ScheduleWithRelations | null
 
     selectedDateForModal.value = dateToUnixTimestamp(sunday)
     showScheduleModal.value = true

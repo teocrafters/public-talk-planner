@@ -1,3 +1,4 @@
+import type { SpeakerSourceType } from "#shared/constants/speaker-sources"
 import type { AUDIT_EVENTS } from "../utils/audit-events"
 import type {
   TalkUpdateInput,
@@ -59,7 +60,9 @@ export interface AuditEventDetails {
     date: Date
     meetingProgramId: number
     partId: number
-    speakerId: string
+    speakerSourceType: SpeakerSourceType
+    speakerId: string | null
+    publisherId: string | null
     talkId: number | null
     customTalkTitle: string | null
     isCircuitOverseerVisit: boolean

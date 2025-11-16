@@ -9,13 +9,13 @@
  * useSeoPage("meetings.list")
  */
 export function useSeoPage(pageKey: string) {
-	const { t } = useI18n()
+  const { t } = useI18n()
 
-	useSeoMeta({
-		title: t(`seo.${pageKey}.title`),
-		description: t(`seo.${pageKey}.description`),
-		ogTitle: t(`seo.${pageKey}.ogTitle`),
-		ogDescription: t(`seo.${pageKey}.ogDescription`),
-		ogImage: t(`seo.${pageKey}.ogImage`),
-	})
+  useSeoMeta({
+    title: t(`seo.${pageKey}.title`),
+    description: t(`seo.${pageKey}.description`),
+    ogTitle: t(`seo.${pageKey}.ogTitle`),
+    ogDescription: t(`seo.${pageKey}.ogDescription`),
+    ogImage: t(`seo.${pageKey}.ogImage`),
+  })
 }

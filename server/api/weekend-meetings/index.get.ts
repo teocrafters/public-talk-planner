@@ -2,23 +2,6 @@ import { eq, gte, lte, and } from "drizzle-orm"
 import { meetingPrograms } from "../../database/schema"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 
-interface WeekendMeetingListItem {
-  id: number
-  date: number
-  isCircuitOverseerVisit: boolean
-  parts: Array<{
-    id: number
-    type: string
-    name: string | null
-    order: number
-    assignment?: {
-      personId: string
-      personName: string
-      personType: "speaker" | "publisher"
-    }
-  }>
-}
-
 export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[]> => {
   await requirePermission({ weekend_meetings: ["list"] })(event)
 

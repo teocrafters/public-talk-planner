@@ -189,7 +189,7 @@ export default defineEventHandler(async event => {
   // For Circuit Overseer visits: add CIRCUIT_OVERSEER_TALK (with title) + PUBLIC_TALK
   if (body.isCircuitOverseerVisit) {
     partsToCreate.push(
-    {
+      {
         type: MEETING_PART_TYPES.PUBLIC_TALK,
         order: currentOrder++,
         name: undefined,
@@ -198,8 +198,7 @@ export default defineEventHandler(async event => {
         type: MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK,
         order: currentOrder++,
         name: body.parts.circuitOverseerTalk?.title,
-      },
-
+      }
     )
   }
   // For regular meetings: PUBLIC_TALK will be added later by talks coordinator
