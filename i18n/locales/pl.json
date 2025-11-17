@@ -65,6 +65,7 @@
     "dashboard": "Panel główny",
     "publicTalks": "Wykłady publiczne",
     "speakers": "Mówcy",
+    "publishers": "Głosiciele",
     "meetings": "Zebrania",
     "settings": "Ustawienia"
   },
@@ -233,17 +234,26 @@
     },
     "capabilities": {
       "elder": "Starszy",
-      "ministerialServant": "Sługa zboru",
-      "canChairWeekendMeeting": "Może przewodniczyć zebraniu w weekend",
-      "conductsWatchtowerStudy": "Prowadzi studium Strażnicy",
+      "ministerialServant": "Sługa pomocniczy",
+      "canChairWeekendMeeting": "Przewoniczący w weekend",
+      "conductsWatchtowerStudy": "Prowadzący studium Strażnicy",
       "backupWatchtowerConductor": "Zastępca prowadzącego Strażnicę",
-      "reader": "Czytający",
-      "offersPublicPrayer": "Prowadzi modlitwę publiczną",
-      "deliversPublicTalks": "Przedstawia wykłady publiczne",
-      "circuitOverseer": "Nadzorca obwodu"
+      "reader": "Lektor",
+      "offersPublicPrayer": "Modlitwy",
+      "deliversPublicTalks": "Wykłady publiczne",
+      "circuitOverseer": "Nadzorca obwodu",
+      "regularPioneer": "Pionier stały"
     },
     "messages": {
-      "linkUserFeatureComingSoon": "Funkcja powiązywania użytkowników będzie wkrótce dostępna"
+      "linkUserFeatureComingSoon": "Funkcja powiązywania użytkowników będzie wkrótce dostępna",
+      "publisherCreated": "Głosiciel został dodany",
+      "publisherUpdated": "Dane głosiciela zostały zaktualizowane"
+    },
+    "modal": {
+      "firstName": "Imię",
+      "lastName": "Nazwisko",
+      "capabilities": "Zadania",
+      "save": "Zapisz"
     }
   },
   "validation": {

@@ -30,6 +30,13 @@
             </ULink>
 
             <ULink
+              to="/publishers"
+              active-class="text-primary"
+              inactive-class="text-muted hover:text-default">
+              {{ t("navigation.publishers") }}
+            </ULink>
+
+            <ULink
               to="/meetings/list"
               active-class="text-primary"
               inactive-class="text-muted hover:text-default">
@@ -86,6 +93,11 @@
       {
         label: t("navigation.speakers"),
         to: "/speakers",
+        icon: "i-heroicons-user-group",
+      },
+      {
+        label: t("navigation.publishers"),
+        to: "/publishers",
         icon: "i-heroicons-user-group",
       },
       {
