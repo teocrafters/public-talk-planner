@@ -11,10 +11,54 @@ import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 
 /**
  * Helper function to randomly select an element from array
+ * Used for visiting speakers and other selections that should remain random
  */
 function randomFromArray<T>(array: T[]): T | undefined {
   if (array.length === 0) return undefined
   return array[Math.floor(Math.random() * array.length)]
+}
+
+/**
+ * Helper function to distribute assignments evenly across eligible people
+ * Ensures each person gets similar number of assignments across all weeks
+ *
+ * @param items - Array of eligible people/publishers
+ * @param count - Number of assignments to make (typically 12 weeks)
+ * @param getKey - Function to extract unique key from each item
+ * @returns Array of assignments with equal distribution
+ *
+ * Example: 6 people, 12 weeks → each person appears exactly 2 times
+ * Example: 5 people, 12 weeks → 2 people appear 3x, 3 people appear 2x
+ */
+function distributeEvenly<T>(items: T[], count: number, getKey: (item: T) => string): T[] {
+  if (items.length === 0) return []
+  if (count === 0) return []
+
+  // Calculate how many times each person should appear
+  const baseCount = Math.floor(count / items.length)
+  const remainder = count % items.length
+
+  // Build assignment list with equal distribution
+  const assignments: T[] = []
+
+  // Create shuffled copy to randomize which people get extra assignments
+  const shuffledItems = [...items].sort(() => Math.random() - 0.5)
+
+  // First, give everyone their base count
+  for (const item of shuffledItems) {
+    for (let i = 0; i < baseCount; i++) {
+      assignments.push(item)
+    }
+  }
+
+  // Then distribute remainder (some people get +1 assignment)
+  for (let i = 0; i < remainder; i++) {
+    assignments.push(shuffledItems[i])
+  }
+
+  // Shuffle assignments to distribute evenly across weeks
+  // This prevents all assignments for same person being consecutive
+  return assignments.sort(() => Math.random() - 0.5)
 }
 
 /**
@@ -79,7 +123,41 @@ export default defineTask({
       const sundays = calculateSundays(12)
       console.log(`Will create programs for ${sundays.length} Sundays`)
 
-      // Step 4: Create weekend meeting programs for each Sunday
+      // Step 4: Pre-calculate fair distribution of assignments for all roles
+      // This ensures each eligible brother gets similar number of assignments
+      const chairmanAssignments = distributeEvenly(
+        samplePublishers.filter(p => p.canChairWeekendMeeting),
+        sundays.length,
+        p => p.id
+      )
+
+      const readerAssignments = distributeEvenly(
+        samplePublishers.filter(p => p.isReader && !p.conductsWatchtowerStudy),
+        sundays.length,
+        p => p.id
+      )
+
+      const prayerAssignments = distributeEvenly(
+        samplePublishers.filter(
+          p => p.offersPublicPrayer && !p.canChairWeekendMeeting && !p.conductsWatchtowerStudy
+        ),
+        sundays.length,
+        p => p.id
+      )
+
+      const localSpeakerAssignments = distributeEvenly(
+        samplePublishers.filter(p => p.deliversPublicTalks),
+        sundays.length,
+        p => p.id
+      )
+
+      console.log(`\n📊 Assignment Distribution:`)
+      console.log(`   - Chairmen: ${chairmanAssignments.length} assignments for ${new Set(chairmanAssignments.map(p => p.id)).size} people`)
+      console.log(`   - Readers: ${readerAssignments.length} assignments for ${new Set(readerAssignments.map(p => p.id)).size} people`)
+      console.log(`   - Prayers: ${prayerAssignments.length} assignments for ${new Set(prayerAssignments.map(p => p.id)).size} people`)
+      console.log(`   - Local Speakers: ${localSpeakerAssignments.length} assignments for ${new Set(localSpeakerAssignments.map(p => p.id)).size} people\n`)
+
+      // Step 5: Create weekend meeting programs for each Sunday
       let programsCreated = 0
       for (let i = 0; i < sundays.length; i++) {
         const sunday = sundays[i]
@@ -105,6 +183,10 @@ export default defineTask({
           isCircuitOverseerVisit,
           publishers: samplePublishers,
           speakers: speakersWithTalks,
+          preAssignedChairman: chairmanAssignments[i],
+          preAssignedReader: readerAssignments[i],
+          preAssignedPrayer: prayerAssignments[i],
+          preAssignedLocalSpeaker: localSpeakerAssignments[i],
         })
 
         programsCreated++
@@ -162,10 +244,24 @@ interface CreateProgramOptions {
     lastName: string
     speakerTalks?: Array<{ talkId: number }>
   }>
+  preAssignedChairman?: typeof publishers.$inferSelect
+  preAssignedReader?: typeof publishers.$inferSelect
+  preAssignedPrayer?: typeof publishers.$inferSelect
+  preAssignedLocalSpeaker?: typeof publishers.$inferSelect
 }
 
 async function createWeekendMeetingProgram(options: CreateProgramOptions): Promise<void> {
-  const { db, date, isCircuitOverseerVisit, publishers, speakers } = options
+  const {
+    db,
+    date,
+    isCircuitOverseerVisit,
+    publishers,
+    speakers,
+    preAssignedChairman,
+    preAssignedReader,
+    preAssignedPrayer,
+    preAssignedLocalSpeaker,
+  } = options
 
   // Create the meeting program
   const [program] = await db
@@ -240,19 +336,15 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
   const readerPart = createdParts.find(p => p.type === MEETING_PART_TYPES.READER)
   const prayerPart = createdParts.find(p => p.type === MEETING_PART_TYPES.CLOSING_PRAYER)
 
-  // Assign chairman - randomly select from eligible publishers
-  if (chairmanPart) {
-    const eligibleChairmen = publishers.filter(p => p.canChairWeekendMeeting)
-    const chairman = randomFromArray(eligibleChairmen)
-    if (chairman) {
-      await db.insert(meetingScheduledParts).values({
-        id: crypto.randomUUID(),
-        meetingProgramPartId: chairmanPart.id,
-        publisherId: chairman.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-    }
+  // Assign chairman - use pre-assigned publisher for fair distribution
+  if (chairmanPart && preAssignedChairman) {
+    await db.insert(meetingScheduledParts).values({
+      id: crypto.randomUUID(),
+      meetingProgramPartId: chairmanPart.id,
+      publisherId: preAssignedChairman.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
   }
 
   // Assign public talk speaker
@@ -280,27 +372,22 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
       // Regular meeting: 50% chance for local speaker, 50% for visiting speaker
       const useLocalSpeaker = Math.random() < 0.5
 
-      if (useLocalSpeaker) {
-        // Use local publisher who delivers public talks
-        const localSpeakers = publishers.filter(p => p.deliversPublicTalks)
-        const localSpeaker = randomFromArray(localSpeakers)
-
-        if (localSpeaker) {
-          await db.insert(scheduledPublicTalks).values({
-            id: crypto.randomUUID(),
-            date,
-            meetingProgramId: program.id,
-            partId: publicTalkPart.id,
-            speakerSourceType: "local_publisher",
-            speakerId: null, // No external speaker
-            publisherId: localSpeaker.id, // Use local publisher
-            talkId: null, // Local speakers may not have specific talk numbers
-            customTalkTitle: null,
-            overrideValidation: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-        }
+      if (useLocalSpeaker && preAssignedLocalSpeaker) {
+        // Use pre-assigned local publisher for fair distribution
+        await db.insert(scheduledPublicTalks).values({
+          id: crypto.randomUUID(),
+          date,
+          meetingProgramId: program.id,
+          partId: publicTalkPart.id,
+          speakerSourceType: "local_publisher",
+          speakerId: null, // No external speaker
+          publisherId: preAssignedLocalSpeaker.id, // Use pre-assigned publisher
+          talkId: null, // Local speakers may not have specific talk numbers
+          customTalkTitle: null,
+          overrideValidation: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
       } else {
         // Use visiting speaker - randomly select from eligible speakers with talks
         const eligibleSpeakers = speakers.filter(s => s.speakerTalks && s.speakerTalks.length > 0)
@@ -359,36 +446,25 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
     }
   }
 
-  // Assign reader - randomly select from eligible publishers (excluding Watchtower conductor)
-  if (readerPart) {
-    const eligibleReaders = publishers.filter(p => p.isReader && !p.conductsWatchtowerStudy)
-    const reader = randomFromArray(eligibleReaders)
-    if (reader) {
-      await db.insert(meetingScheduledParts).values({
-        id: crypto.randomUUID(),
-        meetingProgramPartId: readerPart.id,
-        publisherId: reader.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-    }
+  // Assign reader - use pre-assigned publisher for fair distribution
+  if (readerPart && preAssignedReader) {
+    await db.insert(meetingScheduledParts).values({
+      id: crypto.randomUUID(),
+      meetingProgramPartId: readerPart.id,
+      publisherId: preAssignedReader.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
   }
 
-  // Assign prayer - randomly select from eligible publishers
-  // (excluding chairman and Watchtower conductor)
-  if (prayerPart) {
-    const eligibleForPrayer = publishers.filter(
-      p => p.offersPublicPrayer && !p.canChairWeekendMeeting && !p.conductsWatchtowerStudy
-    )
-    const prayerPublisher = randomFromArray(eligibleForPrayer)
-    if (prayerPublisher) {
-      await db.insert(meetingScheduledParts).values({
-        id: crypto.randomUUID(),
-        meetingProgramPartId: prayerPart.id,
-        publisherId: prayerPublisher.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-    }
+  // Assign prayer - use pre-assigned publisher for fair distribution
+  if (prayerPart && preAssignedPrayer) {
+    await db.insert(meetingScheduledParts).values({
+      id: crypto.randomUUID(),
+      meetingProgramPartId: prayerPart.id,
+      publisherId: preAssignedPrayer.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
   }
 }

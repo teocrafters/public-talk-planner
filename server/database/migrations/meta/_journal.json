@@ -22,6 +22,13 @@
       "when": 1763239062673,
       "tag": "0002_dashing_invaders",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1763396441668,
+      "tag": "0003_rainy_frank_castle",
+      "breakpoints": true
     }
   ]
 }

@@ -74,6 +74,7 @@ export const publishers = sqliteTable("publishers", {
   id: text("id").primaryKey(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  sex: text("sex", { enum: ["male", "female"] }).notNull(),
   userId: text("user_id")
     .unique()
     .references(() => user.id, { onDelete: "set null" }),
