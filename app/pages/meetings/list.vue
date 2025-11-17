@@ -51,6 +51,22 @@
     return monthKey === currentMonthKey.value
   }
 
+  // Convert month name (e.g., "styczeń 2025") to YYYY-MM format
+  function getMonthParam(monthKey: string): string {
+    // monthKey format: "MMMM YYYY" (e.g., "styczeń 2025")
+    // Parse using dayjs with Polish locale
+    const parsed = dayjs(monthKey, "MMMM YYYY", "pl")
+    return parsed.format("YYYY-MM")
+  }
+
+  // Open print page in new tab
+  function handlePrintMonth(monthKey: string): void {
+    const monthParam = getMonthParam(monthKey)
+    console.log(">>> monthParam: ", monthParam, "monthKey: ", monthKey)
+    const printUrl = `/meetings/print/${monthParam}`
+    window.open(printUrl, "_blank")
+  }
+
   function getSortOrder(partType: string): number {
     const order: Record<string, number> = {
       chairman: 1,
@@ -178,15 +194,25 @@
         v-for="[month, monthPrograms] in groupedByMonth"
         :key="month"
         class="space-y-0">
-        <h2
+        <div
           :class="[
-            'sticky top-0 z-20 p-3 text-xl font-semibold border-b transition-all duration-200',
+            'sticky top-0 z-20 flex items-center justify-between p-3 border-b transition-all duration-200',
             isCurrentMonth(month)
               ? 'text-highlighted bg-muted border-accented'
               : 'text-default bg-default border-default',
           ]">
-          {{ month }}
-        </h2>
+          <h2 class="text-xl font-semibold">
+            {{ month }}
+          </h2>
+          <UButton
+            icon="i-heroicons-printer"
+            variant="ghost"
+            size="sm"
+            :aria-label="t('meetings.printView')"
+            @click="handlePrintMonth(month)">
+            {{ t("meetings.printView") }}
+          </UButton>
+        </div>
         <div class="mt-3 space-y-3">
           <UCard
             v-for="program in monthPrograms"
@@ -214,7 +240,9 @@
               <div class="flex flex-col gap-3">
                 <MeetingPartItem
                   v-for="item in prepareDisplayItems(program.parts)"
-                  :key="item.type === 'watchtower_with_reader' ? item.watchtowerPart.id : item.part.id"
+                  :key="
+                    item.type === 'watchtower_with_reader' ? item.watchtowerPart.id : item.part.id
+                  "
                   :item="item" />
               </div>
             </div>

@@ -1,0 +1,337 @@
+/*
+ * Dedicated CSS for Print Meetings Page
+ * Isolated styles that only affect /meetings/print/[month] page
+ * Ensures consistent view between browser preview and actual print
+ */
+
+/* ============================================
+   COMMON STYLES (Both Screen and Print)
+   ============================================ */
+
+/* Reset and base typography */
+.print-page {
+	font-family: var(--font-sans);
+	font-size: 9pt;
+	line-height: 1.2;
+	color: #000;
+}
+
+/* Print page container */
+.print-page {
+	width: 100%;
+	background: #fff;
+}
+
+/* Header styling */
+.print-header {
+	margin-bottom: 0.3cm;
+}
+
+.print-header h1 {
+	font-size: 14pt;
+	font-weight: 700;
+	text-align: center;
+	margin-bottom: 0.15cm;
+	color: #000;
+}
+
+.print-header h2 {
+	font-size: 12pt;
+	font-weight: 600;
+	text-align: center;
+	text-transform: capitalize;
+	color: #333;
+}
+
+/* Meetings list - compact spacing */
+.meetings-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25cm;
+}
+
+/* Meeting blocks - compact */
+.meeting-block {
+	page-break-inside: avoid;
+	border: 1px solid #ddd;
+	padding: 0.2cm;
+	border-radius: 2px;
+	background: #fff;
+}
+
+.meeting-header {
+	display: flex;
+	align-items: center;
+	gap: 0.3cm;
+	padding-bottom: 0.15cm;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 0.2cm;
+}
+
+.print-page .meeting-header h3 {
+	font-size: 12pt !important;
+	font-weight: 700 !important;
+	color: #000;
+}
+
+.co-badge {
+	font-size: 9pt;
+	padding: 0.1cm 0.2cm;
+	border: 1px solid #f97316;
+	border-radius: 0.15cm;
+	background: #fed7aa;
+	color: #c2410c;
+	white-space: nowrap;
+}
+
+/* Meeting parts - very compact */
+.meeting-parts {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15cm;
+}
+
+/* Override MeetingPartItem component styles - aggressive font size reduction */
+.meeting-parts > * {
+	padding: 0.05cm 0.1cm !important;
+	margin: 0 !important;
+	gap: 0.15cm !important;
+}
+
+/* Override all Tailwind text size classes */
+.print-page .text-base {
+	font-size: 10pt !important;
+	line-height: 1.2 !important;
+}
+
+/* Badge text size - readable at 9pt */
+.print-page .text-xs,
+.print-page span.text-xs,
+.print-page span[class*="text-xs"] {
+	font-size: 9pt !important;
+	line-height: 1.3 !important;
+}
+
+.print-page .font-medium {
+	font-weight: 500 !important;
+}
+
+/* Pogrubienie tytułów wykładów publicznych i przemówień NO */
+.print-page .text-base.font-semibold {
+	font-weight: 700 !important;
+}
+
+/* UBadge styling - keep colors AND make readable */
+.print-page [class*="badge"],
+.print-page span.inline-flex.items-center,
+.print-page span[class*="bg-primary"],
+.print-page span[class*="bg-warning"],
+.print-page span[class*="bg-info"],
+.print-page span[class*="bg-secondary"],
+.print-page span[class*="bg-neutral"] {
+	font-size: 9pt !important;
+	line-height: 1.3 !important;
+	padding: 0.1cm 0.15cm !important;
+	font-weight: 500 !important;
+	margin-top: 0 !important; /* Fix alignment - remove mt-1 */
+	print-color-adjust: exact !important; /* Force colors in print */
+	-webkit-print-color-adjust: exact !important; /* Safari/Chrome */
+	color-adjust: exact !important; /* Standard */
+}
+
+/* Fix vertical alignment of badges with content */
+.print-page .flex.items-start {
+	align-items: center !important;
+}
+
+.print-page .mt-1 {
+	margin-top: 0 !important;
+}
+
+/* Print-friendly badge colors - keep them vibrant but print-safe */
+/* Primary (slate) - for chairman */
+.print-page span[class*="bg-primary"] {
+	background-color: #e2e8f0 !important;
+	color: #475569 !important;
+	border: 1px solid #94a3b8 !important;
+}
+
+/* Warning (green) - for public talks and CO service talk */
+.print-page span[class*="bg-warning"] {
+	background-color: #dcfce7 !important;
+	color: #15803d !important;
+	border: 1px solid #22c55e !important;
+}
+
+/* Info (blue) - for watchtower */
+.print-page span[class*="bg-info"] {
+	background-color: #dbeafe !important;
+	color: #1e40af !important;
+	border: 1px solid #3b82f6 !important;
+}
+
+/* Secondary (slate) - for closing prayer */
+.print-page span[class*="bg-secondary"] {
+	background-color: #e2e8f0 !important;
+	color: #475569 !important;
+	border: 1px solid #94a3b8 !important;
+}
+
+/* Neutral (gray) - for reader */
+.print-page span[class*="bg-neutral"] {
+	background-color: #f3f4f6 !important;
+	color: #374151 !important;
+	border: 1px solid #6b7280 !important;
+}
+
+/* Grid layout optimization for Watchtower */
+.print-page .grid {
+	gap: 0.15cm !important;
+}
+
+/* Ensure readable text colors in content - but NOT badges */
+.print-page p,
+.print-page div:not([class*="bg-"]):not([class*="badge"]) {
+	color: #000 !important;
+}
+
+/* Explicitly keep badge text colors */
+.print-page span[class*="bg-primary"],
+.print-page span[class*="bg-warning"],
+.print-page span[class*="bg-info"],
+.print-page span[class*="bg-secondary"],
+.print-page span[class*="bg-neutral"] {
+	/* Colors already set above - don't override */
+}
+
+/* Remove unnecessary spacing from Tailwind classes */
+.print-page .space-y-6,
+.print-page .space-y-4,
+.print-page .space-y-3,
+.print-page .space-y-2 {
+	gap: 0.15cm !important;
+}
+
+/* ============================================
+   SCREEN-ONLY STYLES (Browser Preview)
+   ============================================ */
+
+@media screen {
+	.print-page {
+		max-width: 21cm;
+		margin: 0 auto;
+		padding: 1cm 1.5cm;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		min-height: 29.7cm; /* A4 height */
+	}
+
+	/* Add some breathing room for screen preview */
+	.print-content {
+		padding: 1rem 0;
+	}
+}
+
+/* ============================================
+   PRINT-ONLY STYLES (Actual Printer Output)
+   ============================================ */
+
+@media print {
+	/* Page setup for A4 */
+	@page {
+		size: A4 portrait;
+		margin: 1cm 1.5cm;
+	}
+
+	/* Hide non-print elements */
+	.no-print,
+	nav,
+	header:not(.print-header),
+	footer,
+	button {
+		display: none !important;
+	}
+
+	/* Reset body for print */
+	body {
+		font-size: 9pt;
+		line-height: 1.2;
+		color: #000 !important;
+		background: #fff !important;
+	}
+
+	/* Print page container reset */
+	.print-page {
+		width: 100%;
+		max-width: 100%;
+		padding: 0;
+		margin: 0;
+		box-shadow: none;
+	}
+
+	/* Ensure proper page breaks */
+	.meeting-block {
+		page-break-inside: avoid;
+		break-inside: avoid;
+	}
+
+	/* Remove any shadows or effects */
+	* {
+		box-shadow: none !important;
+		text-shadow: none !important;
+	}
+
+	/* Force color printing for badges */
+	span[class*="bg-primary"],
+	span[class*="bg-warning"],
+	span[class*="bg-info"],
+	span[class*="bg-secondary"],
+	span[class*="bg-neutral"] {
+		print-color-adjust: exact !important;
+		-webkit-print-color-adjust: exact !important;
+		color-adjust: exact !important;
+	}
+
+	/* Ensure badge colors print correctly */
+	.print-page span[class*="bg-primary"] {
+		background-color: #e2e8f0 !important;
+		color: #475569 !important;
+		border: 1px solid #94a3b8 !important;
+	}
+
+	.print-page span[class*="bg-warning"] {
+		background-color: #dcfce7 !important;
+		color: #15803d !important;
+		border: 1px solid #22c55e !important;
+	}
+
+	.print-page span[class*="bg-info"] {
+		background-color: #dbeafe !important;
+		color: #1e40af !important;
+		border: 1px solid #3b82f6 !important;
+	}
+
+	.print-page span[class*="bg-secondary"] {
+		background-color: #e2e8f0 !important;
+		color: #475569 !important;
+		border: 1px solid #94a3b8 !important;
+	}
+
+	.print-page span[class*="bg-neutral"] {
+		background-color: #f3f4f6 !important;
+		color: #374151 !important;
+		border: 1px solid #6b7280 !important;
+	}
+
+	/* Badge sizing in print */
+	.print-page .text-xs,
+	.print-page span.text-xs {
+		font-size: 9pt !important;
+		line-height: 1.3 !important;
+	}
+
+	/* Ensure links are visible if printed */
+	a {
+		text-decoration: underline;
+		color: #000;
+	}
+}

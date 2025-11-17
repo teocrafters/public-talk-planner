@@ -246,6 +246,9 @@
   "meetings": {
     "title": "Weekend Meetings",
     "description": "Browse scheduled weekend meetings with public talks",
+    "printView": "Print Month",
+    "printTitle": "Weekend Meetings Schedule",
+    "printPageTitle": "Print - {month} {year}",
     "managePublicTalksButton": "Manage Public Talks",
     "manageRestParts": "Manage Other Parts",
     "speaker": "Speaker",
@@ -403,6 +406,13 @@
         "ogTitle": "Weekend Meeting Planning",
         "ogDescription": "Complete meeting program editor with brother assignments",
         "ogImage": "/images/og-plan-weekend.jpg"
+      },
+      "print": {
+        "title": "Meeting Schedule - {month} {year} - Talk Planner",
+        "description": "Printable version of weekend meetings for {month} {year}",
+        "ogTitle": "Print Schedule - {month} {year}",
+        "ogDescription": "Ready-to-print weekend meeting schedule",
+        "ogImage": "/images/og-meetings-print.jpg"
       }
     }
   }

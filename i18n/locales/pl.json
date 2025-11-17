@@ -311,6 +311,9 @@
   "meetings": {
     "title": "Zebrania w weekend",
     "description": "Przeglądaj zaplanowane zebrania w weekend z wykładami publicznymi",
+    "printView": "Drukuj miesiąc",
+    "printTitle": "Plan zebrań w weekend",
+    "printPageTitle": "Drukuj - {month} {year}",
     "managePublicTalksButton": "Planuj wykłady",
     "manageRestParts": "Planuj zebrania",
     "managePublicTalks": {
@@ -468,6 +471,13 @@
         "ogTitle": "Planowanie zebrań w weekend",
         "ogDescription": "Kompletny edytor programu zebrania z przydziałami braci",
         "ogImage": "/images/og-plan-weekend.jpg"
+      },
+      "print": {
+        "title": "Plan zebrań - {month} {year} - Planer Wystąpień",
+        "description": "Wersja do druku zebrań w weekend na miesiąc {month} {year}",
+        "ogTitle": "Plan zebrań do druku - {month} {year}",
+        "ogDescription": "Gotowy do wydruku plan zebrań w weekend",
+        "ogImage": "/images/og-meetings-print.jpg"
       }
     }
   }
