@@ -9,7 +9,7 @@
   },
   {
     "id": "speaker-test-002",
-    "firstName": "Anna",
+    "firstName": "Paweł",
     "lastName": "Nowak",
     "phone": "987654321",
     "talkIds": [3, 7, 15],
@@ -25,8 +25,8 @@
   },
   {
     "id": "speaker-test-004",
-    "firstName": "Maria",
-    "lastName": "Dąbrowska",
+    "firstName": "Marcin",
+    "lastName": "Dąbrowski",
     "phone": "111222333",
     "talkIds": [],
     "archived": false
@@ -41,7 +41,7 @@
   },
   {
     "id": "speaker-test-006",
-    "firstName": "Katarzyna",
+    "firstName": "Kamil",
     "lastName": "Wójcik",
     "phone": "777888999",
     "talkIds": [4, 9, 13],
@@ -57,8 +57,8 @@
   },
   {
     "id": "speaker-test-008",
-    "firstName": "Magdalena",
-    "lastName": "Zielińska",
+    "firstName": "Mateusz",
+    "lastName": "Zieliński",
     "phone": "888999000",
     "talkIds": [16, 19, 22],
     "archived": false

@@ -119,11 +119,15 @@ export default defineTask({
         console.log(`Found ${speakersWithTalks.length} active speakers`)
       }
 
-      // Step 3: Calculate next 12 Sundays
+      // Step 3: Get all public talks for random assignment to local speakers
+      const allPublicTalks = await db.query.publicTalks.findMany()
+      console.log(`Found ${allPublicTalks.length} public talks`)
+
+      // Step 4: Calculate next 12 Sundays
       const sundays = calculateSundays(12)
       console.log(`Will create programs for ${sundays.length} Sundays`)
 
-      // Step 4: Pre-calculate fair distribution of assignments for all roles
+      // Step 5: Pre-calculate fair distribution of assignments for all roles
       // This ensures each eligible brother gets similar number of assignments
       const chairmanAssignments = distributeEvenly(
         samplePublishers.filter(p => p.canChairWeekendMeeting),
@@ -157,7 +161,7 @@ export default defineTask({
       console.log(`   - Prayers: ${prayerAssignments.length} assignments for ${new Set(prayerAssignments.map(p => p.id)).size} people`)
       console.log(`   - Local Speakers: ${localSpeakerAssignments.length} assignments for ${new Set(localSpeakerAssignments.map(p => p.id)).size} people\n`)
 
-      // Step 5: Create weekend meeting programs for each Sunday
+      // Step 6: Create weekend meeting programs for each Sunday
       let programsCreated = 0
       for (let i = 0; i < sundays.length; i++) {
         const sunday = sundays[i]
@@ -183,6 +187,7 @@ export default defineTask({
           isCircuitOverseerVisit,
           publishers: samplePublishers,
           speakers: speakersWithTalks,
+          publicTalks: allPublicTalks,
           preAssignedChairman: chairmanAssignments[i],
           preAssignedReader: readerAssignments[i],
           preAssignedPrayer: prayerAssignments[i],
@@ -244,6 +249,7 @@ interface CreateProgramOptions {
     lastName: string
     speakerTalks?: Array<{ talkId: number }>
   }>
+  publicTalks: Array<{ id: number; title: string }>
   preAssignedChairman?: typeof publishers.$inferSelect
   preAssignedReader?: typeof publishers.$inferSelect
   preAssignedPrayer?: typeof publishers.$inferSelect
@@ -257,6 +263,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
     isCircuitOverseerVisit,
     publishers,
     speakers,
+    publicTalks,
     preAssignedChairman,
     preAssignedReader,
     preAssignedPrayer,
@@ -374,6 +381,9 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
 
       if (useLocalSpeaker && preAssignedLocalSpeaker) {
         // Use pre-assigned local publisher for fair distribution
+        // Randomly select a talk from all available public talks
+        const randomTalk = randomFromArray(publicTalks)
+
         await db.insert(scheduledPublicTalks).values({
           id: crypto.randomUUID(),
           date,
@@ -382,7 +392,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
           speakerSourceType: "local_publisher",
           speakerId: null, // No external speaker
           publisherId: preAssignedLocalSpeaker.id, // Use pre-assigned publisher
-          talkId: null, // Local speakers may not have specific talk numbers
+          talkId: randomTalk?.id || null, // Assign random public talk
           customTalkTitle: null,
           overrideValidation: false,
           createdAt: new Date(),
