@@ -14,11 +14,22 @@
 
   const { t } = useI18n()
 
+  // Use composable for calendar chip logic
+  const { shouldShowChip, getChipColor } = useCalendarChipColor()
+
   // Fetch schedules for calendar range (3 months)
   const { data: schedules, refresh } = await useFetch("/api/schedules", {
     query: {
       startDate: dayjs().subtract(1, "month").toDate().toISOString(),
       endDate: dayjs().add(3, "month").toDate().toISOString(),
+    },
+  })
+
+  // Fetch weekend meetings for Circuit Overseer visit info
+  const { data: weekendPrograms } = await useFetch("/api/weekend-meetings", {
+    query: {
+      startDate: dayjs().subtract(1, "month").unix(),
+      endDate: dayjs().add(3, "month").unix(),
     },
   })
 
@@ -44,16 +55,16 @@
   const selectedSchedule = ref<ScheduleWithRelations | null>(null)
   const showScheduleModal = ref(false)
 
-  function isSundayUnscheduled(date: DateValue): boolean {
-    if (!("day" in date)) return false
-    const dayjsDate = dayjs(date.toString())
+  // Computed properties for chip color logic
+  const plannedDates = computed(() => {
+    if (!schedules.value) return []
+    return schedules.value.map(s => dayjs(s.date).unix())
+  })
 
-    if (dayjsDate.day() !== 0) return false // Not Sunday
-    if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return false // Past date
-
-    const scheduled = schedules.value?.find(s => dayjs(s.date).isSame(dayjsDate, "day"))
-    return !scheduled
-  }
+  const circuitOverseerDates = computed(() => {
+    if (!weekendPrograms.value) return []
+    return weekendPrograms.value.filter(p => p.isCircuitOverseerVisit).map(p => p.date)
+  })
 
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
     // Only handle single date selection
@@ -154,8 +165,8 @@
         @update:model-value="handleDateClick">
         <template #day="{ day }">
           <UChip
-            :show="isSundayUnscheduled(day)"
-            :color="isSundayUnscheduled(day) ? 'warning' : 'success'"
+            :show="shouldShowChip(day)"
+            :color="getChipColor(day, plannedDates, circuitOverseerDates)"
             size="2xs">
             {{ day.day }}
           </UChip>

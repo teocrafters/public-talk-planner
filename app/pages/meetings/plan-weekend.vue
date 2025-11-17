@@ -14,6 +14,9 @@
 
   const { t } = useI18n()
 
+  // Use composable for calendar chip logic
+  const { shouldShowChip, getChipColor } = useCalendarChipColor()
+
   // Fetch weekend meeting programs for calendar range (3 months)
   const { data: programs, refresh } = await useFetch("/api/weekend-meetings", {
     query: {
@@ -61,16 +64,16 @@
   const selectedProgram = ref<WeekendProgram | null>(null)
   const showPlanningModal = ref(false)
 
-  function isSundayUnplanned(date: DateValue): boolean {
-    if (!("day" in date)) return false
-    const dayjsDate = dayjs(date.toString())
+  // Computed properties for chip color logic
+  const plannedDates = computed(() => {
+    if (!programs.value) return []
+    return programs.value.map(p => p.date)
+  })
 
-    if (dayjsDate.day() !== 0) return false // Not Sunday
-    if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return false // Past date
-
-    const planned = programs.value?.find(p => dayjs.unix(p.date).utc().isSame(dayjsDate, "day"))
-    return !planned
-  }
+  const circuitOverseerDates = computed(() => {
+    if (!programs.value) return []
+    return programs.value.filter(p => p.isCircuitOverseerVisit).map(p => p.date)
+  })
 
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
     // Only handle single date selection
@@ -177,8 +180,8 @@
         @update:model-value="handleDateClick">
         <template #day="{ day }">
           <UChip
-            :show="isSundayUnplanned(day)"
-            :color="isSundayUnplanned(day) ? 'warning' : 'success'"
+            :show="shouldShowChip(day)"
+            :color="getChipColor(day, plannedDates, circuitOverseerDates)"
             size="2xs">
             {{ day.day }}
           </UChip>
