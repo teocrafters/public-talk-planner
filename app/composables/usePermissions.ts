@@ -92,10 +92,15 @@ export function usePermissions() {
     })
   }
 
+  const clearPermissionCache = () => {
+    permissionCache.value.clear()
+  }
+
   return {
     role: readonly(role),
     isLoading: readonly(isLoading),
     can,
     fetchPermissions,
+    clearPermissionCache,
   }
 }

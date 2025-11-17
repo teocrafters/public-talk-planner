@@ -1,3 +1,152 @@
+<script setup lang="ts">
+  import type { DropdownMenuItem } from "@nuxt/ui"
+
+  interface Speaker {
+    id: string
+    firstName: string
+    lastName: string
+    phone: string
+    congregationId: string
+    congregationName: string
+    archived: boolean
+    archivedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    talks: Array<{
+      id: number
+      no: string
+      title: string
+    }>
+  }
+
+  definePageMeta({
+    auth: {
+      only: "user",
+      redirectGuestTo: "/",
+    },
+    layout: "authenticated",
+    middleware: ["speakers-manager"],
+  })
+
+  const { t } = useI18n()
+  const { can, fetchPermissions } = usePermissions()
+  const toast = useToast()
+
+  const canManageSpeakers = computed(
+    () =>
+      can("speakers", "create").value ||
+      can("speakers", "update").value ||
+      can("speakers", "archive").value
+  )
+
+  const searchQuery = ref("")
+  const showArchived = ref(false)
+  const editModalOpen = ref(false)
+  const selectedSpeaker = ref<Speaker | null>(null)
+  const editMode = ref<"add" | "edit">("add")
+
+  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+
+  const filteredSpeakers = computed(() => {
+    if (!speakers.value) return []
+
+    let filtered = speakers.value
+
+    if (!showArchived.value) {
+      filtered = filtered.filter(s => !s.archived)
+    }
+
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase()
+      filtered = filtered.filter(
+        s =>
+          s.firstName.toLowerCase().includes(query) ||
+          s.lastName.toLowerCase().includes(query) ||
+          formatPhoneNumber(s.phone).includes(query) ||
+          s.congregationName.toLowerCase().includes(query)
+      )
+    }
+
+    return filtered
+  })
+
+  const activeSpeakersCount = computed(() => {
+    if (!speakers.value) return 0
+    return speakers.value.filter(s => !s.archived).length
+  })
+
+  const archivedCount = computed(() => {
+    if (!speakers.value) return 0
+    return speakers.value.filter(s => s.archived).length
+  })
+
+  const getSpeakerActions = (speaker: Speaker): DropdownMenuItem[] => {
+    return [
+      {
+        label: t("speakers.actions.edit"),
+        icon: "i-heroicons-pencil",
+        onSelect: () => handleEdit(speaker),
+      },
+      {
+        type: "separator",
+      },
+      {
+        label: speaker.archived ? t("speakers.actions.restore") : t("speakers.actions.archive"),
+        icon: speaker.archived ? "i-heroicons-arrow-path" : "i-heroicons-archive-box",
+        onSelect: () => handleArchive(speaker),
+      },
+    ]
+  }
+
+  const handleAddSpeaker = () => {
+    selectedSpeaker.value = null
+    editMode.value = "add"
+    editModalOpen.value = true
+  }
+
+  const handleEdit = (speaker: Speaker) => {
+    selectedSpeaker.value = speaker
+    editMode.value = "edit"
+    editModalOpen.value = true
+  }
+
+  const handleArchive = async (speaker: Speaker) => {
+    try {
+      await $fetch(`/api/speakers/${speaker.id}/archive`, {
+        method: "PATCH",
+        body: { archived: !speaker.archived },
+      })
+
+      toast.add({
+        title: t(
+          speaker.archived
+            ? "speakers.messages.speakerRestored"
+            : "speakers.messages.speakerArchived"
+        ),
+        color: "success",
+      })
+
+      await refresh()
+    } catch (err: unknown) {
+      toast.add({
+        title: t("common.error"),
+        description: err instanceof Error ? err.message : t("speakers.messages.archiveError"),
+        color: "error",
+      })
+    }
+  }
+
+  const handleSpeakerSaved = async () => {
+    await refresh()
+    editModalOpen.value = false
+  }
+
+  await fetchPermissions()
+
+  // SEO meta
+  useSeoPage("speakers.list")
+</script>
+
 <template>
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -131,151 +280,3 @@
       @saved="handleSpeakerSaved" />
   </div>
 </template>
-
-<script setup lang="ts">
-  import type { DropdownMenuItem } from "@nuxt/ui"
-
-  interface Speaker {
-    id: string
-    firstName: string
-    lastName: string
-    phone: string
-    congregationId: string
-    congregationName: string
-    archived: boolean
-    archivedAt: Date | null
-    createdAt: Date
-    updatedAt: Date
-    talks: Array<{
-      id: number
-      no: string
-      title: string
-    }>
-  }
-
-  definePageMeta({
-    auth: {
-      only: "user",
-      redirectGuestTo: "/",
-    },
-    layout: "authenticated",
-  })
-
-  const { t } = useI18n()
-  const { can, fetchPermissions } = usePermissions()
-  const toast = useToast()
-
-  const canManageSpeakers = computed(
-    () =>
-      can("speakers", "create").value ||
-      can("speakers", "update").value ||
-      can("speakers", "archive").value
-  )
-
-  const searchQuery = ref("")
-  const showArchived = ref(false)
-  const editModalOpen = ref(false)
-  const selectedSpeaker = ref<Speaker | null>(null)
-  const editMode = ref<"add" | "edit">("add")
-
-  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
-
-  const filteredSpeakers = computed(() => {
-    if (!speakers.value) return []
-
-    let filtered = speakers.value
-
-    if (!showArchived.value) {
-      filtered = filtered.filter(s => !s.archived)
-    }
-
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase()
-      filtered = filtered.filter(
-        s =>
-          s.firstName.toLowerCase().includes(query) ||
-          s.lastName.toLowerCase().includes(query) ||
-          formatPhoneNumber(s.phone).includes(query) ||
-          s.congregationName.toLowerCase().includes(query)
-      )
-    }
-
-    return filtered
-  })
-
-  const activeSpeakersCount = computed(() => {
-    if (!speakers.value) return 0
-    return speakers.value.filter(s => !s.archived).length
-  })
-
-  const archivedCount = computed(() => {
-    if (!speakers.value) return 0
-    return speakers.value.filter(s => s.archived).length
-  })
-
-  const getSpeakerActions = (speaker: Speaker): DropdownMenuItem[] => {
-    return [
-      {
-        label: t("speakers.actions.edit"),
-        icon: "i-heroicons-pencil",
-        onSelect: () => handleEdit(speaker),
-      },
-      {
-        type: "separator",
-      },
-      {
-        label: speaker.archived ? t("speakers.actions.restore") : t("speakers.actions.archive"),
-        icon: speaker.archived ? "i-heroicons-arrow-path" : "i-heroicons-archive-box",
-        onSelect: () => handleArchive(speaker),
-      },
-    ]
-  }
-
-  const handleAddSpeaker = () => {
-    selectedSpeaker.value = null
-    editMode.value = "add"
-    editModalOpen.value = true
-  }
-
-  const handleEdit = (speaker: Speaker) => {
-    selectedSpeaker.value = speaker
-    editMode.value = "edit"
-    editModalOpen.value = true
-  }
-
-  const handleArchive = async (speaker: Speaker) => {
-    try {
-      await $fetch(`/api/speakers/${speaker.id}/archive`, {
-        method: "PATCH",
-        body: { archived: !speaker.archived },
-      })
-
-      toast.add({
-        title: t(
-          speaker.archived
-            ? "speakers.messages.speakerRestored"
-            : "speakers.messages.speakerArchived"
-        ),
-        color: "success",
-      })
-
-      await refresh()
-    } catch (err: unknown) {
-      toast.add({
-        title: t("common.error"),
-        description: err instanceof Error ? err.message : t("speakers.messages.archiveError"),
-        color: "error",
-      })
-    }
-  }
-
-  const handleSpeakerSaved = async () => {
-    await refresh()
-    editModalOpen.value = false
-  }
-
-  await fetchPermissions()
-
-  // SEO meta
-  useSeoPage("speakers.list")
-</script>

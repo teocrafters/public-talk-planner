@@ -1,3 +1,155 @@
+<script setup lang="ts">
+  import type { DropdownMenuItem } from "@nuxt/ui"
+
+  interface Publisher {
+    id: string
+    firstName: string
+    lastName: string
+    userId: string | null
+    isElder: boolean
+    isMinisterialServant: boolean
+    isRegularPioneer: boolean
+    canChairWeekendMeeting: boolean
+    conductsWatchtowerStudy: boolean
+    backupWatchtowerConductor: boolean
+    isReader: boolean
+    offersPublicPrayer: boolean
+    deliversPublicTalks: boolean
+    isCircuitOverseer: boolean
+    createdAt: Date
+    updatedAt: Date
+  }
+
+  definePageMeta({
+    auth: {
+      only: "user",
+      redirectGuestTo: "/",
+    },
+    layout: "authenticated",
+    middleware: ["publisher-manager"],
+  })
+
+  const { t } = useI18n()
+  const { can, fetchPermissions } = usePermissions()
+
+  const canManagePublishers = computed(
+    () => can("publishers", "create").value || can("publishers", "update").value
+  )
+
+  const canLinkUsers = computed(() => can("publishers", "link_to_user").value)
+
+  const searchQuery = ref("")
+  const filters = reactive({
+    isElder: false,
+    isMinisterialServant: false,
+    canChairWeekendMeeting: false,
+    conductsWatchtowerStudy: false,
+    isReader: false,
+    offersPublicPrayer: false,
+    deliversPublicTalks: false,
+  })
+  const editModalOpen = ref(false)
+  const selectedPublisher = ref<Publisher | null>(null)
+  const editMode = ref<"add" | "edit">("add")
+  const linkUserModalOpen = ref(false)
+  const selectedPublisherForLink = ref<Publisher | null>(null)
+
+  const {
+    data: publishers,
+    pending,
+    error,
+    refresh,
+  } = await useFetch<Publisher[]>("/api/publishers")
+
+  const filteredPublishers = computed(() => {
+    if (!publishers.value) return []
+
+    let filtered = publishers.value
+
+    // Apply search filter
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase()
+      filtered = filtered.filter(
+        p => p.firstName.toLowerCase().includes(query) || p.lastName.toLowerCase().includes(query)
+      )
+    }
+
+    // Apply capability filters
+    if (filters.isElder) {
+      filtered = filtered.filter(p => p.isElder)
+    }
+    if (filters.isMinisterialServant) {
+      filtered = filtered.filter(p => p.isMinisterialServant)
+    }
+    if (filters.canChairWeekendMeeting) {
+      filtered = filtered.filter(p => p.canChairWeekendMeeting)
+    }
+    if (filters.conductsWatchtowerStudy) {
+      filtered = filtered.filter(p => p.conductsWatchtowerStudy)
+    }
+    if (filters.isReader) {
+      filtered = filtered.filter(p => p.isReader)
+    }
+    if (filters.offersPublicPrayer) {
+      filtered = filtered.filter(p => p.offersPublicPrayer)
+    }
+    if (filters.deliversPublicTalks) {
+      filtered = filtered.filter(p => p.deliversPublicTalks)
+    }
+
+    return filtered
+  })
+
+  const getPublisherActions = (publisher: Publisher): DropdownMenuItem[] => {
+    const actions: DropdownMenuItem[] = [
+      {
+        label: t("publishers.actions.edit"),
+        icon: "i-heroicons-pencil",
+        onSelect: () => handleEdit(publisher),
+      },
+    ]
+
+    if (canLinkUsers.value) {
+      actions.push({
+        label: publisher.userId
+          ? t("publishers.actions.unlinkUser")
+          : t("publishers.actions.linkUser"),
+        icon: publisher.userId ? "i-heroicons-link-slash" : "i-heroicons-link",
+        onSelect: () => handleLinkUser(publisher),
+      })
+    }
+
+    return actions
+  }
+
+  const handleAddPublisher = () => {
+    selectedPublisher.value = null
+    editMode.value = "add"
+    editModalOpen.value = true
+  }
+
+  const handleEdit = (publisher: Publisher) => {
+    selectedPublisher.value = publisher
+    editMode.value = "edit"
+    editModalOpen.value = true
+  }
+
+  const handleLinkUser = (publisher: Publisher) => {
+    selectedPublisherForLink.value = publisher
+    linkUserModalOpen.value = true
+  }
+
+  const handlePublisherSaved = async () => {
+    await refresh()
+    editModalOpen.value = false
+  }
+
+  await fetchPermissions()
+
+  // SEO meta
+  useSeoPage("publishers.list")
+</script>
+
 <template>
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -197,155 +349,3 @@
       @saved="handlePublisherSaved" />
   </div>
 </template>
-
-<script setup lang="ts">
-  import type { DropdownMenuItem } from "@nuxt/ui"
-
-  interface Publisher {
-    id: string
-    firstName: string
-    lastName: string
-    userId: string | null
-    isElder: boolean
-    isMinisterialServant: boolean
-    isRegularPioneer: boolean
-    canChairWeekendMeeting: boolean
-    conductsWatchtowerStudy: boolean
-    backupWatchtowerConductor: boolean
-    isReader: boolean
-    offersPublicPrayer: boolean
-    deliversPublicTalks: boolean
-    isCircuitOverseer: boolean
-    createdAt: Date
-    updatedAt: Date
-  }
-
-  definePageMeta({
-    auth: {
-      only: "user",
-      redirectGuestTo: "/",
-    },
-    layout: "authenticated",
-    middleware: ["publisher-manager"],
-  })
-
-  const { t } = useI18n()
-  const { can, fetchPermissions } = usePermissions()
-
-  const canManagePublishers = computed(
-    () => can("publishers", "create").value || can("publishers", "update").value
-  )
-
-  const canLinkUsers = computed(() => can("publishers", "link_to_user").value)
-
-  const searchQuery = ref("")
-  const filters = reactive({
-    isElder: false,
-    isMinisterialServant: false,
-    canChairWeekendMeeting: false,
-    conductsWatchtowerStudy: false,
-    isReader: false,
-    offersPublicPrayer: false,
-    deliversPublicTalks: false,
-  })
-  const editModalOpen = ref(false)
-  const selectedPublisher = ref<Publisher | null>(null)
-  const editMode = ref<"add" | "edit">("add")
-  const linkUserModalOpen = ref(false)
-  const selectedPublisherForLink = ref<Publisher | null>(null)
-
-  const {
-    data: publishers,
-    pending,
-    error,
-    refresh,
-  } = await useFetch<Publisher[]>("/api/publishers")
-
-  const filteredPublishers = computed(() => {
-    if (!publishers.value) return []
-
-    let filtered = publishers.value
-
-    // Apply search filter
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase()
-      filtered = filtered.filter(
-        p => p.firstName.toLowerCase().includes(query) || p.lastName.toLowerCase().includes(query)
-      )
-    }
-
-    // Apply capability filters
-    if (filters.isElder) {
-      filtered = filtered.filter(p => p.isElder)
-    }
-    if (filters.isMinisterialServant) {
-      filtered = filtered.filter(p => p.isMinisterialServant)
-    }
-    if (filters.canChairWeekendMeeting) {
-      filtered = filtered.filter(p => p.canChairWeekendMeeting)
-    }
-    if (filters.conductsWatchtowerStudy) {
-      filtered = filtered.filter(p => p.conductsWatchtowerStudy)
-    }
-    if (filters.isReader) {
-      filtered = filtered.filter(p => p.isReader)
-    }
-    if (filters.offersPublicPrayer) {
-      filtered = filtered.filter(p => p.offersPublicPrayer)
-    }
-    if (filters.deliversPublicTalks) {
-      filtered = filtered.filter(p => p.deliversPublicTalks)
-    }
-
-    return filtered
-  })
-
-  const getPublisherActions = (publisher: Publisher): DropdownMenuItem[] => {
-    const actions: DropdownMenuItem[] = [
-      {
-        label: t("publishers.actions.edit"),
-        icon: "i-heroicons-pencil",
-        onSelect: () => handleEdit(publisher),
-      },
-    ]
-
-    if (canLinkUsers.value) {
-      actions.push({
-        label: publisher.userId
-          ? t("publishers.actions.unlinkUser")
-          : t("publishers.actions.linkUser"),
-        icon: publisher.userId ? "i-heroicons-link-slash" : "i-heroicons-link",
-        onSelect: () => handleLinkUser(publisher),
-      })
-    }
-
-    return actions
-  }
-
-  const handleAddPublisher = () => {
-    selectedPublisher.value = null
-    editMode.value = "add"
-    editModalOpen.value = true
-  }
-
-  const handleEdit = (publisher: Publisher) => {
-    selectedPublisher.value = publisher
-    editMode.value = "edit"
-    editModalOpen.value = true
-  }
-
-  const handleLinkUser = (publisher: Publisher) => {
-    selectedPublisherForLink.value = publisher
-    linkUserModalOpen.value = true
-  }
-
-  const handlePublisherSaved = async () => {
-    await refresh()
-    editModalOpen.value = false
-  }
-
-  await fetchPermissions()
-
-  // SEO meta
-  useSeoPage("publishers.list")
-</script>

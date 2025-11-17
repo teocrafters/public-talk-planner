@@ -1,142 +1,3 @@
-<template>
-  <div class="space-y-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h1 class="text-3xl font-bold tracking-tight text-default">
-          {{ t("publicTalks.title") }}
-        </h1>
-        <p class="mt-2 text-sm text-muted">
-          {{ t("publicTalks.totalTalks", { count: talks?.length || 0 }) }}
-        </p>
-      </div>
-      <UButton
-        v-if="canUpdateTalks"
-        data-testid="add-talk-button"
-        icon="i-heroicons-plus"
-        size="md"
-        class="w-full sm:w-auto"
-        @click="handleAddTalk">
-        {{ t("publicTalks.actions.add") }}
-      </UButton>
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-4">
-      <UInput
-        v-model="searchQuery"
-        data-testid="search-input"
-        :placeholder="t('publicTalks.searchPlaceholder')"
-        icon="i-heroicons-magnifying-glass"
-        class="flex-1" />
-
-      <USelect
-        v-model="sortOrder"
-        data-testid="sort-select"
-        :items="sortOptions"
-        value-key="value"
-        class="w-full sm:w-48" />
-    </div>
-
-    <div
-      v-if="pending"
-      class="space-y-4">
-      <USkeleton
-        v-for="i in 5"
-        :key="i"
-        class="h-24 w-full" />
-    </div>
-
-    <UAlert
-      v-else-if="error"
-      color="error"
-      :title="t('common.error')"
-      :description="error.message" />
-
-    <div
-      v-else-if="filteredTalks.length > 0"
-      class="space-y-3">
-      <ClientOnly>
-        <UCard
-          v-for="talk in filteredTalks"
-          :key="talk.id"
-          data-testid="talk-card"
-          class="hover:shadow-md transition-shadow">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1 min-w-0">
-              <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-2">
-                <span class="text-sm font-medium text-muted shrink-0">
-                  {{ talk.no }}
-                </span>
-                <TalkStatusBadge :status="talk.status" />
-              </div>
-              <h3 class="text-lg font-medium text-default break-words">
-                {{ talk.title }}
-              </h3>
-            </div>
-
-            <div class="flex items-center gap-2 shrink-0">
-              <div class="flex gap-2">
-                <UBadge
-                  v-if="talk.multimediaCount > 0"
-                  color="info"
-                  variant="subtle"
-                  class="hidden sm:flex">
-                  <UIcon
-                    name="i-heroicons-photo"
-                    class="w-4 h-4" />
-                  {{ talk.multimediaCount }}
-                </UBadge>
-
-                <UBadge
-                  v-if="talk.videoCount > 0"
-                  color="secondary"
-                  variant="subtle"
-                  class="hidden sm:flex">
-                  <UIcon
-                    name="i-heroicons-video-camera"
-                    class="w-4 h-4" />
-                  {{ talk.videoCount }}
-                </UBadge>
-              </div>
-
-              <TalkActionsMenu
-                v-if="canFlagTalks || canUpdateTalks"
-                :key="talk.id"
-                :talk="talk"
-                :can-flag="canFlagTalks"
-                :can-update="canUpdateTalks"
-                @status-changed="handleStatusChanged"
-                @edit-requested="() => handleEditRequested(talk)"
-                @confirm-requested="handleConfirmRequested" />
-            </div>
-          </div>
-        </UCard>
-      </ClientOnly>
-    </div>
-
-    <UAlert
-      v-else
-      data-testid="no-results-alert"
-      color="info"
-      :title="t('publicTalks.noResults')"
-      icon="i-heroicons-information-circle" />
-
-    <TalkEditModal
-      v-model:open="editModalOpen"
-      :talk="selectedTalk"
-      :mode="editMode"
-      @saved="handleTalkSaved" />
-
-    <ConfirmDialog
-      v-model="showConfirmDialog"
-      :title="confirmDialogConfig.title"
-      :message="confirmDialogConfig.message"
-      :confirm-text="t('publicTalks.confirmations.confirm')"
-      :cancel-text="t('publicTalks.confirmations.cancel')"
-      variant="warning"
-      @confirm="handleConfirm" />
-  </div>
-</template>
-
 <script setup lang="ts">
   interface PublicTalk {
     id: number
@@ -154,6 +15,7 @@
       redirectGuestTo: "/",
     },
     layout: "authenticated",
+    middleware: ["talks-manager"],
   })
 
   const { t } = useI18n()
@@ -292,3 +154,142 @@
 
   useSeoPage("talks.list")
 </script>
+
+<template>
+  <div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-default">
+          {{ t("publicTalks.title") }}
+        </h1>
+        <p class="mt-2 text-sm text-muted">
+          {{ t("publicTalks.totalTalks", { count: talks?.length || 0 }) }}
+        </p>
+      </div>
+      <UButton
+        v-if="canUpdateTalks"
+        data-testid="add-talk-button"
+        icon="i-heroicons-plus"
+        size="md"
+        class="w-full sm:w-auto"
+        @click="handleAddTalk">
+        {{ t("publicTalks.actions.add") }}
+      </UButton>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+      <UInput
+        v-model="searchQuery"
+        data-testid="search-input"
+        :placeholder="t('publicTalks.searchPlaceholder')"
+        icon="i-heroicons-magnifying-glass"
+        class="flex-1" />
+
+      <USelect
+        v-model="sortOrder"
+        data-testid="sort-select"
+        :items="sortOptions"
+        value-key="value"
+        class="w-full sm:w-48" />
+    </div>
+
+    <div
+      v-if="pending"
+      class="space-y-4">
+      <USkeleton
+        v-for="i in 5"
+        :key="i"
+        class="h-24 w-full" />
+    </div>
+
+    <UAlert
+      v-else-if="error"
+      color="error"
+      :title="t('common.error')"
+      :description="error.message" />
+
+    <div
+      v-else-if="filteredTalks.length > 0"
+      class="space-y-3">
+      <ClientOnly>
+        <UCard
+          v-for="talk in filteredTalks"
+          :key="talk.id"
+          data-testid="talk-card"
+          class="hover:shadow-md transition-shadow">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-2">
+                <span class="text-sm font-medium text-muted shrink-0">
+                  {{ talk.no }}
+                </span>
+                <TalkStatusBadge :status="talk.status" />
+              </div>
+              <h3 class="text-lg font-medium text-default break-words">
+                {{ talk.title }}
+              </h3>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="flex gap-2">
+                <UBadge
+                  v-if="talk.multimediaCount > 0"
+                  color="info"
+                  variant="subtle"
+                  class="hidden sm:flex">
+                  <UIcon
+                    name="i-heroicons-photo"
+                    class="w-4 h-4" />
+                  {{ talk.multimediaCount }}
+                </UBadge>
+
+                <UBadge
+                  v-if="talk.videoCount > 0"
+                  color="secondary"
+                  variant="subtle"
+                  class="hidden sm:flex">
+                  <UIcon
+                    name="i-heroicons-video-camera"
+                    class="w-4 h-4" />
+                  {{ talk.videoCount }}
+                </UBadge>
+              </div>
+
+              <TalkActionsMenu
+                v-if="canFlagTalks || canUpdateTalks"
+                :key="talk.id"
+                :talk="talk"
+                :can-flag="canFlagTalks"
+                :can-update="canUpdateTalks"
+                @status-changed="handleStatusChanged"
+                @edit-requested="() => handleEditRequested(talk)"
+                @confirm-requested="handleConfirmRequested" />
+            </div>
+          </div>
+        </UCard>
+      </ClientOnly>
+    </div>
+
+    <UAlert
+      v-else
+      data-testid="no-results-alert"
+      color="info"
+      :title="t('publicTalks.noResults')"
+      icon="i-heroicons-information-circle" />
+
+    <TalkEditModal
+      v-model:open="editModalOpen"
+      :talk="selectedTalk"
+      :mode="editMode"
+      @saved="handleTalkSaved" />
+
+    <ConfirmDialog
+      v-model="showConfirmDialog"
+      :title="confirmDialogConfig.title"
+      :message="confirmDialogConfig.message"
+      :confirm-text="t('publicTalks.confirmations.confirm')"
+      :cancel-text="t('publicTalks.confirmations.cancel')"
+      variant="warning"
+      @confirm="handleConfirm" />
+  </div>
+</template>

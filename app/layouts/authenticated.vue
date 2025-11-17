@@ -16,6 +16,7 @@
             </ULink>
 
             <ULink
+              v-if="canViewTalks"
               to="/talks"
               active-class="text-primary"
               inactive-class="text-muted hover:text-default">
@@ -23,6 +24,7 @@
             </ULink>
 
             <ULink
+              v-if="canViewSpeakers"
               to="/speakers"
               active-class="text-primary"
               inactive-class="text-muted hover:text-default">
@@ -30,6 +32,7 @@
             </ULink>
 
             <ULink
+              v-if="canViewPublishers"
               to="/publishers"
               active-class="text-primary"
               inactive-class="text-muted hover:text-default">
@@ -73,45 +76,79 @@
 <script setup lang="ts">
   const { t } = useI18n()
   const { signOut } = useAuth()
+  const { can, clearPermissionCache, fetchPermissions } = usePermissions()
+
+  // Fetch permissions on SSR
+  await fetchPermissions()
+
+  // Permission checks for menu items
+  const canViewTalks = computed(
+    () =>
+      can("talks", "create").value &&
+      can("talks", "update").value &&
+      can("talks", "archive").value &&
+      can("talks", "flag").value
+  )
+
+  const canViewSpeakers = computed(() => can("speakers", "list").value)
+
+  const canViewPublishers = computed(
+    () => can("publishers", "create").value || can("publishers", "update").value
+  )
 
   const handleSignOut = async () => {
     await signOut({ redirectTo: "/login" })
+    clearPermissionCache()
   }
 
-  const menuItems = [
-    [
+  const menuItems = computed(() => {
+    const items = [
       {
         label: t("navigation.dashboard"),
         to: "/user",
         icon: "i-heroicons-home",
       },
-      {
+    ]
+
+    if (canViewTalks.value) {
+      items.push({
         label: t("navigation.publicTalks"),
         to: "/talks",
         icon: "i-heroicons-document-text",
-      },
-      {
+      })
+    }
+
+    if (canViewSpeakers.value) {
+      items.push({
         label: t("navigation.speakers"),
         to: "/speakers",
         icon: "i-heroicons-user-group",
-      },
-      {
+      })
+    }
+
+    if (canViewPublishers.value) {
+      items.push({
         label: t("navigation.publishers"),
         to: "/publishers",
         icon: "i-heroicons-user-group",
-      },
-      {
-        label: t("navigation.meetings"),
-        to: "/meetings/list",
-        icon: "i-heroicons-calendar-days",
-      },
-    ],
-    [
-      {
-        label: t("auth.signOut"),
-        icon: "i-heroicons-arrow-right-on-rectangle",
-        onSelect: handleSignOut,
-      },
-    ],
-  ]
+      })
+    }
+
+    items.push({
+      label: t("navigation.meetings"),
+      to: "/meetings/list",
+      icon: "i-heroicons-calendar-days",
+    })
+
+    return [
+      items,
+      [
+        {
+          label: t("auth.signOut"),
+          icon: "i-heroicons-arrow-right-on-rectangle",
+          onSelect: handleSignOut,
+        },
+      ],
+    ]
+  })
 </script>

@@ -10,7 +10,7 @@ export const statement = {
 export const ac = createAccessControl(statement)
 
 export const publisher = ac.newRole({
-  speakers: ["list"],
+  speakers: [],
   talks: [],
   weekend_meetings: ["list"],
   publishers: [],
