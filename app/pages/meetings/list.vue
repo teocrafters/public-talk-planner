@@ -73,6 +73,14 @@
     }
   }
 
+  const currentMonthKey = computed(() => {
+    return dayjs().format("MMMM YYYY")
+  })
+
+  function isCurrentMonth(monthKey: string): boolean {
+    return monthKey === currentMonthKey.value
+  }
+
   useSeoPage("meetings.list")
 </script>
 
@@ -141,13 +149,21 @@
     <div
       v-else
       data-testid="meetings-list"
-      class="space-y-8">
+      class="space-y-6">
       <div
         v-for="[month, monthPrograms] in groupedByMonth"
         :key="month"
-        class="space-y-3">
-        <h2 class="text-xl font-semibold text-muted">{{ month }}</h2>
-        <div class="space-y-3">
+        class="space-y-0">
+        <h2
+          :class="[
+            'sticky top-0 z-20 py-3 text-xl font-semibold border-b transition-all duration-200',
+            isCurrentMonth(month)
+              ? 'text-highlighted bg-muted border-accented'
+              : 'text-default bg-default border-default',
+          ]">
+          {{ month }}
+        </h2>
+        <div class="mt-3 space-y-3">
           <UCard
             v-for="program in monthPrograms"
             :key="program.id"
