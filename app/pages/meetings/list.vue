@@ -43,42 +43,66 @@
     return groups
   })
 
-  function getPartLabel(partType: string): string {
-    // Convert snake_case to camelCase
-    const camelCaseKey = partType
-      .toLowerCase()
-      .replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
-
-    const key = `weekendMeetings.parts.${camelCaseKey}`
-    return t(key)
-  }
-
-  function getPartColor(
-    partType: string
-  ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
-    switch (partType) {
-      case "chairman":
-        return "primary"
-      case "public_talk":
-      case "circuit_overseer_talk":
-        return "warning"
-      case "watchtower_study":
-        return "info"
-      case "reader":
-        return "neutral"
-      case "closing_prayer":
-        return "secondary"
-      default:
-        return "neutral"
-    }
-  }
-
   const currentMonthKey = computed(() => {
     return dayjs().format("MMMM YYYY")
   })
 
   function isCurrentMonth(monthKey: string): boolean {
     return monthKey === currentMonthKey.value
+  }
+
+  function getSortOrder(partType: string): number {
+    const order: Record<string, number> = {
+      chairman: 1,
+      public_talk: 2,
+      watchtower_study: 3,
+      circuit_overseer_talk: 4,
+      reader: 5,
+      closing_prayer: 6,
+    }
+    return order[partType] || 999
+  }
+
+  type WeekendMeetingPart = WeekendMeetingListItem["parts"][number]
+
+  type DisplayItem =
+    | {
+        type: "talk"
+        part: WeekendMeetingPart
+      }
+    | {
+        type: "watchtower_with_reader"
+        watchtowerPart: WeekendMeetingPart
+        readerPart?: WeekendMeetingPart
+      }
+    | {
+        type: "single"
+        part: WeekendMeetingPart
+      }
+
+  function prepareDisplayItems(parts: WeekendMeetingPart[]): DisplayItem[] {
+    const sortedParts = [...parts].sort((a, b) => getSortOrder(a.type) - getSortOrder(b.type))
+    const displayItems: DisplayItem[] = []
+
+    for (const part of sortedParts) {
+      if (part.type === "public_talk" || part.type === "circuit_overseer_talk") {
+        displayItems.push({ type: "talk", part })
+      } else if (part.type === "watchtower_study") {
+        const readerPart = sortedParts.find(p => p.type === "reader")
+        displayItems.push({
+          type: "watchtower_with_reader",
+          watchtowerPart: part,
+          readerPart,
+        })
+      } else if (part.type === "reader") {
+        // Skip - already handled with watchtower_study
+        continue
+      } else {
+        displayItems.push({ type: "single", part })
+      }
+    }
+
+    return displayItems
   }
 
   useSeoPage("meetings.list")
@@ -156,7 +180,7 @@
         class="space-y-0">
         <h2
           :class="[
-            'sticky top-0 z-20 py-3 text-xl font-semibold border-b transition-all duration-200',
+            'sticky top-0 z-20 p-3 text-xl font-semibold border-b transition-all duration-200',
             isCurrentMonth(month)
               ? 'text-highlighted bg-muted border-accented'
               : 'text-default bg-default border-default',
@@ -187,56 +211,11 @@
               </div>
 
               <!-- All Meeting Parts -->
-              <div class="grid gap-3 sm:grid-cols-2">
-                <div
-                  v-for="part in program.parts"
-                  :key="part.id"
-                  class="flex items-start gap-2">
-                  <UBadge
-                    :color="getPartColor(part.type)"
-                    variant="subtle"
-                    size="xs"
-                    class="shrink-0 mt-1">
-                    {{ getPartLabel(part.type) }}
-                  </UBadge>
-                  <div class="flex-1 min-w-0">
-                    <!-- Display speaker name for public talk or CO talk parts -->
-                    <p
-                      v-if="part.type === 'public_talk' || part.type === 'circuit_overseer_talk'"
-                      data-testid="meeting-speaker"
-                      class="text-sm font-medium text-default truncate">
-                      <template v-if="part.assignment">
-                        {{ part.assignment.personName }}
-                      </template>
-                      <template v-else>
-                        <span class="text-dimmed italic">{{ t("meetings.noSchedules") }}</span>
-                      </template>
-                    </p>
-                    <!-- Display assignment for other parts -->
-                    <p
-                      v-else-if="part.assignment"
-                      class="text-sm font-medium text-default truncate">
-                      {{ part.assignment.personName }}
-                    </p>
-                    <p
-                      v-else
-                      class="text-sm text-dimmed italic">
-                      {{ t("meetings.noSchedules") }}
-                    </p>
-                    <!-- Display talk title for public talk or CO talk parts -->
-                    <p
-                      v-if="part.type === 'public_talk' || part.type === 'circuit_overseer_talk'"
-                      data-testid="meeting-talk"
-                      class="text-xs text-dimmed truncate mt-1">
-                      <template v-if="part.name">
-                        {{ part.name }}
-                      </template>
-                      <template v-else>
-                        <span class="italic">{{ t("meetings.noTalkTitle") }}</span>
-                      </template>
-                    </p>
-                  </div>
-                </div>
+              <div class="flex flex-col gap-3">
+                <MeetingPartItem
+                  v-for="item in prepareDisplayItems(program.parts)"
+                  :key="item.type === 'watchtower_with_reader' ? item.watchtowerPart.id : item.part.id"
+                  :item="item" />
               </div>
             </div>
           </UCard>
