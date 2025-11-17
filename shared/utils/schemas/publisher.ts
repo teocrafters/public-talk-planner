@@ -33,9 +33,9 @@ export const updatePublisherSchema = (t: (key: string) => string) => {
   return createPublisherSchema(t).partial()
 }
 
-export const linkUserSchema = (_t: (key: string) => string) => {
+export const linkUserSchema = (t: (key: string) => string) => {
   return z.object({
-    userId: z.string().uuid().nullable(),
+    userId: z.string().min(1, t("validation.userIdRequired")).nullable(),
   })
 }
 

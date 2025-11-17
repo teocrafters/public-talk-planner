@@ -190,6 +190,11 @@
       :publisher="selectedPublisher"
       :mode="editMode"
       @saved="handlePublisherSaved" />
+
+    <LinkUserModal
+      v-model:open="linkUserModalOpen"
+      :publisher="selectedPublisherForLink"
+      @saved="handlePublisherSaved" />
   </div>
 </template>
 
@@ -226,7 +231,6 @@
 
   const { t } = useI18n()
   const { can, fetchPermissions } = usePermissions()
-  const toast = useToast()
 
   const canManagePublishers = computed(
     () => can("publishers", "create").value || can("publishers", "update").value
@@ -247,6 +251,8 @@
   const editModalOpen = ref(false)
   const selectedPublisher = ref<Publisher | null>(null)
   const editMode = ref<"add" | "edit">("add")
+  const linkUserModalOpen = ref(false)
+  const selectedPublisherForLink = ref<Publisher | null>(null)
 
   const {
     data: publishers,
@@ -328,13 +334,9 @@
     editModalOpen.value = true
   }
 
-  const handleLinkUser = async (_publisher: Publisher) => {
-    // TODO: Implement user linking dialog
-    toast.add({
-      title: t("common.comingSoon"),
-      description: t("publishers.messages.linkUserFeatureComingSoon"),
-      color: "info",
-    })
+  const handleLinkUser = (publisher: Publisher) => {
+    selectedPublisherForLink.value = publisher
+    linkUserModalOpen.value = true
   }
 
   const handlePublisherSaved = async () => {

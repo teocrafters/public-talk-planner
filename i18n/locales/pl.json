@@ -183,7 +183,10 @@
     "dateMustBeFuture": "Data musi być w przyszłości",
     "userAlreadyLinked": "Ten użytkownik jest już powiązany z innym głosicielem",
     "publicTalkTitleRequired": "Tytuł wykładu publicznego jest wymagany",
-    "serviceTalkTitleRequired": "Tytuł przemówienia służbowego jest wymagany"
+    "serviceTalkTitleRequired": "Tytuł przemówienia służbowego jest wymagany",
+    "userNotFound": "Nie znaleziono użytkownika",
+    "publisherIdRequired": "Identyfikator głosiciela jest wymagany",
+    "publisherUpdateFailed": "Aktualizacja głosiciela nie powiodła się"
   },
   "speakers": {
     "title": "Mówcy",
@@ -247,9 +250,24 @@
     "messages": {
       "linkUserFeatureComingSoon": "Funkcja powiązywania użytkowników będzie wkrótce dostępna",
       "publisherCreated": "Głosiciel został dodany",
-      "publisherUpdated": "Dane głosiciela zostały zaktualizowane"
+      "publisherUpdated": "Dane głosiciela zostały zaktualizowane",
+      "userLinked": "Użytkownik został powiązany z głosicielem",
+      "userUnlinked": "Użytkownik został odłączony od głosiciela"
+    },
+    "linkUserModal": {
+      "linkTitle": "Powiąż użytkownika z głosicielem",
+      "unlinkTitle": "Odłącz użytkownika od głosiciela",
+      "selectUser": "Wybierz użytkownika",
+      "searchUsers": "Szukaj użytkownika...",
+      "currentlyLinked": "Aktualnie powiązany użytkownik",
+      "noUnlinkedUsers": "Brak dostępnych użytkowników do powiązania",
+      "loadingUsers": "Ładowanie użytkowników...",
+      "unlink": "Odłącz",
+      "link": "Powiąż"
     },
     "modal": {
+      "addTitle": "Dodaj głosiciela",
+      "editTitle": "Edytuj głosiciela",
       "firstName": "Imię",
       "lastName": "Nazwisko",
       "capabilities": "Zadania",

@@ -94,7 +94,30 @@
       "circuitOverseer": "Circuit Overseer"
     },
     "messages": {
-      "linkUserFeatureComingSoon": "User linking feature coming soon"
+      "linkUserFeatureComingSoon": "User linking feature coming soon",
+      "publisherCreated": "Publisher created successfully",
+      "publisherUpdated": "Publisher updated successfully",
+      "userLinked": "User has been linked to publisher",
+      "userUnlinked": "User has been unlinked from publisher"
+    },
+    "linkUserModal": {
+      "linkTitle": "Link user to publisher",
+      "unlinkTitle": "Unlink user from publisher",
+      "selectUser": "Select user",
+      "searchUsers": "Search user...",
+      "currentlyLinked": "Currently linked user",
+      "noUnlinkedUsers": "No available users to link",
+      "loadingUsers": "Loading users...",
+      "unlink": "Unlink",
+      "link": "Link"
+    },
+    "modal": {
+      "addTitle": "Add Publisher",
+      "editTitle": "Edit Publisher",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "capabilities": "Capabilities",
+      "save": "Save"
     }
   },
   "publicTalks": {
@@ -179,7 +202,10 @@
     "programNotFound": "Meeting program not found",
     "meetingAlreadyScheduled": "Meeting is already scheduled for this date",
     "dateMustBeFuture": "Date must be in the future",
-    "userAlreadyLinked": "This user is already linked to another publisher"
+    "userAlreadyLinked": "This user is already linked to another publisher",
+    "userNotFound": "User not found",
+    "publisherIdRequired": "Publisher ID is required",
+    "publisherUpdateFailed": "Failed to update publisher"
   },
   "validation": {
     "required": "This field is required",
