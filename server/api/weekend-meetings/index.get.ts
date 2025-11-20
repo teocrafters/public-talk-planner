@@ -78,8 +78,18 @@ export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[
             }
           }
         }
+      } else if (part.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK) {
+        // For circuit overseer talks, also check if there's a talk with number
+        const scheduledPart = part.meetingScheduledParts[0]
+        if (scheduledPart?.publisher) {
+          assignment = {
+            personId: scheduledPart.publisherId,
+            personName: `${scheduledPart.publisher.firstName} ${scheduledPart.publisher.lastName}`,
+            personType: "publisher",
+          }
+        }
       } else {
-        // For all other parts (including circuit_overseer_talk), use meetingScheduledParts (publishers)
+        // For all other parts, use meetingScheduledParts (publishers)
         const scheduledPart = part.meetingScheduledParts[0]
         if (scheduledPart?.publisher) {
           assignment = {
@@ -90,11 +100,24 @@ export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[
         }
       }
 
+      // Extract talk number for public talks and circuit overseer talks
+      let talkNumber: string | undefined
+      if (part.type === MEETING_PART_TYPES.PUBLIC_TALK) {
+        const publicTalk = part.scheduledPublicTalks[0]
+        talkNumber = publicTalk?.talk?.no || undefined
+      } else if (part.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK) {
+        // For circuit overseer talks, try to find a talk number if a talk is scheduled
+        const scheduledPart = part.meetingScheduledParts[0]
+        // Note: Circuit overseer talks might not have talk numbers in the same way
+        // This could be enhanced if circuit overseer talks are linked to publicTalks
+      }
+
       return {
         id: part.id,
         type: part.type,
         name: talkName,
         order: part.order,
+        talkNumber,
         assignment,
       }
     }),

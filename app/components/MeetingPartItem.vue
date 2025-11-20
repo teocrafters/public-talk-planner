@@ -66,6 +66,16 @@
       class="w-40 mt-1 whitespace-normal text-left leading-tight">
       {{ getPartLabel(item.part.type) }}
     </UBadge>
+    <!-- Talk number badge -->
+    <UBadge
+      v-if="item.part.talkNumber"
+      color="neutral"
+      variant="soft"
+      size="sm"
+      class="w-8 h-6 flex items-center justify-center text-xs font-medium leading-none mt-1"
+      data-testid="meeting-talk-number">
+      {{ item.part.talkNumber }}
+    </UBadge>
     <div class="flex-1 min-w-0">
       <!-- Talk title (prominent) -->
       <p

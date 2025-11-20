@@ -7,6 +7,7 @@ export interface WeekendMeetingListItem {
     type: string
     name: string | null
     order: number
+    talkNumber?: string
     assignment?: {
       personId: string
       personName: string
