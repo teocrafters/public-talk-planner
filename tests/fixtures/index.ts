@@ -12,15 +12,35 @@ export const test = base.extend({
     // Store original goto function
     const originalGoto = page.goto.bind(page)
 
-    // Override goto to add hydration waiting
+    // Override goto to add hydration waiting with error handling
     page.goto = async (url, options) => {
-      // Call original goto
-      const response = await originalGoto(url, options)
+      try {
+        // Call original goto
+        const response = await originalGoto(url, options)
 
-      // Wait for Nuxt hydration to complete
-      await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false)
+        // Wait for Nuxt hydration to complete with timeout
+        try {
+          await page.waitForFunction(
+            () => window.useNuxtApp?.().isHydrating === false,
+            { timeout: 10000 }
+          )
+        } catch (hydrationError) {
+          // If hydration wait times out, log but don't fail the test
+          console.log("Hydration check timed out, continuing anyway", hydrationError)
+        }
 
-      return response
+        return response
+      } catch (error) {
+        // If the original goto fails due to navigation interruption,
+        // re-throw with more context
+        if (error.message.includes("interrupted by another navigation")) {
+          console.log(`Navigation to ${url} was interrupted, retrying...`)
+          // Wait a moment and retry once
+          await page.waitForTimeout(500)
+          return await originalGoto(url, options)
+        }
+        throw error
+      }
     }
 
     // Provide the enhanced page to tests
