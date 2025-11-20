@@ -95,7 +95,7 @@ async function analyzeJwpub() {
 
         return {
           no,
-          title: row.Title,
+          title: row.Title.replace(/^\d+\.\s*/, ""), // Remove "NUMBER. " prefix from title
           multimediaCount: row.image_count,
           videoCount: row.video_count,
           status: null,
