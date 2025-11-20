@@ -12,6 +12,7 @@
     archivedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    lastTalkDate: number | null
     talks: Array<{
       id: number
       no: string
@@ -41,11 +42,42 @@
 
   const searchQuery = ref("")
   const showArchived = ref(false)
+  const sortBy = ref("lastTalk")
+  const sortOrder = ref<"asc" | "desc">("asc")
   const editModalOpen = ref(false)
   const selectedSpeaker = ref<Speaker | null>(null)
   const editMode = ref<"add" | "edit">("add")
 
-  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+  const sortOptions = computed(() => [
+    { value: "name-asc", label: t("speakers.sortByNameAsc") },
+    { value: "name-desc", label: t("speakers.sortByNameDesc") },
+    { value: "congregation-asc", label: t("speakers.sortByCongregationAsc") },
+    { value: "congregation-desc", label: t("speakers.sortByCongregationDesc") },
+    { value: "lastTalk-asc", label: t("speakers.sortByLastTalkAsc") },
+    { value: "lastTalk-desc", label: t("speakers.sortByLastTalkDesc") },
+  ])
+
+  const selectedSortOption = computed(() => `${sortBy.value}-${sortOrder.value}`)
+
+  function handleSortChange(newValue: string) {
+    const [newSortBy, newSortOrder] = newValue.split("-")
+    if (newSortBy && newSortOrder) {
+      sortBy.value = newSortBy
+      sortOrder.value = newSortOrder as "asc" | "desc"
+    }
+  }
+
+  const {
+    data: speakers,
+    pending,
+    error,
+    refresh,
+  } = await useFetch<Speaker[]>("/api/speakers", {
+    query: {
+      sortBy,
+      sortOrder,
+    },
+  })
 
   const filteredSpeakers = computed(() => {
     if (!speakers.value) return []
@@ -184,6 +216,14 @@
         icon="i-heroicons-magnifying-glass"
         class="flex-1" />
 
+      <USelect
+        v-model="selectedSortOption"
+        data-testid="sort-select"
+        :items="sortOptions"
+        value-key="value"
+        class="w-full sm:w-56"
+        @update:model-value="handleSortChange" />
+
       <UCheckbox
         v-model="showArchived"
         data-testid="show-archived-toggle"
@@ -218,36 +258,67 @@
         }">
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-2">
-              <h3 class="text-lg font-medium text-default">
-                {{ speaker.firstName }} {{ speaker.lastName }}
-              </h3>
-              <UBadge
-                v-if="speaker.archived"
-                color="neutral"
-                variant="subtle">
-                {{ t("speakers.archived") }}
-              </UBadge>
-            </div>
-            <p class="text-sm text-muted">{{ speaker.congregationName }}</p>
-            <p class="text-sm text-muted">
-              {{ formatPhoneNumber(speaker.phone) }}
-            </p>
-            <div
-              v-if="speaker.talks.length > 0"
-              class="mt-2">
-              <p class="text-xs text-dimmed mb-1">{{ t("speakers.talks") }}:</p>
-              <div
-                class="flex flex-wrap gap-2"
-                data-testid="speaker-talks-badges">
-                <UBadge
-                  v-for="talk in speaker.talks"
-                  :key="talk.id"
-                  color="primary"
-                  variant="subtle"
-                  size="xs">
-                  {{ talk.no }}
-                </UBadge>
+            <!-- Two-column layout for speaker information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Left Column: Speaker Info & Phone -->
+              <div class="space-y-3">
+                <!-- Speaker name with congregation in parentheses -->
+                <div class="flex items-center gap-2">
+                  <h3 class="text-lg font-medium text-default">
+                    {{ speaker.firstName }} {{ speaker.lastName }}
+                    <span class="text-muted">({{ speaker.congregationName }})</span>
+                  </h3>
+                  <UBadge
+                    v-if="speaker.archived"
+                    color="neutral"
+                    variant="subtle">
+                    {{ t("speakers.archived") }}
+                  </UBadge>
+                </div>
+
+                <!-- Phone number -->
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-phone" class="size-4 text-muted" />
+                  <p class="text-sm text-default">{{ formatPhoneNumber(speaker.phone) }}</p>
+                </div>
+              </div>
+
+              <!-- Right Column: Talks & Last Talk Date -->
+              <div class="space-y-3">
+                <!-- Talks list -->
+                <div v-if="speaker.talks.length > 0">
+                  <p class="text-xs text-dimmed mb-2">{{ t("speakers.talks") }}:</p>
+                  <div
+                    class="flex flex-wrap gap-1"
+                    data-testid="speaker-talks-badges">
+                    <UBadge
+                      v-for="talk in speaker.talks"
+                      :key="talk.id"
+                      color="primary"
+                      variant="subtle"
+                      size="xs">
+                      {{ talk.no }}
+                    </UBadge>
+                  </div>
+                </div>
+
+                <!-- Last talk date -->
+                <div>
+                  <UBadge
+                    v-if="speaker.lastTalkDate"
+                    color="info"
+                    variant="subtle"
+                    size="xs">
+                    {{ t("speakers.lastTalkDate") }}: {{ formatDatePL(speaker.lastTalkDate) }}
+                  </UBadge>
+                  <UBadge
+                    v-else
+                    color="warning"
+                    variant="subtle"
+                    size="xs">
+                    {{ t("speakers.never") }}
+                  </UBadge>
+                </div>
               </div>
             </div>
           </div>

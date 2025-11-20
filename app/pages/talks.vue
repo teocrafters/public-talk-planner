@@ -7,6 +7,7 @@
     videoCount: number
     status: "circuit_overseer" | "will_be_replaced" | null
     createdAt: Date
+    lastGivenDate: number | null
   }
 
   definePageMeta({
@@ -19,8 +20,8 @@
   })
 
   const { t } = useI18n()
-
-  const { data: talks, pending, error, refresh } = await useFetch<PublicTalk[]>("/api/public-talks")
+  const route = useRoute()
+  const router = useRouter()
 
   const { can, fetchPermissions } = usePermissions()
 
@@ -28,7 +29,20 @@
   const canFlagTalks = can("talks", "flag")
 
   const searchQuery = ref("")
-  const sortOrder = ref<"asc" | "desc">("asc")
+  const sortBy = ref((route.query.sortBy as string) || "lastGiven")
+  const sortOrder = ref<"asc" | "desc">((route.query.sortOrder as "asc" | "desc") || "asc")
+
+  const {
+    data: talks,
+    pending,
+    error,
+    refresh,
+  } = await useFetch<PublicTalk[]>("/api/public-talks", {
+    query: {
+      sortBy,
+      sortOrder,
+    },
+  })
   const editModalOpen = ref(false)
   const editMode = ref<"add" | "edit">("add")
   const selectedTalk = ref<PublicTalk | null>(null)
@@ -42,9 +56,23 @@
   })
 
   const sortOptions = computed(() => [
-    { value: "asc", label: t("publicTalks.sortAscending") },
-    { value: "desc", label: t("publicTalks.sortDescending") },
+    { value: "number-asc", label: t("publicTalks.sortByNumberAsc") },
+    { value: "number-desc", label: t("publicTalks.sortByNumberDesc") },
+    { value: "title-asc", label: t("publicTalks.sortByTitleAsc") },
+    { value: "title-desc", label: t("publicTalks.sortByTitleDesc") },
+    { value: "lastGiven-asc", label: t("publicTalks.sortByLastGivenAsc") },
+    { value: "lastGiven-desc", label: t("publicTalks.sortByLastGivenDesc") },
   ])
+
+  const selectedSortOption = computed(() => `${sortBy.value}-${sortOrder.value}`)
+
+  function handleSortChange(newValue: string) {
+    const [newSortBy, newSortOrder] = newValue.split("-")
+    if (newSortBy && newSortOrder) {
+      sortBy.value = newSortBy
+      sortOrder.value = newSortOrder as "asc" | "desc"
+    }
+  }
 
   const filteredTalks = computed(() => {
     if (!talks.value) return []
@@ -57,12 +85,6 @@
         talk => talk.no.toString().includes(query) || talk.title.toLowerCase().includes(query)
       )
     }
-
-    result.sort((a, b) => {
-      const aNum = parseInt(a.no)
-      const bNum = parseInt(b.no)
-      return sortOrder.value === "asc" ? aNum - bNum : bNum - aNum
-    })
 
     return result
   })
@@ -186,11 +208,12 @@
         class="flex-1" />
 
       <USelect
-        v-model="sortOrder"
+        v-model="selectedSortOption"
         data-testid="sort-select"
         :items="sortOptions"
         value-key="value"
-        class="w-full sm:w-48" />
+        class="w-full sm:w-56"
+        @update:model-value="handleSortChange" />
     </div>
 
     <div
@@ -217,42 +240,21 @@
           :key="talk.id"
           data-testid="talk-card"
           class="hover:shadow-md transition-shadow">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1 min-w-0">
-              <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-2">
-                <span class="text-sm font-medium text-muted shrink-0">
+          <div class="space-y-3">
+            <!-- First Row: Talk Number and Title -->
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <UBadge
+                  data-testid="talk-number-chip"
+                  color="primary"
+                  variant="subtle"
+                  size="sm"
+                  class="shrink-0">
                   {{ talk.no }}
-                </span>
-                <TalkStatusBadge :status="talk.status" />
-              </div>
-              <h3 class="text-lg font-medium text-default break-words">
-                {{ talk.title }}
-              </h3>
-            </div>
-
-            <div class="flex items-center gap-2 shrink-0">
-              <div class="flex gap-2">
-                <UBadge
-                  v-if="talk.multimediaCount > 0"
-                  color="info"
-                  variant="subtle"
-                  class="hidden sm:flex">
-                  <UIcon
-                    name="i-heroicons-photo"
-                    class="w-4 h-4" />
-                  {{ talk.multimediaCount }}
                 </UBadge>
-
-                <UBadge
-                  v-if="talk.videoCount > 0"
-                  color="secondary"
-                  variant="subtle"
-                  class="hidden sm:flex">
-                  <UIcon
-                    name="i-heroicons-video-camera"
-                    class="w-4 h-4" />
-                  {{ talk.videoCount }}
-                </UBadge>
+                <h3 class="text-lg font-medium text-default break-words">
+                  {{ talk.title }}
+                </h3>
               </div>
 
               <TalkActionsMenu
@@ -264,6 +266,53 @@
                 @status-changed="handleStatusChanged"
                 @edit-requested="() => handleEditRequested(talk)"
                 @confirm-requested="handleConfirmRequested" />
+            </div>
+
+            <!-- Second Row: Metadata -->
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Last given date -->
+              <UBadge
+                data-testid="talk-last-given-date"
+                :color="talk.lastGivenDate ? 'success' : 'error'"
+                variant="subtle"
+                size="xs">
+                <UIcon
+                  name="i-heroicons-calendar"
+                  class="w-3.5 h-3.5 mr-1" />
+                <span v-if="talk.lastGivenDate">{{ formatDatePL(talk.lastGivenDate) }}</span>
+                <span v-else>{{ t("speakers.never") }}</span>
+              </UBadge>
+
+              <!-- Multimedia count -->
+              <UBadge
+                v-if="talk.multimediaCount > 0"
+                data-testid="talk-multimedia-count"
+                color="info"
+                variant="subtle"
+                size="xs">
+                <UIcon
+                  name="i-heroicons-photo"
+                  class="w-3.5 h-3.5 mr-1" />
+                {{ talk.multimediaCount }}
+              </UBadge>
+
+              <!-- Video count -->
+              <UBadge
+                v-if="talk.videoCount > 0"
+                data-testid="talk-video-count"
+                color="secondary"
+                variant="subtle"
+                size="xs">
+                <UIcon
+                  name="i-heroicons-video-camera"
+                  class="w-3.5 h-3.5 mr-1" />
+                {{ talk.videoCount }}
+              </UBadge>
+
+              <!-- Status badge -->
+              <TalkStatusBadge
+                v-if="talk.status"
+                :status="talk.status" />
             </div>
           </div>
         </UCard>
