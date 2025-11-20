@@ -71,6 +71,15 @@
     if (newSortBy && newSortOrder) {
       sortBy.value = newSortBy
       sortOrder.value = newSortOrder as "asc" | "desc"
+
+      // Update URL query parameters
+      router.push({
+        query: {
+          ...route.query,
+          sortBy: newSortBy,
+          sortOrder: newSortOrder,
+        },
+      })
     }
   }
 

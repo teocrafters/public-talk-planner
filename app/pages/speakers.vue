@@ -30,6 +30,8 @@
   })
 
   const { t } = useI18n()
+  const route = useRoute()
+  const router = useRouter()
   const { can, fetchPermissions } = usePermissions()
   const toast = useToast()
 
@@ -42,8 +44,8 @@
 
   const searchQuery = ref("")
   const showArchived = ref(false)
-  const sortBy = ref("lastTalk")
-  const sortOrder = ref<"asc" | "desc">("asc")
+  const sortBy = ref((route.query.sortBy as string) || "lastTalk")
+  const sortOrder = ref<"asc" | "desc">((route.query.sortOrder as "asc" | "desc") || "asc")
   const editModalOpen = ref(false)
   const selectedSpeaker = ref<Speaker | null>(null)
   const editMode = ref<"add" | "edit">("add")
@@ -64,6 +66,15 @@
     if (newSortBy && newSortOrder) {
       sortBy.value = newSortBy
       sortOrder.value = newSortOrder as "asc" | "desc"
+
+      // Update URL query parameters
+      router.push({
+        query: {
+          ...route.query,
+          sortBy: newSortBy,
+          sortOrder: newSortOrder,
+        },
+      })
     }
   }
 
