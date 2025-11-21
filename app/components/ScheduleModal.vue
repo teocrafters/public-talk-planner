@@ -351,6 +351,7 @@
   <!-- Validation Warning Dialog -->
   <UModal
     v-model:open="showOverrideWarning"
+    :ui="{ footer: 'justify-between' }"
     data-testid="validation-warning-dialog">
     <template #header>
       <h3 class="text-lg font-semibold">{{ t("meetings.validationWarning.title") }}</h3>

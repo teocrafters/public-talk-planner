@@ -139,7 +139,9 @@
 </script>
 
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal
+    v-model:open="isOpen"
+    :ui="{ footer: 'justify-between' }">
     <template #content>
       <UCard class="max-w-2xl">
         <template #header>
@@ -221,27 +223,25 @@
         </UForm>
 
         <template #footer>
-          <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <UButton
-              type="button"
-              data-testid="talk-cancel-button"
-              variant="outline"
-              color="neutral"
-              :disabled="isSubmitting"
-              class="w-full sm:w-auto"
-              @click="isOpen = false">
-              {{ t("publicTalks.modal.cancel") }}
-            </UButton>
-            <UButton
-              type="submit"
-              data-testid="talk-save-button"
-              form="talk-form"
-              :loading="isSubmitting"
-              :disabled="isSubmitting"
-              class="w-full sm:w-auto">
-              {{ submitButtonText }}
-            </UButton>
-          </div>
+          <UButton
+            type="button"
+            data-testid="talk-cancel-button"
+            variant="outline"
+            color="neutral"
+            :disabled="isSubmitting"
+            class="w-full sm:w-auto"
+            @click="isOpen = false">
+            {{ t("publicTalks.modal.cancel") }}
+          </UButton>
+          <UButton
+            type="submit"
+            data-testid="talk-save-button"
+            form="talk-form"
+            :loading="isSubmitting"
+            :disabled="isSubmitting"
+            class="w-full sm:w-auto">
+            {{ submitButtonText }}
+          </UButton>
         </template>
       </UCard>
     </template>

@@ -287,7 +287,9 @@
 </script>
 
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal
+    v-model:open="isOpen"
+    :ui="{ footer: 'justify-between' }">
     <UButton
       data-testid="open-weekend-planning-modal-button"
       :label="t('weekendMeetings.plan')" />
@@ -445,21 +447,19 @@
     </template>
 
     <template #footer="{ close }">
-      <div class="flex justify-end gap-2">
-        <UButton
-          data-testid="cancel-button"
-          variant="outline"
-          :label="t('common.cancel')"
-          :disabled="isLoading"
-          @click="close" />
-        <UButton
-          data-testid="save-button"
-          type="submit"
-          :label="t('weekendMeetings.modal.save')"
-          :loading="isLoading"
-          :disabled="isLoading || loadingPublishers"
-          @click="form?.submit()" />
-      </div>
+      <UButton
+        data-testid="cancel-button"
+        variant="outline"
+        :label="t('common.cancel')"
+        :disabled="isLoading"
+        @click="close" />
+      <UButton
+        data-testid="save-button"
+        type="submit"
+        :label="t('weekendMeetings.modal.save')"
+        :loading="isLoading"
+        :disabled="isLoading || loadingPublishers"
+        @click="form?.submit()" />
     </template>
   </UModal>
 </template>
