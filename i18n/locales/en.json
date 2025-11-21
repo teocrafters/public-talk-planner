@@ -283,6 +283,23 @@
     "backToList": "Back to list",
     "noTalk": "No talk",
     "noTalkTitle": "No talk title",
+    "autoSuggestion": {
+      "button": "Auto-suggestion",
+      "skip": "Next speaker",
+      "modal": {
+        "title": "Public Talk Auto-Suggestion",
+        "oldestSpeaker": "Oldest Speaker",
+        "contactInfo": "Contact Information",
+        "availableTalks": "Available Talks",
+        "selectDate": "Select Date",
+        "confirm": "Plan Talk"
+      },
+      "fallback": {
+        "noVisitingSpeakers": "No visiting speakers available",
+        "localPublisherSuggestion": "Suggested local publisher:",
+        "oldestLocalPublisher": "Longest time since last talk"
+      }
+    },
     "managePublicTalks": {
       "title": "Manage Public Talks",
       "description": "Schedule weekend meetings with public talks"

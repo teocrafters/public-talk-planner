@@ -145,15 +145,18 @@
           {{ t("meetings.managePublicTalks.description") }}
         </p>
       </div>
-      <UButton
-        data-testid="back-to-list-button"
-        variant="outline"
-        icon="i-heroicons-list-bullet"
-        size="md"
-        class="w-full sm:w-auto"
-        @click="navigateTo('/meetings/list')">
-        {{ t("meetings.backToList") }}
-      </UButton>
+      <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <AutoSuggestionModal @schedule-created="refresh" />
+        <UButton
+          data-testid="back-to-list-button"
+          variant="outline"
+          icon="i-heroicons-list-bullet"
+          size="md"
+          class="w-full sm:w-auto"
+          @click="navigateTo('/meetings/list')">
+          {{ t("meetings.backToList") }}
+        </UButton>
+      </div>
     </div>
 
     <ClientOnly>

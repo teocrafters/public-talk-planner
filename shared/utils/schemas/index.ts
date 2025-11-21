@@ -50,3 +50,12 @@ export {
   type WeekendMeetingInput,
   type WeekendMeetingUpdateInput,
 } from "./weekend-meeting"
+
+// Auto-suggestion schemas
+export {
+  autoSuggestionSchema,
+  type AutoSuggestionInput,
+  type AutoSuggestionResponse,
+  type SpeakerSuggestion,
+  type TalkSuggestion,
+} from "./auto-suggestion"

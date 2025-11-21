@@ -352,6 +352,23 @@
     "backToList": "Powrót do listy",
     "noTalk": "Brak wykładu",
     "noTalkTitle": "Brak tytułu wykładu",
+    "autoSuggestion": {
+      "button": "Auto-sugestia",
+      "skip": "Następny mówca",
+      "modal": {
+        "title": "Auto-sugestia wykładu",
+        "oldestSpeaker": "Najdawniejszy mówca",
+        "contactInfo": "Dane kontaktowe",
+        "availableTalks": "Dostępne wykłady",
+        "selectDate": "Wybierz datę",
+        "confirm": "Zaplanuj wykład"
+      },
+      "fallback": {
+        "noVisitingSpeakers": "Brak przyjezdnych mówców dostępnych",
+        "localPublisherSuggestion": "Proponowany lokalny wydawca:",
+        "oldestLocalPublisher": "Najdawniej nie przemawiający wydawca"
+      }
+    },
     "modal": {
       "title": "Zaplanuj zebranie",
       "editTitle": "Edytuj zebranie"
