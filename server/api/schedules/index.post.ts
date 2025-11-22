@@ -1,5 +1,5 @@
 import { createError } from "h3"
-import { eq, and } from "drizzle-orm"
+import { eq, and, between } from "drizzle-orm"
 import {
   speakers,
   publishers,
@@ -23,7 +23,11 @@ export default defineEventHandler(async event => {
   const db = useDrizzle()
 
   const date = dayjs.unix(body.date).toDate()
+  const startOfDay = dayjs(date).startOf("day").toDate()
+  const endOfDay = dayjs(date).endOf("day").toDate()
 
+  console.log("startOfDay", startOfDay)
+  console.log("endOfDay", endOfDay)
   if (date.getDay() !== 0) {
     throw createError({
       statusCode: 400,
@@ -83,9 +87,56 @@ export default defineEventHandler(async event => {
     }
   }
 
+  const existing = await db.query.scheduledPublicTalks.findFirst({
+    where: and(
+      between(scheduledPublicTalks.date, startOfDay, endOfDay),
+    ),
+    with: {
+      speaker: true,
+      publisher: true,
+      talk: true,
+    },
+  })
+
+  if (existing) {
+    // Determine speaker name based on source type
+    let speakerName = ""
+    if (
+      existing.speakerSourceType === SPEAKER_SOURCE_TYPES.VISITING_SPEAKER &&
+      existing.speaker
+    ) {
+      speakerName = `${existing.speaker.firstName} ${existing.speaker.lastName}`
+    } else if (
+      existing.speakerSourceType === SPEAKER_SOURCE_TYPES.LOCAL_PUBLISHER &&
+      existing.publisher
+    ) {
+      speakerName = `${existing.publisher.firstName} ${existing.publisher.lastName}`
+    }
+
+    throw createError({
+      statusCode: 409,
+      statusMessage: "Conflict",
+      data: {
+        message: "errors.scheduleAlreadyExists",
+        conflictingSchedule: {
+          id: existing.id,
+          date: body.date,
+          speakerName,
+          talkNumber: existing.talk?.no || null,
+          talkTitle: existing.customTalkTitle || existing.talk?.title || null,
+          speakerSourceType: existing.speakerSourceType,
+        },
+      },
+    })
+  }
+
   // Find or create meetingPrograms entry for this date
   let meetingProgram = await db.query.meetingPrograms.findFirst({
-    where: and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, body.date)),
+    where: and(
+      eq(meetingPrograms.type, "weekend"),
+      eq(meetingPrograms.date, body.date),
+      between(scheduledPublicTalks.date, startOfDay, endOfDay),
+    ),
   })
 
   if (!meetingProgram) {
@@ -138,22 +189,6 @@ export default defineEventHandler(async event => {
         data: { message: "errors.partCreateFailed" },
       })
     }
-  }
-
-  const existing = await db.query.scheduledPublicTalks.findFirst({
-    where: and(
-      eq(scheduledPublicTalks.date, date),
-      eq(scheduledPublicTalks.meetingProgramId, meetingProgram.id),
-      eq(scheduledPublicTalks.partId, part.id)
-    ),
-  })
-
-  if (existing) {
-    throw createError({
-      statusCode: 409,
-      statusMessage: "Conflict",
-      data: { message: "errors.scheduleAlreadyExists" },
-    })
   }
 
   if (body.talkId) {

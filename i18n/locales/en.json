@@ -215,6 +215,7 @@
     "programIdRequired": "Program ID is required",
     "programNotFound": "Meeting program not found",
     "meetingAlreadyScheduled": "Meeting is already scheduled for this date",
+    "scheduleAlreadyExists": "A talk is already scheduled for this date",
     "dateMustBeFuture": "Date must be in the future",
     "userAlreadyLinked": "This user is already linked to another publisher",
     "userNotFound": "User not found",
@@ -312,6 +313,15 @@
       "scheduleCreated": "Meeting scheduled successfully",
       "scheduleUpdated": "Meeting updated successfully",
       "scheduleDeleted": "Meeting deleted successfully"
+    },
+    "conflict": {
+      "title": "Schedule Conflict",
+      "message": "A talk is already scheduled for this date",
+      "currentSchedule": "Current schedule:",
+      "speakerInfo": "{speakerName} - Talk {talkNumber}: {talkTitle}",
+      "speakerInfoNoNumber": "{speakerName} - {talkTitle}",
+      "editExisting": "Edit Existing",
+      "overwrite": "Overwrite"
     },
     "validationWarning": {
       "title": "Validation Warning",

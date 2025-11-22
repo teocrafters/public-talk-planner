@@ -21,3 +21,17 @@ export interface ScheduleWithRelations {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface ConflictingSchedule {
+  id: string
+  date: number
+  speakerName: string
+  talkNumber: string | null
+  talkTitle: string | null
+  speakerSourceType: "visiting_speaker" | "local_publisher"
+}
+
+export interface ScheduleConflictError {
+  message: string
+  conflictingSchedule: ConflictingSchedule
+}

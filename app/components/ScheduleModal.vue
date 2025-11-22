@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { createScheduleSchema } from "#shared/utils/schemas"
   import { SPEAKER_SOURCE_TYPES, type SpeakerSourceType } from "#shared/constants/speaker-sources"
+  import type { ConflictingSchedule } from "#shared/types/api-schedule"
 
   interface Props {
     date: number | null
@@ -20,6 +21,8 @@
 
   const isSubmitting = ref(false)
   const showOverrideWarning = ref(false)
+  const showConflictModal = ref(false)
+  const conflictingSchedule = ref<ConflictingSchedule | null>(null)
 
   // Fetch speakers (non-archived only)
   const { data: speakers } = await useFetch("/api/speakers")
@@ -153,6 +156,20 @@
       emit("saved")
       isOpen.value = false
     } catch (error: unknown) {
+      // Check if it's a 409 conflict error
+      if (isApiValidationError(error) && error.data.statusCode === 409) {
+        const conflictData = error.data.data as {
+          message: string
+          conflictingSchedule: ConflictingSchedule
+        }
+
+        if (conflictData.conflictingSchedule) {
+          conflictingSchedule.value = conflictData.conflictingSchedule
+          showConflictModal.value = true
+          return
+        }
+      }
+
       // Check if it's a validation error (speaker doesn't have talk)
       // This only applies to visiting speakers, not local publishers
       if (
@@ -230,6 +247,45 @@
           color: "success",
         })
       }
+
+      emit("saved")
+      isOpen.value = false
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : t("errors.unexpectedError")
+
+      toast.add({
+        title: t("common.error"),
+        description: errorMessage,
+        color: "error",
+      })
+    }
+  }
+
+  async function handleOverwriteSchedule() {
+    if (!conflictingSchedule.value) return
+
+    try {
+      const requestBody = {
+        date: formState.value.date,
+        meetingProgramId: formState.value.meetingProgramId,
+        partId: formState.value.partId,
+        speakerSourceType: formState.value.speakerSourceType,
+        speakerId: formState.value.speakerId || undefined,
+        publisherId: formState.value.publisherId || undefined,
+        talkId: formState.value.talkId || undefined,
+        customTalkTitle: formState.value.customTalkTitle?.trim() || undefined,
+        overrideValidation: formState.value.overrideValidation,
+      }
+
+      await $fetch(`/api/schedules/${conflictingSchedule.value.id}`, {
+        method: "PATCH",
+        body: requestBody,
+      })
+
+      toast.add({
+        title: t("meetings.messages.scheduleUpdated"),
+        color: "success",
+      })
 
       emit("saved")
       isOpen.value = false
@@ -378,4 +434,10 @@
       </UButton>
     </template>
   </UModal>
+
+  <!-- Conflict Modal -->
+  <ScheduleConflictModal
+    v-model:open="showConflictModal"
+    :conflict="conflictingSchedule"
+    @overwrite="handleOverwriteSchedule" />
 </template>

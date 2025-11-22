@@ -6,6 +6,7 @@
     SpeakerSuggestion,
     TalkSuggestion,
   } from "#shared/utils/schemas"
+  import type { ConflictingSchedule } from "#shared/types/api-schedule"
 
   interface WeekendMeeting {
     id: number
@@ -39,6 +40,8 @@
   const selectedDate = ref<number | null>(null)
   const hasMoreSuggestions = ref(true)
   const isLocalPublisherFallback = ref(false)
+  const showConflictModal = ref(false)
+  const conflictingSchedule = ref<ConflictingSchedule | null>(null)
 
   // Fetch weekend meetings for calendar (6 months range for performance)
   const startOfRange = dayjs().subtract(1, "month").startOf("month").unix()
@@ -118,7 +121,21 @@
 
       isOpen.value = false
       emit("schedule-created")
-    } catch (error) {
+    } catch (error: unknown) {
+      // Check if it's a 409 conflict error
+      if (isApiValidationError(error) && error.data.statusCode === 409) {
+        const conflictData = error.data.data as {
+          message: string
+          conflictingSchedule: ConflictingSchedule
+        }
+
+        if (conflictData.conflictingSchedule) {
+          conflictingSchedule.value = conflictData.conflictingSchedule
+          showConflictModal.value = true
+          return
+        }
+      }
+
       const errorMessage = error instanceof Error ? error.message : t("errors.unexpectedError")
 
       toast.add({
@@ -127,6 +144,52 @@
         color: "error",
       })
     }
+  }
+
+  async function handleOverwriteSchedule() {
+    if (!selectedTalkId.value || !selectedDate.value || !currentSpeaker.value) return
+    if (!conflictingSchedule.value) return
+
+    try {
+      await $fetch(`/api/schedules/${conflictingSchedule.value.id}`, {
+        method: "PATCH",
+        body: {
+          date: selectedDate.value,
+          speakerSourceType: isLocalPublisherFallback.value
+            ? "local_publisher"
+            : "visiting_speaker",
+          speakerId: isLocalPublisherFallback.value ? undefined : currentSpeaker.value.id,
+          publisherId: isLocalPublisherFallback.value ? currentSpeaker.value.id : undefined,
+          talkId: selectedTalkId.value,
+        },
+      })
+
+      toast.add({
+        title: t("meetings.messages.scheduleUpdated"),
+        color: "success",
+      })
+
+      isOpen.value = false
+      emit("schedule-created")
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : t("errors.unexpectedError")
+
+      toast.add({
+        title: t("common.error"),
+        description: errorMessage,
+        color: "error",
+      })
+    }
+  }
+
+  function handleEditSchedule() {
+    // Close auto-suggestion modal - user will use main schedule modal to edit
+    isOpen.value = false
+    toast.add({
+      title: t("common.info"),
+      description: "Użyj kalendarza aby edytować istniejący plan",
+      color: "info",
+    })
   }
 
   // Computed properties for calendar highlighting
@@ -278,8 +341,8 @@
               </h4>
               <UButton
                 size="xs"
-                color="neutral"
-                variant="ghost"
+                color="info"
+                variant="subtle"
                 :label="t('meetings.autoSuggestion.skip')"
                 :loading="isLoading"
                 :disabled="!hasMoreSuggestions || isLoading"
@@ -376,4 +439,11 @@
       </UButton>
     </template>
   </UModal>
+
+  <!-- Conflict Modal -->
+  <ScheduleConflictModal
+    v-model:open="showConflictModal"
+    :conflict="conflictingSchedule"
+    @edit="handleEditSchedule"
+    @overwrite="handleOverwriteSchedule" />
 </template>

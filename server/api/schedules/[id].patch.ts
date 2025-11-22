@@ -152,6 +152,13 @@ export default defineEventHandler(async event => {
 
   if (body.speakerSourceType !== undefined) {
     updateData.speakerSourceType = body.speakerSourceType
+
+    // When changing source type, null out the opposite field to satisfy CHECK constraint
+    if (body.speakerSourceType === SPEAKER_SOURCE_TYPES.VISITING_SPEAKER) {
+      updateData.publisherId = null
+    } else if (body.speakerSourceType === SPEAKER_SOURCE_TYPES.LOCAL_PUBLISHER) {
+      updateData.speakerId = null
+    }
   }
   if (body.speakerId !== undefined) {
     updateData.speakerId = body.speakerId

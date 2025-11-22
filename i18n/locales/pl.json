@@ -185,6 +185,7 @@
     "programIdRequired": "Identyfikator programu jest wymagany",
     "programNotFound": "Nie znaleziono programu zebrania",
     "meetingAlreadyScheduled": "Zebranie na ten dzień jest już zaplanowane",
+    "scheduleAlreadyExists": "Na tę datę jest już zaplanowany wykład",
     "dateMustBeFuture": "Data musi być w przyszłości",
     "userAlreadyLinked": "Ten użytkownik jest już powiązany z innym głosicielem",
     "publicTalkTitleRequired": "Tytuł wykładu publicznego jest wymagany",
@@ -377,6 +378,15 @@
       "scheduleCreated": "Zebranie zostało zaplanowane",
       "scheduleUpdated": "Zebranie zostało zaktualizowane",
       "scheduleDeleted": "Zebranie zostało usunięte"
+    },
+    "conflict": {
+      "title": "Konflikt planowania",
+      "message": "Na tę datę jest już zaplanowany wykład",
+      "currentSchedule": "Obecny plan:",
+      "speakerInfo": "{speakerName} - Wykład {talkNumber}: {talkTitle}",
+      "speakerInfoNoNumber": "{speakerName} - {talkTitle}",
+      "editExisting": "Edytuj istniejący",
+      "overwrite": "Nadpisz"
     },
     "validationWarning": {
       "title": "Ostrzeżenie walidacji",
