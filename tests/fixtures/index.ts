@@ -1,3 +1,4 @@
+// AGENT-NOTE: ALWAYS import test and expect from THIS file (tests/fixtures/index.ts), NEVER from @playwright/test
 import { test as base } from "@playwright/test"
 import { authenticateAs } from "./auth-fixtures"
 

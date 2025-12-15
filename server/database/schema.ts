@@ -5,6 +5,8 @@ import { SPEAKER_SOURCE_TYPES } from "../../shared/constants/speaker-sources"
 
 export * from "./auth-schema"
 
+// AGENT-NOTE: After modifying schema, ALWAYS prompt user to run: pnpm db:generate (NEVER run it automatically)
+
 export const publicTalks = sqliteTable("public_talks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   no: text("no").notNull(),

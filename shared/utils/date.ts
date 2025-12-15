@@ -16,6 +16,8 @@ dayjs.extend(customParseFormat)
 // Set Polish locale globally
 dayjs.locale("pl")
 
+// AGENT-NOTE: ALWAYS use unix timestamps (seconds) for API exchange and database storage. Never milliseconds.
+
 export { dayjs }
 
 /**
