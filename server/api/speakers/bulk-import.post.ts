@@ -8,7 +8,7 @@ interface EnhancedSpeakerImportInput {
 	phone: string
 	congregationId: string
 	talkIds?: number[]
-	operation: "create" | "update" | "restore" | "skip"
+	operation: "create" | "update" | "restore" | "skip" | "archive"
 	existingSpeakerId?: string
 	manuallySelected?: boolean
 	diff?: {
@@ -32,6 +32,7 @@ interface BulkImportCounts {
 	updated: number
 	restored: number
 	skipped: number
+	archived: number
 }
 
 export default defineEventHandler(async event => {
@@ -46,12 +47,15 @@ export default defineEventHandler(async event => {
 		})
 	}
 
+	const speakersToArchive: string[] = body.speakersToArchive || []
+
 	const db = useDrizzle()
 	const counts: BulkImportCounts = {
 		created: 0,
 		updated: 0,
 		restored: 0,
 		skipped: 0,
+		archived: 0,
 	}
 	const errors: string[] = []
 
@@ -112,6 +116,17 @@ export default defineEventHandler(async event => {
 					error instanceof Error ? error.message : "Unknown error"
 				}`
 			)
+		}
+	}
+
+	// Process speakers to archive
+	for (const speakerId of speakersToArchive) {
+		try {
+			await archiveSpeaker(db, event, speakerId)
+			counts.archived++
+		} catch (error) {
+			console.error(`Failed to archive speaker ${speakerId}:`, error)
+			errors.push(`Failed to archive speaker: ${speakerId}`)
 		}
 	}
 
@@ -351,4 +366,46 @@ async function restoreSpeaker(
 			},
 		})
 	}
+}
+
+async function archiveSpeaker(
+	db: ReturnType<typeof useDrizzle>,
+	event: any,
+	speakerId: string
+): Promise<void> {
+	// Fetch speaker data for audit log
+	const [speaker] = await db
+		.select({
+			firstName: speakers.firstName,
+			lastName: speakers.lastName,
+		})
+		.from(speakers)
+		.where(eq(speakers.id, speakerId))
+		.limit(1)
+
+	if (!speaker) {
+		throw new Error(`Speaker ${speakerId} not found`)
+	}
+
+	// Archive speaker
+	await db
+		.update(speakers)
+		.set({
+			archived: true,
+			archivedAt: new Date(),
+			updatedAt: new Date(),
+		})
+		.where(eq(speakers.id, speakerId))
+
+	// Log audit event
+	await logAuditEvent(event, {
+		action: AUDIT_EVENTS.SPEAKER_ARCHIVED,
+		resourceType: "speaker",
+		resourceId: speakerId,
+		details: {
+			speakerId,
+			firstName: speaker.firstName,
+			lastName: speaker.lastName,
+		},
+	})
 }

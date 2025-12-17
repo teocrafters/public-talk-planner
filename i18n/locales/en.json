@@ -94,7 +94,12 @@
       "success": "Successfully imported speakers",
       "created": "created",
       "updated": "updated",
-      "restored": "restored"
+      "restored": "restored",
+      "archived": "archived",
+      "missingTitle": "Speakers to Archive",
+      "missingDescription": "These speakers are in the database from this congregation but are not on the new list. Select which ones should be archived.",
+      "assignedTalks": "Assigned talks",
+      "scheduledTalks": "{count} scheduled talks"
     },
     "modal": {
       "addTitle": "Add Speaker",

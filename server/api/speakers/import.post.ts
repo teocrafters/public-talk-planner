@@ -2,8 +2,8 @@ import { createError } from "h3"
 import { generateObject } from "ai"
 import { anthropic } from "@ai-sdk/anthropic"
 import { z } from "zod"
-import { eq, sql, and } from "drizzle-orm"
-import { organization, publicTalks, speakers, speakerTalks } from "../../database/schema"
+import { eq, sql, and, gt } from "drizzle-orm"
+import { organization, publicTalks, speakers, speakerTalks, scheduledPublicTalks } from "../../database/schema"
 import { createJob, updateJob } from "../../utils/import-jobs"
 
 export default defineEventHandler(async event => {
@@ -349,12 +349,83 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
 			})
 		)
 
+		// Detect missing speakers (speakers in DB but not on the import list)
+		let missingSpeakers: Array<{
+			id: string
+			firstName: string
+			lastName: string
+			congregationName: string
+			assignedTalks: string[]
+			scheduledTalksCount: number
+			selected: boolean
+		}> = []
+
+		if (congregationId) {
+			// 1. Fetch all active speakers from this congregation
+			const activeSpeakers = await db
+				.select({
+					id: speakers.id,
+					firstName: speakers.firstName,
+					lastName: speakers.lastName,
+					phone: speakers.phone,
+					congregationId: speakers.congregationId,
+					congregationName: organization.name,
+				})
+				.from(speakers)
+				.leftJoin(organization, eq(speakers.congregationId, organization.id))
+				.where(and(eq(speakers.congregationId, congregationId), eq(speakers.archived, false)))
+
+			// 2. Create Set of imported names for O(n) lookup
+			const importedNames = new Set(
+				enrichedSpeakers.map(s => `${s.firstName}|${s.lastName}`)
+			)
+
+			// 3. Find missing speakers (in DB but not in import)
+			const missing = activeSpeakers.filter(
+				s => !importedNames.has(`${s.firstName}|${s.lastName}`)
+			)
+
+			// 4. Enrich with talk assignments and scheduled count
+			missingSpeakers = await Promise.all(
+				missing.map(async speaker => {
+					// Fetch assigned talks
+					const assignedTalks = await db
+						.select({
+							talkId: speakerTalks.talkId,
+							talkNo: publicTalks.no,
+						})
+						.from(speakerTalks)
+						.innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
+						.where(eq(speakerTalks.speakerId, speaker.id))
+
+					// Count scheduled future talks
+					const scheduledCount = await db
+						.select({ count: sql<number>`count(*)` })
+						.from(scheduledPublicTalks)
+						.where(
+							and(eq(scheduledPublicTalks.speakerId, speaker.id), gt(scheduledPublicTalks.date, new Date()))
+						)
+
+					return {
+						id: speaker.id,
+						firstName: speaker.firstName,
+						lastName: speaker.lastName,
+						congregationName: speaker.congregationName || "",
+						assignedTalks: assignedTalks.map(t => t.talkNo),
+						scheduledTalksCount: scheduledCount[0]?.count || 0,
+						selected: true, // Default selected for archiving
+					}
+				})
+			)
+		}
+
 		updateJob(jobId, {
 			status: "completed",
 			data: {
 				congregation: congregation?.name || result.object.congregation,
 				congregationId,
 				speakers: enrichedSpeakers,
+				missingSpeakers,
 			},
 		})
 	} catch (error) {

@@ -52,9 +52,20 @@
     }
   }
 
+  interface MissingSpeaker {
+    id: string
+    firstName: string
+    lastName: string
+    congregationName: string
+    assignedTalks: string[]
+    scheduledTalksCount: number
+    selected: boolean
+  }
+
   const jobStatus = ref<"idle" | "uploading" | "polling" | "review" | "importing">("idle")
   const jobId = ref<string | null>(null)
   const extractedSpeakers = ref<ExtractedSpeaker[]>([])
+  const missingSpeakers = ref<MissingSpeaker[]>([])
   const globalCongregationId = ref<string | undefined>(undefined)
   const extractedCongregationName = ref<string>("")
   const isSubmitting = ref(false)
@@ -139,6 +150,7 @@
             congregation: string
             congregationId: string | null
             speakers: ExtractedSpeaker[]
+            missingSpeakers: MissingSpeaker[]
           }
           error?: string
         }>(`/api/speakers/import/status/${jobId.value}`)
@@ -152,6 +164,7 @@
             selected: true,
             errors: validateSpeaker(s),
           }))
+          missingSpeakers.value = status.data.missingSpeakers || []
           jobStatus.value = "review"
         } else if (status.status === "failed") {
           stopPolling()
@@ -423,7 +436,9 @@
         diff: s.diff,
       }))
 
-    if (speakersToImport.length === 0) {
+    const speakersToArchive = missingSpeakers.value.filter(s => s.selected).map(s => s.id)
+
+    if (speakersToImport.length === 0 && speakersToArchive.length === 0) {
       toast.add({ title: t("speakers.import.noValidSpeakers"), color: "warning" })
       return
     }
@@ -433,13 +448,19 @@
 
     try {
       const response = await $fetch<{
-        counts: { created: number; updated: number; restored: number; skipped: number }
+        counts: { created: number; updated: number; restored: number; skipped: number; archived: number }
       }>("/api/speakers/bulk-import", {
         method: "POST",
-        body: { speakers: speakersToImport },
+        body: { speakers: speakersToImport, speakersToArchive },
       })
 
-      const message = `${t("speakers.import.success")}: ${response.counts.created} ${t("speakers.import.created")}, ${response.counts.updated} ${t("speakers.import.updated")}, ${response.counts.restored} ${t("speakers.import.restored")}`
+      const parts = []
+      if (response.counts.created > 0) parts.push(`${response.counts.created} ${t("speakers.import.created")}`)
+      if (response.counts.updated > 0) parts.push(`${response.counts.updated} ${t("speakers.import.updated")}`)
+      if (response.counts.restored > 0) parts.push(`${response.counts.restored} ${t("speakers.import.restored")}`)
+      if (response.counts.archived > 0) parts.push(`${response.counts.archived} ${t("speakers.import.archived")}`)
+
+      const message = `${t("speakers.import.success")}: ${parts.join(", ")}`
 
       toast.add({
         title: message,
@@ -461,6 +482,7 @@
     jobStatus.value = "idle"
     jobId.value = null
     extractedSpeakers.value = []
+    missingSpeakers.value = []
     globalCongregationId.value = undefined
     extractedCongregationName.value = ""
     isSubmitting.value = false
@@ -714,6 +736,80 @@
               </div>
             </div>
           </UCard>
+        </div>
+
+        <!-- Missing speakers to archive -->
+        <div
+          v-if="missingSpeakers.length > 0"
+          class="mt-6"
+          data-testid="speaker-import-missing-speakers-section">
+          <div class="flex items-center gap-2 mb-3">
+            <UIcon
+              name="i-heroicons-archive-box"
+              class="size-5" />
+            <h3 class="text-lg font-semibold">
+              {{ t("speakers.import.missingTitle") }}
+            </h3>
+          </div>
+
+          <UAlert
+            color="warning"
+            variant="subtle"
+            class="mb-4"
+            data-testid="speaker-import-missing-alert">
+            <template #description>
+              {{ t("speakers.import.missingDescription") }}
+            </template>
+          </UAlert>
+
+          <div class="space-y-3">
+            <UCard
+              v-for="(speaker, index) in missingSpeakers"
+              :key="speaker.id"
+              :data-testid="`speaker-import-missing-card-${index}`">
+              <div class="flex items-start gap-3">
+                <UCheckbox
+                  v-model="speaker.selected"
+                  :data-testid="`speaker-import-missing-checkbox-${index}`" />
+
+                <div class="flex-1">
+                  <div class="font-medium">
+                    {{ speaker.firstName }} {{ speaker.lastName }}
+                  </div>
+                  <div class="text-sm text-muted">
+                    {{ speaker.congregationName }}
+                  </div>
+
+                  <div
+                    v-if="speaker.assignedTalks.length > 0"
+                    class="mt-2 flex flex-wrap gap-1">
+                    <span class="text-xs text-dimmed">
+                      {{ t("speakers.import.assignedTalks") }}:
+                    </span>
+                    <UBadge
+                      v-for="talkNo in speaker.assignedTalks"
+                      :key="talkNo"
+                      variant="subtle"
+                      size="xs">
+                      {{ talkNo }}
+                    </UBadge>
+                  </div>
+
+                  <UAlert
+                    v-if="speaker.scheduledTalksCount > 0"
+                    color="warning"
+                    variant="subtle"
+                    size="xs"
+                    class="mt-2"
+                    :data-testid="`speaker-import-missing-scheduled-${index}`">
+                    <template #description>
+                      {{ t("speakers.import.scheduledTalks", { count: speaker.scheduledTalksCount }) }}
+                    </template>
+                  </UAlert>
+                </div>
+              </div>
+            </UCard>
+          </div>
         </div>
       </div>
     </template>

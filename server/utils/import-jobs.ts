@@ -47,6 +47,15 @@ interface Job {
 			existingSpeaker?: ExistingSpeaker
 			diff?: SpeakerDiff
 		}[]
+		missingSpeakers: {
+			id: string
+			firstName: string
+			lastName: string
+			congregationName: string
+			assignedTalks: string[]
+			scheduledTalksCount: number
+			selected: boolean
+		}[]
 	}
 	error?: string
 	createdAt: number

@@ -257,7 +257,12 @@
       "success": "Pomyślnie zaimportowano prelegentów",
       "created": "utworzonych",
       "updated": "zaktualizowanych",
-      "restored": "przywróconych"
+      "restored": "przywróconych",
+      "archived": "zarchiwizowanych",
+      "missingTitle": "Prelegenci do archiwizacji",
+      "missingDescription": "Ci prelegenci są w bazie z tego zboru, ale nie ma ich na nowej liście. Zaznacz, którzy powinni zostać zarchiwizowani.",
+      "assignedTalks": "Przypisane wykłady",
+      "scheduledTalks": "{count} zaplanowane wykłady"
     },
     "modal": {
       "addTitle": "Dodaj mówcę",
