@@ -1,5 +1,33 @@
 type JobStatus = "pending" | "processing" | "completed" | "failed"
 
+type MatchStatus = "new" | "update" | "no-change" | "restore"
+
+interface SpeakerDiff {
+	phone?: {
+		old: string
+		new: string
+	}
+	talks?: {
+		added: number[]
+		removed: number[]
+		unchanged: number[]
+	}
+	congregation?: {
+		oldId: string
+		oldName: string
+		newId: string
+		newName: string
+	}
+}
+
+interface ExistingSpeaker {
+	id: string
+	phone: string
+	congregationId: string
+	congregationName: string
+	talkIds: number[]
+}
+
 interface Job {
 	status: JobStatus
 	data?: {
@@ -13,6 +41,11 @@ interface Job {
 			congregationId: string | null
 			congregation: string
 			talkIds: number[]
+			selected: boolean
+			matchStatus: MatchStatus
+			matchedSpeakerId?: string
+			existingSpeaker?: ExistingSpeaker
+			diff?: SpeakerDiff
 		}[]
 	}
 	error?: string

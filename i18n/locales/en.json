@@ -6,6 +6,7 @@
     "password": "Password",
     "submit": "Submit",
     "cancel": "Cancel",
+    "apply": "Apply",
     "comingSoon": "Coming Soon",
     "sending": "Sending...",
     "or": "or"
@@ -75,7 +76,25 @@
       "noValidSpeakers": "No valid speakers to import",
       "selectedCount": "Selected {count} of {total}",
       "extracted": "Extracted",
-      "selectedTalks": "Selected"
+      "selectedTalks": "Selected",
+      "status": {
+        "new": "New",
+        "update": "Update",
+        "no-change": "No Changes",
+        "restore": "Restore"
+      },
+      "existingTalks": "Existing",
+      "newTalks": "New",
+      "congregationTransfer": "Congregation Transfer",
+      "nothingToImport": "All detected speakers already exist with identical data. Nothing to import.",
+      "treatAsNew": "Treat as new",
+      "changeMatch": "Change match",
+      "selectSpeaker": "Select Speaker",
+      "searchSpeaker": "Search speaker",
+      "success": "Successfully imported speakers",
+      "created": "created",
+      "updated": "updated",
+      "restored": "restored"
     },
     "modal": {
       "addTitle": "Add Speaker",

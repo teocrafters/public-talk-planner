@@ -49,6 +49,27 @@ export interface AuditEventDetails {
     firstName: string
     lastName: string
   }
+  [AUDIT_EVENTS.SPEAKER_UPDATED_FROM_IMPORT]: {
+    speakerId: string
+    changes: {
+      phone?: {
+        old: string
+        new: string
+      }
+      talksAdded?: number[]
+      talksRemoved?: number[]
+    }
+  }
+  [AUDIT_EVENTS.SPEAKER_CONGREGATION_TRANSFERRED]: {
+    speakerId: string
+    firstName: string
+    lastName: string
+    oldCongregationId: string
+    oldCongregationName: string
+    newCongregationId: string
+    newCongregationName: string
+    wasArchived: boolean
+  }
   [AUDIT_EVENTS.PERMISSION_DENIED]: {
     attemptedAction: string
     requiredPermissions?: Record<string, string[]>

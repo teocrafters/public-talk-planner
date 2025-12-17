@@ -6,6 +6,7 @@
     "password": "Hasło",
     "submit": "Zatwierdź",
     "cancel": "Anuluj",
+    "apply": "Zastosuj",
     "comingSoon": "Wkrótce dostępne",
     "sending": "Wysyłanie...",
     "or": "lub",
@@ -238,7 +239,25 @@
       "noValidSpeakers": "Brak poprawnych mówców do zaimportowania",
       "selectedCount": "Wybrano {count} z {total}",
       "extracted": "Wyodrębniono",
-      "selectedTalks": "Wybrane"
+      "selectedTalks": "Wybrane",
+      "status": {
+        "new": "Nowy",
+        "update": "Aktualizacja",
+        "no-change": "Bez zmian",
+        "restore": "Przywrócenie"
+      },
+      "existingTalks": "Dotychczasowe",
+      "newTalks": "Nowe",
+      "congregationTransfer": "Przeniesienie zboru",
+      "nothingToImport": "Wszyscy wykryci prelegenci już istnieją z identycznymi danymi. Nic do zaimportowania.",
+      "treatAsNew": "Traktuj jako nowego",
+      "changeMatch": "Zmień dopasowanie",
+      "selectSpeaker": "Wybierz prelegenta",
+      "searchSpeaker": "Szukaj prelegenta",
+      "success": "Pomyślnie zaimportowano prelegentów",
+      "created": "utworzonych",
+      "updated": "zaktualizowanych",
+      "restored": "przywróconych"
     },
     "modal": {
       "addTitle": "Dodaj mówcę",

@@ -15,6 +15,41 @@
     talkIds?: number[]
     errors?: string[]
     selected: boolean
+
+    // Match information
+    matchStatus: "new" | "update" | "no-change" | "restore"
+    matchedSpeakerId?: string
+
+    // Existing speaker data
+    existingSpeaker?: {
+      id: string
+      phone: string
+      congregationId: string
+      congregationName: string
+      talkIds: number[]
+    }
+
+    // Diff information
+    diff?: {
+      phone?: { old: string; new: string }
+      talks?: {
+        added: number[]
+        removed: number[]
+        unchanged: number[]
+      }
+      congregation?: {
+        oldId: string
+        oldName: string
+        newId: string
+        newName: string
+      }
+    }
+
+    // Manual override state
+    manualOverride?: {
+      type: "reject" | "select-different"
+      selectedSpeakerId?: string
+    }
   }
 
   const jobStatus = ref<"idle" | "uploading" | "polling" | "review" | "importing">("idle")
@@ -23,6 +58,20 @@
   const globalCongregationId = ref<string | undefined>(undefined)
   const extractedCongregationName = ref<string>("")
   const isSubmitting = ref(false)
+
+  // Manual match selection modal
+  const manualMatchModalOpen = ref(false)
+  const currentSpeakerForManualMatch = ref<ExtractedSpeaker | null>(null)
+  const selectedSpeakerForManualMatch = ref<string | undefined>(undefined)
+  const speakerSearchResults = ref<
+    Array<{
+      id: string
+      firstName: string
+      lastName: string
+      congregationName: string
+      archived: boolean
+    }>
+  >([])
 
   const { data: congregations } =
     await useFetch<{ id: string; name: string }[]>("/api/congregations")
@@ -170,20 +219,211 @@
       .length
   })
 
+  const allUnchanged = computed(() => {
+    return extractedSpeakers.value.every(s => s.matchStatus === "no-change")
+  })
+
+  function getStatusBadgeColor(
+    status: string
+  ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
+    switch (status) {
+      case "new":
+        return "success"
+      case "update":
+        return "info"
+      case "no-change":
+        return "neutral"
+      case "restore":
+        return "warning"
+      default:
+        return "neutral"
+    }
+  }
+
+  function getTalkBadgeColor(
+    talkId: number,
+    speaker: ExtractedSpeaker,
+    row: "old" | "new"
+  ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
+    if (!speaker.diff?.talks) return "neutral"
+
+    const { added, removed, unchanged } = speaker.diff.talks
+
+    if (row === "new") {
+      if (added.includes(talkId)) return "success" // Added
+      if (unchanged.includes(talkId)) return "neutral" // Unchanged
+    } else {
+      if (removed.includes(talkId)) return "error" // Removed
+      if (unchanged.includes(talkId)) return "neutral" // Unchanged
+    }
+
+    return "neutral"
+  }
+
+  function getExistingTalkIds(speaker: ExtractedSpeaker): number[] {
+    if (!speaker.existingSpeaker?.talkIds) return []
+    return speaker.existingSpeaker.talkIds
+  }
+
+  function getTalkNumber(talkId: number): string {
+    const talk = talks.value?.find(t => t.id === talkId)
+    return talk?.no || String(talkId)
+  }
+
+  function getTalkId(talkNo: string): number {
+    const talk = talks.value?.find(t => t.no === talkNo)
+    return talk?.id || 0
+  }
+
+  function handleTreatAsNew(speaker: ExtractedSpeaker) {
+    speaker.matchStatus = "new"
+    speaker.diff = undefined
+    speaker.existingSpeaker = undefined
+    speaker.manualOverride = { type: "reject" }
+  }
+
+  async function handleChangeMatch(speaker: ExtractedSpeaker) {
+    currentSpeakerForManualMatch.value = speaker
+    selectedSpeakerForManualMatch.value = undefined
+    manualMatchModalOpen.value = true
+
+    // Load all speakers for search
+    try {
+      const response = await $fetch<
+        Array<{
+          id: string
+          firstName: string
+          lastName: string
+          congregationId: string
+          congregation: { name: string }
+          archived: boolean
+        }>
+      >("/api/speakers")
+
+      speakerSearchResults.value = response.map(s => ({
+        id: s.id,
+        firstName: s.firstName,
+        lastName: s.lastName,
+        congregationName: s.congregation.name,
+        archived: s.archived,
+      }))
+    } catch (error) {
+      console.error("Failed to load speakers:", error)
+      toast.add({ title: t("speakers.messages.networkError"), color: "error" })
+    }
+  }
+
+  async function applyManualMatch() {
+    if (!currentSpeakerForManualMatch.value || !selectedSpeakerForManualMatch.value) return
+
+    const speaker = currentSpeakerForManualMatch.value
+    const selectedSpeakerId = selectedSpeakerForManualMatch.value
+
+    // Fetch the selected speaker's details
+    try {
+      const selectedSpeaker = await $fetch<{
+        id: string
+        phone: string
+        congregationId: string
+        congregation: { name: string }
+        talks: Array<{ id: number }>
+      }>(`/api/speakers/${selectedSpeakerId}`)
+
+      // Update speaker with manual match
+      speaker.matchedSpeakerId = selectedSpeaker.id
+      speaker.existingSpeaker = {
+        id: selectedSpeaker.id,
+        phone: selectedSpeaker.phone,
+        congregationId: selectedSpeaker.congregationId,
+        congregationName: selectedSpeaker.congregation.name,
+        talkIds: selectedSpeaker.talks.map(t => t.id),
+      }
+      speaker.manualOverride = {
+        type: "select-different",
+        selectedSpeakerId: selectedSpeaker.id,
+      }
+
+      // Recalculate diff
+      const hasPhoneChange = speaker.phone !== selectedSpeaker.phone
+      const oldTalkIds = selectedSpeaker.talks.map(t => t.id)
+      const newTalkIds = speaker.talkIds || []
+
+      const added = newTalkIds.filter(id => !oldTalkIds.includes(id))
+      const removed = oldTalkIds.filter(id => !newTalkIds.includes(id))
+      const unchanged = newTalkIds.filter(id => oldTalkIds.includes(id))
+
+      const hasTalkChange = added.length > 0 || removed.length > 0
+      const hasCongregationChange =
+        speaker.congregationId !== selectedSpeaker.congregationId
+
+      if (hasPhoneChange || hasTalkChange || hasCongregationChange) {
+        speaker.matchStatus = "update"
+        speaker.diff = {
+          phone: hasPhoneChange
+            ? { old: selectedSpeaker.phone, new: speaker.phone }
+            : undefined,
+          talks: hasTalkChange ? { added, removed, unchanged } : undefined,
+          congregation: hasCongregationChange
+            ? {
+                oldId: selectedSpeaker.congregationId,
+                oldName: selectedSpeaker.congregation.name,
+                newId: speaker.congregationId || "",
+                newName:
+                  congregations.value?.find(c => c.id === speaker.congregationId)?.name || "",
+              }
+            : undefined,
+        }
+      } else {
+        speaker.matchStatus = "no-change"
+        speaker.diff = undefined
+      }
+
+      manualMatchModalOpen.value = false
+      currentSpeakerForManualMatch.value = null
+      selectedSpeakerForManualMatch.value = undefined
+    } catch (error) {
+      console.error("Failed to fetch speaker details:", error)
+      toast.add({ title: t("speakers.messages.networkError"), color: "error" })
+    }
+  }
+
+  function determineOperation(speaker: ExtractedSpeaker): string {
+    if (speaker.manualOverride?.type === "reject") return "create"
+
+    switch (speaker.matchStatus) {
+      case "new":
+        return "create"
+      case "update":
+        return "update"
+      case "restore":
+        return "restore"
+      case "no-change":
+        return "skip"
+      default:
+        return "create"
+    }
+  }
+
   async function handleImport() {
     if (!globalCongregationId.value) {
       toast.add({ title: t("validation.congregationRequired"), color: "error" })
       return
     }
 
-    const selectedSpeakers = extractedSpeakers.value
-      .filter(s => s.selected && (!s.errors || s.errors.length === 0))
+    const speakersToImport = extractedSpeakers.value
+      .filter(s => s.selected && s.matchStatus !== "no-change" && (!s.errors || s.errors.length === 0))
       .map(s => ({
-        ...s,
-        congregationId: globalCongregationId.value,
+        firstName: s.firstName,
+        lastName: s.lastName,
+        phone: s.phone,
+        congregationId: s.congregationId || globalCongregationId.value!,
+        talkIds: s.talkIds || [],
+        operation: determineOperation(s),
+        existingSpeakerId: s.matchedSpeakerId,
+        diff: s.diff,
       }))
 
-    if (selectedSpeakers.length === 0) {
+    if (speakersToImport.length === 0) {
       toast.add({ title: t("speakers.import.noValidSpeakers"), color: "warning" })
       return
     }
@@ -192,13 +432,17 @@
     jobStatus.value = "importing"
 
     try {
-      await $fetch("/api/speakers/bulk-import", {
+      const response = await $fetch<{
+        counts: { created: number; updated: number; restored: number; skipped: number }
+      }>("/api/speakers/bulk-import", {
         method: "POST",
-        body: { speakers: selectedSpeakers },
+        body: { speakers: speakersToImport },
       })
 
+      const message = `${t("speakers.import.success")}: ${response.counts.created} ${t("speakers.import.created")}, ${response.counts.updated} ${t("speakers.import.updated")}, ${response.counts.restored} ${t("speakers.import.restored")}`
+
       toast.add({
-        title: t("speakers.messages.importSuccess", { count: selectedSpeakers.length }),
+        title: message,
         color: "success",
       })
 
@@ -291,7 +535,16 @@
           </div>
         </UFormField>
 
-        <div class="flex items-center justify-between">
+        <UAlert
+          v-if="allUnchanged"
+          color="info"
+          :title="t('speakers.import.nothingToImport')"
+          icon="i-lucide-info"
+          data-testid="speaker-import-nothing-to-import" />
+
+        <div
+          v-else
+          class="flex items-center justify-between">
           <UButton
             size="sm"
             data-testid="speaker-import-select-all"
@@ -318,10 +571,50 @@
             <div class="flex items-start gap-3">
               <UCheckbox
                 v-model="speaker.selected"
-                :disabled="!!speaker.errors?.length"
+                :disabled="!!speaker.errors?.length || speaker.matchStatus === 'no-change'"
                 :data-testid="`speaker-import-checkbox-${index}`" />
 
-              <div class="flex-1 space-y-2">
+              <div class="flex-1 space-y-3">
+                <!-- Match Status Badge -->
+                <div class="flex items-center justify-between">
+                  <UBadge
+                    :color="getStatusBadgeColor(speaker.matchStatus)"
+                    variant="subtle"
+                    :data-testid="`speaker-import-status-${index}`">
+                    {{ t(`speakers.import.status.${speaker.matchStatus}`) }}
+                  </UBadge>
+
+                  <!-- Manual Override Controls -->
+                  <div
+                    v-if="speaker.matchStatus !== 'new' && speaker.matchStatus !== 'no-change'"
+                    class="flex gap-2">
+                    <UButton
+                      size="xs"
+                      variant="ghost"
+                      :data-testid="`speaker-import-treat-as-new-${index}`"
+                      @click="handleTreatAsNew(speaker)">
+                      {{ t("speakers.import.treatAsNew") }}
+                    </UButton>
+                    <UButton
+                      size="xs"
+                      variant="outline"
+                      :data-testid="`speaker-import-change-match-${index}`"
+                      @click="handleChangeMatch(speaker)">
+                      {{ t("speakers.import.changeMatch") }}
+                    </UButton>
+                  </div>
+                </div>
+
+                <!-- Congregation Transfer Alert -->
+                <UAlert
+                  v-if="speaker.diff?.congregation"
+                  color="warning"
+                  variant="subtle"
+                  size="xs"
+                  :title="t('speakers.import.congregationTransfer')"
+                  :description="`${speaker.diff.congregation.oldName} → ${speaker.diff.congregation.newName}`"
+                  :data-testid="`speaker-import-congregation-transfer-${index}`" />
+
                 <div class="grid grid-cols-3 gap-3">
                   <UFormField :label="t('speakers.modal.firstName')">
                     <UInput
@@ -336,7 +629,20 @@
                   </UFormField>
 
                   <UFormField :label="t('speakers.modal.phone')">
+                    <!-- Phone Diff -->
+                    <div
+                      v-if="speaker.diff?.phone"
+                      class="space-y-1">
+                      <div class="text-xs text-muted line-through">
+                        {{ formatPhoneNumber(speaker.diff.phone.old) }}
+                      </div>
+                      <UInput
+                        v-model="speaker.phone"
+                        placeholder="123-456-789"
+                        :data-testid="`speaker-import-phone-${index}`" />
+                    </div>
                     <UInput
+                      v-else
                       v-model="speaker.phone"
                       placeholder="123-456-789"
                       :data-testid="`speaker-import-phone-${index}`" />
@@ -345,7 +651,44 @@
                   <UFormField
                     :label="t('speakers.modal.talks')"
                     class="col-span-3">
+                    <!-- Talk List Diff -->
+                    <div
+                      v-if="speaker.diff?.talks"
+                      class="space-y-2">
+                      <!-- Existing talks row -->
+                      <div class="flex flex-wrap items-center gap-1">
+                        <span class="text-xs text-dimmed">{{
+                          t("speakers.import.existingTalks")
+                        }}:</span>
+                        <UBadge
+                          v-for="talkId in getExistingTalkIds(speaker)"
+                          :key="`old-${talkId}`"
+                          :color="getTalkBadgeColor(talkId, speaker, 'old')"
+                          variant="subtle"
+                          size="xs"
+                          :data-testid="`speaker-import-existing-talk-${index}-${talkId}`">
+                          {{ getTalkNumber(talkId) }}
+                        </UBadge>
+                      </div>
+
+                      <!-- New talks row -->
+                      <div class="flex flex-wrap items-center gap-1">
+                        <span class="text-xs text-dimmed">{{ t("speakers.import.newTalks") }}:</span>
+                        <UBadge
+                          v-for="talkNo in speaker.talkNumbers"
+                          :key="`new-${talkNo}`"
+                          :color="getTalkBadgeColor(getTalkId(talkNo), speaker, 'new')"
+                          variant="subtle"
+                          size="xs"
+                          :data-testid="`speaker-import-new-talk-${index}-${talkNo}`">
+                          {{ talkNo }}
+                        </UBadge>
+                      </div>
+                    </div>
+
+                    <!-- Regular talk select (no diff) -->
                     <USelect
+                      v-else
                       v-model="speaker.talkNumbers"
                       :items="talkItems"
                       value-key="value"
@@ -391,6 +734,53 @@
         data-testid="speaker-import-submit"
         @click="handleImport">
         {{ t("speakers.import.importSelected", { count: selectedCount }) }}
+      </UButton>
+    </template>
+  </UModal>
+
+  <!-- Manual Match Selection Modal -->
+  <UModal
+    v-model:open="manualMatchModalOpen"
+    data-testid="speaker-import-manual-match-modal">
+    <template #header>
+      <h3
+        class="text-lg font-semibold"
+        data-testid="speaker-import-manual-match-title">
+        {{ t("speakers.import.selectSpeaker") }}
+      </h3>
+    </template>
+
+    <template #body>
+      <UFormField :label="t('speakers.import.searchSpeaker')">
+        <USelect
+          v-model="selectedSpeakerForManualMatch"
+          :items="
+            speakerSearchResults.map(s => ({
+              label: `${s.firstName} ${s.lastName} (${s.congregationName})${s.archived ? ' [' + t('speakers.archived') + ']' : ''}`,
+              value: s.id,
+            }))
+          "
+          searchable
+          value-key="value"
+          :placeholder="t('speakers.import.searchSpeaker')"
+          data-testid="speaker-import-manual-match-select" />
+      </UFormField>
+    </template>
+
+    <template #footer="{ close }">
+      <UButton
+        color="neutral"
+        variant="ghost"
+        data-testid="speaker-import-manual-match-cancel"
+        @click="close">
+        {{ t("common.cancel") }}
+      </UButton>
+
+      <UButton
+        :disabled="!selectedSpeakerForManualMatch"
+        data-testid="speaker-import-manual-match-apply"
+        @click="applyManualMatch">
+        {{ t("common.apply") }}
       </UButton>
     </template>
   </UModal>

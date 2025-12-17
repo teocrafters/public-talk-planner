@@ -13,10 +13,11 @@ export default defineTask({
     const db = useDrizzle()
 
     const congregations = [
+      // TODO: Add more congregations
       {
         id: generateId(),
-        name: "Warszawa Nowy Świat",
-        slug: "warszawa-nowy-swiat",
+        name: "Testowy Zbór",
+        slug: "testowy-zbór",
         logo: null,
         metadata: null,
         createdAt: new Date(),
@@ -25,14 +26,6 @@ export default defineTask({
         id: generateId(),
         name: "Żychlin",
         slug: "zychlin",
-        logo: null,
-        metadata: null,
-        createdAt: new Date(),
-      },
-      {
-        id: generateId(),
-        name: "Toruń Chrobrego",
-        slug: "torun-chrobrego",
         logo: null,
         metadata: null,
         createdAt: new Date(),
@@ -65,6 +58,14 @@ export default defineTask({
         id: generateId(),
         name: "Kłodawa",
         slug: "klodawa",
+        logo: null,
+        metadata: null,
+        createdAt: new Date(),
+      },
+      {
+        id: generateId(),
+        name: "Kutno-Północ",
+        slug: "kutno-polnoc",
         logo: null,
         metadata: null,
         createdAt: new Date(),

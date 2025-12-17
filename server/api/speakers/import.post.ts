@@ -2,8 +2,8 @@ import { createError } from "h3"
 import { generateObject } from "ai"
 import { anthropic } from "@ai-sdk/anthropic"
 import { z } from "zod"
-import { eq, sql } from "drizzle-orm"
-import { organization, publicTalks } from "../../database/schema"
+import { eq, sql, and } from "drizzle-orm"
+import { organization, publicTalks, speakers, speakerTalks } from "../../database/schema"
 import { createJob, updateJob } from "../../utils/import-jobs"
 
 export default defineEventHandler(async event => {
@@ -52,6 +52,174 @@ export default defineEventHandler(async event => {
 	return { jobId }
 })
 
+interface MatchedSpeaker {
+	id: string
+	firstName: string
+	lastName: string
+	phone: string
+	congregationId: string
+	congregationName: string
+	archived: boolean
+	archivedAt: Date | null
+	talkIds: number[]
+}
+
+interface SpeakerDiff {
+	phone?: {
+		old: string
+		new: string
+	}
+	talks?: {
+		added: number[]
+		removed: number[]
+		unchanged: number[]
+	}
+	congregation?: {
+		oldId: string
+		oldName: string
+		newId: string
+		newName: string
+	}
+}
+
+type MatchStatus = "new" | "update" | "no-change" | "restore"
+
+async function findMatchingSpeaker(
+	firstName: string,
+	lastName: string,
+	congregationId: string
+): Promise<MatchedSpeaker | null> {
+	const db = useDrizzle()
+
+	const matches = await db
+		.select()
+		.from(speakers)
+		.innerJoin(organization, eq(speakers.congregationId, organization.id))
+		.where(
+			and(
+				eq(speakers.firstName, firstName),
+				eq(speakers.lastName, lastName),
+				eq(speakers.congregationId, congregationId)
+			)
+		)
+		.limit(1)
+
+	if (matches.length === 0) return null
+
+	const match = matches[0]
+	if (!match) return null
+
+	const speaker = match.speakers
+	const congregation = match.organization
+
+	const talks = await db
+		.select({ talkId: speakerTalks.talkId })
+		.from(speakerTalks)
+		.where(eq(speakerTalks.speakerId, speaker.id))
+
+	return {
+		id: speaker.id,
+		firstName: speaker.firstName,
+		lastName: speaker.lastName,
+		phone: speaker.phone,
+		congregationId: speaker.congregationId,
+		congregationName: congregation.name,
+		archived: speaker.archived,
+		archivedAt: speaker.archivedAt,
+		talkIds: talks.map(t => t.talkId),
+	}
+}
+
+function calculateDiff(
+	extractedTalkIds: number[],
+	extractedPhone: string,
+	extractedCongregationId: string,
+	extractedCongregationName: string,
+	existing: MatchedSpeaker
+): SpeakerDiff | null {
+	const diff: SpeakerDiff = {}
+
+	if (extractedPhone !== existing.phone) {
+		diff.phone = {
+			old: existing.phone,
+			new: extractedPhone,
+		}
+	}
+
+	const added = extractedTalkIds.filter(id => !existing.talkIds.includes(id))
+	const removed = existing.talkIds.filter(id => !extractedTalkIds.includes(id))
+	const unchanged = extractedTalkIds.filter(id => existing.talkIds.includes(id))
+
+	if (added.length > 0 || removed.length > 0) {
+		diff.talks = { added, removed, unchanged }
+	}
+
+	if (existing.archived && existing.congregationId !== extractedCongregationId) {
+		diff.congregation = {
+			oldId: existing.congregationId,
+			oldName: existing.congregationName,
+			newId: extractedCongregationId,
+			newName: extractedCongregationName,
+		}
+	}
+
+	return Object.keys(diff).length > 0 ? diff : null
+}
+
+function determineMatchStatus(match: MatchedSpeaker | null, diff: SpeakerDiff | null): MatchStatus {
+	if (!match) return "new"
+
+	if (match.archived) {
+		return "restore"
+	}
+
+	if (!diff) return "no-change"
+
+	return "update"
+}
+
+async function matchCongregationWithAI(
+	extractedName: string,
+	congregations: Array<{ id: string; name: string }>
+): Promise<{ id: string; name: string } | null> {
+	const schema = z.object({
+		congregationId: z.string().nullable(),
+		confidence: z.number().min(0).max(1),
+	})
+
+	const result = await generateObject({
+		model: anthropic("claude-sonnet-4-5-20250929"),
+		schema,
+		messages: [
+			{
+				role: "user",
+				content: `Match the extracted congregation name with the best matching congregation from the database.
+
+Extracted congregation name: "${extractedName}"
+
+Available congregations:
+${congregations.map(c => `- ${c.id}: ${c.name}`).join("\n")}
+
+Rules:
+- Match based on name similarity (ignore case, prefixes like "Zbór", formatting)
+- Return the congregation ID if confidence is >= 0.999
+- Return null if no confident match can be made
+
+Return JSON with:
+- congregationId: string (or null if no match)
+- confidence: number (0-1)`,
+			},
+		],
+	})
+
+	if (result.object.confidence >= 0.999 && result.object.congregationId) {
+		const matched = congregations.find(c => c.id === result.object.congregationId)
+		return matched || null
+	}
+
+	return null
+}
+
 async function processFileAsync(jobId: string, fileData: Buffer, mimeType: string): Promise<void> {
 	try {
 		updateJob(jobId, { status: "processing" })
@@ -98,13 +266,26 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
 
 		const db = useDrizzle()
 
-		const congregation = await db
-			.select()
+		const allCongregations = await db
+			.select({
+				id: organization.id,
+				name: organization.name,
+			})
 			.from(organization)
-			.where(sql`LOWER(${organization.name}) = LOWER(${result.object.congregation})`)
-			.limit(1)
+			.orderBy(organization.name)
 
-		const congregationId = congregation[0]?.id || null
+		const aiMatch = await matchCongregationWithAI(result.object.congregation, allCongregations)
+
+		const congregation = aiMatch
+			? aiMatch
+			: await db
+					.select()
+					.from(organization)
+					.where(sql`LOWER(${organization.name}) = LOWER(${result.object.congregation})`)
+					.limit(1)
+					.then(rows => (rows[0] ? { id: rows[0].id, name: rows[0].name } : null))
+
+		const congregationId = congregation?.id || null
 
 		const enrichedSpeakers = await Promise.all(
 			result.object.speakers.map(async speaker => {
@@ -121,11 +302,49 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
 					}
 				}
 
+				if (!congregationId) {
+					return {
+						...speaker,
+						congregationId: null,
+						congregation: result.object.congregation,
+						talkIds,
+						selected: false,
+						matchStatus: "new" as MatchStatus,
+					}
+				}
+
+				const match = await findMatchingSpeaker(speaker.firstName, speaker.lastName, congregationId)
+
+				const diff = match
+					? calculateDiff(
+							talkIds,
+							speaker.phone,
+							congregationId,
+							congregation?.name || result.object.congregation,
+							match
+						)
+					: null
+
+				const matchStatus = determineMatchStatus(match, diff)
+
 				return {
 					...speaker,
 					congregationId,
-					congregation: result.object.congregation,
+					congregation: congregation?.name || result.object.congregation,
 					talkIds,
+					selected: false,
+					matchStatus,
+					matchedSpeakerId: match?.id,
+					existingSpeaker: match
+						? {
+								id: match.id,
+								phone: match.phone,
+								congregationId: match.congregationId,
+								congregationName: match.congregationName,
+								talkIds: match.talkIds,
+							}
+						: undefined,
+					diff: diff || undefined,
 				}
 			})
 		)
@@ -133,7 +352,7 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
 		updateJob(jobId, {
 			status: "completed",
 			data: {
-				congregation: result.object.congregation,
+				congregation: congregation?.name || result.object.congregation,
 				congregationId,
 				speakers: enrichedSpeakers,
 			},
