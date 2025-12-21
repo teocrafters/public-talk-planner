@@ -1,60 +1,53 @@
-# Official Vue Components Reference
+# Vue 3 Components Quick Reference
 
-Official Vue 3 component patterns and APIs. For general Vue conventions and project patterns, see
-@.agents/vue-conventions.md.
+Quick reference for Vue 3 component APIs and project-specific patterns.
 
-## defineModel() API Reference
+**For complete Vue 3 documentation, use Context7 to query official docs.**
 
-Vue 3.3+ official v-model binding API that replaces manual `modelValue` prop and `update:modelValue`
-event definitions.
+## Project-Specific Notes
 
-## Examples
+- **Always use**: `<script setup lang="ts">` syntax (Composition API)
+- **Reference project patterns**: `.agents/vue-conventions.md`
 
-### defineModel()
+## defineModel() Quick Reference
+
+Vue 3.3+ API for two-way binding (replaces manual modelValue prop/emit).
+
+### Simple Model
 
 ```vue
 <script setup lang="ts">
-  // ✅ Simple two-way binding for modelvalue
-  const title = defineModel<string>()
-
-  // ✅ With options and modifiers
-  const [title, modifiers] = defineModel<string>({
-    default: "default value",
-    required: true,
-    get: value => value.trim(), // transform value before binding
-    set: value => {
-      if (modifiers.capitalize) {
-        return value.charAt(0).toUpperCase() + value.slice(1)
-      }
-      return value
-    },
-  })
+const title = defineModel<string>()
 </script>
 ```
 
 ### Multiple Models
 
-By default `defineModel()` assumes a prop named `modelValue` but if we want to define multiple
-v-model bindings, we need to give them explicit names:
-
 ```vue
 <script setup lang="ts">
-  // ✅ Multiple v-model bindings
-  const firstName = defineModel<string>("firstName")
-  const age = defineModel<number>("age")
+const firstName = defineModel<string>("firstName")
+const age = defineModel<number>("age")
 </script>
+
+<!-- Parent usage -->
+<UserForm v-model:first-name="user.firstName" v-model:age="user.age" />
 ```
 
-They can be used in the template like this:
+## Context7 References
 
-```html
-<UserForm
-  v-model:first-name="user.firstName"
-  v-model:age="user.age" />
-```
+**For comprehensive documentation, query via Context7**:
 
-### Modifiers & Transformations
+- **Vue 3 Composition API**: defineProps, defineEmits, defineModel
+- **Vue 3 Components**: Props, emits, slots, lifecycle
+- **Vue 3 Reactivity**: ref, reactive, computed, watch
+- **Vue 3 Advanced**: Teleport, Suspense, custom directives
 
-Native elements `v-model` has built-in modifiers like `.lazy`, `.number`, and `.trim`. We can
-implement similar functionality in components, fetch and read
-<https://vuejs.org/guide/components/v-model.md#handling-v-model-modifiers> if the user needs that.
+**Query examples**:
+- "Vue 3 defineModel with modifiers"
+- "Vue 3 Composition API lifecycle hooks"
+- "Vue 3 provide/inject patterns"
+
+## References
+
+- Project Vue patterns: `.agents/vue-conventions.md`
+- Official Vue 3 docs: Use Context7

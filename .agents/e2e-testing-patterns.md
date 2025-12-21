@@ -534,3 +534,24 @@ test("correct approach", async ({ page }) => {
 - MAINTAINABILITY: High-quality tests require less maintenance
 - DOCUMENTATION: Tests serve as living documentation
 - REGRESSION PREVENTION: Comprehensive tests catch regressions early
+
+## Context7 References
+
+**For Playwright documentation, query via Context7**:
+
+- **Playwright API**: Fixtures, locators, assertions, auto-waiting
+- **Test isolation**: Best practices for independent tests
+- **Authentication**: Setup patterns and storage state
+- **Page Object Models**: Structuring test utilities
+
+**Query examples**:
+- "Playwright test fixtures patterns"
+- "Playwright authentication setup"
+- "Playwright page object model best practices"
+
+## References
+
+- Test-ready checklist: `.agents/test-ready-component-checklist.md`
+- Frontend guidelines: `app/AGENTS.md`
+- Test-ready skill: `test-ready-component-check.md`
+- E2E workflow skill: `e2e-test-workflow.md`

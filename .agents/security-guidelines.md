@@ -246,3 +246,23 @@ Comprehensive security standards and best practices for the Public Talk Planner 
 - CONFIGURE environment-specific bindings
 - USE Wrangler secrets for sensitive data
 - VALIDATE Cloudflare KV access patterns
+
+## Context7 References
+
+**For security documentation, query via Context7**:
+
+- **OWASP Top 10**: Web application security risks and mitigations
+- **Better Auth**: Authentication security best practices
+- **Input validation**: Zod validation patterns and security
+- **Cloudflare Security**: Workers security features, D1 access control
+
+**Query examples**:
+- "OWASP Top 10 security vulnerabilities"
+- "Better Auth session security"
+- "Cloudflare Workers security best practices"
+
+## References
+
+- Backend guidelines: `server/AGENTS.md`
+- Database patterns: `.agents/database-patterns.md`
+- Validation schemas: `shared/utils/schemas/`

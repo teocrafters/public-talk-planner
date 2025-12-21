@@ -130,3 +130,23 @@ consistent testing patterns across the project.
 - [ ] Component behavior remains unchanged after adding test IDs
 - [ ] No console errors or warnings related to test IDs
 - [ ] Component documentation updated with test ID information
+
+## Context7 References
+
+**For testing documentation, query via Context7**:
+
+- **Playwright**: Locators, selectors, best practices
+- **Testing patterns**: Component testing, integration testing
+- **Test automation**: Fixture patterns, Page Object Models
+
+**Query examples**:
+- "Playwright data-testid selector best practices"
+- "Component testing patterns"
+- "Test fixture organization"
+
+## References
+
+- E2E testing patterns: `.agents/e2e-testing-patterns.md`
+- Frontend guidelines: `app/AGENTS.md`
+- Test-ready skill: `test-ready-component-check.md`
+- E2E workflow skill: `e2e-test-workflow.md`

@@ -151,6 +151,20 @@ Styling guidelines and patterns for Tailwind CSS 4 with Nuxt UI 4 design system 
 - CUSTOMIZE prefix with ui.prefix option
 - CONFIGURE colorMode integration with ui.colorMode option
 
+## Context7 References
+
+**For Tailwind CSS documentation, query via Context7**:
+
+- **Tailwind CSS v4**: Utilities, configuration, CSS variables
+- **Responsive design**: Breakpoints, mobile-first approach
+- **Dark mode**: Dark variant and color strategies
+- **Performance**: JIT compilation, tree-shaking
+
+**Query examples**:
+- "Tailwind CSS v4 responsive design patterns"
+- "Tailwind CSS dark mode implementation"
+- "Tailwind CSS custom theme configuration"
+
 ## File References
 
 - Color system: `app/assets/css/colors.css` (if exists)
@@ -159,3 +173,5 @@ Styling guidelines and patterns for Tailwind CSS 4 with Nuxt UI 4 design system 
 - Nuxt UI config: `app.config.ts`
 - Build config: `nuxt.config.ts`
 - Component patterns: `app/components/`
+- Tailwind v4 quick ref: `.agents/official-tailwind.md`
+- Frontend guidelines: `app/AGENTS.md`

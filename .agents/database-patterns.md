@@ -455,6 +455,20 @@ Never concatenate user input into SQL queries. Always use Drizzle's parameterize
 
 Without transactions, partial updates can occur if errors happen during multi-step operations.
 
+## Context7 References
+
+**For Drizzle ORM documentation, query via Context7**:
+
+- **Drizzle ORM**: Schema definition, queries, migrations
+- **SQLite**: Database-specific features and constraints
+- **Drizzle D1**: Cloudflare D1 integration patterns
+- **Transactions**: Transaction handling and rollback
+
+**Query examples**:
+- "Drizzle ORM schema definition patterns"
+- "Drizzle ORM transactions and rollback"
+- "Drizzle ORM migration generation"
+
 ## Reference Files
 
 - Schema definition: `server/database/schema.ts`
@@ -462,3 +476,5 @@ Without transactions, partial updates can occur if errors happen during multi-st
 - Database utilities: `server/utils/drizzle.ts`
 - Validation schemas: `shared/utils/schemas/`
 - Date/time utilities: `app/utils/date.ts`
+- Backend guidelines: `server/AGENTS.md`
+- Migration workflow skill: `database-migration-workflow.md`
