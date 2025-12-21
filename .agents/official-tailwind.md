@@ -17,17 +17,18 @@ Quick reference for common migration issues:
 ### Most Common Renames
 
 | ❌ v3 (Don't use) | ✅ v4 (Use this) |
-|------------------|------------------|
-| `bg-gradient-*` | `bg-linear-*` |
-| `shadow-sm` | `shadow-xs` |
-| `shadow` | `shadow-sm` |
-| `rounded-sm` | `rounded-xs` |
-| `rounded` | `rounded-sm` |
-| `ring` | `ring-3` |
+| ----------------- | ---------------- |
+| `bg-gradient-*`   | `bg-linear-*`    |
+| `shadow-sm`       | `shadow-xs`      |
+| `shadow`          | `shadow-sm`      |
+| `rounded-sm`      | `rounded-xs`     |
+| `rounded`         | `rounded-sm`     |
+| `ring`            | `ring-3`         |
 
 ### Removed Utilities
 
 Use opacity modifiers instead:
+
 - `bg-opacity-*` → `bg-black/50`
 - `text-opacity-*` → `text-black/50`
 
@@ -47,6 +48,7 @@ Use opacity modifiers instead:
 - **Configuration**: `@theme` directive, `@source` directive
 
 **Query examples**:
+
 - "How to use container queries in Tailwind v4"
 - "Tailwind v4 text shadow utilities"
 - "Tailwind CSS v4 @theme directive syntax"

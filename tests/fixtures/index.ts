@@ -1,8 +1,18 @@
 // AGENT-NOTE: ALWAYS import test and expect from THIS file (tests/fixtures/index.ts), NEVER from @playwright/test
-import { test as base } from "@playwright/test"
+import { test as base, type Page } from "@playwright/test"
 import { authenticateAs } from "./auth-fixtures"
 
-export const test = base.extend({
+type Fixtures = {
+  page: Page
+  authenticateAs: {
+    admin: () => Promise<void>
+    publisher: () => Promise<void>
+    publicTalkCoordinator: () => Promise<void>
+    boeCoordinator: () => Promise<void>
+  }
+}
+
+export const test = base.extend<Fixtures>({
   /**
    * Extended test fixture that overrides page.goto() to automatically wait
    * for Nuxt hydration to complete before proceeding with test steps.
@@ -21,10 +31,9 @@ export const test = base.extend({
 
         // Wait for Nuxt hydration to complete with timeout
         try {
-          await page.waitForFunction(
-            () => window.useNuxtApp?.().isHydrating === false,
-            { timeout: 10000 }
-          )
+          await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false, {
+            timeout: 10000,
+          })
         } catch (hydrationError) {
           // If hydration wait times out, log but don't fail the test
           console.log("Hydration check timed out, continuing anyway", hydrationError)

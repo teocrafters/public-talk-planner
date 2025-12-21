@@ -161,6 +161,7 @@ Styling guidelines and patterns for Tailwind CSS 4 with Nuxt UI 4 design system 
 - **Performance**: JIT compilation, tree-shaking
 
 **Query examples**:
+
 - "Tailwind CSS v4 responsive design patterns"
 - "Tailwind CSS dark mode implementation"
 - "Tailwind CSS custom theme configuration"

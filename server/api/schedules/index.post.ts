@@ -88,9 +88,7 @@ export default defineEventHandler(async event => {
   }
 
   const existing = await db.query.scheduledPublicTalks.findFirst({
-    where: and(
-      between(scheduledPublicTalks.date, startOfDay, endOfDay),
-    ),
+    where: and(between(scheduledPublicTalks.date, startOfDay, endOfDay)),
     with: {
       speaker: true,
       publisher: true,
@@ -101,10 +99,7 @@ export default defineEventHandler(async event => {
   if (existing) {
     // Determine speaker name based on source type
     let speakerName = ""
-    if (
-      existing.speakerSourceType === SPEAKER_SOURCE_TYPES.VISITING_SPEAKER &&
-      existing.speaker
-    ) {
+    if (existing.speakerSourceType === SPEAKER_SOURCE_TYPES.VISITING_SPEAKER && existing.speaker) {
       speakerName = `${existing.speaker.firstName} ${existing.speaker.lastName}`
     } else if (
       existing.speakerSourceType === SPEAKER_SOURCE_TYPES.LOCAL_PUBLISHER &&
@@ -135,7 +130,7 @@ export default defineEventHandler(async event => {
     where: and(
       eq(meetingPrograms.type, "weekend"),
       eq(meetingPrograms.date, body.date),
-      between(scheduledPublicTalks.date, startOfDay, endOfDay),
+      between(scheduledPublicTalks.date, startOfDay, endOfDay)
     ),
   })
 

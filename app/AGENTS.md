@@ -33,6 +33,7 @@ app/
 ```
 
 **Key Points**:
+
 - Components in `app/components/` are auto-imported in templates
 - Composables in `app/composables/` are auto-imported everywhere
 - Utilities in `app/utils/` are auto-imported everywhere
@@ -44,31 +45,31 @@ app/
 
 ```vue
 <script setup lang="ts">
-// 1. Type imports (always at top)
-import type { Speaker } from "~/server/database/schema"
+  // 1. Type imports (always at top)
+  import type { Speaker } from "~/server/database/schema"
 
-// 2. Composables (at top level of setup)
-const { $t } = useI18n()
-const { canManageSpeakers } = usePermissions()
+  // 2. Composables (at top level of setup)
+  const { $t } = useI18n()
+  const { canManageSpeakers } = usePermissions()
 
-// 3. Reactive state
-const isOpen = ref(false)
-const selectedSpeaker = ref<Speaker | null>(null)
+  // 3. Reactive state
+  const isOpen = ref(false)
+  const selectedSpeaker = ref<Speaker | null>(null)
 
-// 4. Computed properties
-const filteredSpeakers = computed(() => {
-  // Derived state logic
-})
+  // 4. Computed properties
+  const filteredSpeakers = computed(() => {
+    // Derived state logic
+  })
 
-// 5. Methods
-async function handleCreate() {
-  // Method implementation
-}
+  // 5. Methods
+  async function handleCreate() {
+    // Method implementation
+  }
 
-// 6. Lifecycle hooks (if needed)
-onMounted(async () => {
-  // Initialization logic
-})
+  // 6. Lifecycle hooks (if needed)
+  onMounted(async () => {
+    // Initialization logic
+  })
 </script>
 
 <template>
@@ -77,6 +78,7 @@ onMounted(async () => {
 ```
 
 **Critical Rules**:
+
 - ALWAYS use `<script setup lang="ts">` syntax
 - CALL composables at top level only (not in methods or conditionals)
 - USE `ref()` for primitive values, `reactive()` for objects
@@ -91,16 +93,16 @@ onMounted(async () => {
 
 ```vue
 <script setup lang="ts">
-import type { Speaker } from "~/server/database/schema"
+  import type { Speaker } from "~/server/database/schema"
 
-// ✅ CORRECT: useFetch for SSR-compatible data fetching
-const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+  // ✅ CORRECT: useFetch for SSR-compatible data fetching
+  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
 
-// Access reactive values in template:
-// - data: reactive reference to fetched data
-// - pending: true while fetching
-// - error: error object if request fails
-// - refresh: function to manually refetch
+  // Access reactive values in template:
+  // - data: reactive reference to fetched data
+  // - pending: true while fetching
+  // - error: error object if request fails
+  // - refresh: function to manually refetch
 </script>
 
 <template>
@@ -118,23 +120,24 @@ const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/
 ### When to Use Each
 
 **useFetch()** - Most common case:
+
 ```vue
 <script setup lang="ts">
-// Simple API call
-const { data } = await useFetch<Talk[]>("/api/talks")
+  // Simple API call
+  const { data } = await useFetch<Talk[]>("/api/talks")
 </script>
 ```
 
 **useAsyncData()** - Custom fetch logic:
+
 ```vue
 <script setup lang="ts">
-// Custom headers or complex async operations
-const { data } = await useAsyncData(
-  "user-profile",
-  () => $fetch("/api/user/profile", {
-    headers: { "X-Custom-Header": "value" }
-  })
-)
+  // Custom headers or complex async operations
+  const { data } = await useAsyncData("user-profile", () =>
+    $fetch("/api/user/profile", {
+      headers: { "X-Custom-Header": "value" },
+    })
+  )
 </script>
 ```
 
@@ -142,20 +145,21 @@ const { data } = await useAsyncData(
 
 ```vue
 <script setup lang="ts">
-// ❌ WRONG: Direct $fetch() doesn't transfer SSR data to client
-const speakers = await $fetch("/api/speakers")
+  // ❌ WRONG: Direct $fetch() doesn't transfer SSR data to client
+  const speakers = await $fetch("/api/speakers")
 
-// ❌ WRONG: onMounted defeats SSR purpose
-onMounted(async () => {
-  speakers.value = await $fetch("/api/speakers")
-})
+  // ❌ WRONG: onMounted defeats SSR purpose
+  onMounted(async () => {
+    speakers.value = await $fetch("/api/speakers")
+  })
 
-// ❌ WRONG: Not awaiting breaks SSR hydration
-const { data } = useFetch("/api/speakers") // Missing await!
+  // ❌ WRONG: Not awaiting breaks SSR hydration
+  const { data } = useFetch("/api/speakers") // Missing await!
 </script>
 ```
 
 ### Why SSR Matters
+
 - **SEO**: Search engines see fully rendered content
 - **Performance**: Faster initial page load
 - **UX**: No loading flicker, content appears immediately
@@ -167,26 +171,26 @@ const { data } = useFetch("/api/speakers") // Missing await!
 
 ```vue
 <script setup lang="ts">
-import type { Speaker } from "~/server/database/schema"
+  import type { Speaker } from "~/server/database/schema"
 
-// Props with TypeScript interface
-interface Props {
-  speaker: Speaker
-  readonly?: boolean
-}
-const props = defineProps<Props>()
+  // Props with TypeScript interface
+  interface Props {
+    speaker: Speaker
+    readonly?: boolean
+  }
+  const props = defineProps<Props>()
 
-// Emits with TypeScript
-interface Emits {
-  (e: "update", speaker: Speaker): void
-  (e: "delete", id: string): void
-}
-const emit = defineEmits<Emits>()
+  // Emits with TypeScript
+  interface Emits {
+    (e: "update", speaker: Speaker): void
+    (e: "delete", id: string): void
+  }
+  const emit = defineEmits<Emits>()
 
-// Use in methods
-function handleUpdate() {
-  emit("update", props.speaker)
-}
+  // Use in methods
+  function handleUpdate() {
+    emit("update", props.speaker)
+  }
 </script>
 ```
 
@@ -218,6 +222,7 @@ function handleUpdate() {
 ### Component Verification
 
 **ALWAYS verify component API via MCP before implementation**:
+
 1. Use `mcp__nuxt-ui__get_component` to fetch current API
 2. Verify props, slots, and events from documentation
 3. Check TypeScript types to import
@@ -232,31 +237,38 @@ function handleUpdate() {
 
     <!-- Content in #body slot -->
     <template #body>
-      <UForm ref="form" @submit="handleSubmit">
+      <UForm
+        ref="form"
+        @submit="handleSubmit">
         <!-- Form fields here -->
       </UForm>
     </template>
 
     <!-- Footer with close function -->
     <template #footer="{ close }">
-      <UButton label="Cancel" @click="close" />
-      <UButton label="Submit" @click="form?.submit()" />
+      <UButton
+        label="Cancel"
+        @click="close" />
+      <UButton
+        label="Submit"
+        @click="form?.submit()" />
     </template>
   </UModal>
 </template>
 
 <script setup lang="ts">
-const form = useTemplateRef('form')
-const isOpen = ref(false)
+  const form = useTemplateRef("form")
+  const isOpen = ref(false)
 
-async function handleSubmit(event: FormSubmitEvent) {
-  // Form submission logic
-  isOpen.value = false // Close modal on success
-}
+  async function handleSubmit(event: FormSubmitEvent) {
+    // Form submission logic
+    isOpen.value = false // Close modal on success
+  }
 </script>
 ```
 
 **Key Points**:
+
 - Place UForm in `#body` slot with ref
 - Trigger submission from `#footer` button via `form?.submit()`
 - Use `#footer="{ close }"` to access close function
@@ -266,22 +278,22 @@ async function handleSubmit(event: FormSubmitEvent) {
 
 ```vue
 <script setup lang="ts">
-import type { DropdownMenuItem } from "@nuxt/ui"
+  import type { DropdownMenuItem } from "@nuxt/ui"
 
-// ✅ CORRECT: Use onSelect (NOT click or onClick)
-const items: DropdownMenuItem[] = [
-  {
-    label: "Edit",
-    icon: "i-lucide-pencil",
-    onSelect: () => handleEdit(), // ✅ Correct
-  },
-  {
-    label: "Delete",
-    icon: "i-lucide-trash",
-    color: "error",
-    onSelect: () => handleDelete(),
-  },
-]
+  // ✅ CORRECT: Use onSelect (NOT click or onClick)
+  const items: DropdownMenuItem[] = [
+    {
+      label: "Edit",
+      icon: "i-lucide-pencil",
+      onSelect: () => handleEdit(), // ✅ Correct
+    },
+    {
+      label: "Delete",
+      icon: "i-lucide-trash",
+      color: "error",
+      onSelect: () => handleDelete(),
+    },
+  ]
 </script>
 
 <template>
@@ -299,8 +311,8 @@ const items: DropdownMenuItem[] = [
 
 ```vue
 <script setup lang="ts">
-const { $t } = useI18n()
-const title = computed(() => $t('pages.speakers.title'))
+  const { $t } = useI18n()
+  const title = computed(() => $t("pages.speakers.title"))
 </script>
 
 <template>
@@ -326,29 +338,30 @@ const title = computed(() => $t('pages.speakers.title'))
 
 ```vue
 <script setup lang="ts">
-import { isApiValidationError } from "~/app/utils/error"
+  import { isApiValidationError } from "~/app/utils/error"
 
-async function handleSubmit() {
-  try {
-    await $fetch("/api/speakers", {
-      method: "POST",
-      body: formData,
-    })
-  } catch (err) {
-    // ✅ CORRECT: Use type guard
-    if (isApiValidationError(err)) {
-      // err.data.errors is typed and available
-      console.error(err.data.errors)
-    } else {
-      // Generic error handling
-      console.error("Unknown error:", err)
+  async function handleSubmit() {
+    try {
+      await $fetch("/api/speakers", {
+        method: "POST",
+        body: formData,
+      })
+    } catch (err) {
+      // ✅ CORRECT: Use type guard
+      if (isApiValidationError(err)) {
+        // err.data.errors is typed and available
+        console.error(err.data.errors)
+      } else {
+        // Generic error handling
+        console.error("Unknown error:", err)
+      }
     }
   }
-}
 </script>
 ```
 
 **Key Points**:
+
 - ALWAYS use `isApiValidationError` type guard
 - IMPORT type guard before handling API errors
 - NEVER assume error structure without validation
@@ -358,6 +371,7 @@ async function handleSubmit() {
 ### Test Development Workflow
 
 **Three-step process**:
+
 1. **Component**: Add data-testid during development (use `test-ready-component-check` skill)
 2. **Fixtures**: Create/update fixtures for reusable patterns
 3. **Tests**: Write tests using fixtures and test IDs
@@ -384,16 +398,16 @@ test("displays speakers list", async ({ page }) => {
 
 ```vue
 <script setup lang="ts">
-// WRONG: Direct $fetch in component
-const speakers = await $fetch("/api/speakers")
+  // WRONG: Direct $fetch in component
+  const speakers = await $fetch("/api/speakers")
 
-// WRONG: Fetching in onMounted
-onMounted(async () => {
-  speakers.value = await $fetch("/api/speakers")
-})
+  // WRONG: Fetching in onMounted
+  onMounted(async () => {
+    speakers.value = await $fetch("/api/speakers")
+  })
 
-// WRONG: Not awaiting useFetch
-const { data } = useFetch("/api/speakers")
+  // WRONG: Not awaiting useFetch
+  const { data } = useFetch("/api/speakers")
 </script>
 ```
 
@@ -405,7 +419,7 @@ const { data } = useFetch("/api/speakers")
   <h1>Lista prelegentów</h1>
 
   <!-- CORRECT: Use $t() -->
-  <h1>{{ $t('pages.speakers.title') }}</h1>
+  <h1>{{ $t("pages.speakers.title") }}</h1>
 </template>
 ```
 
@@ -427,17 +441,17 @@ const { data } = useFetch("/api/speakers")
 
 ```vue
 <script setup>
-// WRONG: Using click instead of onSelect
-const items = [{
-  label: "Edit",
-  click: () => handleEdit() // ❌ Wrong
-}]
+  // WRONG: Using click instead of onSelect
+  const items = [{
+    label: "Edit",
+    click: () => handleEdit() // ❌ Wrong
+  }]
 
-// CORRECT: Using onSelect
-const items: DropdownMenuItem[] = [{
-  label: "Edit",
-  onSelect: () => handleEdit() // ✅ Correct
-}]
+  // CORRECT: Using onSelect
+  const items: DropdownMenuItem[] = [{
+    label: "Edit",
+    onSelect: () => handleEdit() // ✅ Correct
+  }]
 </script>
 ```
 
@@ -453,6 +467,7 @@ Use these skills during frontend development:
 ## References
 
 ### Detailed Documentation
+
 - Vue conventions: `.agents/vue-conventions.md`
 - Nuxt UI integration: `.agents/nuxt-ui-4-integration.md`
 - E2E testing: `.agents/e2e-testing-patterns.md`
@@ -460,6 +475,7 @@ Use these skills during frontend development:
 - Tailwind patterns: `.agents/tailwind-patterns.md`
 
 ### Official Documentation (Context7)
+
 - Nuxt 4: Composables, SSR, auto-imports
 - Vue 3: Composition API, defineModel
 - Tailwind CSS v4: Utilities, configuration

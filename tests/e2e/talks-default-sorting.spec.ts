@@ -1,7 +1,7 @@
 import { test, expect } from "../fixtures"
 
 test.describe("Talks - Default Sorting Verification", () => {
-  test.beforeEach(async ({ page, authenticateAs }) => {
+  test.beforeEach(async ({ authenticateAs }) => {
     await authenticateAs.publicTalkCoordinator()
   })
 
@@ -42,7 +42,8 @@ test.describe("Talks - Default Sorting Verification", () => {
 
     // Extract last given dates from each talk card
     const talkDates: (string | null)[] = []
-    for (let i = 0; i < Math.min(cardCount, 10); i++) { // Check first 10 talks for efficiency
+    for (let i = 0; i < Math.min(cardCount, 10); i++) {
+      // Check first 10 talks for efficiency
       const card = talkCards.nth(i)
       const lastGivenBadge = card.getByTestId("talk-last-given-date")
 
@@ -85,48 +86,76 @@ test.describe("Talks - Default Sorting Verification", () => {
       const nextDate = datedTalks[i + 1]
 
       // Convert dates to comparable format
-      const current = new Date(currentDate.replace(/(\d+)\s+(\w+)\s+(\d+)/, (match, day, month, year) => {
-        const monthMap: { [key: string]: string } = {
-          'stycznia': '01', 'styczeń': '01',
-          'lutego': '02', 'luty': '02',
-          'marca': '03', 'marzec': '03',
-          'kwietnia': '04', 'kwiecień': '04',
-          'maja': '05', 'maj': '05',
-          'czerwca': '06', 'czerwiec': '06',
-          'lipca': '07', 'lipiec': '07',
-          'sierpnia': '08', 'sierpień': '08',
-          'września': '09', 'wrzesień': '09',
-          'października': '10', 'październik': '10',
-          'listopada': '11', 'listopad': '11',
-          'grudnia': '12', 'grudzień': '12'
-        }
-        return `${year}-${monthMap[month] || month}-${day.padStart(2, '0')}`
-      }))
+      const current = new Date(
+        currentDate.replace(/(\d+)\s+(\w+)\s+(\d+)/, (match, day, month, year) => {
+          const monthMap: { [key: string]: string } = {
+            stycznia: "01",
+            styczeń: "01",
+            lutego: "02",
+            luty: "02",
+            marca: "03",
+            marzec: "03",
+            kwietnia: "04",
+            kwiecień: "04",
+            maja: "05",
+            maj: "05",
+            czerwca: "06",
+            czerwiec: "06",
+            lipca: "07",
+            lipiec: "07",
+            sierpnia: "08",
+            sierpień: "08",
+            września: "09",
+            wrzesień: "09",
+            października: "10",
+            październik: "10",
+            listopada: "11",
+            listopad: "11",
+            grudnia: "12",
+            grudzień: "12",
+          }
+          return `${year}-${monthMap[month] || month}-${day.padStart(2, "0")}`
+        })
+      )
 
-      const next = new Date(nextDate.replace(/(\d+)\s+(\w+)\s+(\d+)/, (match, day, month, year) => {
-        const monthMap: { [key: string]: string } = {
-          'stycznia': '01', 'styczeń': '01',
-          'lutego': '02', 'luty': '02',
-          'marca': '03', 'marzec': '03',
-          'kwietnia': '04', 'kwiecień': '04',
-          'maja': '05', 'maj': '05',
-          'czerwca': '06', 'czerwiec': '06',
-          'lipca': '07', 'lipiec': '07',
-          'sierpnia': '08', 'sierpień': '08',
-          'września': '09', 'wrzesień': '09',
-          'października': '10', 'październik': '10',
-          'listopada': '11', 'listopad': '11',
-          'grudnia': '12', 'grudzień': '12'
-        }
-        return `${year}-${monthMap[month] || month}-${day.padStart(2, '0')}`
-      }))
+      const next = new Date(
+        nextDate.replace(/(\d+)\s+(\w+)\s+(\d+)/, (match, day, month, year) => {
+          const monthMap: { [key: string]: string } = {
+            stycznia: "01",
+            styczeń: "01",
+            lutego: "02",
+            luty: "02",
+            marca: "03",
+            marzec: "03",
+            kwietnia: "04",
+            kwiecień: "04",
+            maja: "05",
+            maj: "05",
+            czerwca: "06",
+            czerwiec: "06",
+            lipca: "07",
+            lipiec: "07",
+            sierpnia: "08",
+            sierpień: "08",
+            września: "09",
+            wrzesień: "09",
+            października: "10",
+            październik: "10",
+            listopada: "11",
+            listopad: "11",
+            grudnia: "12",
+            grudzień: "12",
+          }
+          return `${year}-${monthMap[month] || month}-${day.padStart(2, "0")}`
+        })
+      )
 
       expect(current.getTime()).toBeLessThanOrEqual(next.getTime())
     }
 
     // Verify that "Nigdy" (never) talks are at the end if any exist
     const neverTalks = page.getByTestId("talk-card").filter({ hasText: "Nigdy" })
-    if (await neverTalks.count() > 0) {
+    if ((await neverTalks.count()) > 0) {
       // Get all talk cards and check if never talks are at the end
       const allCards = page.getByTestId("talk-card")
       const totalCards = await allCards.count()
@@ -143,7 +172,7 @@ test.describe("Talks - Default Sorting Verification", () => {
       }
       // If we have never talks, at least one should be in the last positions
       if (!foundNeverInLast) {
-        console.log('Total cards:', totalCards, 'Never talks count:', await neverTalks.count())
+        console.log("Total cards:", totalCards, "Never talks count:", await neverTalks.count())
         // This is a data-dependent assertion, so we'll be more lenient
         // The main goal is to verify the sorting logic above works
       }
@@ -188,7 +217,7 @@ test.describe("Talks - Default Sorting Verification", () => {
       "Tytuł (A-Z)",
       "Tytuł (Z-A)",
       "Ostatnio wygłaszany (od najstarszego)",
-      "Ostatnio wygłaszany (od najnowszego)"
+      "Ostatnio wygłaszany (od najnowszego)",
     ]
 
     // USelect doesn't use standard role="option" attributes, so we need to check the dropdown content

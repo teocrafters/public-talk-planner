@@ -1,6 +1,7 @@
 # i18n Key Validation Skill
 
-Validates that translation keys exist in both Polish and English locale files before committing changes.
+Validates that translation keys exist in both Polish and English locale files before committing
+changes.
 
 ## Purpose
 
@@ -19,9 +20,9 @@ DO NOT use this skill for:
 
 ## Critical Rules
 
-⚠️ **Polish is PRIMARY** - All user-facing text must be in Polish via $t()
-⚠️ **Both locales REQUIRED** - Keys must exist in BOTH `i18n/locales/pl.json` AND `i18n/locales/en.json`
-⚠️ **No hardcoded Polish** - Never put Polish text directly in templates
+⚠️ **Polish is PRIMARY** - All user-facing text must be in Polish via $t() ⚠️ **Both locales
+REQUIRED** - Keys must exist in BOTH `i18n/locales/pl.json` AND `i18n/locales/en.json` ⚠️ **No
+hardcoded Polish** - Never put Polish text directly in templates
 
 ## Workflow Steps
 
@@ -197,10 +198,11 @@ All checkboxes must be checked before committing.
 ### Scenario: Adding New Meeting Page
 
 **Component code**:
+
 ```vue
 <script setup lang="ts">
-const { $t } = useI18n()
-const title = computed(() => $t('pages.meetings.create.title'))
+  const { $t } = useI18n()
+  const title = computed(() => $t("pages.meetings.create.title"))
 </script>
 
 <template>
@@ -213,6 +215,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
 
 1. **Detect keys**: `pages.meetings.create.title`, `common.submit`
 2. **Check pl.json**:
+
 ```json
 {
   "pages": {
@@ -227,9 +230,11 @@ const title = computed(() => $t('pages.meetings.create.title'))
   }
 }
 ```
+
 ✅ Both keys exist
 
 3. **Check en.json**:
+
 ```json
 {
   "pages": {
@@ -244,6 +249,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
   }
 }
 ```
+
 ✅ Both keys exist with same paths
 
 4. **Browser console**: No warnings
@@ -259,6 +265,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
 **Symptom**: Key exists in pl.json but not in en.json
 
 **Solution**:
+
 1. Copy key structure from pl.json to en.json
 2. Translate value to English
 3. Re-run validation
@@ -268,6 +275,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
 **Symptom**: `pages.meeting.title` in pl.json vs `pages.meetings.title` in en.json
 
 **Solution**:
+
 1. Decide on correct key path (usually plural: `meetings`)
 2. Update both files to use same path
 3. Update component to use correct key
@@ -277,6 +285,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
 **Symptom**: `[i18n] Missing translation: pages.meetings.title (locale: pl)`
 
 **Solution**:
+
 1. Check key spelling in component matches JSON files exactly
 2. Verify JSON syntax (no trailing commas, proper nesting)
 3. Restart dev server if hot reload didn't pick up changes
@@ -287,6 +296,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
 **Symptom**: "ZatwierdĹş" instead of "Zatwierdź"
 
 **Solution**:
+
 1. Verify file encoding is UTF-8 (not ISO-8859-2)
 2. Check HTML meta charset: `<meta charset="UTF-8">`
 3. Verify font supports Polish characters
@@ -296,6 +306,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
 ## Anti-Patterns (NEVER DO THIS)
 
 ❌ **Hardcoded Polish text**:
+
 ```vue
 <template>
   <!-- WRONG -->
@@ -307,6 +318,7 @@ const title = computed(() => $t('pages.meetings.create.title'))
 ```
 
 ❌ **Missing English fallback**:
+
 ```json
 // i18n/locales/pl.json
 {
@@ -324,20 +336,24 @@ const title = computed(() => $t('pages.meetings.create.title'))
 ```
 
 ❌ **Dynamic key generation**:
+
 ```vue
 <script setup>
-// WRONG - Can't validate at build time
-const errorCode = '404'
-const message = $t(`errors.${errorCode}`)
+  // WRONG - Can't validate at build time
+  const errorCode = "404"
+  const message = $t(`errors.${errorCode}`)
 
-// CORRECT - Explicit keys
-const message = computed(() => {
-  switch (errorCode) {
-    case '404': return $t('errors.notFound')
-    case '500': return $t('errors.serverError')
-    default: return $t('errors.unknown')
-  }
-})
+  // CORRECT - Explicit keys
+  const message = computed(() => {
+    switch (errorCode) {
+      case "404":
+        return $t("errors.notFound")
+      case "500":
+        return $t("errors.serverError")
+      default:
+        return $t("errors.unknown")
+    }
+  })
 </script>
 ```
 

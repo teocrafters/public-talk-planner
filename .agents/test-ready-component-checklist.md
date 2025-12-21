@@ -140,6 +140,7 @@ consistent testing patterns across the project.
 - **Test automation**: Fixture patterns, Page Object Models
 
 **Query examples**:
+
 - "Playwright data-testid selector best practices"
 - "Component testing patterns"
 - "Test fixture organization"

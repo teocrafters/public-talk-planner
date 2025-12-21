@@ -1,5 +1,11 @@
 import { eq, desc, asc, sql } from "drizzle-orm"
-import { speakers, speakerTalks, organization, publicTalks, scheduledPublicTalks } from "../../database/schema"
+import {
+  speakers,
+  speakerTalks,
+  organization,
+  publicTalks,
+  scheduledPublicTalks,
+} from "../../database/schema"
 
 export default defineEventHandler(async event => {
   await requirePermission({ speakers: ["list"] })(event)
@@ -49,23 +55,34 @@ export default defineEventHandler(async event => {
   switch (sortBy) {
     case "name":
       // Sort by last name first, then first name
-      speakersQuery = sortOrder === "desc"
-        ? speakersQuery.orderBy(desc(speakers.lastName), desc(speakers.firstName))
-        : speakersQuery.orderBy(asc(speakers.lastName), asc(speakers.firstName))
+      speakersQuery =
+        sortOrder === "desc"
+          ? speakersQuery.orderBy(desc(speakers.lastName), desc(speakers.firstName))
+          : speakersQuery.orderBy(asc(speakers.lastName), asc(speakers.firstName))
       break
 
     case "congregation":
       // Sort by congregation name, then by speaker name
-      speakersQuery = sortOrder === "desc"
-        ? speakersQuery.orderBy(desc(organization.name), desc(speakers.lastName), desc(speakers.firstName))
-        : speakersQuery.orderBy(asc(organization.name), asc(speakers.lastName), asc(speakers.firstName))
+      speakersQuery =
+        sortOrder === "desc"
+          ? speakersQuery.orderBy(
+              desc(organization.name),
+              desc(speakers.lastName),
+              desc(speakers.firstName)
+            )
+          : speakersQuery.orderBy(
+              asc(organization.name),
+              asc(speakers.lastName),
+              asc(speakers.firstName)
+            )
       break
 
     default:
       // Sort by last talk date
-      speakersQuery = sortOrder === "desc"
-        ? speakersQuery.orderBy(desc(sql`MAX(${scheduledPublicTalks.date})`))
-        : speakersQuery.orderBy(asc(sql`MAX(${scheduledPublicTalks.date})`))
+      speakersQuery =
+        sortOrder === "desc"
+          ? speakersQuery.orderBy(desc(sql`MAX(${scheduledPublicTalks.date})`))
+          : speakersQuery.orderBy(asc(sql`MAX(${scheduledPublicTalks.date})`))
   }
 
   const speakersList = await speakersQuery

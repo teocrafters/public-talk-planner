@@ -438,6 +438,7 @@ console.log("✅ All i18n keys are synchronized")
 - **SEO integration**: i18n meta tags and hreflang
 
 **Query examples**:
+
 - "Nuxt i18n module configuration"
 - "Vue i18n pluralization rules"
 - "i18n SEO meta tags setup"

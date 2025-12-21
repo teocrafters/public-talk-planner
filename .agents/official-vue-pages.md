@@ -43,6 +43,7 @@ pages/
 - **Route configuration**: definePage(), route meta, aliases
 
 **Query examples**:
+
 - "Nuxt 4 file-based routing patterns"
 - "Vue Router route guards and middleware"
 - "Nuxt typed router usage"

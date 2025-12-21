@@ -1,6 +1,7 @@
 # Database Migration Workflow Skill
 
-Guides through the safe process of database schema modification and migration generation for Drizzle ORM with D1 database.
+Guides through the safe process of database schema modification and migration generation for Drizzle
+ORM with D1 database.
 
 ## Purpose
 
@@ -19,9 +20,10 @@ DO NOT use this skill for:
 
 ## Critical Rules (NEVER VIOLATE)
 
-⛔ **NEVER execute `.sql` files manually** - All database changes MUST be applied through schema modifications
-⛔ **NEVER run `pnpm db:generate` automatically** - ALWAYS prompt the user to execute this command
-⛔ **NEVER edit migration files manually** - Migration files are generated and should remain unchanged
+⛔ **NEVER execute `.sql` files manually** - All database changes MUST be applied through schema
+modifications ⛔ **NEVER run `pnpm db:generate` automatically** - ALWAYS prompt the user to execute
+this command ⛔ **NEVER edit migration files manually** - Migration files are generated and should
+remain unchanged
 
 ## Workflow Steps
 
@@ -187,7 +189,8 @@ export type NewTable = typeof newTable.$inferSelect
 export type NewTableInsert = typeof newTable.$inferInsert
 ```
 
-**After modification**: Follow workflow → User runs `pnpm db:generate` → Review migration → Test → Commit
+**After modification**: Follow workflow → User runs `pnpm db:generate` → Review migration → Test →
+Commit
 
 ### Modifying Existing Column
 
@@ -199,7 +202,8 @@ email: text("email"),
 email: text("email").notNull(),
 ```
 
-**After modification**: Follow workflow → Migration will contain `ALTER TABLE` → Review carefully → Test → Commit
+**After modification**: Follow workflow → Migration will contain `ALTER TABLE` → Review carefully →
+Test → Commit
 
 ### Removing a Table (DANGEROUS)
 
@@ -208,31 +212,36 @@ email: text("email").notNull(),
 // export const oldTable = sqliteTable("old_table", { ... })
 ```
 
-**After modification**: ⚠️ **CRITICAL** → Follow workflow → Migration will contain `DROP TABLE` → **VERIFY DATA BACKUP** → Test → Commit
+**After modification**: ⚠️ **CRITICAL** → Follow workflow → Migration will contain `DROP TABLE` →
+**VERIFY DATA BACKUP** → Test → Commit
 
 ---
 
 ## Anti-Patterns (NEVER DO THIS)
 
 ❌ **Running migrations manually**:
+
 ```bash
 # WRONG - Do not do this
 sqlite3 .wrangler/state/v3/d1/miniflare-D1DatabaseObject/db.sqlite < server/database/migrations/0001_migration.sql
 ```
 
 ❌ **Executing `pnpm db:generate` automatically**:
+
 ```typescript
 // WRONG - Do not do this
 await $`pnpm db:generate`
 ```
 
 ❌ **Editing migration files**:
+
 ```sql
 -- WRONG - Do not manually edit generated migrations
 ALTER TABLE speakers ADD COLUMN custom_field TEXT;
 ```
 
 ❌ **Committing schema without migration**:
+
 ```bash
 # WRONG - Do not commit only schema
 git add server/database/schema.ts

@@ -19,9 +19,9 @@ DO NOT use this skill for:
 
 ## Critical Rules
 
-⚠️ **NO SHORTCUTS** - ALL quality checks must pass before committing
-⚠️ **ALWAYS RUN** - Never skip quality checks "just this once"
-⚠️ **FIX BEFORE COMMIT** - Don't commit broken code with intent to fix later
+⚠️ **NO SHORTCUTS** - ALL quality checks must pass before committing ⚠️ **ALWAYS RUN** - Never skip
+quality checks "just this once" ⚠️ **FIX BEFORE COMMIT** - Don't commit broken code with intent to
+fix later
 
 ## Workflow Steps
 
@@ -311,6 +311,7 @@ READY TO COMMIT or STOP (if errors)
 **When**: Step 4 detects `server/database/schema.ts` modifications
 
 **How**:
+
 ```
 IF schema.ts modified:
   INVOKE database-migration-workflow skill
@@ -332,11 +333,12 @@ IF schema.ts modified:
 **Changes**: Fixed typo in `server/api/speakers/index.get.ts`
 
 **Quality Check**:
+
 1. ✅ Linting: PASSED
 2. ✅ Type Check: PASSED
 3. ✅ Formatting: PASSED
 4. ✅ Schema: No changes
-5. ⚠️  Testing: Test API endpoint
+5. ⚠️ Testing: Test API endpoint
 6. ✅ Commit: `fix(api): correct typo in speakers endpoint`
 
 **Result**: Ready to commit ✅
@@ -344,19 +346,22 @@ IF schema.ts modified:
 ### Scenario 2: New Feature with Schema Change
 
 **Changes**:
+
 - Added `app/components/SpeakerImportModal.vue`
 - Modified `server/database/schema.ts`
 - Added API route `server/api/speakers/import.post.ts`
 
 **Quality Check**:
+
 1. ✅ Linting: PASSED (auto-fixed 2 issues)
 2. ✅ Type Check: PASSED
 3. ✅ Formatting: Modified 3 files
-4. ⚠️  **Schema Changed**: Invoking migration workflow...
+4. ⚠️ **Schema Changed**: Invoking migration workflow...
    - User ran `pnpm db:generate`
    - Migration reviewed and staged
-5. ⚠️  Testing: Test import modal, API endpoint
+5. ⚠️ Testing: Test import modal, API endpoint
 6. ✅ Commit Template:
+
    ```
    feat(speakers): add speaker import functionality
    - Implemented import modal component
@@ -373,8 +378,10 @@ IF schema.ts modified:
 **Changes**: Refactored composable `app/composables/usePermissions.ts`
 
 **Quality Check**:
+
 1. ✅ Linting: PASSED
 2. ❌ **Type Check: FAILED** (5 errors)
+
    ```
    app/composables/usePermissions.ts:23:12 - error TS2322:
    Type 'string | undefined' is not assignable to type 'string'.
@@ -382,6 +389,7 @@ IF schema.ts modified:
    app/pages/speakers.vue:45:28 - error TS2339:
    Property 'canEditSpeakers' does not exist on type 'ReturnType<typeof usePermissions>'.
    ```
+
 3. **STOPPED**: Must fix type errors before continuing
 
 **Result**: ❌ Cannot commit until type errors fixed
@@ -391,12 +399,14 @@ IF schema.ts modified:
 ## Anti-Patterns (NEVER DO THIS)
 
 ❌ **Skipping quality checks**:
+
 ```bash
 # WRONG
 git commit -m "quick fix" --no-verify
 ```
 
 ❌ **Committing with known errors**:
+
 ```
 ❌ Type Check: 3 errors
 "I'll fix these in the next commit"
@@ -404,6 +414,7 @@ git commit -m "quick fix" --no-verify
 ```
 
 ❌ **Ignoring formatting changes**:
+
 ```
 ⚠️  Formatting: Modified 5 files
 "I'll commit without reviewing the formatting changes"
@@ -411,6 +422,7 @@ git commit -m "quick fix" --no-verify
 ```
 
 ❌ **Committing schema without migration**:
+
 ```
 Modified: server/database/schema.ts
 "I'll generate the migration later"
@@ -418,6 +430,7 @@ Modified: server/database/schema.ts
 ```
 
 ❌ **Vague commit messages**:
+
 ```bash
 git commit -m "updates"  # WRONG - Be specific
 git commit -m "fix stuff"  # WRONG - Describe what was fixed
@@ -435,6 +448,7 @@ git commit -m "wip"  # WRONG - Don't commit work in progress
 ## Configuration
 
 **Commands used**:
+
 - `pnpm lint:fix` → ESLint with auto-fix
 - `pnpm typecheck` → TypeScript compiler check
 - `pnpm format` → Prettier code formatter

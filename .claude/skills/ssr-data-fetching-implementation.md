@@ -19,25 +19,28 @@ DO NOT use this skill for:
 
 ## Critical Rules
 
-⛔ **ALWAYS use useFetch() or useAsyncData()** - NEVER use raw $fetch() in components
-⛔ **ALWAYS await the composable** - Required for proper SSR hydration
-⛔ **ALWAYS handle loading and error states** - Provide good UX
+⛔ **ALWAYS use useFetch() or useAsyncData()** - NEVER use raw $fetch() in components ⛔ **ALWAYS
+await the composable** - Required for proper SSR hydration ⛔ **ALWAYS handle loading and error
+states** - Provide good UX
 
 ## Why SSR Data Fetching Matters
 
 **Server-Side Rendering (SSR)** means:
+
 1. Server fetches data and renders HTML with it
 2. Client receives fully rendered HTML (instant content)
 3. Vue hydrates the HTML (makes it interactive)
 4. No loading spinner on initial page load
 
 **Benefits**:
+
 - **SEO**: Search engines see fully rendered content with data
 - **Performance**: Faster initial page load, better Core Web Vitals
 - **UX**: No loading flicker, content appears immediately
 - **Accessibility**: Content available even if JavaScript fails
 
 **Problem with $fetch()**:
+
 - $fetch() runs only on client (not during SSR)
 - Server renders without data → HTML is empty
 - Client fetches and re-renders → loading flicker
@@ -96,28 +99,26 @@ Is it a simple API call?
 
 ```vue
 <script setup lang="ts">
-import type { TypeName } from "~/server/database/schema"
+  import type { TypeName } from "~/server/database/schema"
 
-// ✅ CORRECT: useFetch with await
-const {
-  data: variableName,
-  pending,
-  error,
-  refresh
-} = await useFetch<TypeName[]>("/api/endpoint")
+  // ✅ CORRECT: useFetch with await
+  const {
+    data: variableName,
+    pending,
+    error,
+    refresh,
+  } = await useFetch<TypeName[]>("/api/endpoint")
 
-// Destructured values:
-// - data: Reactive reference to fetched data (null until loaded)
-// - pending: Boolean - true while fetching
-// - error: Error object if request fails (null on success)
-// - refresh: Function to manually refetch data
+  // Destructured values:
+  // - data: Reactive reference to fetched data (null until loaded)
+  // - pending: Boolean - true while fetching
+  // - error: Error object if request fails (null on success)
+  // - refresh: Function to manually refetch data
 </script>
 
 <template>
   <!-- Handle loading state -->
-  <div v-if="pending">
-    Loading...
-  </div>
+  <div v-if="pending">Loading...</div>
 
   <!-- Handle error state -->
   <div v-else-if="error">
@@ -138,6 +139,7 @@ const {
 ```
 
 **Validation Checklist**:
+
 - [ ] `await` keyword present before `useFetch`
 - [ ] TypeScript type provided: `useFetch<Type>`
 - [ ] Destructured `data`, `pending`, `error`
@@ -157,36 +159,32 @@ const {
 
 ```vue
 <script setup lang="ts">
-// ✅ CORRECT: useAsyncData with await
-const {
-  data: variableName,
-  pending,
-  error,
-  refresh
-} = await useAsyncData(
-  "unique-cache-key", // Unique key for caching
-  () => $fetch("/api/endpoint", {
-    headers: {
-      "X-Custom-Header": "value"
-    }
-  })
-)
+  // ✅ CORRECT: useAsyncData with await
+  const {
+    data: variableName,
+    pending,
+    error,
+    refresh,
+  } = await useAsyncData(
+    "unique-cache-key", // Unique key for caching
+    () =>
+      $fetch("/api/endpoint", {
+        headers: {
+          "X-Custom-Header": "value",
+        },
+      })
+  )
 
-// Or combine multiple data sources:
-const { data: combined } = await useAsyncData(
-  "dashboard-data",
-  async () => {
-    const [talks, speakers] = await Promise.all([
-      $fetch("/api/talks"),
-      $fetch("/api/speakers")
-    ])
+  // Or combine multiple data sources:
+  const { data: combined } = await useAsyncData("dashboard-data", async () => {
+    const [talks, speakers] = await Promise.all([$fetch("/api/talks"), $fetch("/api/speakers")])
     return { talks, speakers }
-  }
-)
+  })
 </script>
 ```
 
 **When to use**:
+
 - Custom fetch options (headers, method, etc.)
 - Non-HTTP async operations
 - Combining multiple data sources
@@ -203,28 +201,31 @@ const { data: combined } = await useAsyncData(
 **Verification Steps**:
 
 1. Check `await` keyword:
+
    ```vue
    <script setup lang="ts">
-   // ✅ CORRECT
-   const { data } = await useFetch("/api/speakers")
+     // ✅ CORRECT
+     const { data } = await useFetch("/api/speakers")
 
-   // ❌ WRONG - Missing await
-   const { data } = useFetch("/api/speakers")
+     // ❌ WRONG - Missing await
+     const { data } = useFetch("/api/speakers")
    </script>
    ```
 
 2. Verify destructuring:
+
    ```vue
    <script setup lang="ts">
-   // ✅ CORRECT - All states accessible
-   const { data, pending, error, refresh } = await useFetch(...)
+     // ✅ CORRECT - All states accessible
+     const { data, pending, error, refresh } = await useFetch(...)
 
-   // ⚠️ INCOMPLETE - Missing error handling
-   const { data } = await useFetch(...)
+     // ⚠️ INCOMPLETE - Missing error handling
+     const { data } = await useFetch(...)
    </script>
    ```
 
 3. Check template state handling:
+
    ```vue
    <template>
      <!-- ✅ CORRECT - All states handled -->
@@ -286,34 +287,33 @@ If you see:
 
 ```vue
 <script setup lang="ts">
-// ✅ CORRECT: Parallel requests (execute simultaneously)
-const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
-const { data: talks } = await useFetch<Talk[]>("/api/talks")
-// Both requests run in parallel during SSR
+  // ✅ CORRECT: Parallel requests (execute simultaneously)
+  const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
+  const { data: talks } = await useFetch<Talk[]>("/api/talks")
+  // Both requests run in parallel during SSR
 
-// ❌ WRONG: Sequential requests (slow)
-const { data: speakers } = await useFetch("/api/speakers")
-// Wait for speakers to complete...
-const { data: talks } = await useFetch("/api/talks")
-// Then fetch talks (slower!)
+  // ❌ WRONG: Sequential requests (slow)
+  const { data: speakers } = await useFetch("/api/speakers")
+  // Wait for speakers to complete...
+  const { data: talks } = await useFetch("/api/talks")
+  // Then fetch talks (slower!)
 
-// ✅ CORRECT: Reactive refetching
-const route = useRoute()
-const { data: speaker } = await useFetch(
-  () => `/api/speakers/${route.params.id}`
-)
-// Automatically refetches when route.params.id changes
+  // ✅ CORRECT: Reactive refetching
+  const route = useRoute()
+  const { data: speaker } = await useFetch(() => `/api/speakers/${route.params.id}`)
+  // Automatically refetches when route.params.id changes
 
-// ✅ CORRECT: Manual refresh when data changes
-const { data: speakers, refresh } = await useFetch("/api/speakers")
+  // ✅ CORRECT: Manual refresh when data changes
+  const { data: speakers, refresh } = await useFetch("/api/speakers")
 
-async function handleSpeakerCreated() {
-  await refresh() // Refetch speakers list
-}
+  async function handleSpeakerCreated() {
+    await refresh() // Refetch speakers list
+  }
 </script>
 ```
 
 **Performance Tips**:
+
 - Fetch multiple resources in parallel
 - Use reactive fetching for dynamic routes
 - Use `refresh()` to update data after mutations
@@ -331,9 +331,9 @@ async function handleSpeakerCreated() {
 
 ```vue
 <script setup lang="ts">
-import type { Speaker } from "~/server/database/schema"
+  import type { Speaker } from "~/server/database/schema"
 
-const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
+  const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
 </script>
 
 <template>
@@ -354,14 +354,16 @@ const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speak
 
 ```vue
 <script setup lang="ts">
-import type { Speaker } from "~/server/database/schema"
+  import type { Speaker } from "~/server/database/schema"
 
-const route = useRoute()
+  const route = useRoute()
 
-// Reactive fetching - refetches when route.params.id changes
-const { data: speaker, pending, error } = await useFetch<Speaker>(
-  () => `/api/speakers/${route.params.id}`
-)
+  // Reactive fetching - refetches when route.params.id changes
+  const {
+    data: speaker,
+    pending,
+    error,
+  } = await useFetch<Speaker>(() => `/api/speakers/${route.params.id}`)
 </script>
 
 <template>
@@ -379,14 +381,14 @@ const { data: speaker, pending, error } = await useFetch<Speaker>(
 
 ```vue
 <script setup lang="ts">
-import type { Speaker, Talk } from "~/server/database/schema"
+  import type { Speaker, Talk } from "~/server/database/schema"
 
-// Parallel fetching (both execute simultaneously)
-const { data: speakers, pending: speakersPending } = await useFetch<Speaker[]>("/api/speakers")
-const { data: talks, pending: talksPending } = await useFetch<Talk[]>("/api/talks")
+  // Parallel fetching (both execute simultaneously)
+  const { data: speakers, pending: speakersPending } = await useFetch<Speaker[]>("/api/speakers")
+  const { data: talks, pending: talksPending } = await useFetch<Talk[]>("/api/talks")
 
-// Combined loading state
-const loading = computed(() => speakersPending.value || talksPending.value)
+  // Combined loading state
+  const loading = computed(() => speakersPending.value || talksPending.value)
 </script>
 
 <template>
@@ -404,14 +406,13 @@ const loading = computed(() => speakersPending.value || talksPending.value)
 
 ```vue
 <script setup lang="ts">
-const { data: profile } = await useAsyncData(
-  "user-profile",
-  () => $fetch("/api/user/profile", {
-    headers: {
-      "Authorization": `Bearer ${token.value}`
-    }
-  })
-)
+  const { data: profile } = await useAsyncData("user-profile", () =>
+    $fetch("/api/user/profile", {
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    })
+  )
 </script>
 ```
 
@@ -423,12 +424,12 @@ const { data: profile } = await useAsyncData(
 
 ```vue
 <script setup lang="ts">
-// WRONG: Direct $fetch() in component
-const speakers = await $fetch("/api/speakers")
-// Problem: No SSR, no loading state, no error handling
+  // WRONG: Direct $fetch() in component
+  const speakers = await $fetch("/api/speakers")
+  // Problem: No SSR, no loading state, no error handling
 
-// CORRECT: Use useFetch
-const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
+  // CORRECT: Use useFetch
+  const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
 </script>
 ```
 
@@ -436,14 +437,14 @@ const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speak
 
 ```vue
 <script setup lang="ts">
-// WRONG: Fetching in lifecycle hook defeats SSR
-const speakers = ref([])
-onMounted(async () => {
-  speakers.value = await $fetch("/api/speakers")
-})
+  // WRONG: Fetching in lifecycle hook defeats SSR
+  const speakers = ref([])
+  onMounted(async () => {
+    speakers.value = await $fetch("/api/speakers")
+  })
 
-// CORRECT: Use useFetch at top level
-const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
+  // CORRECT: Use useFetch at top level
+  const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
 </script>
 ```
 
@@ -451,11 +452,11 @@ const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
 
 ```vue
 <script setup lang="ts">
-// WRONG: Missing await breaks SSR hydration
-const { data } = useFetch("/api/speakers")
+  // WRONG: Missing await breaks SSR hydration
+  const { data } = useFetch("/api/speakers")
 
-// CORRECT: Always await
-const { data } = await useFetch("/api/speakers")
+  // CORRECT: Always await
+  const { data } = await useFetch("/api/speakers")
 </script>
 ```
 
@@ -472,7 +473,9 @@ const { data } = await useFetch("/api/speakers")
   <div v-if="pending">Loading...</div>
   <div v-else-if="error">Error: {{ error.message }}</div>
   <div v-else-if="speakers">
-    <div v-for="speaker in speakers" :key="speaker.id">
+    <div
+      v-for="speaker in speakers"
+      :key="speaker.id">
       {{ speaker.firstName }}
     </div>
   </div>
@@ -483,14 +486,14 @@ const { data } = await useFetch("/api/speakers")
 
 ```vue
 <script setup lang="ts">
-// WRONG: Sequential (second waits for first)
-const { data: speakers } = await useFetch("/api/speakers")
-const { data: talks } = await useFetch("/api/talks")
+  // WRONG: Sequential (second waits for first)
+  const { data: speakers } = await useFetch("/api/speakers")
+  const { data: talks } = await useFetch("/api/talks")
 
-// CORRECT: Parallel (both execute together)
-// Just declare both awaits at top level - they run in parallel
-const { data: speakers } = await useFetch("/api/speakers")
-const { data: talks } = await useFetch("/api/talks")
+  // CORRECT: Parallel (both execute together)
+  // Just declare both awaits at top level - they run in parallel
+  const { data: speakers } = await useFetch("/api/speakers")
+  const { data: talks } = await useFetch("/api/talks")
 </script>
 ```
 
@@ -535,23 +538,25 @@ All items checked → SSR data fetching implemented correctly!
 **Symptom**: Flicker, loading state visible even though SSR should prevent it
 
 **Diagnosis**:
+
 ```vue
 <script setup lang="ts">
-// Check 1: Is await present?
-const { data } = useFetch("/api/speakers") // ❌ Missing await!
+  // Check 1: Is await present?
+  const { data } = useFetch("/api/speakers") // ❌ Missing await!
 
-// Check 2: Is it in onMounted?
-onMounted(async () => {
-  const { data } = await useFetch("/api/speakers") // ❌ Wrong place!
-})
+  // Check 2: Is it in onMounted?
+  onMounted(async () => {
+    const { data } = await useFetch("/api/speakers") // ❌ Wrong place!
+  })
 </script>
 ```
 
 **Solution**:
+
 ```vue
 <script setup lang="ts">
-// ✅ Add await at top level
-const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
+  // ✅ Add await at top level
+  const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
 </script>
 ```
 
@@ -560,6 +565,7 @@ const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speak
 **Symptom**: `data` is null even after SSR
 
 **Diagnosis**:
+
 ```vue
 <template>
   <!-- Error: Cannot read properties of undefined -->
@@ -568,6 +574,7 @@ const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speak
 ```
 
 **Solution**:
+
 ```vue
 <template>
   <!-- ✅ Always check data exists -->
@@ -583,22 +590,24 @@ const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speak
 **Symptom**: `Property 'firstName' does not exist on type 'unknown'`
 
 **Diagnosis**:
+
 ```vue
 <script setup lang="ts">
-// Missing TypeScript type
-const { data } = await useFetch("/api/speakers")
-// TypeScript doesn't know what type 'data' is
+  // Missing TypeScript type
+  const { data } = await useFetch("/api/speakers")
+  // TypeScript doesn't know what type 'data' is
 </script>
 ```
 
 **Solution**:
+
 ```vue
 <script setup lang="ts">
-import type { Speaker } from "~/server/database/schema"
+  import type { Speaker } from "~/server/database/schema"
 
-// ✅ Provide explicit type
-const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
-// Now TypeScript knows speakers is Speaker[] | null
+  // ✅ Provide explicit type
+  const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
+  // Now TypeScript knows speakers is Speaker[] | null
 </script>
 ```
 
@@ -607,14 +616,15 @@ const { data: speakers } = await useFetch<Speaker[]>("/api/speakers")
 **Symptom**: Created new speaker but list doesn't show it
 
 **Solution**:
+
 ```vue
 <script setup lang="ts">
-const { data: speakers, refresh } = await useFetch<Speaker[]>("/api/speakers")
+  const { data: speakers, refresh } = await useFetch<Speaker[]>("/api/speakers")
 
-async function handleSpeakerCreated() {
-  // After successful creation
-  await refresh() // ✅ Refetch data
-}
+  async function handleSpeakerCreated() {
+    // After successful creation
+    await refresh() // ✅ Refetch data
+  }
 </script>
 ```
 
@@ -627,26 +637,31 @@ async function handleSpeakerCreated() {
 ```vue
 <!-- app/pages/speakers.vue -->
 <script setup lang="ts">
-import type { Speaker } from "~/server/database/schema"
+  import type { Speaker } from "~/server/database/schema"
 
-// Fetch speakers list
-const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
+  // Fetch speakers list
+  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
 
-// Permissions check (separate composable)
-const { canManageSpeakers } = usePermissions()
+  // Permissions check (separate composable)
+  const { canManageSpeakers } = usePermissions()
 
-// Data is fetched on server during SSR
-// Client receives pre-rendered HTML with speakers
-// No loading flicker on initial page load
+  // Data is fetched on server during SSR
+  // Client receives pre-rendered HTML with speakers
+  // No loading flicker on initial page load
 </script>
 
 <template>
   <div v-if="pending">
-    <USkeleton v-for="i in 5" :key="i" class="h-20 mb-4" />
+    <USkeleton
+      v-for="i in 5"
+      :key="i"
+      class="h-20 mb-4" />
   </div>
 
   <div v-else-if="error">
-    <UAlert color="error" title="Failed to load speakers" />
+    <UAlert
+      color="error"
+      title="Failed to load speakers" />
   </div>
 
   <div v-else-if="speakers">
@@ -660,6 +675,7 @@ const { canManageSpeakers } = usePermissions()
 ```
 
 **Key Points from Real Implementation**:
+
 - TypeScript types from schema
 - All states handled (pending, error, success)
 - Refresh function passed to child components
@@ -680,20 +696,22 @@ const { canManageSpeakers } = usePermissions()
 ### Converting Client-Only to SSR
 
 **Before (Client-only)**:
+
 ```vue
 <script setup lang="ts">
-const speakers = ref<Speaker[]>([])
+  const speakers = ref<Speaker[]>([])
 
-onMounted(async () => {
-  speakers.value = await $fetch("/api/speakers")
-})
+  onMounted(async () => {
+    speakers.value = await $fetch("/api/speakers")
+  })
 </script>
 ```
 
 **After (SSR-compatible)**:
+
 ```vue
 <script setup lang="ts">
-const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
+  const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speakers")
 </script>
 
 <template>
@@ -706,6 +724,7 @@ const { data: speakers, pending, error } = await useFetch<Speaker[]>("/api/speak
 ```
 
 **Changes**:
+
 1. Removed `ref()` and `onMounted`
 2. Added `useFetch` with `await`
 3. Added loading and error states

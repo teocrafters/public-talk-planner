@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { WeekendMeetingListItem } from "~/shared/types/api-weekend-meetings"
+  import type { WeekendMeetingListItem } from "#shared/types/api-weekend-meetings"
 
   type WeekendMeetingPart = WeekendMeetingListItem["parts"][number]
 
@@ -18,7 +18,7 @@
         part: WeekendMeetingPart
       }
 
-  const props = defineProps<{
+  defineProps<{
     item: DisplayItem
   }>()
 

@@ -19,10 +19,10 @@ DO NOT use this skill for:
 
 ## Critical Rules
 
-⚠️ **Factory pattern REQUIRED** - Schemas must accept translation function `t: (key: string) => string`
-⚠️ **i18n keys in errors** - All error messages use translation keys, not hardcoded text
-⚠️ **File organization** - All schemas in `shared/utils/schemas/` directory
-⚠️ **Type export** - Always export TypeScript type using `z.infer<ReturnType<...>>`
+⚠️ **Factory pattern REQUIRED** - Schemas must accept translation function
+`t: (key: string) => string` ⚠️ **i18n keys in errors** - All error messages use translation keys,
+not hardcoded text ⚠️ **File organization** - All schemas in `shared/utils/schemas/` directory ⚠️
+**Type export** - Always export TypeScript type using `z.infer<ReturnType<...>>`
 
 ## Workflow Steps
 
@@ -52,6 +52,7 @@ DO NOT use this skill for:
 **File Location**: `shared/utils/schemas/{resource}.ts`
 
 **Naming Convention**:
+
 - Use singular form: `speaker.ts`, `meeting.ts`, `talk.ts`
 - Use kebab-case: `speaker-import.ts`, `talk-schedule.ts`
 
@@ -112,6 +113,7 @@ export function create{Resource}Schema(t: (key: string) => string) {
 ```
 
 **Validation Rules**:
+
 - Use `z.string()`, `z.number()`, `z.boolean()` for primitives
 - Add `.min()`, `.max()` for length/value constraints
 - Use `.email()`, `.url()`, `.uuid()` for format validation
@@ -149,6 +151,7 @@ export type CreateSpeakerInput = z.infer<ReturnType<typeof createSpeakerSchema>>
 ```
 
 **Key Points**:
+
 - Type name follows PascalCase: `CreateSpeakerInput`
 - Uses `z.infer<ReturnType<...>>` pattern
 - Type automatically matches schema structure
@@ -172,6 +175,7 @@ export type Update{Resource}Input = z.infer<ReturnType<typeof update{Resource}Sc
 ```
 
 **Why `.partial()`**:
+
 - Makes all fields optional
 - Allows partial updates (only send changed fields)
 - Validation still applies to provided fields
@@ -216,9 +220,11 @@ export function updateSpeakerSchema(t: (key: string) => string) {
 2. Verify all schemas exported
 
 **Why This Matters**:
+
 - Schemas in `shared/utils/schemas/` subdirectory require explicit import
 - Barrel file allows: `import { createSpeakerSchema } from "#shared/utils/schemas"`
-- Without barrel export, direct imports needed: `import { createSpeakerSchema } from "#shared/utils/schemas/speaker"`
+- Without barrel export, direct imports needed:
+  `import { createSpeakerSchema } from "#shared/utils/schemas/speaker"`
 
 **Output**: Schema exported from barrel file.
 
@@ -301,6 +307,7 @@ export default defineEventHandler(async (event) => {
 ```
 
 **Key Points**:
+
 - Import schema from `#shared/utils/schemas`
 - Use `validateBody(event, schemaFactory)` utility
 - Schema is auto-imported (no need to specify import)
@@ -318,6 +325,7 @@ export default defineEventHandler(async (event) => {
 **Requirement**: Validate speaker creation with first name, last name, email, phone, congregation
 
 **Step 1**: Requirements identified
+
 - Required: firstName, lastName
 - Optional: email, phone, congregation
 - Email must be valid format
@@ -349,15 +357,9 @@ export function createSpeakerSchema(t: (key: string) => string) {
       .max(200, t("validation.emailTooLong"))
       .optional(),
 
-    phone: z
-      .string()
-      .max(20, t("validation.phoneTooLong"))
-      .optional(),
+    phone: z.string().max(20, t("validation.phoneTooLong")).optional(),
 
-    congregation: z
-      .string()
-      .max(200, t("validation.congregationTooLong"))
-      .optional(),
+    congregation: z.string().max(200, t("validation.congregationTooLong")).optional(),
   })
 }
 
@@ -388,17 +390,20 @@ export * from "./speaker"
 // server/api/speakers/index.post.ts
 import { createSpeakerSchema } from "#shared/utils/schemas"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const body = await validateBody(event, createSpeakerSchema)
 
   const db = useDrizzle()
-  const [speaker] = await db.insert(tables.speakers).values({
-    id: crypto.randomUUID(),
-    ...body,
-    isArchived: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }).returning()
+  const [speaker] = await db
+    .insert(tables.speakers)
+    .values({
+      id: crypto.randomUUID(),
+      ...body,
+      isArchived: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .returning()
 
   return speaker
 })
@@ -406,7 +411,7 @@ export default defineEventHandler(async (event) => {
 // server/api/speakers/[id].patch.ts
 import { updateSpeakerSchema } from "#shared/utils/schemas"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const id = getRouterParam(event, "id")
   const body = await validateBody(event, updateSpeakerSchema)
 
@@ -428,26 +433,19 @@ export default defineEventHandler(async (event) => {
 ### String with Length Constraints
 
 ```typescript
-field: z
-  .string()
-  .min(1, t("validation.fieldRequired"))
-  .max(200, t("validation.fieldTooLong"))
+field: z.string().min(1, t("validation.fieldRequired")).max(200, t("validation.fieldTooLong"))
 ```
 
 ### Email Validation
 
 ```typescript
-email: z
-  .string()
-  .email(t("validation.emailInvalid"))
-  .optional()
+email: z.string().email(t("validation.emailInvalid")).optional()
 ```
 
 ### Phone Number Validation
 
 ```typescript
-phone: z
-  .string()
+phone: z.string()
   .regex(/^\+?[0-9]{9,15}$/, t("validation.phoneInvalid"))
   .optional()
 ```
@@ -455,10 +453,7 @@ phone: z
 ### Date Validation (Unix Timestamp)
 
 ```typescript
-scheduledDate: z
-  .number()
-  .int(t("validation.dateInvalid"))
-  .positive(t("validation.dateInvalid"))
+scheduledDate: z.number().int(t("validation.dateInvalid")).positive(t("validation.dateInvalid"))
 ```
 
 ### Enum/Union Validation
@@ -466,18 +461,13 @@ scheduledDate: z
 ```typescript
 import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
 
-sourceType: z
-  .enum(Object.values(SPEAKER_SOURCE_TYPES) as [string, ...string[]])
-  .optional()
+sourceType: z.enum(Object.values(SPEAKER_SOURCE_TYPES) as [string, ...string[]]).optional()
 ```
 
 ### Array Validation
 
 ```typescript
-tags: z
-  .array(z.string())
-  .max(10, t("validation.tooManyTags"))
-  .optional()
+tags: z.array(z.string()).max(10, t("validation.tooManyTags")).optional()
 ```
 
 ---
@@ -509,23 +499,23 @@ Frontend handles errors:
 
 ```vue
 <script setup lang="ts">
-import { isApiValidationError } from "~/app/utils/error"
+  import { isApiValidationError } from "~/app/utils/error"
 
-async function handleSubmit() {
-  try {
-    await $fetch("/api/speakers", {
-      method: "POST",
-      body: formData,
-    })
-  } catch (err) {
-    if (isApiValidationError(err)) {
-      // Display translated errors
-      err.data.errors.forEach(error => {
-        console.error($t(error.messageKey))
+  async function handleSubmit() {
+    try {
+      await $fetch("/api/speakers", {
+        method: "POST",
+        body: formData,
       })
+    } catch (err) {
+      if (isApiValidationError(err)) {
+        // Display translated errors
+        err.data.errors.forEach(error => {
+          console.error($t(error.messageKey))
+        })
+      }
     }
   }
-}
 </script>
 ```
 

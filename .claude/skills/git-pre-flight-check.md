@@ -20,10 +20,9 @@ DO NOT use this skill for:
 
 ## Critical Rules
 
-⛔ **NEVER force push to main/master** - Extremely dangerous, can destroy team's work
-⛔ **ALWAYS verify current branch** - Know what you're pushing before pushing
-⛔ **USE --force-with-lease** - Safer alternative to --force
-⛔ **RUN quality checks** - Ensure code passes all tests before pushing
+⛔ **NEVER force push to main/master** - Extremely dangerous, can destroy team's work ⛔ **ALWAYS
+verify current branch** - Know what you're pushing before pushing ⛔ **USE --force-with-lease** -
+Safer alternative to --force ⛔ **RUN quality checks** - Ensure code passes all tests before pushing
 
 ## Workflow Steps
 
@@ -136,6 +135,7 @@ Force push: git push --force-with-lease
 **Actions**:
 
 1. **Verify NOT main/master branch**:
+
    ```
    ⛔ STOP: Cannot force push to main/master!
 
@@ -148,6 +148,7 @@ Force push: git push --force-with-lease
    ```
 
 2. **If feature branch**, verify reason for force push:
+
    ```
    Force Push Verification
 
@@ -161,6 +162,7 @@ Force push: git push --force-with-lease
    ```
 
 3. **Recommend --force-with-lease**:
+
    ```
    ⚠️  Use --force-with-lease instead of --force
 
@@ -173,6 +175,7 @@ Force push: git push --force-with-lease
    ```
 
 4. **Final confirmation**:
+
    ```
    ⚠️  Force Push Confirmation
 
@@ -368,6 +371,7 @@ START
 **Branch**: `feat/speaker-import`
 
 **Checks**:
+
 1. ✅ Feature branch (not main)
 2. ✅ Working directory clean
 3. ✅ Regular push (not force)
@@ -382,6 +386,7 @@ START
 **Branch**: `feat/talk-schedule`
 
 **Checks**:
+
 1. ✅ Feature branch (not main)
 2. ✅ Working directory clean
 3. ⚠️ **Force push required** (rebased)
@@ -397,6 +402,7 @@ START
 **Branch**: `main`
 
 **Checks**:
+
 1. ⚠️ **CRITICAL**: On main branch!
 2. User confirmation: "Are you sure?" → User says NO
 
@@ -407,12 +413,14 @@ START
 **Branch**: `feat/api-refactor`
 
 **Checks**:
+
 1. ✅ Feature branch
 2. ✅ Working directory clean
 3. ✅ Regular push
 4. ❌ **Remote Status**: Diverged (ahead 2, behind 3)
 
 **Action Required**:
+
 ```bash
 git fetch origin
 git rebase origin/feat/api-refactor
@@ -427,12 +435,14 @@ git rebase origin/feat/api-refactor
 ## Anti-Patterns (NEVER DO THIS)
 
 ❌ **Force pushing to main**:
+
 ```bash
 # WRONG - NEVER do this
 git push --force origin main
 ```
 
 ❌ **Using --force instead of --force-with-lease**:
+
 ```bash
 # WRONG - Dangerous
 git push --force
@@ -442,6 +452,7 @@ git push --force-with-lease
 ```
 
 ❌ **Skipping quality checks**:
+
 ```bash
 # WRONG - Pushing broken code
 git push
@@ -449,6 +460,7 @@ git push
 ```
 
 ❌ **Pushing with uncommitted changes**:
+
 ```bash
 # WRONG - Work in progress not committed
 git push
@@ -456,6 +468,7 @@ git push
 ```
 
 ❌ **Pushing without verifying branch**:
+
 ```bash
 # WRONG - Not sure which branch
 git push
@@ -475,10 +488,12 @@ git push
 ### Works with pre-commit-quality-check
 
 **Relationship**:
+
 - `pre-commit-quality-check` → Before committing locally
 - `git-pre-flight-check` → Before pushing to remote
 
 **Workflow**:
+
 1. Make changes
 2. Run `pre-commit-quality-check` skill
 3. Commit changes
@@ -488,6 +503,7 @@ git push
 ## Configuration
 
 **Git commands used**:
+
 - `git branch --show-current` - Show current branch name
 - `git status --short` - Show working directory status
 - `git status -sb` - Show branch status with remote tracking

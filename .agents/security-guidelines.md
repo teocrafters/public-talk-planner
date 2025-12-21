@@ -257,6 +257,7 @@ Comprehensive security standards and best practices for the Public Talk Planner 
 - **Cloudflare Security**: Workers security features, D1 access control
 
 **Query examples**:
+
 - "OWASP Top 10 security vulnerabilities"
 - "Better Auth session security"
 - "Cloudflare Workers security best practices"

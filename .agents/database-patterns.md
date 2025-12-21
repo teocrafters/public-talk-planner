@@ -465,6 +465,7 @@ Without transactions, partial updates can occur if errors happen during multi-st
 - **Transactions**: Transaction handling and rollback
 
 **Query examples**:
+
 - "Drizzle ORM schema definition patterns"
 - "Drizzle ORM transactions and rollback"
 - "Drizzle ORM migration generation"

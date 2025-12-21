@@ -366,15 +366,12 @@
       const unchanged = newTalkIds.filter(id => oldTalkIds.includes(id))
 
       const hasTalkChange = added.length > 0 || removed.length > 0
-      const hasCongregationChange =
-        speaker.congregationId !== selectedSpeaker.congregationId
+      const hasCongregationChange = speaker.congregationId !== selectedSpeaker.congregationId
 
       if (hasPhoneChange || hasTalkChange || hasCongregationChange) {
         speaker.matchStatus = "update"
         speaker.diff = {
-          phone: hasPhoneChange
-            ? { old: selectedSpeaker.phone, new: speaker.phone }
-            : undefined,
+          phone: hasPhoneChange ? { old: selectedSpeaker.phone, new: speaker.phone } : undefined,
           talks: hasTalkChange ? { added, removed, unchanged } : undefined,
           congregation: hasCongregationChange
             ? {
@@ -424,7 +421,9 @@
     }
 
     const speakersToImport = extractedSpeakers.value
-      .filter(s => s.selected && s.matchStatus !== "no-change" && (!s.errors || s.errors.length === 0))
+      .filter(
+        s => s.selected && s.matchStatus !== "no-change" && (!s.errors || s.errors.length === 0)
+      )
       .map(s => ({
         firstName: s.firstName,
         lastName: s.lastName,
@@ -448,17 +447,27 @@
 
     try {
       const response = await $fetch<{
-        counts: { created: number; updated: number; restored: number; skipped: number; archived: number }
+        counts: {
+          created: number
+          updated: number
+          restored: number
+          skipped: number
+          archived: number
+        }
       }>("/api/speakers/bulk-import", {
         method: "POST",
         body: { speakers: speakersToImport, speakersToArchive },
       })
 
       const parts = []
-      if (response.counts.created > 0) parts.push(`${response.counts.created} ${t("speakers.import.created")}`)
-      if (response.counts.updated > 0) parts.push(`${response.counts.updated} ${t("speakers.import.updated")}`)
-      if (response.counts.restored > 0) parts.push(`${response.counts.restored} ${t("speakers.import.restored")}`)
-      if (response.counts.archived > 0) parts.push(`${response.counts.archived} ${t("speakers.import.archived")}`)
+      if (response.counts.created > 0)
+        parts.push(`${response.counts.created} ${t("speakers.import.created")}`)
+      if (response.counts.updated > 0)
+        parts.push(`${response.counts.updated} ${t("speakers.import.updated")}`)
+      if (response.counts.restored > 0)
+        parts.push(`${response.counts.restored} ${t("speakers.import.restored")}`)
+      if (response.counts.archived > 0)
+        parts.push(`${response.counts.archived} ${t("speakers.import.archived")}`)
 
       const message = `${t("speakers.import.success")}: ${parts.join(", ")}`
 
@@ -679,9 +688,9 @@
                       class="space-y-2">
                       <!-- Existing talks row -->
                       <div class="flex flex-wrap items-center gap-1">
-                        <span class="text-xs text-dimmed">{{
-                          t("speakers.import.existingTalks")
-                        }}:</span>
+                        <span class="text-xs text-dimmed"
+                          >{{ t("speakers.import.existingTalks") }}:</span
+                        >
                         <UBadge
                           v-for="talkId in getExistingTalkIds(speaker)"
                           :key="`old-${talkId}`"
@@ -695,7 +704,9 @@
 
                       <!-- New talks row -->
                       <div class="flex flex-wrap items-center gap-1">
-                        <span class="text-xs text-dimmed">{{ t("speakers.import.newTalks") }}:</span>
+                        <span class="text-xs text-dimmed"
+                          >{{ t("speakers.import.newTalks") }}:</span
+                        >
                         <UBadge
                           v-for="talkNo in speaker.talkNumbers"
                           :key="`new-${talkNo}`"
@@ -773,9 +784,7 @@
                   :data-testid="`speaker-import-missing-checkbox-${index}`" />
 
                 <div class="flex-1">
-                  <div class="font-medium">
-                    {{ speaker.firstName }} {{ speaker.lastName }}
-                  </div>
+                  <div class="font-medium">{{ speaker.firstName }} {{ speaker.lastName }}</div>
                   <div class="text-sm text-muted">
                     {{ speaker.congregationName }}
                   </div>
@@ -803,7 +812,9 @@
                     class="mt-2"
                     :data-testid="`speaker-import-missing-scheduled-${index}`">
                     <template #description>
-                      {{ t("speakers.import.scheduledTalks", { count: speaker.scheduledTalksCount }) }}
+                      {{
+                        t("speakers.import.scheduledTalks", { count: speaker.scheduledTalksCount })
+                      }}
                     </template>
                   </UAlert>
                 </div>

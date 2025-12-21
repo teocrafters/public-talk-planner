@@ -545,6 +545,7 @@ test("correct approach", async ({ page }) => {
 - **Page Object Models**: Structuring test utilities
 
 **Query examples**:
+
 - "Playwright test fixtures patterns"
 - "Playwright authentication setup"
 - "Playwright page object model best practices"

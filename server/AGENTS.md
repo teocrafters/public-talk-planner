@@ -31,6 +31,7 @@ server/
 ```
 
 **Key Points**:
+
 - API routes use HTTP method in filename: `.get.ts`, `.post.ts`, `.patch.ts`, `.delete.ts`
 - Utilities in `server/utils/` are auto-imported in server context
 - NEVER manually execute `.sql` files - use schema modifications
@@ -62,6 +63,7 @@ export type NewSpeaker = typeof speakers.$inferInsert
 ```
 
 **Key Points**:
+
 - Use descriptive table and column names
 - ALWAYS include `createdAt` and `updatedAt` timestamps
 - Use `mode: "timestamp"` for datetime fields
@@ -75,7 +77,7 @@ export type NewSpeaker = typeof speakers.$inferInsert
 // server/api/speakers/index.get.ts
 import { eq } from "drizzle-orm"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const db = useDrizzle()
 
   const speakers = await db
@@ -88,6 +90,7 @@ export default defineEventHandler(async (event) => {
 ```
 
 **Available via `useDrizzle()`**:
+
 - Database instance: `const db = useDrizzle()`
 - Operators: `eq`, `and`, `or`, `sql`, `gte`, `lte`, `desc`, `asc`
 - Tables: `tables.speakers`, `tables.meetings`, etc.
@@ -96,10 +99,10 @@ export default defineEventHandler(async (event) => {
 
 ```typescript
 // Use transactions for operations affecting multiple tables
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const db = useDrizzle()
 
-  await db.transaction(async (tx) => {
+  await db.transaction(async tx => {
     // Insert talk
     const [talk] = await tx
       .insert(tables.talks)
@@ -127,6 +130,7 @@ export default defineEventHandler(async (event) => {
 ```
 
 **Key Points**:
+
 - USE transactions when updating multiple related records
 - ROLLBACK happens automatically on any error
 - KEEP transactions short and focused
@@ -137,6 +141,7 @@ export default defineEventHandler(async (event) => {
 **NEVER execute `.sql` files manually** - All database changes MUST be through schema modifications.
 
 **Workflow**:
+
 1. Modify `server/database/schema.ts`
 2. Prompt user: "Please run `pnpm db:generate`"
 3. User generates migration files
@@ -177,7 +182,7 @@ server/api/
 // server/api/speakers/index.post.ts
 import { createSpeakerSchema } from "#shared/utils/schemas"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   // Validate request body
   const body = await validateBody(event, createSpeakerSchema)
 
@@ -203,6 +208,7 @@ export default defineEventHandler(async (event) => {
 ```
 
 **Key Points**:
+
 - Schemas are auto-imported from `shared/utils/schemas/`
 - `validateBody()` utility returns typed, validated data
 - Validation errors return HTTP 400 with error details
@@ -236,6 +242,7 @@ export function updateSpeakerSchema(t: (key: string) => string) {
 ```
 
 **Key Points**:
+
 - USE factory pattern with translation function parameter
 - EMBED i18n keys in error messages
 - EXPORT TypeScript types using `z.infer<ReturnType<...>>`
@@ -261,7 +268,7 @@ shared/utils/schemas/
 ```typescript
 import { createSpeakerSchema } from "#shared/utils/schemas"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   // Validate at API boundary
   const body = await validateBody(event, createSpeakerSchema)
 
@@ -314,10 +321,7 @@ Frontend uses `messageKey` to display translated error messages via `$t(error.me
 
 ```typescript
 // ✅ CORRECT: Parameterized queries (SQL injection safe)
-const speaker = await db
-  .select()
-  .from(tables.speakers)
-  .where(eq(tables.speakers.id, userId))
+const speaker = await db.select().from(tables.speakers).where(eq(tables.speakers.id, userId))
 
 // ✅ CORRECT: Input validation
 const body = await validateBody(event, createSpeakerSchema)
@@ -358,6 +362,7 @@ export default defineTask({
 ```
 
 **Key Points**:
+
 - Define tasks in `server/tasks/` directory
 - Use descriptive names and descriptions
 - Handle errors and provide meaningful logs
@@ -381,6 +386,7 @@ export const tables = schema
 ```
 
 **Auto-imported in server context**:
+
 - `useDrizzle()` - Database instance
 - `eq`, `and`, `or`, `sql` - Query operators
 - `tables` - Schema tables
@@ -394,12 +400,7 @@ import { eq, and, gte } from "drizzle-orm"
 const speakers = await db
   .select()
   .from(tables.speakers)
-  .where(
-    and(
-      eq(tables.speakers.isArchived, false),
-      gte(tables.speakers.createdAt, startDate)
-    )
-  )
+  .where(and(eq(tables.speakers.isArchived, false), gte(tables.speakers.createdAt, startDate)))
 
 // Ordering
 const speakers = await db
@@ -428,13 +429,13 @@ await $`pnpm db:generate`
 
 ```typescript
 // WRONG: No input validation
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const body = await readBody(event) // Unvalidated!
   // ... use body directly
 })
 
 // CORRECT: Always validate
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const body = await validateBody(event, createSpeakerSchema)
   // ... use validated body
 })
@@ -470,10 +471,12 @@ Use these skills during backend development:
 ## References
 
 ### Detailed Documentation
+
 - Database patterns: `.agents/database-patterns.md`
 - Security guidelines: `.agents/security-guidelines.md`
 
 ### Official Documentation (Context7)
+
 - Drizzle ORM: Queries, schema definition, migrations
 - Nitro: Server engine, API routes, event handlers
 - Nuxt 4: Server utilities, composables

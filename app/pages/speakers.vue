@@ -312,7 +312,9 @@
 
                 <!-- Phone number -->
                 <div class="flex items-center gap-2">
-                  <UIcon name="i-heroicons-phone" class="size-4 text-muted" />
+                  <UIcon
+                    name="i-heroicons-phone"
+                    class="size-4 text-muted" />
                   <p class="text-sm text-default">{{ formatPhoneNumber(speaker.phone) }}</p>
                 </div>
               </div>

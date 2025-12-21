@@ -487,6 +487,7 @@ Refetch data when dependencies change:
 - **Nuxt 4 Auto-imports**: Component and utility auto-discovery
 
 **Query examples**:
+
 - "Vue 3 Composition API best practices"
 - "Nuxt 4 useFetch vs useAsyncData"
 - "Vue 3 defineModel with modifiers"

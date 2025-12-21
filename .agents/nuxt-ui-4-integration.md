@@ -6,10 +6,10 @@ Guidelines for using Nuxt UI 4 components with MCP-first workflow.
 
 ## Critical Integration Rules
 
-⚠️ **MCP-first workflow** - ALWAYS verify component API via MCP before implementation
-⚠️ **Correct component names** - UDropdownMenu (not UDropdown), UFormField (not UFormGroup)
-⚠️ **Proper event handlers** - onSelect for dropdown items (NOT click)
-⚠️ **Slot structure** - UModal has specific hierarchy that must be followed
+⚠️ **MCP-first workflow** - ALWAYS verify component API via MCP before implementation ⚠️ **Correct
+component names** - UDropdownMenu (not UDropdown), UFormField (not UFormGroup) ⚠️ **Proper event
+handlers** - onSelect for dropdown items (NOT click) ⚠️ **Slot structure** - UModal has specific
+hierarchy that must be followed
 
 **USE SKILL**: `nuxt-ui-component-integration` when adding Nuxt UI components
 
@@ -37,7 +37,9 @@ Guidelines for using Nuxt UI 4 components with MCP-first workflow.
 
 ```vue
 <template>
-  <UModal v-model:open="isOpen" title="Modal Title">
+  <UModal
+    v-model:open="isOpen"
+    title="Modal Title">
     <!-- Trigger in default slot -->
     <UButton label="Open Modal" />
 
@@ -48,8 +50,12 @@ Guidelines for using Nuxt UI 4 components with MCP-first workflow.
 
     <!-- Footer with close function -->
     <template #footer="{ close }">
-      <UButton label="Cancel" @click="close" />
-      <UButton label="Confirm" @click="handleConfirm" />
+      <UButton
+        label="Cancel"
+        @click="close" />
+      <UButton
+        label="Confirm"
+        @click="handleConfirm" />
     </template>
   </UModal>
 </template>
@@ -64,7 +70,9 @@ Guidelines for using Nuxt UI 4 components with MCP-first workflow.
 
     <!-- UForm in #body slot with ref -->
     <template #body>
-      <UForm ref="form" @submit="handleSubmit">
+      <UForm
+        ref="form"
+        @submit="handleSubmit">
         <UFormField name="firstName">
           <UInput v-model="state.firstName" />
         </UFormField>
@@ -73,23 +81,28 @@ Guidelines for using Nuxt UI 4 components with MCP-first workflow.
 
     <!-- Submit from #footer via ref -->
     <template #footer="{ close }">
-      <UButton label="Cancel" @click="close" />
-      <UButton label="Submit" @click="form?.submit()" />
+      <UButton
+        label="Cancel"
+        @click="close" />
+      <UButton
+        label="Submit"
+        @click="form?.submit()" />
     </template>
   </UModal>
 </template>
 
 <script setup lang="ts">
-const form = useTemplateRef('form')
-const isOpen = ref(false)
+  const form = useTemplateRef("form")
+  const isOpen = ref(false)
 
-async function handleSubmit(event: FormSubmitEvent) {
-  isOpen.value = false
-}
+  async function handleSubmit(event: FormSubmitEvent) {
+    isOpen.value = false
+  }
 </script>
 ```
 
 **Key Points**:
+
 - Place UForm in `#body` slot with ref attribute
 - Trigger submission from `#footer` button via `form?.submit()`
 - NEVER wrap `#footer` with UForm
@@ -115,24 +128,24 @@ async function handleSubmit(event: FormSubmitEvent) {
 
 ```vue
 <script setup lang="ts">
-import type { DropdownMenuItem } from "@nuxt/ui"
+  import type { DropdownMenuItem } from "@nuxt/ui"
 
-// ✅ CORRECT: Use onSelect
-const items: DropdownMenuItem[] = [
-  {
-    label: "Edit",
-    icon: "i-lucide-pencil",
-    onSelect: () => handleEdit(),
-  },
-]
+  // ✅ CORRECT: Use onSelect
+  const items: DropdownMenuItem[] = [
+    {
+      label: "Edit",
+      icon: "i-lucide-pencil",
+      onSelect: () => handleEdit(),
+    },
+  ]
 
-// ❌ WRONG: Using click or onClick
-const items = [
-  {
-    label: "Edit",
-    click: () => handleEdit(), // Wrong property
-  },
-]
+  // ❌ WRONG: Using click or onClick
+  const items = [
+    {
+      label: "Edit",
+      click: () => handleEdit(), // Wrong property
+    },
+  ]
 </script>
 
 <template>
@@ -145,20 +158,16 @@ const items = [
 ## Component Name Reference
 
 | ❌ Common Mistake | ✅ Correct Name |
-|------------------|----------------|
-| UDropdown | UDropdownMenu |
-| UFormGroup | UFormField |
-| UDialog | UModal |
+| ----------------- | --------------- |
+| UDropdown         | UDropdownMenu   |
+| UFormGroup        | UFormField      |
+| UDialog           | UModal          |
 
 ## TypeScript Integration
 
 ```typescript
 // Import component-specific types
-import type {
-  DropdownMenuItem,
-  ButtonProps,
-  FormSubmitEvent,
-} from "@nuxt/ui"
+import type { DropdownMenuItem, ButtonProps, FormSubmitEvent } from "@nuxt/ui"
 
 // Use in component
 const items: DropdownMenuItem[] = []
@@ -198,6 +207,7 @@ const items: DropdownMenuItem[] = []
 - **Component Events**: Emitted events and handlers
 
 **Query examples**:
+
 - "Nuxt UI 4 UModal slots and props"
 - "Nuxt UI 4 UDropdownMenu item structure"
 - "Nuxt UI 4 UForm validation patterns"

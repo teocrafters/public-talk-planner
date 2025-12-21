@@ -17,7 +17,7 @@ Vue 3.3+ API for two-way binding (replaces manual modelValue prop/emit).
 
 ```vue
 <script setup lang="ts">
-const title = defineModel<string>()
+  const title = defineModel<string>()
 </script>
 ```
 
@@ -25,8 +25,8 @@ const title = defineModel<string>()
 
 ```vue
 <script setup lang="ts">
-const firstName = defineModel<string>("firstName")
-const age = defineModel<number>("age")
+  const firstName = defineModel<string>("firstName")
+  const age = defineModel<number>("age")
 </script>
 
 <!-- Parent usage -->
@@ -43,6 +43,7 @@ const age = defineModel<number>("age")
 - **Vue 3 Advanced**: Teleport, Suspense, custom directives
 
 **Query examples**:
+
 - "Vue 3 defineModel with modifiers"
 - "Vue 3 Composition API lifecycle hooks"
 - "Vue 3 provide/inject patterns"

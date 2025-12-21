@@ -6,10 +6,10 @@ Guidelines for date/time operations using dayjs utility with unix timestamps.
 
 ## Critical Project-Specific Rules
 
-⚠️ **ALWAYS import from `~/app/utils/date.ts`** - NEVER import dayjs directly
-⚠️ **USE unix timestamps (seconds)** - For API communication and database storage
-⚠️ **STORE as integer** - Database columns use integer type for unix timestamps
-⚠️ **USE Polish locale** - Pre-configured in app/utils/date.ts
+⚠️ **ALWAYS import from `~/app/utils/date.ts`** - NEVER import dayjs directly ⚠️ **USE unix
+timestamps (seconds)** - For API communication and database storage ⚠️ **STORE as integer** -
+Database columns use integer type for unix timestamps ⚠️ **USE Polish locale** - Pre-configured in
+app/utils/date.ts
 
 ## Import Pattern (CRITICAL)
 
@@ -22,6 +22,7 @@ import dayjs from "dayjs"
 ```
 
 **Why**: `app/utils/date.ts` pre-configures:
+
 - UTC plugin
 - Timezone plugin
 - Polish locale
@@ -30,6 +31,7 @@ import dayjs from "dayjs"
 ## Unix Timestamp Strategy
 
 **Why unix timestamps**:
+
 - Consistent across timezones (UTC-based)
 - Efficient storage (integer vs ISO string)
 - Safe from timezone conversion bugs
@@ -149,10 +151,9 @@ const endTimestamp = dayjs("2025-01-31").unix()
 const results = await db
   .select()
   .from(meetings)
-  .where(and(
-    gte(meetings.scheduledDate, startTimestamp),
-    lte(meetings.scheduledDate, endTimestamp)
-  ))
+  .where(
+    and(gte(meetings.scheduledDate, startTimestamp), lte(meetings.scheduledDate, endTimestamp))
+  )
 ```
 
 ## Utility Functions
@@ -202,6 +203,7 @@ import { dayjs } from "~/app/utils/date"
 - **Locale configuration**: Polish locale setup
 
 **Query examples**:
+
 - "dayjs format date in specific locale"
 - "dayjs unix timestamp conversion"
 - "dayjs compare dates"

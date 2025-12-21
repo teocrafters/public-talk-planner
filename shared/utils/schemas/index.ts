@@ -62,8 +62,8 @@ export {
 
 // Speaker import schemas
 export {
-	extractedSpeakerSchema,
-	bulkImportSchema,
-	type ExtractedSpeaker,
-	type BulkImport,
+  extractedSpeakerSchema,
+  bulkImportSchema,
+  type ExtractedSpeaker,
+  type BulkImport,
 } from "./speaker-import"

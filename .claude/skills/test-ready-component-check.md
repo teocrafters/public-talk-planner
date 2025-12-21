@@ -1,6 +1,7 @@
 # Test-Ready Component Check Skill
 
-Verifies that Vue components are fully prepared for E2E testing with Playwright before tests are written.
+Verifies that Vue components are fully prepared for E2E testing with Playwright before tests are
+written.
 
 ## Purpose
 
@@ -19,9 +20,9 @@ DO NOT use this skill for:
 
 ## Critical Rules
 
-⚠️ **data-testid is MANDATORY** - ALL interactive elements MUST have data-testid attributes
-⚠️ **Naming convention MUST be followed** - Use `{feature}-{element}-{type}` in kebab-case
-⚠️ **Component-first approach** - Add test IDs DURING development, NOT retroactively
+⚠️ **data-testid is MANDATORY** - ALL interactive elements MUST have data-testid attributes ⚠️
+**Naming convention MUST be followed** - Use `{feature}-{element}-{type}` in kebab-case ⚠️
+**Component-first approach** - Add test IDs DURING development, NOT retroactively
 
 ## Workflow Steps
 
@@ -54,6 +55,7 @@ DO NOT use this skill for:
 **Actions**:
 
 1. For each element identified in Step 1, verify presence of `data-testid`:
+
    ```vue
    <!-- ✅ Has data-testid -->
    <UButton data-testid="speakers-create-button" />
@@ -61,6 +63,7 @@ DO NOT use this skill for:
    <!-- ❌ Missing data-testid -->
    <UButton label="Create" />
    ```
+
 2. Identify MISSING test IDs:
    - Element type (button, input, link)
    - Element purpose (submit, cancel, email input)
@@ -82,6 +85,7 @@ DO NOT use this skill for:
 - **type**: Element type (e.g., `button`, `input`, `select`, `menu`, `dialog`, `list`)
 
 **Examples**:
+
 - `speakers-create-button` - Button to create speaker
 - `speakers-first-name-input` - Input for speaker's first name
 - `meetings-submit-button` - Submit button in meetings form
@@ -96,6 +100,7 @@ DO NOT use this skill for:
    - Ensure descriptive element name
    - Check type suffix is appropriate
 2. Identify INVALID naming:
+
    ```vue
    <!-- ❌ Wrong: camelCase -->
    <UButton data-testid="speakersCreateButton" />
@@ -109,6 +114,7 @@ DO NOT use this skill for:
    <!-- ✅ Correct -->
    <UButton data-testid="speakers-create-button" />
    ```
+
 3. Create list of test IDs that violate naming convention
 
 **Output**: List of test IDs with invalid naming (if any).
@@ -124,6 +130,7 @@ DO NOT use this skill for:
 #### Form Components
 
 Checklist:
+
 - [ ] All input fields have unique data-testid
 - [ ] Submit button has data-testid
 - [ ] Cancel/Close buttons have data-testid
@@ -134,6 +141,7 @@ Checklist:
 #### Navigation Components
 
 Checklist:
+
 - [ ] Menu items have data-testid
 - [ ] Dropdown triggers have data-testid
 - [ ] Navigation links have data-testid
@@ -143,6 +151,7 @@ Checklist:
 #### List and Table Components
 
 Checklist:
+
 - [ ] Container element has data-testid
 - [ ] Individual list items have data-testid (if testing specific items)
 - [ ] Action buttons within items have data-testid
@@ -152,6 +161,7 @@ Checklist:
 #### Dialog and Modal Components
 
 Checklist:
+
 - [ ] Dialog/Modal container has data-testid
 - [ ] Confirm/Action buttons have data-testid
 - [ ] Cancel/Close buttons have data-testid
@@ -185,17 +195,17 @@ Checklist:
 
 ```vue
 <script setup lang="ts">
-/**
- * SpeakerImportModal Component
- *
- * Test IDs:
- * - speaker-import-modal: Modal container
- * - speaker-import-file-input: File upload input
- * - speaker-import-format-select: Format selection dropdown
- * - speaker-import-submit-button: Submit button
- * - speaker-import-cancel-button: Cancel button
- * - speaker-import-error-message: Error message container
- */
+  /**
+   * SpeakerImportModal Component
+   *
+   * Test IDs:
+   * - speaker-import-modal: Modal container
+   * - speaker-import-file-input: File upload input
+   * - speaker-import-format-select: Format selection dropdown
+   * - speaker-import-submit-button: Submit button
+   * - speaker-import-cancel-button: Cancel button
+   * - speaker-import-error-message: Error message container
+   */
 </script>
 
 <template>
@@ -283,14 +293,13 @@ Component: [ComponentName.vue]
 ### Component: SpeakerImportModal.vue
 
 **Template**:
+
 ```vue
 <template>
   <UModal
     v-model:open="isOpen"
     data-testid="speaker-import-modal">
-    <UButton data-testid="speaker-import-trigger-button">
-      Import Speakers
-    </UButton>
+    <UButton data-testid="speaker-import-trigger-button"> Import Speakers </UButton>
 
     <template #body>
       <UFormField label="Upload File">
@@ -364,11 +373,10 @@ Component: [ComponentName.vue]
 **Symptom**: `<UButton>` doesn't have data-testid
 
 **Solution**:
+
 ```vue
 <!-- Add data-testid as prop -->
-<UButton
-  data-testid="speakers-create-button"
-  label="Create" />
+<UButton data-testid="speakers-create-button" label="Create" />
 ```
 
 ### Issue: Wrong naming convention
@@ -376,6 +384,7 @@ Component: [ComponentName.vue]
 **Symptom**: `data-testid="createButton"` (camelCase)
 
 **Solution**:
+
 ```vue
 <!-- Use kebab-case with feature prefix -->
 <UButton data-testid="speakers-create-button" />
@@ -386,6 +395,7 @@ Component: [ComponentName.vue]
 **Symptom**: `data-testid="button1"`
 
 **Solution**:
+
 ```vue
 <!-- Use descriptive name with context -->
 <UButton data-testid="speakers-create-button" />
@@ -396,6 +406,7 @@ Component: [ComponentName.vue]
 **Symptom**: Attribute missing when inspecting in browser
 
 **Solution**:
+
 1. Check conditional rendering (v-if might be false)
 2. Verify component is imported and rendering
 3. Check for typos in attribute name

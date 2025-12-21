@@ -88,6 +88,7 @@ shared/              # Universal code (both contexts)
 ## Nuxt 4 Auto-Import System
 
 **Directory Auto-Imports**:
+
 - `app/components/` - Vue components auto-imported in templates
 - `app/composables/` - Composables auto-imported everywhere
 - `app/utils/` - Client utilities auto-imported
@@ -96,12 +97,14 @@ shared/              # Universal code (both contexts)
 - `shared/types/*.ts` - ONLY direct files auto-imported
 
 **Critical Import Rules**:
+
 - USE `#shared` alias for imports from `shared/` subdirectories
 - DO NOT import direct files from `shared/utils/` or `shared/types/` (auto-imported)
 - DO NOT import from `app/utils/` (auto-imported)
 - NEVER use `~~/shared` alias (use `#shared` instead)
 
 **Examples**:
+
 ```typescript
 // ✅ Correct: Direct files auto-imported
 const event = AUDIT_EVENTS.USER_LOGIN // from shared/utils/audit-events.ts
@@ -120,11 +123,13 @@ import { AUDIT_EVENTS } from "#shared/utils/audit-events"
 The `shared/` directory contains universal code working in both server and client contexts.
 
 **Requirements**:
+
 - NEVER import Vue-specific code (ref, reactive, components)
 - NEVER import Nitro-specific code (defineEventHandler, H3 utilities)
 - USE only pure TypeScript/JavaScript
 
 **Import Patterns**:
+
 - Direct files (`shared/utils/audit-events.ts`) → Auto-imported
 - Subdirectories (`shared/utils/schemas/`) → Require `#shared` import
 
@@ -137,13 +142,14 @@ export const SPEAKER_SOURCE_TYPES = {
   LOCAL_PUBLISHER: "local_publisher",
 } as const
 
-export type SpeakerSourceType = typeof SPEAKER_SOURCE_TYPES[keyof typeof SPEAKER_SOURCE_TYPES]
+export type SpeakerSourceType = (typeof SPEAKER_SOURCE_TYPES)[keyof typeof SPEAKER_SOURCE_TYPES]
 
 // Usage (auto-imported)
 const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 ```
 
 **Rules**:
+
 - DECLARE constants with ALL_CAPS using `as const`
 - PLACE shared constants in `shared/constants/`
 - IMPORT using `#shared/constants/*`
@@ -152,10 +158,9 @@ const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 
 ### Database Rules
 
-⛔ **NEVER execute .sql files manually** - All changes through schema modifications
-⛔ **NEVER run `pnpm db:generate` automatically** - ALWAYS prompt user to execute
-⛔ **NEVER edit migration files manually** - Generated files stay unchanged
-⛔ **ALWAYS commit schema + migration together**
+⛔ **NEVER execute .sql files manually** - All changes through schema modifications ⛔ **NEVER run
+`pnpm db:generate` automatically** - ALWAYS prompt user to execute ⛔ **NEVER edit migration files
+manually** - Generated files stay unchanged ⛔ **ALWAYS commit schema + migration together**
 
 **USE SKILL**: `database-migration-workflow` for all schema changes
 
@@ -163,10 +168,9 @@ const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 
 ### Testing Rules
 
-⛔ **ALWAYS add data-testid to ALL interactive elements**
-⛔ **USE data-testid as PRIMARY selector** - NEVER use CSS classes or text
-⛔ **FOLLOW naming**: `{feature}-{element}-{type}` in kebab-case
-⛔ **ADD test IDs DURING development** - Not retroactively
+⛔ **ALWAYS add data-testid to ALL interactive elements** ⛔ **USE data-testid as PRIMARY
+selector** - NEVER use CSS classes or text ⛔ **FOLLOW naming**: `{feature}-{element}-{type}` in
+kebab-case ⛔ **ADD test IDs DURING development** - Not retroactively
 
 **USE SKILL**: `test-ready-component-check` before marking component complete
 
@@ -174,15 +178,13 @@ const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 
 ### Import Rules
 
-⛔ **USE #shared for subdirectories** - Never ~~/shared
-⛔ **DO NOT import shared/utils/ direct files** - They're auto-imported
-⛔ **DO NOT import app/utils/** - Auto-imported by Nuxt
+⛔ **USE #shared for subdirectories** - Never ~~/shared ⛔ **DO NOT import shared/utils/ direct
+files** - They're auto-imported ⛔ **DO NOT import app/utils/** - Auto-imported by Nuxt
 
 ### SSR Rules
 
-⛔ **ALWAYS use useFetch() or useAsyncData()** - NEVER $fetch() in components
-⛔ **ALWAYS await the composable** - Required for SSR hydration
-⛔ **ALWAYS handle loading and error states**
+⛔ **ALWAYS use useFetch() or useAsyncData()** - NEVER $fetch() in components ⛔ **ALWAYS await the
+composable** - Required for SSR hydration ⛔ **ALWAYS handle loading and error states**
 
 **USE SKILL**: `ssr-data-fetching-implementation` when adding data fetching
 
@@ -190,15 +192,13 @@ const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 
 ### Type Safety Rules
 
-⛔ **NEVER use @ts-expect-error or @ts-ignore**
-⛔ **AVOID any type** - Find or create proper types
+⛔ **NEVER use @ts-expect-error or @ts-ignore** ⛔ **AVOID any type** - Find or create proper types
 ⛔ **ALWAYS declare function parameter and return types**
 
 ### i18n Rules
 
-⛔ **ALWAYS use $t() for UI text** - NEVER hardcode Polish text
-⛔ **VERIFY keys exist in pl.json AND en.json**
-⛔ **MAINTAIN Polish-first strategy**
+⛔ **ALWAYS use $t() for UI text** - NEVER hardcode Polish text ⛔ **VERIFY keys exist in pl.json
+AND en.json** ⛔ **MAINTAIN Polish-first strategy**
 
 **USE SKILL**: `i18n-key-validation` when adding translation keys
 
@@ -218,6 +218,7 @@ const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 **USE SKILL**: `pre-commit-quality-check` before every commit
 
 **Manual steps**:
+
 1. Run `pnpm ci` (lint + typecheck + format)
 2. If schema changed: Ask user to run `pnpm db:generate`
 3. Test critical functionality manually
@@ -228,6 +229,7 @@ const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 **USE SKILL**: `git-pre-flight-check` before pushing
 
 **Safety checks**:
+
 - Verify not pushing to main/master
 - Use `--force-with-lease` for force pushes
 - Ensure quality checks passed
@@ -273,12 +275,14 @@ Example: `// AGENT-NOTE: Performance-critical path; avoid extra allocations`
 Workflow automation skills for common tasks:
 
 ### Quality & Validation
+
 - **pre-commit-quality-check** - Run lint, typecheck, format before commit
 - **git-pre-flight-check** - Verify safe git operations before push
 - **i18n-key-validation** - Validate translation keys in pl.json and en.json
 - **test-ready-component-check** - Verify component ready for E2E testing
 
 ### Development Workflows
+
 - **database-migration-workflow** - Guide through schema modifications
 - **ssr-data-fetching-implementation** - Implement SSR-compatible data fetching
 - **zod-validation-schema-creation** - Create Zod schemas with i18n
@@ -288,6 +292,7 @@ Workflow automation skills for common tasks:
 ## Specialized Documentation
 
 ### Frontend Development
+
 - `.agents/vue-conventions.md` - Vue 3 patterns and best practices
 - `.agents/nuxt-ui-4-integration.md` - Nuxt UI 4 component integration
 - `.agents/tailwind-patterns.md` - Tailwind CSS styling guidelines
@@ -296,13 +301,16 @@ Workflow automation skills for common tasks:
 - `.agents/date-time-patterns.md` - Date/time handling with dayjs
 
 ### Backend Development
+
 - `.agents/database-patterns.md` - Drizzle ORM and D1 database
 - `.agents/security-guidelines.md` - Security best practices
 
 ### Quality & Testing
+
 - `.agents/test-ready-component-checklist.md` - Component testing checklist
 
 ### Official Documentation (via Context7)
+
 - Nuxt 4: Composables, SSR, auto-imports
 - Vue 3: Composition API, defineModel
 - Drizzle ORM: Queries, schema, migrations

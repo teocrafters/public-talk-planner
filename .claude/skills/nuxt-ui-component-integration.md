@@ -19,10 +19,10 @@ DO NOT use this skill for:
 
 ## Critical Rules
 
-⚠️ **MCP-first verification** - ALWAYS verify component API via MCP before implementation
-⚠️ **Correct component names** - UDropdownMenu (not UDropdown), UFormField (not UFormGroup)
-⚠️ **Proper event handlers** - onSelect for dropdown items (NOT click or onClick)
-⚠️ **Slot structure matters** - UModal has specific slot hierarchy that must be followed
+⚠️ **MCP-first verification** - ALWAYS verify component API via MCP before implementation ⚠️
+**Correct component names** - UDropdownMenu (not UDropdown), UFormField (not UFormGroup) ⚠️ **Proper
+event handlers** - onSelect for dropdown items (NOT click or onClick) ⚠️ **Slot structure
+matters** - UModal has specific slot hierarchy that must be followed
 
 ## Workflow Steps
 
@@ -56,9 +56,11 @@ DO NOT use this skill for:
 **Actions**:
 
 1. Execute MCP call:
+
    ```
    mcp__nuxt-ui__get_component(componentName: "ComponentName")
    ```
+
    Example: `mcp__nuxt-ui__get_component(componentName: "UModal")`
 
 2. Review returned documentation:
@@ -129,13 +131,16 @@ TypeScript:
 
     <!-- Footer with close function -->
     <template #footer="{ close }">
-      <UButton label="Close" @click="close" />
+      <UButton
+        label="Close"
+        @click="close" />
     </template>
   </UModal>
 </template>
 ```
 
 **Anti-Pattern**:
+
 ```vue
 <!-- ❌ WRONG: Content in default slot -->
 <UModal v-model:open="isOpen">
@@ -152,7 +157,9 @@ TypeScript:
 
     <template #body>
       <!-- UForm with ref in #body slot -->
-      <UForm ref="form" @submit="handleSubmit">
+      <UForm
+        ref="form"
+        @submit="handleSubmit">
         <UFormField name="firstName">
           <UInput v-model="state.firstName" />
         </UFormField>
@@ -161,20 +168,24 @@ TypeScript:
 
     <template #footer="{ close }">
       <!-- Trigger form submit from footer -->
-      <UButton label="Cancel" @click="close" />
-      <UButton label="Submit" @click="form?.submit()" />
+      <UButton
+        label="Cancel"
+        @click="close" />
+      <UButton
+        label="Submit"
+        @click="form?.submit()" />
     </template>
   </UModal>
 </template>
 
 <script setup lang="ts">
-const form = useTemplateRef('form')
-const isOpen = ref(false)
+  const form = useTemplateRef("form")
+  const isOpen = ref(false)
 
-async function handleSubmit(event: FormSubmitEvent) {
-  // Handle form submission
-  isOpen.value = false
-}
+  async function handleSubmit(event: FormSubmitEvent) {
+    // Handle form submission
+    isOpen.value = false
+  }
 </script>
 ```
 
@@ -182,24 +193,24 @@ async function handleSubmit(event: FormSubmitEvent) {
 
 ```vue
 <script setup lang="ts">
-import type { DropdownMenuItem } from "@nuxt/ui"
+  import type { DropdownMenuItem } from "@nuxt/ui"
 
-// ✅ CORRECT: Use onSelect
-const items: DropdownMenuItem[] = [
-  {
-    label: "Edit",
-    icon: "i-lucide-pencil",
-    onSelect: () => handleEdit(),
-  },
-]
+  // ✅ CORRECT: Use onSelect
+  const items: DropdownMenuItem[] = [
+    {
+      label: "Edit",
+      icon: "i-lucide-pencil",
+      onSelect: () => handleEdit(),
+    },
+  ]
 
-// ❌ WRONG: Using click or onClick
-const items = [
-  {
-    label: "Edit",
-    click: () => handleEdit(), // ❌ Wrong
-  },
-]
+  // ❌ WRONG: Using click or onClick
+  const items = [
+    {
+      label: "Edit",
+      click: () => handleEdit(), // ❌ Wrong
+    },
+  ]
 </script>
 ```
 
@@ -247,16 +258,16 @@ const items = [
 
 ```vue
 <script setup lang="ts">
-// Type imports
-import type { ComponentTypes } from "@nuxt/ui"
+  // Type imports
+  import type { ComponentTypes } from "@nuxt/ui"
 
-// Props/state
-const isOpen = ref(false)
+  // Props/state
+  const isOpen = ref(false)
 
-// Event handlers
-function handleAction() {
-  // Implementation
-}
+  // Event handlers
+  function handleAction() {
+    // Implementation
+  }
 </script>
 
 <template>
@@ -316,29 +327,24 @@ General:
 ### Component Name Corrections
 
 | ❌ Common Mistake | ✅ Correct Name |
-|------------------|----------------|
-| UDropdown | UDropdownMenu |
-| UFormGroup | UFormField |
-| UDialog | UModal |
+| ----------------- | --------------- |
+| UDropdown         | UDropdownMenu   |
+| UFormGroup        | UFormField      |
+| UDialog           | UModal          |
 
 ### Event Handler Reference
 
-| Component | Event Property | Usage |
-|-----------|---------------|-------|
-| UDropdownMenu items | `onSelect` | `{ onSelect: () => handleClick() }` |
-| UButton | `@click` | `<UButton @click="handleClick" />` |
-| UModal | `@update:open` | `<UModal v-model:open="isOpen" />` |
-| UForm | `@submit` | `<UForm @submit="handleSubmit" />` |
+| Component           | Event Property | Usage                               |
+| ------------------- | -------------- | ----------------------------------- |
+| UDropdownMenu items | `onSelect`     | `{ onSelect: () => handleClick() }` |
+| UButton             | `@click`       | `<UButton @click="handleClick" />`  |
+| UModal              | `@update:open` | `<UModal v-model:open="isOpen" />`  |
+| UForm               | `@submit`      | `<UForm @submit="handleSubmit" />`  |
 
 ### Common TypeScript Imports
 
 ```typescript
-import type {
-  DropdownMenuItem,
-  ButtonProps,
-  FormSubmitEvent,
-  InputProps,
-} from "@nuxt/ui"
+import type { DropdownMenuItem, ButtonProps, FormSubmitEvent, InputProps } from "@nuxt/ui"
 ```
 
 ---
@@ -349,29 +355,29 @@ import type {
 
 ```vue
 <script setup lang="ts">
-import type { DropdownMenuItem } from "@nuxt/ui"
+  import type { DropdownMenuItem } from "@nuxt/ui"
 
-const items: DropdownMenuItem[] = [
-  {
-    label: "Edit",
-    icon: "i-lucide-pencil",
-    onSelect: () => handleEdit(),
-  },
-  {
-    label: "Delete",
-    icon: "i-lucide-trash",
-    color: "error",
-    onSelect: () => handleDelete(),
-  },
-]
+  const items: DropdownMenuItem[] = [
+    {
+      label: "Edit",
+      icon: "i-lucide-pencil",
+      onSelect: () => handleEdit(),
+    },
+    {
+      label: "Delete",
+      icon: "i-lucide-trash",
+      color: "error",
+      onSelect: () => handleDelete(),
+    },
+  ]
 
-function handleEdit() {
-  console.log("Edit clicked")
-}
+  function handleEdit() {
+    console.log("Edit clicked")
+  }
 
-function handleDelete() {
-  console.log("Delete clicked")
-}
+  function handleDelete() {
+    console.log("Delete clicked")
+  }
 </script>
 
 <template>
@@ -389,26 +395,26 @@ function handleDelete() {
 
 ```vue
 <script setup lang="ts">
-import type { FormSubmitEvent } from "@nuxt/ui"
+  import type { FormSubmitEvent } from "@nuxt/ui"
 
-const isOpen = ref(false)
-const form = useTemplateRef('form')
-const state = reactive({
-  firstName: "",
-  lastName: "",
-})
+  const isOpen = ref(false)
+  const form = useTemplateRef("form")
+  const state = reactive({
+    firstName: "",
+    lastName: "",
+  })
 
-async function handleSubmit(event: FormSubmitEvent<typeof state>) {
-  try {
-    await $fetch("/api/speakers", {
-      method: "POST",
-      body: event.data,
-    })
-    isOpen.value = false
-  } catch (err) {
-    console.error(err)
+  async function handleSubmit(event: FormSubmitEvent<typeof state>) {
+    try {
+      await $fetch("/api/speakers", {
+        method: "POST",
+        body: event.data,
+      })
+      isOpen.value = false
+    } catch (err) {
+      console.error(err)
+    }
   }
-}
 </script>
 
 <template>
@@ -462,21 +468,25 @@ async function handleSubmit(event: FormSubmitEvent<typeof state>) {
 ### Available MCP Tools
 
 **List all components**:
+
 ```
 mcp__nuxt-ui__list_components()
 ```
 
 **Get component documentation**:
+
 ```
 mcp__nuxt-ui__get_component(componentName: "UButton")
 ```
 
 **Get component metadata** (detailed props/slots/events):
+
 ```
 mcp__nuxt-ui__get_component_metadata(componentName: "UModal")
 ```
 
 **Search components**:
+
 ```
 mcp__nuxt-ui__search_components_by_category(category: "Form")
 ```
