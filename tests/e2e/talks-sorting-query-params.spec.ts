@@ -1,7 +1,7 @@
 import { test, expect } from "../fixtures"
 
 test.describe("Talks - Query Parameter Persistence", () => {
-  test.beforeEach(async ({ page, authenticateAs }) => {
+  test.beforeEach(async ({ authenticateAs }) => {
     await authenticateAs.publicTalkCoordinator()
   })
 
@@ -30,8 +30,8 @@ test.describe("Talks - Query Parameter Persistence", () => {
 
     // Close any dropdown that might have opened
     try {
-      await page.keyboard.press('Escape')
-    } catch (e) {
+      await page.keyboard.press("Escape")
+    } catch {
       // If escape fails, just continue
     }
 
@@ -72,9 +72,6 @@ test.describe("Talks - Query Parameter Persistence", () => {
     await page.goto("/talks")
     await expect(page.getByTestId("talk-card").first()).toBeVisible()
 
-    const sortSelect = page.getByTestId("sort-select")
-    const initialUrl = page.url()
-
     // Wait for any pending navigations to complete
     await page.waitForLoadState("networkidle")
 
@@ -109,7 +106,7 @@ test.describe("Talks - Query Parameter Persistence", () => {
         // If forward didn't work, we're still on talks page, which is fine
         console.log("Forward navigation didn't have history - staying on talks page")
       }
-    } catch (error) {
+    } catch {
       // If forward navigation fails, just navigate back to talks
       console.log("Forward navigation failed, navigating back to talks")
       await page.goto("/talks")
@@ -166,9 +163,9 @@ test.describe("Talks - Query Parameter Persistence", () => {
     // Try to find any option to click
     try {
       await page.getByText("Tytuł").first().click()
-    } catch (e) {
+    } catch {
       // If we can't find specific options, just close the dropdown
-      await page.keyboard.press('Escape')
+      await page.keyboard.press("Escape")
     }
 
     // Wait for any potential updates

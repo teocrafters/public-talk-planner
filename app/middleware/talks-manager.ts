@@ -3,7 +3,12 @@ export default defineNuxtRouteMiddleware(async () => {
 
   await fetchPermissions()
 
-  if (!can("talks", "create").value || !can("talks", "update").value || !can("talks", "archive").value || !can("talks", "flag").value) {
+  if (
+    !can("talks", "create").value ||
+    !can("talks", "update").value ||
+    !can("talks", "archive").value ||
+    !can("talks", "flag").value
+  ) {
     return navigateTo("/")
   }
 })

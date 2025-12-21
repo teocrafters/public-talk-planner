@@ -356,10 +356,12 @@ console.log("✅ All i18n keys are synchronized")
 
 ### Reference Files
 
-- Core i18n rules: @AGENTS.md (Internationalization section)
-- Component integration: @.agents/vue-conventions.md
-- Date formatting with i18n: @.agents/date-time-patterns.md
-- Validation schemas: @AGENTS.md (Zod Schema Patterns section)
+- Core i18n rules: `app/AGENTS.md` (Internationalization section)
+- Component integration: `.agents/vue-conventions.md`
+- Date formatting with i18n: `.agents/date-time-patterns.md`
+- Validation schemas: `server/AGENTS.md` (Zod Schema Patterns section)
+- i18n validation skill: `i18n-key-validation.md`
+- Zod schema skill: `zod-validation-schema-creation.md`
 
 ## Date and Number Formatting Rules
 
@@ -425,3 +427,25 @@ console.log("✅ All i18n keys are synchronized")
 - DOCUMENT parameter requirements for complex translation strings
 - TEST translations in all supported locales during development
 - VERIFY proper RTL language support when implementing new locales
+
+## Context7 References
+
+**For Vue i18n documentation, query via Context7**:
+
+- **@nuxtjs/i18n**: Nuxt i18n module configuration and usage
+- **Vue I18n**: Translation functions, pluralization, formatting
+- **Locale configuration**: Setup and fallback strategies
+- **SEO integration**: i18n meta tags and hreflang
+
+**Query examples**:
+
+- "Nuxt i18n module configuration"
+- "Vue i18n pluralization rules"
+- "i18n SEO meta tags setup"
+
+## References
+
+- Frontend guidelines: `app/AGENTS.md`
+- i18n validation skill: `i18n-key-validation.md`
+- Polish locale: `i18n/locales/pl.json`
+- English locale: `i18n/locales/en.json`

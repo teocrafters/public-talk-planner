@@ -6,6 +6,7 @@
     "password": "Hasło",
     "submit": "Zatwierdź",
     "cancel": "Anuluj",
+    "apply": "Zastosuj",
     "comingSoon": "Wkrótce dostępne",
     "sending": "Wysyłanie...",
     "or": "lub",
@@ -192,7 +193,12 @@
     "serviceTalkTitleRequired": "Tytuł przemówienia służbowego jest wymagany",
     "userNotFound": "Nie znaleziono użytkownika",
     "publisherIdRequired": "Identyfikator głosiciela jest wymagany",
-    "publisherUpdateFailed": "Aktualizacja głosiciela nie powiodła się"
+    "publisherUpdateFailed": "Aktualizacja głosiciela nie powiodła się",
+    "noFileUploaded": "Nie przesłano pliku",
+    "invalidFile": "Nieprawidłowy plik",
+    "invalidJobId": "Nieprawidłowy identyfikator zadania",
+    "jobNotFound": "Zadanie nie znalezione",
+    "invalidRequestBody": "Nieprawidłowe dane żądania"
   },
   "speakers": {
     "title": "Mówcy",
@@ -214,9 +220,49 @@
     "talks": "Wykłady",
     "actions": {
       "add": "Dodaj mówcę",
+      "import": "Importuj mówców",
       "edit": "Edytuj mówcę",
       "archive": "Archiwizuj",
       "restore": "Przywróć"
+    },
+    "import": {
+      "title": "Importuj Listę Mówców",
+      "description": "Prześlij plik PDF lub zdjęcie zawierające informacje o mówcach",
+      "uploadLabel": "Upuść listę mówców tutaj",
+      "uploadDescription": "PDF, JPG lub PNG (maks. 20MB)",
+      "processing": "Przetwarzanie pliku...",
+      "review": "Sprawdź wyodrębnione dane",
+      "selectAll": "Zaznacz wszystkich",
+      "deselectAll": "Odznacz wszystkich",
+      "importSelected": "Importuj zaznaczonych ({count})",
+      "importAll": "Importuj wszystkich ({count})",
+      "noValidSpeakers": "Brak poprawnych mówców do zaimportowania",
+      "selectedCount": "Wybrano {count} z {total}",
+      "extracted": "Wyodrębniono",
+      "selectedTalks": "Wybrane",
+      "status": {
+        "new": "Nowy",
+        "update": "Aktualizacja",
+        "no-change": "Bez zmian",
+        "restore": "Przywrócenie"
+      },
+      "existingTalks": "Dotychczasowe",
+      "newTalks": "Nowe",
+      "congregationTransfer": "Przeniesienie zboru",
+      "nothingToImport": "Wszyscy wykryci prelegenci już istnieją z identycznymi danymi. Nic do zaimportowania.",
+      "treatAsNew": "Traktuj jako nowego",
+      "changeMatch": "Zmień dopasowanie",
+      "selectSpeaker": "Wybierz prelegenta",
+      "searchSpeaker": "Szukaj prelegenta",
+      "success": "Pomyślnie zaimportowano prelegentów",
+      "created": "utworzonych",
+      "updated": "zaktualizowanych",
+      "restored": "przywróconych",
+      "archived": "zarchiwizowanych",
+      "missingTitle": "Prelegenci do archiwizacji",
+      "missingDescription": "Ci prelegenci są w bazie z tego zboru, ale nie ma ich na nowej liście. Zaznacz, którzy powinni zostać zarchiwizowani.",
+      "assignedTalks": "Przypisane wykłady",
+      "scheduledTalks": "{count} zaplanowane wykłady"
     },
     "modal": {
       "addTitle": "Dodaj mówcę",
@@ -235,7 +281,13 @@
       "speakerUpdated": "Mówca został zaktualizowany",
       "speakerArchived": "Mówca został zarchiwizowany",
       "speakerRestored": "Mówca został przywrócony",
-      "archiveError": "Wystąpił błąd podczas archiwizacji"
+      "archiveError": "Wystąpił błąd podczas archiwizacji",
+      "importSuccess": "Pomyślnie zaimportowano {count} mówców",
+      "importError": "Nie udało się przetworzyć pliku",
+      "extractionFailed": "Nie można wyodrębnić danych mówców z pliku",
+      "networkError": "Błąd połączenia. Spróbuj ponownie.",
+      "timeout": "Przetwarzanie trwało zbyt długo. Spróbuj ponownie.",
+      "retry": "Spróbuj ponownie"
     }
   },
   "publishers": {
@@ -321,7 +373,10 @@
     "speakerSourceTypeInvalid": "Nieprawidłowy typ źródła mówcy. Dopuszczalne: 'visiting_speaker' lub 'local_publisher'",
     "speakerOrPublisherRequired": "Musisz wybrać mówcę przyjezdnego lub lokalnego głosiciela",
     "customTalkTitleTooLong": "Tytuł własnego wykładu nie może być dłuższy niż 200 znaków",
-    "talkIdOrCustomTitleRequired": "Musisz wybrać wykład lub wprowadzić tytuł własnego wykładu"
+    "talkIdOrCustomTitleRequired": "Musisz wybrać wykład lub wprowadzić tytuł własnego wykładu",
+    "fileTooLarge": "Plik jest za duży (maks. 20MB)",
+    "invalidFileType": "Nieprawidłowy typ pliku (dozwolone: PDF, JPG, PNG)",
+    "atLeastOneSpeaker": "Wybierz przynajmniej jednego mówcę"
   },
   "meetings": {
     "title": "Zebrania w weekend",

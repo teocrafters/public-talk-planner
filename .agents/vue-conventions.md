@@ -477,6 +477,21 @@ Refetch data when dependencies change:
 - NEVER ignore TypeScript errors with any types
 - NEVER create custom components when Nuxt UI equivalents exist
 
+## Context7 References
+
+**For Vue 3 and Nuxt documentation, query via Context7**:
+
+- **Vue 3 Composition API**: defineProps, defineEmits, defineModel
+- **Vue 3 Reactivity**: ref, reactive, computed, watch
+- **Nuxt 4 Composables**: useFetch, useAsyncData, useRoute
+- **Nuxt 4 Auto-imports**: Component and utility auto-discovery
+
+**Query examples**:
+
+- "Vue 3 Composition API best practices"
+- "Nuxt 4 useFetch vs useAsyncData"
+- "Vue 3 defineModel with modifiers"
+
 ## File References
 
 - Vue 3 Composition API: `@vue/composition-api`
@@ -485,3 +500,5 @@ Refetch data when dependencies change:
 - Component examples: `app/components/`
 - Composables: `app/composables/`
 - Type definitions: `types/` (if exists)
+- Frontend guidelines: `app/AGENTS.md`
+- Vue components quick ref: `.agents/official-vue-components.md`

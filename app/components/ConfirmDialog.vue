@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  // AGENT-NOTE: ALL interactive elements MUST have data-testid attributes for E2E testing (buttons, inputs, dialogs, links)
+
   interface Props {
     title: string
     message: string

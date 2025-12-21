@@ -59,3 +59,11 @@ export {
   type SpeakerSuggestion,
   type TalkSuggestion,
 } from "./auto-suggestion"
+
+// Speaker import schemas
+export {
+  extractedSpeakerSchema,
+  bulkImportSchema,
+  type ExtractedSpeaker,
+  type BulkImport,
+} from "./speaker-import"

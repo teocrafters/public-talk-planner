@@ -47,6 +47,7 @@
   const sortBy = ref((route.query.sortBy as string) || "lastTalk")
   const sortOrder = ref<"asc" | "desc">((route.query.sortOrder as "asc" | "desc") || "asc")
   const editModalOpen = ref(false)
+  const importModalOpen = ref(false)
   const selectedSpeaker = ref<Speaker | null>(null)
   const editMode = ref<"add" | "edit">("add")
 
@@ -184,6 +185,15 @@
     editModalOpen.value = false
   }
 
+  const handleImportSpeakers = () => {
+    importModalOpen.value = true
+  }
+
+  const handleSpeakersSaved = async () => {
+    await refresh()
+    importModalOpen.value = false
+  }
+
   await fetchPermissions()
 
   // SEO meta
@@ -208,15 +218,28 @@
           }}
         </p>
       </div>
-      <UButton
+      <div
         v-if="canManageSpeakers"
-        data-testid="add-speaker-button"
-        icon="i-heroicons-plus"
-        size="md"
-        class="w-full sm:w-auto"
-        @click="handleAddSpeaker">
-        {{ t("speakers.actions.add") }}
-      </UButton>
+        class="flex gap-2 w-full sm:w-auto">
+        <UButton
+          data-testid="speaker-import-button"
+          icon="i-lucide-upload"
+          size="md"
+          variant="outline"
+          class="flex-1 sm:flex-none"
+          @click="handleImportSpeakers">
+          {{ t("speakers.actions.import") }}
+        </UButton>
+
+        <UButton
+          data-testid="add-speaker-button"
+          icon="i-heroicons-plus"
+          size="md"
+          class="flex-1 sm:flex-none"
+          @click="handleAddSpeaker">
+          {{ t("speakers.actions.add") }}
+        </UButton>
+      </div>
     </div>
 
     <div class="flex flex-col sm:flex-row gap-4">
@@ -289,7 +312,9 @@
 
                 <!-- Phone number -->
                 <div class="flex items-center gap-2">
-                  <UIcon name="i-heroicons-phone" class="size-4 text-muted" />
+                  <UIcon
+                    name="i-heroicons-phone"
+                    class="size-4 text-muted" />
                   <p class="text-sm text-default">{{ formatPhoneNumber(speaker.phone) }}</p>
                 </div>
               </div>
@@ -360,5 +385,9 @@
       :speaker="selectedSpeaker"
       :mode="editMode"
       @saved="handleSpeakerSaved" />
+
+    <SpeakerImportModal
+      v-model:open="importModalOpen"
+      @saved="handleSpeakersSaved" />
   </div>
 </template>

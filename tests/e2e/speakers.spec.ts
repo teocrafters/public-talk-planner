@@ -656,10 +656,6 @@ test.describe("Speakers - Default Sorting Verification", () => {
     // Wait for dropdown to open - the dropdown content should appear
     await page.waitForTimeout(500)
 
-    // Try to find dropdown options - let's see what's actually available
-    // The dropdown might use different selectors, so let's be more flexible
-    const dropdownContent = page.locator('[data-state="open"]').first()
-
     // Look for any elements that might contain the option text
     const possibleSelectors = [
       '[role="option"]',
@@ -683,7 +679,7 @@ test.describe("Speakers - Default Sorting Verification", () => {
             }
           }
         }
-      } catch (e) {
+      } catch {
         // Continue with next selector
       }
     }
@@ -726,7 +722,7 @@ test.describe("Speakers - Query Parameter Persistence", () => {
     // Close dropdown
     try {
       await page.keyboard.press("Escape")
-    } catch (e) {
+    } catch {
       // Continue if escape fails
     }
 
@@ -758,7 +754,7 @@ test.describe("Speakers - Query Parameter Persistence", () => {
     // Close dropdown
     try {
       await page.keyboard.press("Escape")
-    } catch (e) {
+    } catch {
       // Continue if escape fails
     }
 
@@ -787,7 +783,7 @@ test.describe("Speakers - Query Parameter Persistence", () => {
     // Give a moment for search to process
     try {
       await page.waitForTimeout(300)
-    } catch (e) {
+    } catch {
       // Continue if page times out
     }
 
@@ -806,7 +802,7 @@ test.describe("Speakers - Query Parameter Persistence", () => {
     // Give a moment for search to clear
     try {
       await page.waitForTimeout(300)
-    } catch (e) {
+    } catch {
       // Continue if page times out
     }
 

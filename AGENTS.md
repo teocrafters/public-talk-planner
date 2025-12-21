@@ -1,7 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this
-repository.
+This file provides guidance to Claude Code when working with code in this repository.
 
 ## Package Manager
 
@@ -21,16 +20,15 @@ pnpm install
 pnpm dev          # Start dev server on localhost:3000
 pnpm build        # Build for production
 pnpm preview      # Preview production build locally
-pnpm generate     # Generate static files
 ```
 
 ### Code Quality
 
 ```bash
-pnpm lint         # Run ESLint
 pnpm lint:fix     # Run ESLint with auto-fix
-pnpm format       # Format code with Prettier
 pnpm typecheck    # Run TypeScript type checking
+pnpm format       # Format code with Prettier
+pnpm ci           # Run all checks (lint + typecheck + format)
 ```
 
 ### Database
@@ -39,345 +37,103 @@ pnpm typecheck    # Run TypeScript type checking
 pnpm db:generate  # Generate Drizzle migrations (USER must run after schema changes)
 ```
 
-**Important:** After modifying `server/database/schema.ts`, always ask the user to run
-`pnpm db:generate`. Never execute this command automatically. See "Database Patterns with Drizzle"
-section for complete workflow.
-
 ## Architecture
 
 Nuxt 4 Full-Stack Application for Cloudflare Deployment:
 
-- Serverless-first approach using Cloudflare Workers
-- TypeScript-first development for type safety
-- Component-driven development with reusable UI elements
-- Responsive design with mobile-first approach
-- SEO-optimized with server-side rendering
-- Frontend: Nuxt 4 + Vue 3 + TypeScript + `@nuxt/ui` (Tailwind CSS)
+- Frontend: Nuxt 4 + Vue 3 + TypeScript + @nuxt/ui (Tailwind CSS)
 - Backend: Nitro server + Drizzle ORM + D1 Database
-- Authentication: Better Auth for secure user management
-- Internationalization: `@nuxtjs/i18n` with Polish primary language
+- Authentication: Better Auth
+- Internationalization: @nuxtjs/i18n with Polish primary language
+- Testing: Playwright for E2E
 - Deployment: Cloudflare Workers + NuxtHub + D1
-- Build tool: Vite (via Nuxt)
-- Package manager: `pnpm`
-- Developer tools: ESLint + Prettier + TypeScript
-- Testing: Playwright for E2E testing
 
-## Code Style
+## Code Style Essentials
 
 - TypeScript: Strict mode with `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`
 - Imports: Always use `consistent-type-imports`
 - Use tabs for indentation (2 spaces for YAML/JSON/MD)
 - Use double quotes, no semicolons, trailing commas
-- Do not use `JSDoc` docstrings for documenting `TypeScript` definitions
 - Always keep 100 character line limit
-- Use descriptive variable/function names
-- Prefer functional programming patterns
 - Never use `@ts-expect-error` or `@ts-ignore` to suppress type errors
-- Always declare types function parameters and return values
-- Avoid `any` - find for necessary types instead or create them if missing
-- Handle potential undefined values explicitly
-- Avoid enums - use const objects instead
-- Use discriminated unions to model data with different shapes
-- Prefer types over interfaces except for public APIs
-- Avoid magic numbers: Use constants with descriptive names for numerical or string literals
-- Avoid primitive obsession: Encapsulate data in composite types
-- Prefer immutability: Use `readonly` for immutable properties, `as const` for literals
-- Validate at boundaries: Use classes with internal validation instead of function-level validation
-- Use Result types instead of throwing errors for library code
-- Keep functions short (less than 20 lines) and single-purpose
-- Use early returns to avoid deeply nested blocks
-- Use arrow functions for simple cases (less than 3 instructions)
-- Use default parameters instead of `null`/`undefined` checks
-- Use RO-RO pattern (Receive Object, Return Object) for multiple parameters
-- Separate logical sections with blank lines, not with comments
-- Use comments only when it describes an architectural decision. Do not use comments to explain the
-  code
-- Use named exports over default exports when possible (remember about frontend frameworks
-  exceptions)
+- Avoid `any` - find or create proper types
 
 ### Naming Conventions
 
-- `camelCase`: Variables and function names (`myVariable`, `myFunction()`)
-- `PascalCase`: Classes, types, and interfaces (`MyClass`, `MyInterface`)
-- `ALL_CAPS`: Constants and enum values (`MAX_COUNT`, `Color.RED`) - see Constants Pattern section
+- `camelCase`: Variables and functions
+- `PascalCase`: Components, classes, types
+- `ALL_CAPS`: Constants with `as const`
 - `kebab-case`: File and directory names
-- Generic types: Prefix with `T` (`TKey`, `TValue`, `TData`, `TError`)
-- In `camelCase` names, use `URL` (not `Url`), `API` (not `Api`), `ID` (not `Id`)
+- Generic types: Prefix with `T` (TKey, TValue, TData)
 
-## Development Rules & Best Practices
-
-### Project Structure Rules
+## Project Structure
 
 ```
-app/                 # Frontend application code
-├── app.vue         # Root application component
-├── layouts/        # Shared layout components
-├── pages/          # File-based routing (auto-generated routes)
-├── components/     # Reusable Vue components
-├── composables/    # Vue composables and business logic
-├── utils/          # Client-side utilities (auto-imported)
-└── assets/         # Static assets and global styles
+app/                 # Frontend (see app/AGENTS.md)
+├── components/      # Vue components (auto-imported)
+├── composables/     # Vue composables (auto-imported)
+├── pages/           # File-based routing
+└── utils/           # Client utilities (auto-imported)
 
-server/             # Backend server code
-├── api/            # API route handlers
-├── database/       # Database schema and migrations
-├── tasks/          # Background task definitions
-└── utils/          # Server utilities and helpers
+server/              # Backend (see server/AGENTS.md)
+├── api/             # API route handlers
+├── database/        # Schema and migrations
+└── utils/           # Server utilities (auto-imported)
 
-shared/             # Universal code (both server and client)
-├── types/          # Shared TypeScript type definitions
-└── utils/          # Pure functions and constants
+shared/              # Universal code (both contexts)
+├── types/           # TypeScript types (auto-imported)
+└── utils/           # Pure functions (auto-imported)
 ```
 
-### Nuxt 4 Auto-Import System
+## Nuxt 4 Auto-Import System
 
-Nuxt 4 automatically imports components, composables, and utilities from specific directories.
+**Directory Auto-Imports**:
 
-Directory Auto-Imports:
+- `app/components/` - Vue components auto-imported in templates
+- `app/composables/` - Composables auto-imported everywhere
+- `app/utils/` - Client utilities auto-imported
+- `server/utils/` - Server utilities auto-imported in server context
+- `shared/utils/*.ts` - ONLY direct files auto-imported
+- `shared/types/*.ts` - ONLY direct files auto-imported
 
-- `app/components/` - Vue components are auto-imported in templates
-- `app/composables/` - Vue composables are auto-imported everywhere
-- `app/utils/` - Client-side utilities are auto-imported everywhere
-- `server/utils/` - Server-side utilities are auto-imported in server context
-- `shared/utils/*.ts` - ONLY direct files in shared/utils are auto-imported
-- `shared/types/*.ts` - ONLY direct files in shared/types are auto-imported
+**Critical Import Rules**:
 
-Built-in Auto-Imports:
-
-- Vue APIs: `ref`, `computed`, `watch`, `reactive`, `onMounted`, etc.
-- Nuxt utilities: `navigateTo`, `useRoute`, `useRouter`, `useFetch`, `useAsyncData`, etc.
-- Nuxt modules: APIs from installed Nuxt modules (e.g., `useI18n` from `@nuxtjs/i18n`)
-
-Critical Import Rules:
-
-- USE `#shared` alias for ALL imports from `shared/` subdirectories
+- USE `#shared` alias for imports from `shared/` subdirectories
 - DO NOT import direct files from `shared/utils/` or `shared/types/` (auto-imported)
-- ALWAYS import from subdirectories like `shared/utils/schemas/`, `shared/constants/`, etc.
-- NEVER use `~~/shared` alias (inconsistent, prefer `#shared`)
-- DO NOT import from `app/utils/` directory (auto-imported)
+- DO NOT import from `app/utils/` (auto-imported)
+- NEVER use `~~/shared` alias (use `#shared` instead)
 
-Auto-Import Examples:
+**Examples**:
 
 ```typescript
-// ✅ Correct: Direct files are auto-imported (no import needed)
-// shared/utils/audit-events.ts exports are available everywhere
-const event = AUDIT_EVENTS.USER_LOGIN
+// ✅ Correct: Direct files auto-imported
+const event = AUDIT_EVENTS.USER_LOGIN // from shared/utils/audit-events.ts
+const today = getToday() // from shared/utils/date.ts
 
-// ✅ Correct: Direct files are auto-imported (no import needed)
-// shared/utils/date.ts exports are available everywhere
-const formatted = formatDatePL(new Date())
-
-// ✅ Correct: Subdirectories require explicit import with #shared
+// ✅ Correct: Subdirectories use #shared
 import { createScheduleSchema } from "#shared/utils/schemas"
 import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
 
-// ❌ Wrong: Don't import direct files (they're auto-imported)
+// ❌ Wrong: Don't import direct files
 import { AUDIT_EVENTS } from "#shared/utils/audit-events"
-
-// ❌ Wrong: Don't use ~~/shared alias (use #shared instead)
-import { createScheduleSchema } from "~~/shared/utils/schemas"
 ```
 
-Schema Organization:
+## Shared Code Pattern
 
-- PLACE all Zod validation schemas in `shared/utils/schemas/` directory
-- EXPORT all schemas from individual schema files
-- IMPORT schemas using `#shared/utils/schemas` path
-- USE schema factory pattern with i18n translation function parameter
-- EXPORT TypeScript types using `z.infer<ReturnType<typeof schemaFactory>>`
+The `shared/` directory contains universal code working in both server and client contexts.
 
-Best Practices:
-
-- RELY on auto-imports for Vue APIs and Nuxt utilities (no manual imports needed)
-- RELY on auto-imports for direct files in `shared/utils/` and `shared/types/`
-- ALWAYS use `#shared` alias for subdirectory imports
-- AVOID creating custom utils when Nuxt or VueUse provides equivalent functionality
-- CHECK nuxt.config.ts before assuming a directory is auto-imported
-
-### Shared Code Pattern
-
-The `shared/` directory contains universal code that works in both server and client contexts.
-
-Directory Structure:
-
-- `shared/types/` - TypeScript type definitions and interfaces
-- `shared/utils/` - Pure functions, constants, and validation schemas
-
-Requirements:
+**Requirements**:
 
 - NEVER import Vue-specific code (ref, reactive, components)
 - NEVER import Nitro-specific code (defineEventHandler, H3 utilities)
 - USE only pure TypeScript/JavaScript
-- WRITE framework-agnostic code
 
-Use Cases:
+**Import Patterns**:
 
-- Constants: `export const AUDIT_EVENTS = { ... } as const`
-- Type definitions: `export type AuditEventType = ...`
-- Validation schemas: Zod schemas used by both client and server (in `shared/utils/schemas/`)
-- Pure utility functions: data transformations, formatters, calculators
+- Direct files (`shared/utils/audit-events.ts`) → Auto-imported
+- Subdirectories (`shared/utils/schemas/`) → Require `#shared` import
 
-Import Patterns:
-
-- DIRECT FILES: Auto-imported (no import statement needed)
-  - `shared/utils/audit-events.ts` - Use `AUDIT_EVENTS` directly
-  - `shared/utils/date.ts` - Use `formatDatePL`, `dayjs` directly
-  - `shared/types/permissions.ts` - Types available everywhere
-
-- SUBDIRECTORIES: Require explicit imports with `#shared` alias
-  - `shared/utils/schemas/` - Import with `#shared/utils/schemas`
-  - `shared/constants/` - Import with `#shared/constants/*`
-  - `shared/utils/permissions/` - Import with `#shared/utils/permissions/*`
-
-Import Examples:
-
-```typescript
-// ✅ Correct: Direct file exports (auto-imported)
-const event = AUDIT_EVENTS.USER_LOGIN // shared/utils/audit-events.ts
-const today = getToday() // shared/utils/date.ts
-
-// ✅ Correct: Subdirectory imports with #shared alias
-import { createScheduleSchema } from "#shared/utils/schemas"
-import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
-import { hasPermission } from "#shared/utils/permissions/declare"
-
-// ❌ Wrong: Importing direct files (they're auto-imported)
-import { AUDIT_EVENTS } from "#shared/utils/audit-events"
-import { formatDatePL } from "#shared/utils/date"
-
-// ❌ Wrong: Using ~~/shared alias instead of #shared
-import { createSchema } from "~~/shared/utils/schemas"
-```
-
-Why Use Shared Directory:
-
-- CONSISTENCY: Same types and constants across server and client
-- TYPE SAFETY: Single source of truth for TypeScript definitions
-- MAINTAINABILITY: Update once, apply everywhere
-- NO DUPLICATION: Avoid copying code between app/ and server/
-- AUTO-IMPORT: Nuxt automatically imports everything from shared/
-
-### Shared Directory Import Patterns
-
-The `#shared` alias provides consistent imports from the `shared/` directory across the application.
-
-#### When to Use #shared Alias
-
-- ALWAYS use `#shared` for imports from `shared/` subdirectories
-- REQUIRED for: schemas, constants, permission utilities, nested utilities
-- CONSISTENT across both server and client contexts
-
-#### Directory Structure and Import Rules
-
-```
-shared/
-├── utils/
-│   ├── audit-events.ts        # ✅ Auto-imported (no import needed)
-│   ├── date.ts                 # ✅ Auto-imported (no import needed)
-│   ├── schemas/                # ❌ Requires #shared import
-│   │   ├── index.ts
-│   │   ├── schedule.ts
-│   │   └── speaker.ts
-│   └── permissions/            # ❌ Requires #shared import
-│       └── declare.ts
-├── constants/                  # ❌ Requires #shared import
-│   ├── meetings.ts
-│   └── speaker-sources.ts
-└── types/
-    └── permissions.ts          # ✅ Auto-imported (no import needed)
-```
-
-#### Rule Explanation
-
-**Auto-Imported (No Import Needed):**
-
-- Direct files in `shared/utils/` (e.g., `audit-events.ts`, `date.ts`)
-- Direct files in `shared/types/` (e.g., `permissions.ts`)
-- Exports from these files are globally available
-
-**Explicit Import Required:**
-
-- Any file in a subdirectory of `shared/` (e.g., `schemas/`, `constants/`, `permissions/`)
-- Use `#shared` alias for these imports
-
-#### Practical Examples
-
-**Component Using Mixed Imports:**
-
-```vue
-<script setup lang="ts">
-  // ✅ Auto-imported: direct files from shared/utils/
-  const today = getToday() // from shared/utils/date.ts
-  const event = AUDIT_EVENTS.USER_LOGIN // from shared/utils/audit-events.ts
-
-  // ✅ Explicit import: subdirectory with #shared
-  import { createScheduleSchema } from "#shared/utils/schemas"
-  import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
-
-  const schema = createScheduleSchema(t)
-  const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
-</script>
-```
-
-**API Route Using Schemas:**
-
-```typescript
-// server/api/schedules/index.post.ts
-
-// ✅ Explicit import: schema from subdirectory
-import { createScheduleSchema } from "#shared/utils/schemas"
-
-export default defineEventHandler(async event => {
-  // ✅ Auto-imported: validation utility from shared/utils/
-  const body = await validateBody(event, createScheduleSchema)
-
-  // ... rest of handler
-})
-```
-
-#### Anti-Patterns
-
-```typescript
-// ❌ Wrong: Importing auto-imported direct files
-import { AUDIT_EVENTS } from "#shared/utils/audit-events"
-import { formatDatePL } from "shared/utils/date"
-
-// ❌ Wrong: Using ~~/shared instead of #shared
-import { createSchema } from "~~/shared/utils/schemas"
-
-// ❌ Wrong: Relative imports from shared
-import { SPEAKER_SOURCE_TYPES } from "../../shared/constants/speaker-sources"
-
-// ✅ Correct: Use #shared for subdirectories
-import { createScheduleSchema } from "#shared/utils/schemas"
-import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
-
-// ✅ Correct: No import for direct files (auto-imported)
-const event = AUDIT_EVENTS.USER_LOGIN
-const formatted = formatDatePL(new Date())
-```
-
-#### Why This Pattern Matters
-
-- CONSISTENCY: Single import alias (`#shared`) for all explicit imports
-- CLARITY: Clear distinction between auto-imported and explicit imports
-- TYPE SAFETY: TypeScript resolves `#shared` alias correctly
-- MAINTAINABILITY: Easy to refactor and reorganize shared code
-- NO CONFUSION: Eliminates mixing of `~~/shared`, `~/shared`, relative paths
-
-### Constants Pattern
-
-- DECLARE all constants with ALL_CAPS naming convention using underscores
-- USE `as const` assertion for type safety and literal type inference
-- PLACE frontend-only constants in `app/utils/` directory
-- PLACE shared constants (server + client) in `shared/constants/` directory
-- IMPORT shared constants using `#shared/constants/*` path
-- EXPORT companion types using `typeof` and `keyof` pattern for type derivation
-- PAIR constants with type definitions in `shared/types/` when creating discriminated unions
-- NEVER define constants directly in components - extract to appropriate utils directory
-- REFERENCE existing pattern: `shared/utils/audit-events.ts` with `AUDIT_EVENTS` constant
-
-Shared Constants Example:
+## Constants Pattern
 
 ```typescript
 // shared/constants/speaker-sources.ts
@@ -388,735 +144,174 @@ export const SPEAKER_SOURCE_TYPES = {
 
 export type SpeakerSourceType = (typeof SPEAKER_SOURCE_TYPES)[keyof typeof SPEAKER_SOURCE_TYPES]
 
-// Usage in component or API route
-import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
-
+// Usage (auto-imported)
 const sourceType = SPEAKER_SOURCE_TYPES.VISITING_SPEAKER
 ```
 
-### TypeScript Patterns
+**Rules**:
 
-Always use strict TypeScript:
+- DECLARE constants with ALL_CAPS using `as const`
+- PLACE shared constants in `shared/constants/`
+- IMPORT using `#shared/constants/*`
 
-- Enable `strict: true` in `tsconfig.json`
-- Use type inference from Drizzle schemas: `typeof schema.tableName.$inferSelect`
-- Create interface files for complex types in `types/` directory
-- Use generic types for reusable patterns
-- Prefer `interface` over `type` for object shapes
-- Use `const assertions` for literal types
+## CRITICAL RULES SUMMARY
 
-Good patterns:
+### Database Rules
 
-- Use schema inference: `export type User = typeof schema.users.$inferSelect`
-- Create generic composables: `export function useApi<T>(endpoint: string): ComputedRef<T | null>`
+⛔ **NEVER execute .sql files manually** - All changes through schema modifications ⛔ **NEVER run
+`pnpm db:generate` automatically** - ALWAYS prompt user to execute ⛔ **NEVER edit migration files
+manually** - Generated files stay unchanged ⛔ **ALWAYS commit schema + migration together**
 
-### Database Patterns with Drizzle
+**USE SKILL**: `database-migration-workflow` for all schema changes
 
-Schema Definition:
+**REFERENCE**: `server/AGENTS.md`, `.agents/database-patterns.md`
 
-- Define all tables in `server/database/schema.ts`
-- Use descriptive table and column names
-- Always include `createdAt` and `updatedAt` timestamps
-- Use `mode: "timestamp"` for dates, `mode: "boolean"` for booleans
-- Store custom date fields as unix timestamps (integer, seconds) for consistency and timezone safety
-- Export inferred types: `export type TableName = typeof tableName.$inferSelect`
-- REFERENCE @.agents/date-time-patterns.md for unix timestamp patterns and dayjs utility usage
+### Testing Rules
 
-Database Access:
+⛔ **ALWAYS add data-testid to ALL interactive elements** ⛔ **USE data-testid as PRIMARY
+selector** - NEVER use CSS classes or text ⛔ **FOLLOW naming**: `{feature}-{element}-{type}` in
+kebab-case ⛔ **ADD test IDs DURING development** - Not retroactively
 
-- Create a `useDrizzle()` composable in `server/utils/drizzle.ts`
-- Export commonly used operators: `eq`, `and`, `or`, `sql`
-- Use transactions for multi-table operations
-- Always validate input data before database operations
+**USE SKILL**: `test-ready-component-check` before marking component complete
 
-Migration Workflow:
+**REFERENCE**: `app/AGENTS.md`, `.agents/e2e-testing-patterns.md`
 
-**CRITICAL DATABASE RULES:**
+### Import Rules
 
-- **NEVER execute .sql files manually** - All database changes MUST be applied through schema
-  modifications in `server/database/schema.ts`
-- **ALWAYS ask the user to generate migrations** - NEVER run `pnpm db:generate` yourself; prompt the
-  user to execute this command after schema changes
-- **NEVER edit migration files manually** - Migration files are generated and should remain
-  unchanged
+⛔ **USE #shared for subdirectories** - Never ~~/shared ⛔ **DO NOT import shared/utils/ direct
+files** - They're auto-imported ⛔ **DO NOT import app/utils/** - Auto-imported by Nuxt
 
-**Workflow Steps:**
+### SSR Rules
 
-1. Modify schema in `server/database/schema.ts`
-2. Prompt user: "Database schema has been updated. Please run `pnpm db:generate` to create migration
-   files."
-3. User runs `pnpm db:generate` to generate migration files
-4. Review generated migration before committing
-5. Commit schema changes and generated migration files together
+⛔ **ALWAYS use useFetch() or useAsyncData()** - NEVER $fetch() in components ⛔ **ALWAYS await the
+composable** - Required for SSR hydration ⛔ **ALWAYS handle loading and error states**
 
-**Why These Rules Matter:**
+**USE SKILL**: `ssr-data-fetching-implementation` when adding data fetching
 
-- CONSISTENCY: Schema file is the single source of truth for database structure
-- SAFETY: Manual SQL execution can create schema drift and data corruption
-- AUDITABILITY: All database changes are version-controlled through schema and migrations
-- REVERSIBILITY: Drizzle migrations support rollback through proper migration history
+**REFERENCE**: `app/AGENTS.md`
 
-### Server-Side Patterns
+### Type Safety Rules
 
-API Routes:
+⛔ **NEVER use @ts-expect-error or @ts-ignore** ⛔ **AVOID any type** - Find or create proper types
+⛔ **ALWAYS declare function parameter and return types**
 
-- Place API routes in `server/api/` directory
-- Use proper HTTP methods:
-  - POST for creating resources (accepts body)
-  - PUT for complete replacement (accepts body)
-  - PATCH for partial updates (accepts body)
-  - GET for retrieving (no body)
-  - DELETE for removing (no body)
-- VALIDATE all request bodies with Zod schemas:
-  - IMPORT schema factory from `app/schemas/`
-  - USE `validateBody(event, schemaFactory)` utility from `server/utils/validation`
-  - RETURN validation errors with i18n keys automatically via utility
-- Return consistent response formats
-- Handle errors gracefully with proper status codes
+### i18n Rules
 
-#### Zod Schema Patterns
+⛔ **ALWAYS use $t() for UI text** - NEVER hardcode Polish text ⛔ **VERIFY keys exist in pl.json
+AND en.json** ⛔ **MAINTAIN Polish-first strategy**
 
-Schema Structure:
+**USE SKILL**: `i18n-key-validation` when adding translation keys
 
-- CREATE schemas in `shared/utils/schemas/` directory
-- USE factory pattern accepting translation function `t: (key: string) => string`
-- EMBED i18n keys in error messages: `t("validation.fieldRequired")`
-- EXPORT TypeScript types using `z.infer<ReturnType<typeof schemaFactory>>`
-- DEFINE separate schemas for create/update operations (use `.partial()` for updates)
-- UPDATE `shared/utils/schemas/index.ts` barrel file to export all schemas
-
-Schema File Location:
-
-- PLACE all Zod schemas in `shared/utils/schemas/` directory
-- EXPORT schema from `shared/utils/schemas/index.ts` for auto-import
-- DO NOT import schemas manually (auto-imported by Nuxt)
-
-#### API Validation Usage
-
-Endpoint Implementation Pattern:
-
-- VALIDATE request body using `validateBody(event, schemaFactory)` utility
-- SCHEMAS are auto-imported (no import statement needed)
-- USE schema directly by name (e.g., `createResourceSchema`)
-- BODY is fully typed after validation
-
-Validation Error Response Format:
-
-When validation fails, `validateBody()` automatically returns:
-
-```json
-{
-  "statusCode": 400,
-  "statusMessage": "Validation Error",
-  "data": {
-    "errors": [
-      { "field": "name", "messageKey": "validation.nameRequired" },
-      { "field": "email", "messageKey": "validation.emailInvalid" }
-    ]
-  }
-}
-```
-
-Frontend can use `messageKey` values to display translated error messages via
-`$t(error.messageKey)`.
-
-Background Tasks:
-
-- Define tasks in `server/tasks/` directory using `defineTask()`
-- Use descriptive names and descriptions
-- Handle errors and provide meaningful logs
-- Use tasks for database seeding, cleanup, and scheduled operations
-
-Server Utils:
-
-- Create reusable utilities in `server/utils/`
-- Export commonly used database functions
-- Use composable pattern for server-side logic
-
-### Frontend Patterns
-
-Vue 3 Composition API:
-
-- Always use `<script setup>` syntax
-- Create composables for reusable logic in `composables/`
-- Use `ref()` for primitive values, `reactive()` for objects
-- Prefer `computed()` over methods for derived data
-- Use `watch()` for side effects, `watchEffect()` for automatic tracking
-
-Components:
-
-- Use PascalCase for component names
-- Create single-purpose components
-- Use props with TypeScript interfaces
-- Emit events with proper typing
-- Use `@nuxt/ui` components when available
-- When creating forms inside modals, place UForm in `#body` slot with a ref, and trigger submission
-  from `#footer` button via `form?.submit()`
-- REFERENCE @.agents/nuxt-ui-4-integration.md for UModal with Forms pattern details
-
-Error Handling:
-
-- USE `isApiValidationError` type guard from `~/app/utils/error` for all API error validation
-- VALIDATE both runtime structure and TypeScript types with type guards
-- IMPORT `isApiValidationError` before handling API errors in try-catch blocks
-- CHECK error type with type guard before accessing error properties
-- DISPLAY error messages from `error.data.message` field after validation
-- INTEGRATE with i18n for translating error messages when messageKey provided
-- HANDLE generic errors with fallback messages when type guard fails
-- NEVER assume error structure without type guard validation
-- NEVER use loose type checking with `any` or optional chaining for API errors
-
-Pages and Layouts:
-
-- Use file-based routing in `pages/` directory
-- Create layouts in `layouts/` for shared UI patterns
-- Use dynamic routes with proper parameter validation
-- Implement proper SEO with `useSeoMeta()`
-
-### SSR Data Fetching
-
-This application uses Server-Side Rendering (SSR). Always use Nuxt's SSR-compatible data fetching
-composables to ensure data is fetched on the server and properly transferred to the client.
-
-Critical Rules:
-
-- **ALWAYS** use `useFetch()` or `useAsyncData()` for data fetching in components
-- **NEVER** use raw `$fetch()` directly in components (it won't transfer SSR data to client)
-- **ALWAYS** `await` these composables in `<script setup>` for proper SSR hydration
-- **HANDLE** loading and error states using destructured values
-
-Using useFetch():
-
-```vue
-<script setup lang="ts">
-  // ✅ Correct: useFetch for SSR-compatible data fetching
-  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
-
-  // Access reactive data in template
-  // - data: reactive reference to fetched data
-  // - pending: true while fetching, false when complete
-  // - error: contains error object if request fails
-  // - refresh: function to manually refetch data
-</script>
-
-<template>
-  <div v-if="pending">Loading...</div>
-  <div v-else-if="error">Error: {{ error.message }}</div>
-  <div v-else>
-    <div
-      v-for="speaker in speakers"
-      :key="speaker.id">
-      {{ speaker.firstName }} {{ speaker.lastName }}
-    </div>
-  </div>
-</template>
-```
-
-Using useAsyncData():
-
-```vue
-<script setup lang="ts">
-  // ✅ Use useAsyncData for complex async operations or custom fetching logic
-  const {
-    data: userData,
-    pending,
-    error,
-  } = await useAsyncData(
-    "user-profile", // unique key for caching
-    () =>
-      $fetch("/api/user/profile", {
-        headers: { "X-Custom-Header": "value" },
-      })
-  )
-</script>
-```
-
-When to Use Each:
-
-- USE `useFetch()` for simple API calls (most common case)
-- USE `useAsyncData()` when you need:
-  - Custom fetch logic with headers or request options
-  - Non-HTTP async operations
-  - More control over caching with unique keys
-  - Multiple data sources combined
-
-Anti-Patterns to Avoid:
-
-```vue
-<script setup lang="ts">
-  // ❌ Wrong: Direct $fetch() in component doesn't transfer SSR data
-  const speakers = await $fetch("/api/speakers")
-
-  // ❌ Wrong: Using onMounted for data fetching defeats SSR
-  onMounted(async () => {
-    const data = await $fetch("/api/speakers")
-    speakers.value = data
-  })
-
-  // ❌ Wrong: Not awaiting useFetch breaks SSR hydration
-  const { data } = useFetch("/api/speakers") // Missing await!
-</script>
-```
-
-Best Practices:
-
-- DESTRUCTURE return values for clear code: `const { data, pending, error, refresh }`
-- PROVIDE TypeScript types for data: `useFetch<Speaker[]>(...)`
-- HANDLE all states: loading (`pending`), error (`error`), success (`data`)
-- USE `refresh()` function to manually refetch when data changes
-- AVOID fetching in `onMounted` - use `useFetch`/`useAsyncData` instead
-- CHECK data exists before accessing properties: `v-if="data"` or optional chaining
-
-Example from Codebase:
-
-```vue
-<script setup lang="ts">
-  // Real example from app/pages/speakers.vue
-  const { data: speakers, pending, error, refresh } = await useFetch<Speaker[]>("/api/speakers")
-
-  // Permission checks use usePermissions composable
-  const { canManageSpeakers, fetchPermissions } = usePermissions()
-  onMounted(async () => {
-    await fetchPermissions()
-  })
-
-  // Data is fetched on server-side during SSR
-  // Permissions are fetched client-side using BetterAuth organization API
-  // Client receives pre-rendered HTML with data already available
-</script>
-```
-
-Why This Matters:
-
-- **SEO**: Search engines see fully rendered content with data
-- **PERFORMANCE**: Faster initial page load with server-rendered data
-- **UX**: No loading flicker - content appears immediately
-- **HYDRATION**: Client-side Vue picks up where server left off
-
-### Cloudflare & NuxtHub Patterns
-
-Configuration:
-
-- Use `cloudflare_module` preset in `nitro.preset`
-- Enable node compatibility for server-side features
-- Configure D1 database binding through NuxtHub
-- Use environment variables for configuration
-
-Performance:
-
-- Leverage Cloudflare's edge caching
-- Use `hubCache()` for server-side caching
-- Minimize bundle size with proper tree-shaking
-- Use dynamic imports for code splitting
-
-Deployment:
-
-- Use Wrangler for local development and deployment
-- Configure D1 database bindings properly
-- Use environment-specific configurations
-- Test locally with `wrangler dev` before deployment
-
-### Code Quality Rules
-
-Naming Conventions:
-
-- `camelCase` for variables, functions, and methods
-- `PascalCase` for components, classes, and types
-- `kebab-case` for file names and CSS classes
-- `SCREAMING_SNAKE_CASE` for constants
-
-Error Handling:
-
-- Always handle async operations with try-catch
-- Provide meaningful error messages to users
-- Log errors properly for debugging
-- Use proper HTTP status codes in API responses
-
-Performance:
-
-- Use `defineAsyncComponent()` for lazy loading
-- Implement proper loading states
-- Use `v-memo` for expensive list renders
-- Optimize images and assets
-
-## Testing
-
-- Vitest for unit testing and API integration tests
-- Playwright for E2E tests and UI-focused integration tests
-- When writing tests, do it one test case at a time
-- Use `expect(VALUE).toXyz(...)` instead of storing in variables
-- Omit `should` from test names (e.g., `it("validates input")` not `it("should validate input")`)
-- Test files: `*.test.ts` or `*.spec.ts`
-- Mock external dependencies appropriately
-
-### E2E Testing with Playwright
-
-Test Selector Requirements:
-
-- ADD data-testid attributes to ALL interactive elements during component development
-- USE data-testid as primary selector strategy, NEVER use CSS classes, attributes, or text content
-- FOLLOW naming convention: `{feature}-{element}-{type}` in kebab-case
-- DOCUMENT all data-testid values in component files
-- VERIFY test IDs exist before marking component complete
-
-Fixture Pattern Requirements:
-
-- USE Playwright's `test.extend()` API for all reusable test utilities
-- ORGANIZE fixtures in `tests/fixtures/` directory with domain-specific files
-- IMPLEMENT Page Object Models as fixtures, not standalone classes
-- COMBINE fixtures using `mergeTests()` and export from `tests/fixtures/index.ts`
-- IMPORT test and expect from merged fixtures in all test files
-
-Fixture Usage in Tests:
-
-```typescript
-// ✅ Correct: Import test and expect from merged fixtures
-import { test, expect } from "../fixtures"
-
-test("displays speakers list", async ({ page }) => {
-  // Enhanced page fixture automatically waits for Nuxt hydration
-  await page.goto("http://localhost:3000/speakers")
-
-  // Use data-testid selectors for stability
-  await expect(page.getByTestId("speakers-list")).toBeVisible()
-})
-
-test("authenticates as admin", async ({ page, authenticateAs }) => {
-  // Use authenticateAs fixture for role-based authentication
-  await authenticateAs.admin()
-
-  await page.goto("http://localhost:3000/admin")
-  await expect(page.getByTestId("admin-dashboard")).toBeVisible()
-})
-```
-
-Available Fixtures:
-
-- `page` - Enhanced page that waits for Nuxt hydration after navigation
-- `authenticateAs` - Object with role-based authentication methods:
-  - `authenticateAs.admin()` - Authenticate as admin user
-  - `authenticateAs.publisher()` - Authenticate as publisher user
-  - `authenticateAs.talksManager()` - Authenticate as talks manager
-  - `authenticateAs.speakersManager()` - Authenticate as speakers manager
-
-Fixture Anti-Patterns:
-
-```typescript
-// ❌ Wrong: Importing directly from @playwright/test
-import { test, expect } from "@playwright/test"
-
-// ❌ Wrong: Creating standalone Page Object classes
-class SpeakersPage {
-  constructor(private page: Page) {}
-  async goto() {
-    await this.page.goto("/speakers")
-  }
-}
-
-// ✅ Correct: Implement Page Objects as fixtures
-export const test = base.extend<{ speakersPage: SpeakersPage }>({
-  speakersPage: async ({ page }, use) => {
-    await use(new SpeakersPage(page))
-  },
-})
-```
-
-Component Development Rules:
-
-- IMPLEMENT component with data-testid attributes from start
-- CREATE or UPDATE fixtures for reusable patterns
-- WRITE tests only after component is test-ready with all test IDs
-- REFERENCE @.agents/test-ready-component-checklist.md before marking complete
-
-Module Syntax Requirements:
-
-- USE `import` statements exclusively in all test files
-- ADD `with { type: "json" }` assertion for JSON imports
-- NEVER use `require()` in test files
-- FOLLOW project's ESM module standard
-
-Comprehensive E2E Guidelines:
-
-- REFERENCE @.agents/e2e-testing-patterns.md for complete testing patterns
-- FOLLOW three-step workflow: component first, fixtures second, tests third
-- ENSURE test isolation and independence using fixtures
-- LEVERAGE Playwright's built-in features over custom solutions
-
-## Security
-
-- Use appropriate data types that limit exposure of sensitive information
-- Never commit secrets or API keys to repository
-- Use environment variables for sensitive data
-- Validate all user inputs on both client and server
-- Follow principle of least privilege
-
-### Development Workflow
-
-Before Starting Work:
-
-1. Run `pnpm install` to ensure dependencies are up to date
-2. Check database schema and run migrations if needed
-3. Verify environment variables are properly configured
-
-During Development:
-
-1. Run `pnpm dev` for hot-reload development
-2. Use `pnpm typecheck` frequently to catch type errors
-3. Test database operations thoroughly
-4. Use browser dev tools for debugging
-
-Before Committing:
-
-1. Run `pnpm lint:fix` to fix linting issues
-2. Run `pnpm typecheck` to ensure no type errors
-3. Run `pnpm format` to ensure consistent formatting
-4. Test critical functionality manually
-5. If schema changed, ask user to run `pnpm db:generate` to generate migrations
-
-Deployment Checklist:
-
-1. Ensure all environment variables are configured
-2. Test build process with `pnpm build`
-3. Verify database migrations are applied
-4. Test production build locally with `pnpm preview`
-
-## Internationalization (i18n) Rules
-
-### Language Standards
-
-UI Language: Polish (Primary)
-
-- All user-facing text must be in Polish
-- Use `$t()` function for all UI text
-- Never hardcode Polish text directly in components
-- Maintain consistent formal/informal tone (informal "Ty" form)
-
-Code & Documentation: English (Strict)
-
-- All code, comments, and documentation in English only
-- Variable names, function names: English camelCase
-- Git commit messages: English
-- API endpoints and technical terms: English
-- Error logging and console messages: English
-
-### Translation Key Structure
-
-Hierarchical Organization:
-
-- `common.*` - Shared UI elements (buttons, labels)
-- `auth.*` - Authentication flows
-- `dashboard.*` - Dashboard and main app
-- `navigation.*` - Navigation elements
-- `meta.*` - SEO meta tags and descriptions
-- `errors.*` - Error messages and validation
-- `validation.*` - API and form validation messages (field-specific errors)
-
-Key Naming Conventions:
-
-- Use English-based descriptive keys: `auth.signInButton` not `auth.przyciskLogowania`
-- Dot notation for hierarchy: `auth.form.emailLabel`
-- Context-specific grouping: `errors.validation.required`
-- Consistent naming patterns: `action.resource` (e.g., `create.account`, `delete.item`)
-
-Validation Key Examples:
-
-- Field requirements: `validation.firstNameRequired`, `validation.emailRequired`
-- Format validation: `validation.phoneInvalid`, `validation.emailInvalid`
-- Length constraints: `validation.firstNameTooLong`, `validation.passwordTooShort`
-- Business rules: `validation.congregationRequired`, `validation.dateInPast`
-
-### Component Integration Patterns
-
-Required Usage:
-
-- Use `$t()` for UI text: `<button>{{ $t('common.submit') }}</button>`
-- Never hardcode Polish text: avoid `<button>Zatwierdź</button>`
-- Always import `useI18n()` in components with translations: `const { $t } = useI18n()`
-- Use interpolation for dynamic content: `$t('dashboard.welcomeUser', { email: user.value?.email })`
-
-SEO Meta Tags:
-
-- Use i18n meta tags: `useSeoMeta({ title: $t('meta.dashboard.title') })`
-- Avoid hardcoded meta tags: never use `title: 'Panel główny - Planer Wystąpień'`
-
-### Translation File Management
-
-File Structure:
-
-- `locales/pl.json` - Primary Polish translations
-- `locales/en.json` - English fallback (for development)
-
-Translation Quality Standards:
-
-- Natural Polish expressions, not literal translations
-- Consistent technical terminology
-- Proper Polish grammar and declension
-- Context-aware translations (formal vs informal)
-- UTF-8 encoding with Polish diacritical marks (ą, ć, ę, ł, ń, ó, ś, ź, ż)
-
-Example Translation Patterns:
-
-- Auth translations: `"signIn": "Zaloguj się"`, `"emailAddress": "Adres email"`
-- Dashboard translations: `"welcomeUser": "Witaj, {email}!"`, with proper interpolation
-
-### Development Workflow
-
-Adding New UI Text:
-
-1. Add translation key to `locales/pl.json`
-2. Use `$t('key')` in component, never hardcode text
-3. Test with missing translation detection
-4. Verify Polish character rendering
-
-Before Committing:
-
-1. Run `pnpm typecheck` to catch i18n typing errors
-2. Verify no hardcoded Polish text remains in components
-3. Check translation file JSON syntax validity
-4. Test critical user flows with Polish UI
-
-Quality Checks:
-
-- Use browser dev tools to check for missing translation warnings
-- Verify interpolation works correctly: `$t('key', { variable })`
-- Test responsive design with longer Polish text
-- Validate Polish character encoding in all browsers
-
-### Technical Configuration
-
-Nuxt i18n Module Settings:
-
-- Default locale: `'pl'` (Polish primary)
-- Fallback locale: `'pl'` (consistent experience)
-- Strategy: `'no_prefix'` (no URL prefixes)
-- Lazy loading: Enabled for performance
-- SEO optimization: Automatic hreflang generation
-
-TypeScript Integration:
-
-- Use proper typing for translation keys
-- Define interface with translation structure: `auth: { signIn: string }`
-
-### Error Prevention
-
-Common Mistakes to Avoid:
-
-- Mixing Polish and English in same component
-- Hardcoding Polish text instead of using `$t()`
-- Using English variable names in Polish translation keys
-- Forgetting to add `useI18n()` in components
-- Not testing with missing translations
-- Inconsistent formal/informal tone across UI
-
-Validation Rules:
-
-- All user-visible text must use translation functions
-- No Polish text should appear directly in Vue templates
-- Translation keys must be in English and descriptive
-- All new components must include i18n integration from start
-- VERIFY all translation keys exist in both `i18n/locales/pl.json` and `i18n/locales/en.json` before
-  committing
-- CHECK browser console for missing translation warnings during development
-- REFERENCE @.agents/i18n-patterns.md for comprehensive key validation workflow and best practices
+**REFERENCE**: `app/AGENTS.md`, `.agents/i18n-patterns.md`
 
 ## Git Workflow
 
 ### Commit Standards
 
-- Conventional commits: Use format `<type>(<scope>): <description> [AI]`
+- Conventional commits: `<type>(<scope>): <description>`
+- Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
+- Scopes: `ui`, `api`, `auth`, `i18n`, `db`, `test`
 - Granular commits: One logical change per commit
-- Clear messages: Explain why changes were made, not just what
-- Issue linking: Reference ticket numbers with `fixes #123`, `refs #123`
-- Standard scopes: `ui`, `api`, `auth`, `i18n`, `test`, `docs`, `deps`, `config`
-- Breaking changes: Use `!` after type or `BREAKING CHANGE:` footer
-- Commit frequently: After creating component, fixing bug, or significant progress
-- Review AI code: Never merge code you don't understand
-
-### Common Types
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `refactor`: Code refactoring
-- `perf`: Performance improvements
-- `style`: Code formatting
-- `docs`: Documentation
-- `test`: Adding tests
-- `chore`: Dependencies, tooling
 
 ### Pre-commit Process
 
-- Always run `pnpm ci` before committing (see `package.json` for available CI command)
-- Fix linting errors with `pnpm lint:fix`
-- Run `pnpm typecheck` to verify type safety
-- Never use `git push --force` on the main branch
-- Use `git push --force-with-lease` for feature branches if needed
-- Always verify current branch before force operations
+**USE SKILL**: `pre-commit-quality-check` before every commit
+
+**Manual steps**:
+
+1. Run `pnpm ci` (lint + typecheck + format)
+2. If schema changed: Ask user to run `pnpm db:generate`
+3. Test critical functionality manually
+4. Verify current branch before force operations
+
+### Pre-push Process
+
+**USE SKILL**: `git-pre-flight-check` before pushing
+
+**Safety checks**:
+
+- Verify not pushing to main/master
+- Use `--force-with-lease` for force pushes
+- Ensure quality checks passed
 
 ## Common Pitfalls
 
-- Trying to use `npm` instead of `pnpm`
-- Not following the established project structure
-- Working in the wrong directory
-- Using incorrect import patterns
-- Writing tests without proper analysis and planning, even when directly requested
-- Using scoped styles instead of Tailwind classes
-- Making large refactors in a single commit
-- Mixing Polish and English text in components
-- Hardcoding Polish text instead of using `$t()`
-- Not running type checks before committing
-- Executing SQL files manually instead of updating schema
+- Using `npm` instead of `pnpm`
+- Not following established project structure
+- Using incorrect import patterns (#shared)
+- Hardcoding Polish text instead of using $t()
+- Executing SQL files manually
 - Running `pnpm db:generate` without user confirmation
-- Making schema changes without prompting for migration generation
+- Not adding data-testid to components during development
+- Using $fetch() directly in components (breaks SSR)
 
 ## Files to NOT Modify
 
-These files should never be modified without explicit permission:
-
-- `.gitignore` and `.npmignore` files
-- Lock files (e.g., `pnpm-lock.yaml`)
-- Environment configuration files (`.env.*`)
+- `.gitignore`, `.npmignore`, lock files
+- Environment files (`.env.*`)
 - Generated type definitions (`.d.ts`)
-- Core configuration files (e.g., `nuxt.config.ts`, `wrangler.toml`, `drizzle.config.ts`)
+- Core config files (`nuxt.config.ts`, `wrangler.toml`, `drizzle.config.ts`)
 - Migration files in `server/database/migrations/`
-
-## Configuration
-
-When adding new configuration options, update all relevant places:
-
-1. Environment variables in `.env.example`
-2. Configuration schemas if using config validation
-3. Documentation in README.md
-
-All configuration keys use consistent naming and must be documented.
 
 ## Anchor Comments System
 
-Use specially formatted comments throughout the codebase to provide inline knowledge that can be
-easily searched:
+Use specially formatted comments for inline knowledge:
 
-- Use `AGENT-NOTE:`, `AGENT-TODO:`, or `AGENT-QUESTION:` (all-caps prefix) for comments aimed at all
-  agents and developers
-- Keep them concise (≤ 120 chars)
-- Important: Before scanning files, always first try to locate existing anchors `AGENT-*` in
-  relevant subdirectories
-- Update relevant anchors when modifying associated code
-- Do not remove `AGENT-NOTE`s without explicit human instruction
+- Use `AGENT-NOTE:`, `AGENT-TODO:`, or `AGENT-QUESTION:` (all-caps prefix)
+- Keep concise (≤ 120 chars)
+- Before scanning files, try to locate existing anchors first
+- Update relevant anchors when modifying code
+- Do not remove without explicit instruction
 
-Example pattern: `// AGENT-NOTE: Performance-critical path; avoid extra allocations`
+Example: `// AGENT-NOTE: Performance-critical path; avoid extra allocations`
 
-## Frontend development
+## Directory-Specific Guidelines
 
-- @.agents/nuxt-ui-4-integration.md
-- @.agents/date-time-patterns.md
-- @.agents/i18n-patterns.md
-- @.agents/official-tailwind.md
-- @.agents/official-vue-components.md
-- @.agents/official-vue-pages.md
-- @.agents/quality-standards.md
-- @.agents/security-guidelines.md
-- @.agents/tailwind-patterns.md
-- @.agents/vue-conventions.md
+- **Frontend (SSR + Vue)**: See `app/AGENTS.md`
+- **Backend (API + DB)**: See `server/AGENTS.md`
 
-## Backend development
+## Available Skills
 
-- @.agents/database-patterns.md
+Workflow automation skills for common tasks:
+
+### Quality & Validation
+
+- **pre-commit-quality-check** - Run lint, typecheck, format before commit
+- **git-pre-flight-check** - Verify safe git operations before push
+- **i18n-key-validation** - Validate translation keys in pl.json and en.json
+- **test-ready-component-check** - Verify component ready for E2E testing
+
+### Development Workflows
+
+- **database-migration-workflow** - Guide through schema modifications
+- **ssr-data-fetching-implementation** - Implement SSR-compatible data fetching
+- **zod-validation-schema-creation** - Create Zod schemas with i18n
+- **nuxt-ui-component-integration** - Verify Nuxt UI component usage
+- **e2e-test-workflow** - Complete E2E test creation workflow
+
+## Specialized Documentation
+
+### Frontend Development
+
+- `.agents/vue-conventions.md` - Vue 3 patterns and best practices
+- `.agents/nuxt-ui-4-integration.md` - Nuxt UI 4 component integration
+- `.agents/tailwind-patterns.md` - Tailwind CSS styling guidelines
+- `.agents/e2e-testing-patterns.md` - Playwright E2E testing
+- `.agents/i18n-patterns.md` - Internationalization patterns
+- `.agents/date-time-patterns.md` - Date/time handling with dayjs
+
+### Backend Development
+
+- `.agents/database-patterns.md` - Drizzle ORM and D1 database
+- `.agents/security-guidelines.md` - Security best practices
+
+### Quality & Testing
+
+- `.agents/test-ready-component-checklist.md` - Component testing checklist
+
+### Official Documentation (via Context7)
+
+- Nuxt 4: Composables, SSR, auto-imports
+- Vue 3: Composition API, defineModel
+- Drizzle ORM: Queries, schema, migrations
+- Tailwind CSS v4: Utilities, configuration

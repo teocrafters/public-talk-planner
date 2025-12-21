@@ -30,7 +30,7 @@ function randomFromArray<T>(array: T[]): T | undefined {
  * Example: 6 people, 12 weeks → each person appears exactly 2 times
  * Example: 5 people, 12 weeks → 2 people appear 3x, 3 people appear 2x
  */
-function distributeEvenly<T>(items: T[], count: number, getKey: (item: T) => string): T[] {
+function distributeEvenly<T>(items: T[], count: number): T[] {
   if (items.length === 0) return []
   if (count === 0) return []
 
@@ -131,35 +131,39 @@ export default defineTask({
       // This ensures each eligible brother gets similar number of assignments
       const chairmanAssignments = distributeEvenly(
         samplePublishers.filter(p => p.canChairWeekendMeeting),
-        sundays.length,
-        p => p.id
+        sundays.length
       )
 
       const readerAssignments = distributeEvenly(
         samplePublishers.filter(p => p.isReader && !p.conductsWatchtowerStudy),
-        sundays.length,
-        p => p.id
+        sundays.length
       )
 
       const prayerAssignments = distributeEvenly(
         samplePublishers.filter(
           p => p.offersPublicPrayer && !p.canChairWeekendMeeting && !p.conductsWatchtowerStudy
         ),
-        sundays.length,
-        p => p.id
+        sundays.length
       )
 
       const localSpeakerAssignments = distributeEvenly(
         samplePublishers.filter(p => p.deliversPublicTalks),
-        sundays.length,
-        p => p.id
+        sundays.length
       )
 
       console.log(`\n📊 Assignment Distribution:`)
-      console.log(`   - Chairmen: ${chairmanAssignments.length} assignments for ${new Set(chairmanAssignments.map(p => p.id)).size} people`)
-      console.log(`   - Readers: ${readerAssignments.length} assignments for ${new Set(readerAssignments.map(p => p.id)).size} people`)
-      console.log(`   - Prayers: ${prayerAssignments.length} assignments for ${new Set(prayerAssignments.map(p => p.id)).size} people`)
-      console.log(`   - Local Speakers: ${localSpeakerAssignments.length} assignments for ${new Set(localSpeakerAssignments.map(p => p.id)).size} people\n`)
+      console.log(
+        `   - Chairmen: ${chairmanAssignments.length} assignments for ${new Set(chairmanAssignments.map(p => p.id)).size} people`
+      )
+      console.log(
+        `   - Readers: ${readerAssignments.length} assignments for ${new Set(readerAssignments.map(p => p.id)).size} people`
+      )
+      console.log(
+        `   - Prayers: ${prayerAssignments.length} assignments for ${new Set(prayerAssignments.map(p => p.id)).size} people`
+      )
+      console.log(
+        `   - Local Speakers: ${localSpeakerAssignments.length} assignments for ${new Set(localSpeakerAssignments.map(p => p.id)).size} people\n`
+      )
 
       // Step 6: Create weekend meeting programs for each Sunday
       let programsCreated = 0

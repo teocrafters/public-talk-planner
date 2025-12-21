@@ -1,35 +1,55 @@
-# Official Vue Router Advanced Patterns
+# Vue Router Quick Reference
 
-Advanced Vue Router and file-based routing patterns. For basic routing and project structure, see
-@.agents/project-structure.md.
+Quick reference for advanced Vue Router syntax and project-specific routing patterns.
+
+**For complete Vue Router documentation, use Context7 to query official docs.**
+
+## Project-Specific Notes
+
+- **File-based routing**: Pages in `app/pages/` auto-generate routes
+- **Typed router**: Always refer to `typed-router.d.ts` for route names and parameters
+- **Reference project patterns**: `.agents/vue-conventions.md`
 
 ## Advanced Route Syntax
 
-- Use double brackets `[[paramName]]` for optional route parameters
-- Use the `+` modifier after a closing bracket `]` to make a parameter repeatable:
-  `/posts.[[slug]]+.vue` matches `/posts/some-posts` and `/posts/some/post`
-- Within a page component, use `definePage()` to customize the route's properties like `meta`,
-  `name`, `path`, `alias`, etc
-- ALWAYS refer to the `typed-router.d.ts` file to find route names and parameters
-
-### Route groups
-
-Route groups can also create shared layouts without interfering with the generated URL:
+### Optional Parameters
 
 ```
-src/pages/
-├── (admin).vue # layout for all admin routes, does not affect other pages
+pages/posts.[[slug]].vue → /posts or /posts/some-slug
+```
+
+### Repeatable Parameters
+
+```
+pages/posts.[[slug]]+.vue → /posts/some-posts or /posts/some/post
+```
+
+### Route Groups
+
+```
+pages/
+├── (admin).vue       # Layout for admin routes
 ├── (admin)/
-│   ├── dashboard.vue
-│   └── settings.vue
-└── (user)/
-    ├── profile.vue
-    └── order.vue
+│   ├── dashboard.vue → /dashboard
+│   └── settings.vue  → /settings
 ```
 
-Resulting URLs:
+## Context7 References
 
-- `/dashboard` -> renders `src/pages/(admin)/dashboard.vue`
-- `/settings` -> renders `src/pages/(admin)/settings.vue`
-- `/profile` -> renders `src/pages/(user)/profile.vue`
-- `/order` -> renders `src/pages/(user)/order.vue`
+**For comprehensive documentation, query via Context7**:
+
+- **Vue Router**: Advanced routing, dynamic routes, route guards
+- **File-based routing**: Nuxt 4 pages directory conventions
+- **Route configuration**: definePage(), route meta, aliases
+
+**Query examples**:
+
+- "Nuxt 4 file-based routing patterns"
+- "Vue Router route guards and middleware"
+- "Nuxt typed router usage"
+
+## References
+
+- Project Vue patterns: `.agents/vue-conventions.md`
+- Typed routes: `typed-router.d.ts`
+- Official Vue Router docs: Use Context7

@@ -33,23 +33,26 @@ export default defineEventHandler(async event => {
   switch (sortBy) {
     case "title":
       // Sort by title alphabetically
-      talksQuery = sortOrder === "desc"
-        ? talksQuery.orderBy(desc(publicTalks.title))
-        : talksQuery.orderBy(asc(publicTalks.title))
+      talksQuery =
+        sortOrder === "desc"
+          ? talksQuery.orderBy(desc(publicTalks.title))
+          : talksQuery.orderBy(asc(publicTalks.title))
       break
 
     case "number":
       // Sort by talk number numerically
-      talksQuery = sortOrder === "desc"
-        ? talksQuery.orderBy(desc(sql`CAST(${publicTalks.no} AS INTEGER)`))
-        : talksQuery.orderBy(asc(sql`CAST(${publicTalks.no} AS INTEGER)`))
+      talksQuery =
+        sortOrder === "desc"
+          ? talksQuery.orderBy(desc(sql`CAST(${publicTalks.no} AS INTEGER)`))
+          : talksQuery.orderBy(asc(sql`CAST(${publicTalks.no} AS INTEGER)`))
       break
 
     default:
       // Sort by last given date
-      talksQuery = sortOrder === "desc"
-        ? talksQuery.orderBy(desc(sql`MAX(${scheduledPublicTalks.date})`))
-        : talksQuery.orderBy(asc(sql`MAX(${scheduledPublicTalks.date})`))
+      talksQuery =
+        sortOrder === "desc"
+          ? talksQuery.orderBy(desc(sql`MAX(${scheduledPublicTalks.date})`))
+          : talksQuery.orderBy(asc(sql`MAX(${scheduledPublicTalks.date})`))
       break
   }
 

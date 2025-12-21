@@ -6,6 +6,7 @@
     "password": "Password",
     "submit": "Submit",
     "cancel": "Cancel",
+    "apply": "Apply",
     "comingSoon": "Coming Soon",
     "sending": "Sending...",
     "or": "or"
@@ -56,9 +57,49 @@
     "talks": "Talks",
     "actions": {
       "add": "Add Speaker",
+      "import": "Import Speakers",
       "edit": "Edit Speaker",
       "archive": "Archive",
       "restore": "Restore"
+    },
+    "import": {
+      "title": "Import Speaker List",
+      "description": "Upload a PDF or image file containing speaker information",
+      "uploadLabel": "Drop speaker list here",
+      "uploadDescription": "PDF, JPG, or PNG (max 20MB)",
+      "processing": "Processing file...",
+      "review": "Review extracted data",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "importSelected": "Import Selected ({count})",
+      "importAll": "Import All ({count})",
+      "noValidSpeakers": "No valid speakers to import",
+      "selectedCount": "Selected {count} of {total}",
+      "extracted": "Extracted",
+      "selectedTalks": "Selected",
+      "status": {
+        "new": "New",
+        "update": "Update",
+        "no-change": "No Changes",
+        "restore": "Restore"
+      },
+      "existingTalks": "Existing",
+      "newTalks": "New",
+      "congregationTransfer": "Congregation Transfer",
+      "nothingToImport": "All detected speakers already exist with identical data. Nothing to import.",
+      "treatAsNew": "Treat as new",
+      "changeMatch": "Change match",
+      "selectSpeaker": "Select Speaker",
+      "searchSpeaker": "Search speaker",
+      "success": "Successfully imported speakers",
+      "created": "created",
+      "updated": "updated",
+      "restored": "restored",
+      "archived": "archived",
+      "missingTitle": "Speakers to Archive",
+      "missingDescription": "These speakers are in the database from this congregation but are not on the new list. Select which ones should be archived.",
+      "assignedTalks": "Assigned talks",
+      "scheduledTalks": "{count} scheduled talks"
     },
     "modal": {
       "addTitle": "Add Speaker",
@@ -76,7 +117,13 @@
       "speakerUpdated": "Speaker updated",
       "speakerArchived": "Speaker archived",
       "speakerRestored": "Speaker restored",
-      "archiveError": "Error archiving speaker"
+      "archiveError": "Error archiving speaker",
+      "importSuccess": "Successfully imported {count} speakers",
+      "importError": "Failed to process file",
+      "extractionFailed": "Could not extract speaker data from file",
+      "networkError": "Connection error. Please try again.",
+      "timeout": "Processing took too long. Please try again.",
+      "retry": "Retry"
     }
   },
   "publishers": {
@@ -220,7 +267,12 @@
     "userAlreadyLinked": "This user is already linked to another publisher",
     "userNotFound": "User not found",
     "publisherIdRequired": "Publisher ID is required",
-    "publisherUpdateFailed": "Failed to update publisher"
+    "publisherUpdateFailed": "Failed to update publisher",
+    "noFileUploaded": "No file uploaded",
+    "invalidFile": "Invalid file",
+    "invalidJobId": "Invalid job ID",
+    "jobNotFound": "Job not found",
+    "invalidRequestBody": "Invalid request body"
   },
   "validation": {
     "required": "This field is required",
@@ -255,6 +307,9 @@
     "speakerOrPublisherRequired": "You must select either a visiting speaker or a local publisher",
     "customTalkTitleTooLong": "Custom talk title cannot be longer than 200 characters",
     "talkIdOrCustomTitleRequired": "You must select a talk or enter a custom talk title",
+    "fileTooLarge": "File is too large (max 20MB)",
+    "invalidFileType": "Invalid file type (PDF, JPG, or PNG only)",
+    "atLeastOneSpeaker": "Select at least one speaker",
     "publicTalkTitleRequired": "Public talk title is required",
     "serviceTalkTitleRequired": "Service talk title is required"
   },

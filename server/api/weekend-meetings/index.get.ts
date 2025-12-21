@@ -105,11 +105,6 @@ export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[
       if (part.type === MEETING_PART_TYPES.PUBLIC_TALK) {
         const publicTalk = part.scheduledPublicTalks[0]
         talkNumber = publicTalk?.talk?.no || undefined
-      } else if (part.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK) {
-        // For circuit overseer talks, try to find a talk number if a talk is scheduled
-        const scheduledPart = part.meetingScheduledParts[0]
-        // Note: Circuit overseer talks might not have talk numbers in the same way
-        // This could be enhanced if circuit overseer talks are linked to publicTalks
       }
 
       return {

@@ -7,6 +7,8 @@ export const AUDIT_EVENTS = {
   SPEAKER_EDITED: "speaker_edited",
   SPEAKER_ARCHIVED: "speaker_archived",
   SPEAKER_RESTORED: "speaker_restored",
+  SPEAKER_UPDATED_FROM_IMPORT: "speaker_updated_from_import",
+  SPEAKER_CONGREGATION_TRANSFERRED: "speaker_congregation_transferred",
   SCHEDULE_CREATED: "schedule_created",
   SCHEDULE_UPDATED: "schedule_updated",
   SCHEDULE_DELETED: "schedule_deleted",
