@@ -14,11 +14,23 @@
 
   const { t } = useI18n()
 
+  // Fetch permissions
+  const { can, fetchPermissions } = usePermissions()
+  await fetchPermissions()
+
   // Use composable for calendar chip logic
   const { shouldShowChip, getChipColor } = useCalendarChipColor()
 
   // Fetch weekend meeting programs for calendar range (3 months)
   const { data: programs, refresh } = await useFetch("/api/weekend-meetings", {
+    query: {
+      startDate: dayjs().subtract(1, "month").unix(),
+      endDate: dayjs().add(3, "month").unix(),
+    },
+  })
+
+  // Fetch meeting exceptions
+  const { data: exceptions, refresh: refreshExceptions } = await useFetch("/api/meeting-exceptions", {
     query: {
       startDate: dayjs().subtract(1, "month").unix(),
       endDate: dayjs().add(3, "month").unix(),
@@ -75,21 +87,44 @@
     return programs.value.filter(p => p.isCircuitOverseerVisit).map(p => p.date)
   })
 
+  const exceptionDates = computed(() => {
+    if (!exceptions.value) return []
+    return exceptions.value.map(e => e.date)
+  })
+
+  // Map chip color to UChip-compatible color
+  function getUChipColor(date: DateValue): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
+    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, exceptionDates.value)
+    return color === "purple" ? "primary" : color
+  }
+
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
     // Only handle single date selection
     if (!date || Array.isArray(date) || (typeof date === "object" && "start" in date)) return
     if (!date || !("day" in date)) return
 
-    const dayjsDate = dayjs(date.toString())
+    // Keep the LOCAL date (e.g., 2026-01-11) but normalize time to 11:00 UTC to match DB storage
+    const localDate = dayjs(date.toString())
+    const dayjsDate = dayjs
+      .utc()
+      .year(localDate.year())
+      .month(localDate.month())
+      .date(localDate.date())
+      .hour(11)
+      .minute(0)
+      .second(0)
+      .millisecond(0)
 
     if (dayjsDate.day() !== 0) return // Not Sunday
     if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return // Past date
 
     // Find existing program for this date
+    const dateToCheck = dayjsDate.toDate()
     selectedProgram.value =
-      (programs.value?.find(p => dayjs.unix(p.date).utc().isSame(dayjsDate, "day")) as
-        | WeekendProgram
-        | undefined) || null
+      (programs.value?.find(p => {
+        const programDate = dayjs.unix(p.date).toDate()
+        return isSameDay(dateToCheck, programDate)
+      }) as WeekendProgram | undefined) || null
 
     selectedDateForModal.value = dayjsDate.unix()
     showPlanningModal.value = true
@@ -112,11 +147,17 @@
     for (let week = 0; week < WEEKS_TO_SHOW; week++) {
       const sundayDate = currentSunday.toDate()
 
-      const isPlanned = programs.value?.some(p =>
-        dayjs.unix(p.date).utc().isSame(currentSunday, "day")
-      )
+      const isPlanned = programs.value?.some(p => {
+        const programDate = dayjs.unix(p.date).toDate()
+        return isSameDay(sundayDate, programDate)
+      })
 
-      if (!isPlanned) {
+      const isException = exceptions.value?.some(e => {
+        const exceptionDate = dayjs.unix(e.date).toDate()
+        return isSameDay(sundayDate, exceptionDate)
+      })
+
+      if (!isPlanned && !isException) {
         sundays.push(sundayDate)
       }
 
@@ -126,19 +167,41 @@
     return sundays
   })
 
+  // Exception modal state
+  const showExceptionModal = ref(false)
+  const selectedDateForException = ref<number | null>(null)
+  const selectedExceptionForEdit = ref(null)
+
+  // Check permission for managing exceptions
+  const canManageExceptions = computed(() => can("weekend_meetings", "manage_exceptions"))
+
   function handleModalSaved(): void {
     refresh()
     showPlanningModal.value = false
   }
 
+  function handleExceptionModalSaved(): void {
+    refresh()
+    refreshExceptions()
+    showExceptionModal.value = false
+  }
+
+  function openExceptionModal(): void {
+    selectedDateForException.value = null
+    selectedExceptionForEdit.value = null
+    showExceptionModal.value = true
+  }
+
   function handleSundayClick(sunday: Date): void {
     const sundayTimestamp = dateToUnixTimestamp(sunday)
+    const sundayDate = dayjs.unix(sundayTimestamp).toDate()
 
     // Find existing program for this date
     selectedProgram.value =
-      (programs.value?.find(p =>
-        dayjs.unix(p.date).utc().isSame(dayjs.unix(sundayTimestamp), "day")
-      ) as WeekendProgram | undefined) || null
+      (programs.value?.find(p => {
+        const programDate = dayjs.unix(p.date).toDate()
+        return isSameDay(sundayDate, programDate)
+      }) as WeekendProgram | undefined) || null
 
     selectedDateForModal.value = sundayTimestamp
     showPlanningModal.value = true
@@ -171,6 +234,20 @@
       </UButton>
     </div>
 
+    <!-- Manage Exceptions Button -->
+    <div
+      v-if="canManageExceptions"
+      class="flex justify-end">
+      <UButton
+        data-testid="manage-exceptions-button"
+        icon="i-heroicons-exclamation-triangle"
+        variant="outline"
+        size="md"
+        @click="openExceptionModal">
+        {{ t("meetings.meetingExceptions.manageExceptions") }}
+      </UButton>
+    </div>
+
     <ClientOnly>
       <UCalendar
         data-testid="weekend-calendar"
@@ -181,7 +258,7 @@
         <template #day="{ day }">
           <UChip
             :show="shouldShowChip(day)"
-            :color="getChipColor(day, plannedDates, circuitOverseerDates)"
+            :color="getUChipColor(day)"
             size="2xs">
             {{ day.day }}
           </UChip>
@@ -235,5 +312,11 @@
       :date="selectedDateForModal"
       :program="selectedProgram"
       @saved="handleModalSaved" />
+
+    <MeetingExceptionModal
+      v-model:open="showExceptionModal"
+      :date="selectedDateForException"
+      :exception="selectedExceptionForEdit"
+      @saved="handleExceptionModalSaved" />
   </div>
 </template>

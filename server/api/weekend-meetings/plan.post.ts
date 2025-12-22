@@ -6,6 +6,7 @@ import {
   meetingScheduledParts,
   publishers,
   scheduledPublicTalks,
+  meetingExceptions,
 } from "../../database/schema"
 import { validateBody } from "../../utils/validation"
 import { planWeekendMeetingSchema } from "#shared/utils/schemas"
@@ -33,6 +34,22 @@ export default defineEventHandler(async event => {
       statusCode: 400,
       statusMessage: "Bad Request",
       data: { message: "errors.dateMustBeFuture" },
+    })
+  }
+
+  // Check if date has an exception
+  const exception = await db.query.meetingExceptions.findFirst({
+    where: eq(meetingExceptions.date, body.date),
+  })
+
+  if (exception) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+      data: {
+        message: "errors.meetingDateHasException",
+        exceptionType: exception.exceptionType,
+      },
     })
   }
 

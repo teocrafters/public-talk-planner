@@ -3,7 +3,10 @@
     "sequential-thinking": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "env": {}
     },
     "figma": {
@@ -20,20 +23,21 @@
     },
     "playwright-test": {
       "command": "npx",
-      "args": ["playwright", "run-test-mcp-server"]
+      "args": [
+        "playwright",
+        "run-test-mcp-server"
+      ]
     },
     "cloudflare-docs": {
       "type": "sse",
       "url": "https://docs.mcp.cloudflare.com/sse"
     },
-    "context7": {
-      "type": "sse",
-      "url": "https://mcp.context7.com/sse"
-    },
     "chrome-devtools": {
       "type": "stdio",
       "command": "npx",
-      "args": ["chrome-devtools-mcp@latest"],
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ],
       "env": {}
     },
     "MCP SQLite Server": {
@@ -44,6 +48,13 @@
         "mcp-sqlite",
         ".data/hub/d1/miniflare-D1DatabaseObject/7b8799eb95f0bb5448e259812996a461ce40142dacbdea254ea597e307767f45.sqlite"
       ]
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "ctx7sk-b4d4d641-3d88-4ca9-8c33-5767b613819f"
+      }
     }
   }
 }

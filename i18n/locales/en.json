@@ -272,7 +272,13 @@
     "invalidFile": "Invalid file",
     "invalidJobId": "Invalid job ID",
     "jobNotFound": "Job not found",
-    "invalidRequestBody": "Invalid request body"
+    "invalidRequestBody": "Invalid request body",
+    "meetingDateHasException": "Cannot schedule meeting - this date is marked as exception ({exceptionType})",
+    "exceptionAlreadyExists": "Exception already exists for this date",
+    "exceptionNotFound": "Exception not found",
+    "permissionDeniedManageExceptions": "Permission denied to manage exceptions",
+    "exceptionIdRequired": "Exception ID is required",
+    "meetingAlreadyScheduledOnException": "A meeting is already scheduled for this date. Creating an exception will delete this meeting and all assignments."
   },
   "validation": {
     "required": "This field is required",
@@ -311,7 +317,10 @@
     "invalidFileType": "Invalid file type (PDF, JPG, or PNG only)",
     "atLeastOneSpeaker": "Select at least one speaker",
     "publicTalkTitleRequired": "Public talk title is required",
-    "serviceTalkTitleRequired": "Service talk title is required"
+    "serviceTalkTitleRequired": "Service talk title is required",
+    "exceptionTypeRequired": "Select exception type",
+    "descriptionTooLong": "Description cannot exceed 500 characters",
+    "atLeastOneFieldRequired": "At least one field is required for update"
   },
   "meetings": {
     "title": "Weekend Meetings",
@@ -382,6 +391,29 @@
       "title": "Validation Warning",
       "message": "The selected speaker does not have this talk in their list. Do you want to continue anyway?",
       "confirm": "Yes, schedule anyway"
+    },
+    "meetingExceptions": {
+      "title": "Meeting Exceptions",
+      "manageExceptions": "Manage Exceptions",
+      "createException": "Add Exception",
+      "editException": "Edit Exception",
+      "deleteException": "Delete Exception",
+      "exceptionType": "Exception Type",
+      "description": "Description (optional)",
+      "types": {
+        "circuit_assembly": "Circuit Assembly",
+        "regional_convention": "Regional Convention",
+        "memorial": "Memorial"
+      },
+      "confirmDeleteMeeting": "Existing meeting will be deleted",
+      "confirmDeleteMeetingDescription": "A meeting is already scheduled for this date ({date}). Creating an exception will delete this meeting and all assignments.",
+      "confirmDeleteExceptionTitle": "Delete Exception",
+      "confirmDeleteExceptionDescription": "Are you sure you want to delete this exception? After deletion, it will be possible to schedule a meeting on this date.",
+      "messages": {
+        "exceptionCreated": "Exception created",
+        "exceptionUpdated": "Exception updated",
+        "exceptionDeleted": "Exception deleted"
+      }
     }
   },
   "weekendMeetings": {

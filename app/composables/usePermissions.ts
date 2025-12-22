@@ -50,6 +50,10 @@ export function usePermissions() {
           key: "weekend_meetings:list_history",
           permissions: { weekend_meetings: ["list_history"] },
         },
+        {
+          key: "weekend_meetings:manage_exceptions",
+          permissions: { weekend_meetings: ["manage_exceptions"] },
+        },
         { key: "publishers:list", permissions: { publishers: ["list"] } },
         { key: "publishers:create", permissions: { publishers: ["create"] } },
         { key: "publishers:update", permissions: { publishers: ["update"] } },

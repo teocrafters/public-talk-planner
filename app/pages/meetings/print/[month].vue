@@ -57,14 +57,66 @@
     },
   })
 
-  // Filter meetings to ensure they're in the selected month
-  const monthPrograms = computed(() => {
-    if (!programs.value) return []
+  // Fetch meeting exceptions for the month
+  const { data: exceptions } = await useFetch("/api/meeting-exceptions", {
+    query: {
+      startDate: startOfMonth.unix(),
+      endDate: endOfMonth.unix(),
+    },
+  })
 
-    return programs.value.filter(program => {
-      const programMonth = dayjs.unix(program.date).format("YYYY-MM")
-      return programMonth === monthParam
+  // Unified timeline item type
+  type TimelineItem =
+    | {
+        type: "meeting"
+        meeting: WeekendMeetingListItem
+      }
+    | {
+        type: "exception"
+        exception: NonNullable<typeof exceptions.value>[number]
+      }
+
+  // Unified timeline grouped by month (YYYY-MM format)
+  const unifiedTimelineByMonth = computed(() => {
+    if (!programs.value && !exceptions.value) return new Map()
+
+    const timeline: TimelineItem[] = []
+    const exceptionDates = new Set<string>() // format: "YYYY-MM-DD"
+
+    // 1. Add all exceptions to timeline and remember dates
+    exceptions.value?.forEach(exception => {
+      timeline.push({ type: "exception", exception })
+      exceptionDates.add(dayjs.unix(exception.date).format("YYYY-MM-DD"))
     })
+
+    // 2. Add programs ONLY if there's NO exception on that day
+    programs.value?.forEach(program => {
+      const programDate = dayjs.unix(program.date).format("YYYY-MM-DD")
+      if (!exceptionDates.has(programDate)) {
+        timeline.push({ type: "meeting", meeting: program })
+      }
+    })
+
+    // 3. Sort chronologically
+    timeline.sort((a, b) => {
+      const dateA = a.type === "meeting" ? a.meeting.date : a.exception.date
+      const dateB = b.type === "meeting" ? b.meeting.date : b.exception.date
+      return dateA - dateB
+    })
+
+    // 4. Group by months (YYYY-MM format)
+    const groups = new Map<string, TimelineItem[]>()
+    timeline.forEach(item => {
+      const date = item.type === "meeting" ? item.meeting.date : item.exception.date
+      const monthKey = dayjs.unix(date).format("YYYY-MM")
+
+      if (!groups.has(monthKey)) {
+        groups.set(monthKey, [])
+      }
+      groups.get(monthKey)!.push(item)
+    })
+
+    return groups
   })
 
   // Sort order for parts
@@ -155,7 +207,7 @@
 
     <!-- Print Content -->
     <div
-      v-else-if="monthPrograms && monthPrograms.length > 0"
+      v-else-if="unifiedTimelineByMonth.get(monthParam) && unifiedTimelineByMonth.get(monthParam)!.length > 0"
       class="print-content">
       <!-- Print Header -->
       <header class="print-header mb-6">
@@ -167,31 +219,53 @@
         </h2>
       </header>
 
-      <!-- Meetings List -->
+      <!-- Timeline List -->
       <div class="meetings-list space-y-4">
         <article
-          v-for="program in monthPrograms"
-          :key="program.id"
+          v-for="item in unifiedTimelineByMonth.get(monthParam)"
+          :key="item.type === 'meeting' ? `meeting-${item.meeting.id}` : `exception-${item.exception.id}`"
           class="meeting-block">
-          <!-- Meeting Date -->
-          <div class="meeting-header flex items-center gap-2 mb-2">
-            <h3 class="text-base font-semibold">
-              {{ dayjs.unix(program.date).format("dddd, D MMMM YYYY") }}
-            </h3>
-            <span
-              v-if="program.isCircuitOverseerVisit"
-              class="co-badge">
-              {{ t("meetings.circuitOverseerVisit") }}
-            </span>
-          </div>
 
-          <!-- Meeting Parts -->
-          <div class="meeting-parts space-y-2">
-            <MeetingPartItem
-              v-for="item in prepareDisplayItems(program.parts)"
-              :key="item.type === 'watchtower_with_reader' ? item.watchtowerPart.id : item.part.id"
-              :item="item" />
-          </div>
+          <!-- Exception Block -->
+          <template v-if="item.type === 'exception'">
+            <div class="meeting-header mb-2">
+              <h3 class="text-base font-semibold">
+                {{ dayjs.unix(item.exception.date).format("dddd, D MMMM YYYY") }}
+              </h3>
+            </div>
+            <div class="exception-notice border-l-4 border-purple-500 pl-3">
+              <p class="font-semibold">
+                {{ t(`meetings.meetingExceptions.types.${item.exception.exceptionType}`) }}
+              </p>
+              <p
+                v-if="item.exception.description"
+                class="text-xs text-gray-600 mt-1">
+                {{ item.exception.description }}
+              </p>
+            </div>
+          </template>
+
+          <!-- Meeting Block -->
+          <template v-else>
+            <div class="meeting-header flex items-center gap-2 mb-2">
+              <h3 class="text-base font-semibold">
+                {{ dayjs.unix(item.meeting.date).format("dddd, D MMMM YYYY") }}
+              </h3>
+              <span
+                v-if="item.meeting.isCircuitOverseerVisit"
+                class="co-badge">
+                {{ t("meetings.circuitOverseerVisit") }}
+              </span>
+            </div>
+
+            <!-- Meeting Parts -->
+            <div class="meeting-parts space-y-2">
+              <MeetingPartItem
+                v-for="partItem in prepareDisplayItems(item.meeting.parts)"
+                :key="partItem.type === 'watchtower_with_reader' ? partItem.watchtowerPart.id : partItem.part.id"
+                :item="partItem" />
+            </div>
+          </template>
         </article>
       </div>
     </div>

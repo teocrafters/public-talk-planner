@@ -250,7 +250,8 @@
 
   function calendarChipColor(date: DateValue | undefined) {
     if (!date) return "neutral" as const
-    return getChipColor(date, plannedDates.value, circuitOverseerDates.value)
+    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, [])
+    return color === "purple" ? "primary" : color
   }
 
   function shouldCalendarShowChip(date: DateValue | undefined) {

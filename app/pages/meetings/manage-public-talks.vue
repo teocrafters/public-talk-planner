@@ -64,6 +64,12 @@
     return weekendPrograms.value.filter(p => p.isCircuitOverseerVisit).map(p => p.date)
   })
 
+  // Map chip color to UChip-compatible color
+  function getUChipColor(date: DateValue): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
+    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, [])
+    return color === "purple" ? "primary" : color
+  }
+
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
     // Only handle single date selection
     if (!date || Array.isArray(date) || (typeof date === "object" && "start" in date)) return
@@ -167,7 +173,7 @@
         <template #day="{ day }">
           <UChip
             :show="shouldShowChip(day)"
-            :color="getChipColor(day, plannedDates, circuitOverseerDates)"
+            :color="getUChipColor(day)"
             size="2xs">
             {{ day.day }}
           </UChip>

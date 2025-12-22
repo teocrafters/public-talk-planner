@@ -198,7 +198,13 @@
     "invalidFile": "Nieprawidłowy plik",
     "invalidJobId": "Nieprawidłowy identyfikator zadania",
     "jobNotFound": "Zadanie nie znalezione",
-    "invalidRequestBody": "Nieprawidłowe dane żądania"
+    "invalidRequestBody": "Nieprawidłowe dane żądania",
+    "meetingDateHasException": "Nie można zaplanować zebrania - ten dzień jest oznaczony jako wyjątek ({exceptionType})",
+    "exceptionAlreadyExists": "Wyjątek na ten dzień już istnieje",
+    "exceptionNotFound": "Nie znaleziono wyjątku",
+    "permissionDeniedManageExceptions": "Brak uprawnień do zarządzania wyjątkami",
+    "exceptionIdRequired": "Identyfikator wyjątku jest wymagany",
+    "meetingAlreadyScheduledOnException": "Na tę datę jest już zaplanowane zebranie. Utworzenie wyjątku spowoduje usunięcie tego zebrania i wszystkich przydziałów."
   },
   "speakers": {
     "title": "Mówcy",
@@ -376,7 +382,10 @@
     "talkIdOrCustomTitleRequired": "Musisz wybrać wykład lub wprowadzić tytuł własnego wykładu",
     "fileTooLarge": "Plik jest za duży (maks. 20MB)",
     "invalidFileType": "Nieprawidłowy typ pliku (dozwolone: PDF, JPG, PNG)",
-    "atLeastOneSpeaker": "Wybierz przynajmniej jednego mówcę"
+    "atLeastOneSpeaker": "Wybierz przynajmniej jednego mówcę",
+    "exceptionTypeRequired": "Wybierz typ wyjątku",
+    "descriptionTooLong": "Opis nie może przekraczać 500 znaków",
+    "atLeastOneFieldRequired": "Wymagane jest co najmniej jedno pole do aktualizacji"
   },
   "meetings": {
     "title": "Zebrania w weekend",
@@ -447,6 +456,29 @@
       "title": "Ostrzeżenie walidacji",
       "message": "Wybrany mówca nie ma tego wykładu na swojej liście. Czy chcesz kontynuować mimo to?",
       "confirm": "Tak, zaplanuj mimo to"
+    },
+    "meetingExceptions": {
+      "title": "Wyjątki zebraniowe",
+      "manageExceptions": "Zarządzaj wyjątkami",
+      "createException": "Dodaj wyjątek",
+      "editException": "Edytuj wyjątek",
+      "deleteException": "Usuń wyjątek",
+      "exceptionType": "Typ wyjątku",
+      "description": "Opis (opcjonalny)",
+      "types": {
+        "circuit_assembly": "Zgromadzenie obwodowe",
+        "regional_convention": "Kongres regionalny",
+        "memorial": "Pamiątka"
+      },
+      "confirmDeleteMeeting": "Istniejące zebranie zostanie usunięte",
+      "confirmDeleteMeetingDescription": "Na ten dzień ({date}) zaplanowano już zebranie. Utworzenie wyjątku spowoduje usunięcie tego zebrania i wszystkich przydziałów.",
+      "confirmDeleteExceptionTitle": "Usuń wyjątek",
+      "confirmDeleteExceptionDescription": "Czy na pewno chcesz usunąć ten wyjątek? Po usunięciu będzie można zaplanować zebranie na ten dzień.",
+      "messages": {
+        "exceptionCreated": "Wyjątek został utworzony",
+        "exceptionUpdated": "Wyjątek został zaktualizowany",
+        "exceptionDeleted": "Wyjątek został usunięty"
+      }
     }
   },
   "weekendMeetings": {
