@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
-import { eq, and } from "drizzle-orm"
+import { eq, and, gte, lte } from "drizzle-orm"
 import { generateId } from "better-auth"
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
@@ -132,9 +132,17 @@ export default defineTask({
           const date = dateDayjs.toDate()
           const dateUnix = dateDayjs.unix()
 
-          // Check if meeting program already exists for this date
+          // Calculate day boundaries for range query (resilient to timestamp inconsistencies)
+          const startOfDay = dateDayjs.startOf("day").unix()
+          const endOfDay = dateDayjs.endOf("day").unix()
+
+          // Check if meeting program already exists for this date (using day range)
           const existingProgram = await db.query.meetingPrograms.findFirst({
-            where: and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, dateUnix)),
+            where: and(
+              eq(meetingPrograms.type, "weekend"),
+              gte(meetingPrograms.date, startOfDay),
+              lte(meetingPrograms.date, endOfDay)
+            ),
           })
 
           let programId: number
@@ -157,7 +165,7 @@ export default defineTask({
             let publicTalkPart = await db.query.meetingProgramParts.findFirst({
               where: and(
                 eq(meetingProgramParts.meetingProgramId, existingProgram.id),
-                eq(meetingProgramParts.type, "PUBLIC_TALK")
+                eq(meetingProgramParts.type, MEETING_PART_TYPES.PUBLIC_TALK)
               ),
             })
 
@@ -196,7 +204,7 @@ export default defineTask({
               .insert(meetingProgramParts)
               .values({
                 meetingProgramId: program.id,
-                type: "PUBLIC_TALK",
+                type: MEETING_PART_TYPES.PUBLIC_TALK,
                 name: null,
                 order: MEETING_PART_ORDER.indexOf(MEETING_PART_TYPES.PUBLIC_TALK) + 1,
                 createdAt: new Date(),
