@@ -196,6 +196,25 @@ export const meetingScheduledParts = sqliteTable(
   }
 )
 
+export const meetingExceptions = sqliteTable(
+	"meeting_exceptions",
+	{
+		id: text("id").primaryKey(),
+		date: integer("date", { mode: "number" }).notNull(),
+		exceptionType: text("exception_type")
+			.$type<"circuit_assembly" | "regional_convention" | "memorial">()
+			.notNull(),
+		description: text("description"),
+		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	},
+	table => {
+		return {
+			uniqueDate: uniqueIndex("meeting_exceptions_date_unique").on(table.date),
+		}
+	}
+)
+
 export type MeetingProgram = typeof meetingPrograms.$inferSelect
 export type NewMeetingProgram = typeof meetingPrograms.$inferInsert
 export type MeetingProgramPart = typeof meetingProgramParts.$inferSelect
@@ -204,6 +223,8 @@ export type ScheduledPublicTalk = typeof scheduledPublicTalks.$inferSelect
 export type NewScheduledPublicTalk = typeof scheduledPublicTalks.$inferInsert
 export type MeetingScheduledPart = typeof meetingScheduledParts.$inferSelect
 export type NewMeetingScheduledPart = typeof meetingScheduledParts.$inferInsert
+export type MeetingException = typeof meetingExceptions.$inferSelect
+export type NewMeetingException = typeof meetingExceptions.$inferInsert
 
 // Relations
 export const publishersRelations = relations(publishers, ({ one, many }) => ({

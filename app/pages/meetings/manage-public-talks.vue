@@ -31,6 +31,14 @@
     },
   })
 
+  // Fetch meeting exceptions for calendar chip display
+  const { data: exceptions } = await useFetch("/api/meeting-exceptions", {
+    query: {
+      startDate: dayjs().subtract(1, "month").unix(),
+      endDate: dayjs().add(3, "month").unix(),
+    },
+  })
+
   // Responsive months display - start with mobile size
   const windowWidth = ref(1)
   const numberOfMonths = computed(() => {
@@ -63,6 +71,17 @@
     if (!weekendPrograms.value) return []
     return weekendPrograms.value.filter(p => p.isCircuitOverseerVisit).map(p => p.date)
   })
+
+  const exceptionDates = computed(() => {
+    if (!exceptions.value) return []
+    return exceptions.value.map(e => e.date)
+  })
+
+  // Map chip color to UChip-compatible color
+  function getUChipColor(date: DateValue): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
+    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, exceptionDates.value)
+    return color === "purple" ? "primary" : color
+  }
 
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
     // Only handle single date selection
@@ -102,7 +121,12 @@
 
       const isScheduled = schedules.value?.some(s => isSameDay(s.date, sundayDate))
 
-      if (!isScheduled) {
+      const isException = exceptions.value?.some(e => {
+        const exceptionDate = dayjs.unix(e.date).toDate()
+        return isSameDay(sundayDate, exceptionDate)
+      })
+
+      if (!isScheduled && !isException) {
         sundays.push(sundayDate)
       }
 
@@ -167,7 +191,7 @@
         <template #day="{ day }">
           <UChip
             :show="shouldShowChip(day)"
-            :color="getChipColor(day, plannedDates, circuitOverseerDates)"
+            :color="getUChipColor(day)"
             size="2xs">
             {{ day.day }}
           </UChip>

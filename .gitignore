@@ -40,3 +40,6 @@ requirements/
 *.jwpub
 
 *.pid.json
+
+# MCP configuration (may contain API keys)
+.mcp.json

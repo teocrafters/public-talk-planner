@@ -200,42 +200,59 @@ export function useDrizzle() {
 export const tables = schema
 ```
 
-### Transaction Patterns
+### Cloudflare D1 Transaction Limitations
 
-- USE transactions when updating multiple related records
-- ROLLBACK transactions on any error to maintain consistency
-- KEEP transactions short and focused
-- AVOID long-running operations within transactions
+⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`, `SAVEPOINT`).
 
-**Example Transaction Usage:**
+**Why D1 is Different:**
+- D1 is a serverless SQLite database running in Cloudflare Workers
+- Traditional SQL transactions don't work in the Workers environment
+- Drizzle's `db.transaction()` uses SQL BEGIN which D1 will reject
+
+**Recommended Alternative:**
+
+1. **Use `db.batch()` for atomic operations** (D1-compatible approach)
+
+### Batch Operations Pattern (D1-Compatible)
+
+- USE `db.batch()` when updating multiple related records
+- ROLLBACK happens automatically on any error within batch
+- KEEP batches short and focused
+- MOVE dependent queries outside the batch (e.g., fetch data first)
+
+**Example Batch Usage:**
 
 ```typescript
 const db = useDrizzle()
 
-await db.transaction(async tx => {
+// All operations execute atomically - if any fails, all are rolled back
+await db.batch([
   // Insert talk
-  const [talk] = await tx
-    .insert(tables.talks)
-    .values({
-      id: crypto.randomUUID(),
-      title: "New Talk",
-      speakerId: speaker.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .returning()
-
-  // Create schedule entry
-  await tx.insert(tables.schedules).values({
+  db.insert(tables.talks).values({
     id: crypto.randomUUID(),
-    talkId: talk.id,
+    title: "New Talk",
+    speakerId: speaker.id,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }),
+
+  // Create schedule entry (talkId must be known beforehand)
+  db.insert(tables.schedules).values({
+    id: crypto.randomUUID(),
+    talkId: talkId, // Pre-fetched or generated
     scheduledDate: dateTimestamp,
     createdAt: new Date(),
     updatedAt: new Date(),
-  })
+  }),
+])
 
-  // If any operation fails, both are rolled back
-})
+// If any operation fails, D1 rolls back the entire batch
+```
+
+**Important Batch API Considerations:**
+- All statements in batch must be independent (no dependencies on results from previous statements)
+- Move dependent queries outside the batch (e.g., fetch IDs before executing batch)
+- If any operation fails, D1 rolls back the entire batch
 ```
 
 ## Migration Workflow Best Practices
@@ -451,9 +468,27 @@ database.
 
 Never concatenate user input into SQL queries. Always use Drizzle's parameterized queries.
 
-**❌ Not Using Transactions for Related Operations**
+**❌ Using db.transaction() with Cloudflare D1**
 
-Without transactions, partial updates can occur if errors happen during multi-step operations.
+Cloudflare D1 does not support SQL BEGIN TRANSACTION. Use `db.batch()` instead.
+
+```typescript
+// ❌ Wrong: Will fail on D1
+await db.transaction(async tx => {
+  await tx.insert(tables.talks).values(...)
+  await tx.insert(tables.schedules).values(...)
+})
+
+// ✅ Correct: Use batch() for D1
+await db.batch([
+  db.insert(tables.talks).values(...),
+  db.insert(tables.schedules).values(...),
+])
+```
+
+**❌ Not Using Batch Operations for Related Operations**
+
+Without batch operations, partial updates can occur if errors happen during multi-step operations.
 
 ## Context7 References
 

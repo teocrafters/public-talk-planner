@@ -1,11 +1,12 @@
 import { createError } from "h3"
-import { eq, and } from "drizzle-orm"
+import { eq, and, gte, lte } from "drizzle-orm"
 import {
   meetingPrograms,
   meetingProgramParts,
   meetingScheduledParts,
   publishers,
   scheduledPublicTalks,
+  meetingExceptions,
 } from "../../database/schema"
 import { validateBody } from "../../utils/validation"
 import { planWeekendMeetingSchema } from "#shared/utils/schemas"
@@ -33,6 +34,26 @@ export default defineEventHandler(async event => {
       statusCode: 400,
       statusMessage: "Bad Request",
       data: { message: "errors.dateMustBeFuture" },
+    })
+  }
+
+  // Check if date has an exception (using day-range check for consistency)
+  const requestDate = dayjs.unix(body.date)
+  const dayStartUnix = requestDate.startOf("day").unix()
+  const dayEndUnix = requestDate.endOf("day").unix()
+
+  const exception = await db.query.meetingExceptions.findFirst({
+    where: and(gte(meetingExceptions.date, dayStartUnix), lte(meetingExceptions.date, dayEndUnix)),
+  })
+
+  if (exception) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+      data: {
+        message: "errors.meetingDateHasException",
+        exceptionType: exception.exceptionType,
+      },
     })
   }
 

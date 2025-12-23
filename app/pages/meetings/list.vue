@@ -23,21 +23,73 @@
     },
   })
 
+  const {
+    data: exceptions,
+    refresh: refreshExceptions,
+  } = await useFetch("/api/meeting-exceptions", {
+    query: {
+      startDate: dayjs().subtract(6, "month").unix(),
+      endDate: dayjs().add(6, "month").unix(),
+    },
+  })
+
+  // Refresh exceptions when page becomes visible (e.g., after navigating back)
+  onMounted(() => {
+    refreshExceptions()
+  })
+
   const canSchedulePublicTalks = can("weekend_meetings", "schedule_public_talks")
   const canScheduleRestParts = can("weekend_meetings", "schedule_rest")
 
-  const groupedByMonth = computed(() => {
-    if (!programs.value) return new Map()
+  // Unified timeline item type
+  type TimelineItem =
+    | {
+        type: "meeting"
+        meeting: WeekendMeetingListItem
+      }
+    | {
+        type: "exception"
+        exception: NonNullable<typeof exceptions.value>[number]
+      }
 
-    const groups = new Map<string, WeekendMeetingListItem[]>()
+  // Unified timeline grouped by month (MMMM YYYY format)
+  const unifiedTimelineByMonth = computed(() => {
+    if (!programs.value && !exceptions.value) return new Map()
 
-    programs.value.forEach(program => {
-      const monthKey = dayjs.unix(program.date).format("MMMM YYYY")
+    const timeline: TimelineItem[] = []
+    const exceptionDates = new Set<string>() // format: "YYYY-MM-DD"
+
+    // 1. Add all exceptions to timeline and remember dates
+    exceptions.value?.forEach(exception => {
+      timeline.push({ type: "exception", exception })
+      exceptionDates.add(dayjs.unix(exception.date).format("YYYY-MM-DD"))
+    })
+
+    // 2. Add programs ONLY if there's NO exception on that day
+    programs.value?.forEach(program => {
+      const programDate = dayjs.unix(program.date).format("YYYY-MM-DD")
+      if (!exceptionDates.has(programDate)) {
+        timeline.push({ type: "meeting", meeting: program })
+      }
+    })
+
+    // 3. Sort chronologically
+    timeline.sort((a, b) => {
+      const dateA = a.type === "meeting" ? a.meeting.date : a.exception.date
+      const dateB = b.type === "meeting" ? b.meeting.date : b.exception.date
+      return dateA - dateB
+    })
+
+    // 4. Group by months (MMMM YYYY)
+    const groups = new Map<string, TimelineItem[]>()
+    timeline.forEach(item => {
+      const date = item.type === "meeting" ? item.meeting.date : item.exception.date
+      const monthKey = dayjs.unix(date).format("MMMM YYYY")
 
       if (!groups.has(monthKey)) {
         groups.set(monthKey, [])
       }
-      groups.get(monthKey)!.push(program)
+      groups.get(monthKey)!.push(item)
     })
 
     return groups
@@ -191,7 +243,7 @@
       data-testid="meetings-list"
       class="space-y-6">
       <div
-        v-for="[month, monthPrograms] in groupedByMonth"
+        v-for="[month, monthItems] in unifiedTimelineByMonth"
         :key="month"
         class="space-y-0">
         <div
@@ -214,39 +266,73 @@
           </UButton>
         </div>
         <div class="mt-3 space-y-3">
-          <UCard
-            v-for="program in monthPrograms"
-            :key="program.id"
-            :data-testid="`meeting-card-${program.id}`"
-            class="hover:shadow-md transition-shadow">
-            <div class="space-y-4">
-              <!-- Date and CO Visit Badge -->
+          <template
+            v-for="item in monthItems"
+            :key="
+              item.type === 'meeting' ? `meeting-${item.meeting.id}` : `exception-${item.exception.id}`
+            ">
+            <!-- Exception Card -->
+            <UCard
+              v-if="item.type === 'exception'"
+              color="purple"
+              variant="subtle"
+              :data-testid="`exception-card-${item.exception.date}`">
               <div class="flex items-center gap-2">
-                <p
-                  data-testid="meeting-date"
-                  class="text-lg font-semibold text-default">
-                  {{ dayjs.unix(program.date).format("dddd, D MMMM YYYY") }}
-                </p>
-                <UBadge
-                  v-if="program.isCircuitOverseerVisit"
-                  color="secondary"
-                  variant="subtle"
-                  size="sm">
-                  {{ t("meetings.circuitOverseerVisit") }}
-                </UBadge>
+                <UIcon
+                  name="i-heroicons-exclamation-triangle"
+                  class="text-purple-500" />
+                <div>
+                  <p class="text-sm text-muted">
+                    {{ formatDatePL(item.exception.date) }}
+                  </p>
+                  <p class="font-semibold text-default">
+                    {{ t(`meetings.meetingExceptions.types.${item.exception.exceptionType}`) }}
+                  </p>
+                  <p
+                    v-if="item.exception.description"
+                    class="text-sm text-muted">
+                    {{ item.exception.description }}
+                  </p>
+                </div>
               </div>
+            </UCard>
 
-              <!-- All Meeting Parts -->
-              <div class="flex flex-col gap-3">
-                <MeetingPartItem
-                  v-for="item in prepareDisplayItems(program.parts)"
-                  :key="
-                    item.type === 'watchtower_with_reader' ? item.watchtowerPart.id : item.part.id
-                  "
-                  :item="item" />
+            <!-- Meeting Card -->
+            <UCard
+              v-else
+              :data-testid="`meeting-card-${item.meeting.id}`"
+              class="hover:shadow-md transition-shadow">
+              <div class="space-y-4">
+                <!-- Date and CO Visit Badge -->
+                <div class="flex items-center gap-2">
+                  <p
+                    data-testid="meeting-date"
+                    class="text-lg font-semibold text-default">
+                    {{ dayjs.unix(item.meeting.date).format("dddd, D MMMM YYYY") }}
+                  </p>
+                  <UBadge
+                    v-if="item.meeting.isCircuitOverseerVisit"
+                    color="secondary"
+                    variant="subtle"
+                    size="sm">
+                    {{ t("meetings.circuitOverseerVisit") }}
+                  </UBadge>
+                </div>
+
+                <!-- All Meeting Parts -->
+                <div class="flex flex-col gap-3">
+                  <MeetingPartItem
+                    v-for="partItem in prepareDisplayItems(item.meeting.parts)"
+                    :key="
+                      partItem.type === 'watchtower_with_reader'
+                        ? partItem.watchtowerPart.id
+                        : partItem.part.id
+                    "
+                    :item="partItem" />
+                </div>
               </div>
-            </div>
-          </UCard>
+            </UCard>
+          </template>
         </div>
       </div>
     </div>

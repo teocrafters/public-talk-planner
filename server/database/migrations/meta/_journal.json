@@ -29,6 +29,13 @@
       "when": 1763396441668,
       "tag": "0003_rainy_frank_castle",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1766348997592,
+      "tag": "0004_hard_logan",
+      "breakpoints": true
     }
   ]
 }

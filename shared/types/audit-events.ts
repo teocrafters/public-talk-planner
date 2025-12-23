@@ -1,4 +1,5 @@
 import type { SpeakerSourceType } from "#shared/constants/speaker-sources"
+import type { MeetingExceptionType } from "#shared/constants/meeting-exceptions"
 import type { AUDIT_EVENTS } from "../utils/audit-events"
 import type {
   TalkUpdateInput,
@@ -138,5 +139,26 @@ export interface AuditEventDetails {
   [AUDIT_EVENTS.WEEKEND_MEETING_UPDATED]: {
     programId: number
     changes: WeekendMeetingUpdateInput
+  }
+  [AUDIT_EVENTS.MEETING_EXCEPTION_CREATED]: {
+    exceptionId: string
+    date: number
+    exceptionType: MeetingExceptionType
+    description: string | null
+    deletedExistingMeeting: boolean
+    deletedMeetingId?: number
+  }
+  [AUDIT_EVENTS.MEETING_EXCEPTION_UPDATED]: {
+    exceptionId: string
+    date: number
+    changes: {
+      exceptionType?: MeetingExceptionType
+      description?: string | null
+    }
+  }
+  [AUDIT_EVENTS.MEETING_EXCEPTION_DELETED]: {
+    exceptionId: string
+    date: number
+    exceptionType: MeetingExceptionType
   }
 }
