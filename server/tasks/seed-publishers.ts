@@ -1,5 +1,5 @@
 import { eq, and } from "drizzle-orm"
-import { publishers } from "../database/schema"
+import { schema } from "hub:db"
 
 export default defineTask({
   meta: {
@@ -10,8 +10,6 @@ export default defineTask({
     console.log("Starting publishers seeding...")
 
     try {
-      const db = useDrizzle()
-
       const sampleData = [
         // 1. Elder - Watchtower Conductor
         {
@@ -244,14 +242,14 @@ export default defineTask({
         // Check if publisher with this name already exists
         const existing = await db
           .select()
-          .from(publishers)
+          .from(schema.publishers)
           .where(
-            and(eq(publishers.firstName, data.firstName), eq(publishers.lastName, data.lastName))
+            and(eq(schema.publishers.firstName, data.firstName), eq(schema.publishers.lastName, data.lastName))
           )
           .get()
 
         if (!existing) {
-          await db.insert(publishers).values({
+          await db.insert(schema.publishers).values({
             ...data,
             userId: null,
             isMinisterialServant: data.isMinisterialServant ?? false,

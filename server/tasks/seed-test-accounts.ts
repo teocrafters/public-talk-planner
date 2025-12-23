@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { eq } from "drizzle-orm"
 import { generateRandomString } from "better-auth/crypto"
-import { organization, member, user } from "../database/auth-schema"
+import { organization, member, user } from "../db/auth-schema"
 import { serverAuth } from "../utils/auth"
 
 export default defineTask({
@@ -17,7 +17,6 @@ export default defineTask({
       const dataPath = join(process.cwd(), "tests", "fixtures", "test-accounts.json")
       const data = JSON.parse(await readFile(dataPath, "utf-8"))
 
-      const db = useDrizzle()
       const auth = serverAuth()
 
       // Check if organization already exists

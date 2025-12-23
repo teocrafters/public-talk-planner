@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm"
 import { generateId } from "better-auth"
-import { organization } from "../database/auth-schema"
+import { organization } from "../db/auth-schema"
 
 export default defineTask({
   meta: {
@@ -9,8 +9,6 @@ export default defineTask({
   },
   async run() {
     console.log("Running congregations seed task...")
-
-    const db = useDrizzle()
 
     const congregations = [
       // TODO: Add more congregations

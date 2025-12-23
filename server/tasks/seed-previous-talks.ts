@@ -5,14 +5,7 @@ import { eq, and, gte, lte } from "drizzle-orm"
 import { generateId } from "better-auth"
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
-import {
-  organization,
-  speakers,
-  publicTalks,
-  meetingPrograms,
-  meetingProgramParts,
-  scheduledPublicTalks,
-} from "../database/schema"
+import { schema } from "hub:db"
 import { MEETING_PART_TYPES, MEETING_PART_ORDER } from "#shared/constants/meetings"
 
 // Extend dayjs with customParseFormat plugin for DD.MM.YYYY format support
@@ -37,17 +30,15 @@ export default defineTask({
     console.log("Starting previous talks seeding...")
 
     try {
-      const db = useDrizzle()
-
       // Step 1: Ensure "Nieznany zbor" exists
       console.log("Ensuring 'Nieznany zbor' exists...")
       let unknownCongregation = await db.query.organization.findFirst({
-        where: eq(organization.slug, UNKNOWN_CONGREGATION_SLUG),
+        where: eq(schema.organization.slug, UNKNOWN_CONGREGATION_SLUG),
       })
 
       if (!unknownCongregation) {
         const [newCongregation] = await db
-          .insert(organization)
+          .insert(schema.organization)
           .values({
             id: generateId(),
             name: "Nieznany zbor",
@@ -66,12 +57,12 @@ export default defineTask({
       // Step 2: Ensure "Nieznany mówca" exists
       console.log("Ensuring 'Nieznany mówca' exists...")
       let unknownSpeaker = await db.query.speakers.findFirst({
-        where: eq(speakers.id, UNKNOWN_SPEAKER_ID),
+        where: eq(schema.speakers.id, UNKNOWN_SPEAKER_ID),
       })
 
       if (!unknownSpeaker) {
         const [newSpeaker] = await db
-          .insert(speakers)
+          .insert(schema.speakers)
           .values({
             id: UNKNOWN_SPEAKER_ID,
             firstName: "Nieznany",
@@ -108,7 +99,7 @@ export default defineTask({
       for (const { talkNo, dates } of previousTalks) {
         // Find the talk in database by talk number (publicTalks.no field)
         const talk = await db.query.publicTalks.findFirst({
-          where: eq(publicTalks.no, String(talkNo)),
+          where: eq(schema.publicTalks.no, String(talkNo)),
         })
 
         if (!talk) {
@@ -139,9 +130,9 @@ export default defineTask({
           // Check if meeting program already exists for this date (using day range)
           const existingProgram = await db.query.meetingPrograms.findFirst({
             where: and(
-              eq(meetingPrograms.type, "weekend"),
-              gte(meetingPrograms.date, startOfDay),
-              lte(meetingPrograms.date, endOfDay)
+              eq(schema.meetingPrograms.type, "weekend"),
+              gte(schema.meetingPrograms.date, startOfDay),
+              lte(schema.meetingPrograms.date, endOfDay)
             ),
           })
 
@@ -152,7 +143,7 @@ export default defineTask({
           if (existingProgram) {
             // Check if a public talk already exists for this program
             const existingTalk = await db.query.scheduledPublicTalks.findFirst({
-              where: eq(scheduledPublicTalks.meetingProgramId, existingProgram.id),
+              where: eq(schema.scheduledPublicTalks.meetingProgramId, existingProgram.id),
             })
 
             if (existingTalk) {
@@ -164,14 +155,14 @@ export default defineTask({
             // Find or create PUBLIC_TALK part for existing program
             let publicTalkPart = await db.query.meetingProgramParts.findFirst({
               where: and(
-                eq(meetingProgramParts.meetingProgramId, existingProgram.id),
-                eq(meetingProgramParts.type, MEETING_PART_TYPES.PUBLIC_TALK)
+                eq(schema.meetingProgramParts.meetingProgramId, existingProgram.id),
+                eq(schema.meetingProgramParts.type, MEETING_PART_TYPES.PUBLIC_TALK)
               ),
             })
 
             if (!publicTalkPart) {
               const [createdPart] = await db
-                .insert(meetingProgramParts)
+                .insert(schema.meetingProgramParts)
                 .values({
                   meetingProgramId: existingProgram.id,
                   type: MEETING_PART_TYPES.PUBLIC_TALK,
@@ -189,7 +180,7 @@ export default defineTask({
           } else {
             // Create new meeting program
             const [program] = await db
-              .insert(meetingPrograms)
+              .insert(schema.meetingPrograms)
               .values({
                 type: "weekend",
                 date: dateUnix,
@@ -201,7 +192,7 @@ export default defineTask({
 
             // Create PUBLIC_TALK part
             const [part] = await db
-              .insert(meetingProgramParts)
+              .insert(schema.meetingProgramParts)
               .values({
                 meetingProgramId: program.id,
                 type: MEETING_PART_TYPES.PUBLIC_TALK,
@@ -217,7 +208,7 @@ export default defineTask({
           }
 
           // Create scheduledPublicTalk (common for both cases)
-          await db.insert(scheduledPublicTalks).values({
+          await db.insert(schema.scheduledPublicTalks).values({
             id: crypto.randomUUID(),
             date,
             meetingProgramId: programId,

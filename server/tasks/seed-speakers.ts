@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
 import { eq } from "drizzle-orm"
-import { speakers, speakerTalks, organization, publicTalks } from "../database/schema"
+import { schema } from "hub:db"
 
 const SpeakerSeedSchema = z.object({
   id: z.string().min(1),
@@ -33,12 +33,10 @@ export default defineTask({
       const validated = SpeakersSeedArraySchema.parse(speakersData)
       console.log(`Validation passed for ${validated.length} speakers`)
 
-      const db = useDrizzle()
-
       // Get the test organization ID
       console.log("Finding test organization...")
       const testOrg = await db.query.organization.findFirst({
-        where: eq(organization.slug, "zychlin"),
+        where: eq(schema.organization.slug, "zychlin"),
       })
 
       if (!testOrg) {
@@ -49,8 +47,8 @@ export default defineTask({
 
       // Clear existing speaker data
       console.log("Deleting existing speakers and talk assignments...")
-      await db.delete(speakerTalks)
-      await db.delete(speakers)
+      await db.delete(schema.speakerTalks)
+      await db.delete(schema.speakers)
       console.log("Deleted existing speakers")
 
       // Verify talk IDs exist
@@ -61,7 +59,7 @@ export default defineTask({
       }
 
       if (allTalkIds.size > 0) {
-        const existingTalks = await db.select({ id: publicTalks.id }).from(publicTalks)
+        const existingTalks = await db.select({ id: schema.publicTalks.id }).from(schema.publicTalks)
 
         const existingTalkIds = new Set(existingTalks.map(t => t.id))
         const missingTalkIds = Array.from(allTalkIds).filter(id => !existingTalkIds.has(id))
@@ -75,7 +73,7 @@ export default defineTask({
       // Insert speakers and their talk assignments
       console.log(`Inserting ${validated.length} speakers...`)
       for (const speaker of validated) {
-        await db.insert(speakers).values({
+        await db.insert(schema.speakers).values({
           id: speaker.id,
           firstName: speaker.firstName,
           lastName: speaker.lastName,
@@ -93,9 +91,9 @@ export default defineTask({
           const validTalkIds: number[] = []
           for (const talkId of speaker.talkIds) {
             const talkExists = await db
-              .select({ id: publicTalks.id })
-              .from(publicTalks)
-              .where(eq(publicTalks.id, talkId))
+              .select({ id: schema.publicTalks.id })
+              .from(schema.publicTalks)
+              .where(eq(schema.publicTalks.id, talkId))
               .limit(1)
 
             if (talkExists.length > 0) {
@@ -110,7 +108,7 @@ export default defineTask({
               createdAt: new Date(),
             }))
 
-            await db.insert(speakerTalks).values(talkAssignments)
+            await db.insert(schema.speakerTalks).values(talkAssignments)
           }
         }
 

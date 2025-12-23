@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
-import { publicTalks } from "../database/schema"
+import { schema } from "hub:db"
 
 const PublicTalkSchema = z.object({
   no: z.union([z.number().int().positive(), z.string().min(1)]).transform(val => String(val)),
@@ -31,15 +31,13 @@ export default defineTask({
       const validatedTalks = PublicTalksArraySchema.parse(talks)
       console.log(`Validation passed for ${validatedTalks.length} talks`)
 
-      const db = useDrizzle()
-
       console.log("Deleting existing public talks...")
-      await db.delete(publicTalks)
+      await db.delete(schema.publicTalks)
       console.log("Deleted existing public talks")
 
       console.log(`Inserting ${validatedTalks.length} talks...`)
       for (const talk of validatedTalks) {
-        await db.insert(publicTalks).values({
+        await db.insert(schema.publicTalks).values({
           no: talk.no,
           title: talk.title,
           multimediaCount: talk.multimediaCount,

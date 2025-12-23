@@ -1,13 +1,7 @@
 import { eq, and } from "drizzle-orm"
-import type { publishers } from "../database/schema"
-import {
-  meetingPrograms,
-  meetingProgramParts,
-  meetingScheduledParts,
-  scheduledPublicTalks,
-  speakers,
-} from "../database/schema"
+import { schema } from "hub:db"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
+import type { Publisher } from "../utils/drizzle"
 
 /**
  * Helper function to randomly select an element from array
@@ -84,11 +78,9 @@ export default defineTask({
     console.log("Starting weekend meetings seeding...")
 
     try {
-      const db = useDrizzle()
-
       // Step 1: Get all publishers from database
       console.log("Fetching publishers from database...")
-      const samplePublishers = await db.query.publishers.findMany()
+      const samplePublishers: Publisher[] = await db.query.publishers.findMany()
 
       if (samplePublishers.length === 0) {
         console.warn("⚠️  No publishers found. Run seed-publishers first.")
@@ -103,7 +95,7 @@ export default defineTask({
 
       // Step 2: Get all active speakers for public talk assignments
       const speakersWithTalks = await db.query.speakers.findMany({
-        where: eq(speakers.archived, false),
+        where: eq(schema.speakers.archived, false),
         with: {
           speakerTalks: {
             with: {
@@ -129,24 +121,24 @@ export default defineTask({
 
       // Step 5: Pre-calculate fair distribution of assignments for all roles
       // This ensures each eligible brother gets similar number of assignments
-      const chairmanAssignments = distributeEvenly(
+      const chairmanAssignments = distributeEvenly<Publisher>(
         samplePublishers.filter(p => p.canChairWeekendMeeting),
         sundays.length
       )
 
-      const readerAssignments = distributeEvenly(
+      const readerAssignments = distributeEvenly<Publisher>(
         samplePublishers.filter(p => p.isReader && !p.conductsWatchtowerStudy),
         sundays.length
       )
 
-      const prayerAssignments = distributeEvenly(
+      const prayerAssignments = distributeEvenly<Publisher>(
         samplePublishers.filter(
           p => p.offersPublicPrayer && !p.canChairWeekendMeeting && !p.conductsWatchtowerStudy
         ),
         sundays.length
       )
 
-      const localSpeakerAssignments = distributeEvenly(
+      const localSpeakerAssignments = distributeEvenly<Publisher>(
         samplePublishers.filter(p => p.deliversPublicTalks),
         sundays.length
       )
@@ -174,9 +166,9 @@ export default defineTask({
         // Check if program already exists for this date
         const existingProgram = await db
           .select()
-          .from(meetingPrograms)
+          .from(schema.meetingPrograms)
           .where(
-            and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, dayjs(sunday).unix()))
+            and(eq(schema.meetingPrograms.type, "weekend"), eq(schema.meetingPrograms.date, dayjs(sunday).unix()))
           )
           .get()
 
@@ -246,7 +238,7 @@ interface CreateProgramOptions {
   db: ReturnType<typeof useDrizzle>
   date: Date
   isCircuitOverseerVisit: boolean
-  publishers: Array<typeof publishers.$inferSelect>
+  publishers: Array<typeof schema.publishers.$inferSelect>
   speakers: Array<{
     id: string
     firstName: string
@@ -254,10 +246,10 @@ interface CreateProgramOptions {
     speakerTalks?: Array<{ talkId: number }>
   }>
   publicTalks: Array<{ id: number; title: string }>
-  preAssignedChairman?: typeof publishers.$inferSelect
-  preAssignedReader?: typeof publishers.$inferSelect
-  preAssignedPrayer?: typeof publishers.$inferSelect
-  preAssignedLocalSpeaker?: typeof publishers.$inferSelect
+  preAssignedChairman?: typeof schema.publishers.$inferSelect
+  preAssignedReader?: typeof schema.publishers.$inferSelect
+  preAssignedPrayer?: typeof schema.publishers.$inferSelect
+  preAssignedLocalSpeaker?: typeof schema.publishers.$inferSelect
 }
 
 async function createWeekendMeetingProgram(options: CreateProgramOptions): Promise<void> {
@@ -276,7 +268,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
 
   // Create the meeting program
   const [program] = await db
-    .insert(meetingPrograms)
+    .insert(schema.meetingPrograms)
     .values({
       type: "weekend",
       date: dayjs(date).unix(), // Unix timestamp in seconds
@@ -324,8 +316,10 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
     }
   )
 
-  const createdParts = await db
-    .insert(meetingProgramParts)
+  type MeetingProgramPart = typeof schema.meetingProgramParts.$inferSelect
+
+  const createdParts: MeetingProgramPart[] = await db
+    .insert(schema.meetingProgramParts)
     .values(
       partTypes.map(part => ({
         meetingProgramId: program.id,
@@ -338,18 +332,18 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
     .returning()
 
   // Assign publishers to parts
-  const chairmanPart = createdParts.find(p => p.type === MEETING_PART_TYPES.CHAIRMAN)
-  const publicTalkPart = createdParts.find(p => p.type === MEETING_PART_TYPES.PUBLIC_TALK)
+  const chairmanPart = createdParts.find((p: MeetingProgramPart) => p.type === MEETING_PART_TYPES.CHAIRMAN)
+  const publicTalkPart = createdParts.find((p: MeetingProgramPart) => p.type === MEETING_PART_TYPES.PUBLIC_TALK)
   const circuitOverseerTalkPart = createdParts.find(
-    p => p.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK
+    (p: MeetingProgramPart) => p.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK
   )
-  const watchtowerPart = createdParts.find(p => p.type === MEETING_PART_TYPES.WATCHTOWER_STUDY)
-  const readerPart = createdParts.find(p => p.type === MEETING_PART_TYPES.READER)
-  const prayerPart = createdParts.find(p => p.type === MEETING_PART_TYPES.CLOSING_PRAYER)
+  const watchtowerPart = createdParts.find((p: MeetingProgramPart) => p.type === MEETING_PART_TYPES.WATCHTOWER_STUDY)
+  const readerPart = createdParts.find((p: MeetingProgramPart) => p.type === MEETING_PART_TYPES.READER)
+  const prayerPart = createdParts.find((p: MeetingProgramPart) => p.type === MEETING_PART_TYPES.CLOSING_PRAYER)
 
   // Assign chairman - use pre-assigned publisher for fair distribution
   if (chairmanPart && preAssignedChairman) {
-    await db.insert(meetingScheduledParts).values({
+    await db.insert(schema.meetingScheduledParts).values({
       id: crypto.randomUUID(),
       meetingProgramPartId: chairmanPart.id,
       publisherId: preAssignedChairman.id,
@@ -364,7 +358,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
       // CO visit: Assign CO to PUBLIC_TALK via scheduledPublicTalks as local_publisher
       const circuitOverseer = publishers.find(p => p.isCircuitOverseer)
       if (circuitOverseer) {
-        await db.insert(scheduledPublicTalks).values({
+        await db.insert(schema.scheduledPublicTalks).values({
           id: crypto.randomUUID(),
           date,
           meetingProgramId: program.id,
@@ -388,7 +382,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
         // Randomly select a talk from all available public talks
         const randomTalk = randomFromArray(publicTalks)
 
-        await db.insert(scheduledPublicTalks).values({
+        await db.insert(schema.scheduledPublicTalks).values({
           id: crypto.randomUUID(),
           date,
           meetingProgramId: program.id,
@@ -411,7 +405,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
           const speakerTalk = randomFromArray(speaker.speakerTalks)
 
           if (speakerTalk) {
-            await db.insert(scheduledPublicTalks).values({
+            await db.insert(schema.scheduledPublicTalks).values({
               id: crypto.randomUUID(),
               date,
               meetingProgramId: program.id,
@@ -435,7 +429,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
   if (isCircuitOverseerVisit && circuitOverseerTalkPart) {
     const circuitOverseer = publishers.find(p => p.isCircuitOverseer)
     if (circuitOverseer) {
-      await db.insert(meetingScheduledParts).values({
+      await db.insert(schema.meetingScheduledParts).values({
         id: crypto.randomUUID(),
         meetingProgramPartId: circuitOverseerTalkPart.id,
         publisherId: circuitOverseer.id,
@@ -450,7 +444,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
     const eligibleConductors = publishers.filter(p => p.conductsWatchtowerStudy)
     const conductor = randomFromArray(eligibleConductors)
     if (conductor) {
-      await db.insert(meetingScheduledParts).values({
+      await db.insert(schema.meetingScheduledParts).values({
         id: crypto.randomUUID(),
         meetingProgramPartId: watchtowerPart.id,
         publisherId: conductor.id,
@@ -462,7 +456,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
 
   // Assign reader - use pre-assigned publisher for fair distribution
   if (readerPart && preAssignedReader) {
-    await db.insert(meetingScheduledParts).values({
+    await db.insert(schema.meetingScheduledParts).values({
       id: crypto.randomUUID(),
       meetingProgramPartId: readerPart.id,
       publisherId: preAssignedReader.id,
@@ -473,7 +467,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
 
   // Assign prayer - use pre-assigned publisher for fair distribution
   if (prayerPart && preAssignedPrayer) {
-    await db.insert(meetingScheduledParts).values({
+    await db.insert(schema.meetingScheduledParts).values({
       id: crypto.randomUUID(),
       meetingProgramPartId: prayerPart.id,
       publisherId: preAssignedPrayer.id,
