@@ -121,7 +121,12 @@
 
       const isScheduled = schedules.value?.some(s => isSameDay(s.date, sundayDate))
 
-      if (!isScheduled) {
+      const isException = exceptions.value?.some(e => {
+        const exceptionDate = dayjs.unix(e.date).toDate()
+        return isSameDay(sundayDate, exceptionDate)
+      })
+
+      if (!isScheduled && !isException) {
         sundays.push(sundayDate)
       }
 
