@@ -43,3 +43,6 @@ requirements/
 
 # MCP configuration (may contain API keys)
 .mcp.json
+
+wrangler.prod.jsonc
+wrangler.stage.jsonc
