@@ -11,6 +11,7 @@
     videoCount: number
     status: "circuit_overseer" | "will_be_replaced" | null
     createdAt: Date
+    lastGivenDate: number | null
   }
 
   interface Props {
