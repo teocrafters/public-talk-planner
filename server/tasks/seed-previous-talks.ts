@@ -13,6 +13,7 @@ import {
   meetingProgramParts,
   scheduledPublicTalks,
 } from "../database/schema"
+import { MEETING_PART_TYPES, MEETING_PART_ORDER } from "#shared/constants/meetings"
 
 // Extend dayjs with customParseFormat plugin for DD.MM.YYYY format support
 dayjs.extend(customParseFormat)
@@ -105,7 +106,7 @@ export default defineTask({
       let invalidDateCount = 0
 
       for (const { talkNo, dates } of previousTalks) {
-        // Find the talk in database by number (no field)
+        // Find the talk in database by talk number (publicTalks.no field)
         const talk = await db.query.publicTalks.findFirst({
           where: eq(publicTalks.no, String(talkNo)),
         })
@@ -118,7 +119,8 @@ export default defineTask({
 
         for (const dateStr of dates) {
           // Parse date from DD.MM.YYYY format
-          const dateDayjs = dayjs(dateStr, "DD.MM.YYYY").startOf("day")
+          // Use hour(12) for consistency with seed-weekend-meetings.ts
+          const dateDayjs = dayjs(dateStr, "DD.MM.YYYY").hour(12).minute(0).second(0).millisecond(0)
 
           // Validate date parsing
           if (!dateDayjs.isValid()) {
@@ -129,13 +131,6 @@ export default defineTask({
 
           const date = dateDayjs.toDate()
           const dateUnix = dateDayjs.unix()
-
-          // Additional validation for Unix timestamp
-          if (!Number.isFinite(dateUnix)) {
-            console.warn(`⚠️  Invalid Unix timestamp for date: ${dateStr}, skipping`)
-            invalidDateCount++
-            continue
-          }
 
           // Check if meeting program already exists for this date
           const existingProgram = await db.query.meetingPrograms.findFirst({
@@ -171,9 +166,9 @@ export default defineTask({
                 .insert(meetingProgramParts)
                 .values({
                   meetingProgramId: existingProgram.id,
-                  type: "PUBLIC_TALK",
+                  type: MEETING_PART_TYPES.PUBLIC_TALK,
                   name: null,
-                  order: 2,
+                  order: MEETING_PART_ORDER.indexOf(MEETING_PART_TYPES.PUBLIC_TALK) + 1,
                   createdAt: new Date(),
                 })
                 .returning()
@@ -203,7 +198,7 @@ export default defineTask({
                 meetingProgramId: program.id,
                 type: "PUBLIC_TALK",
                 name: null,
-                order: 2,
+                order: MEETING_PART_ORDER.indexOf(MEETING_PART_TYPES.PUBLIC_TALK) + 1,
                 createdAt: new Date(),
               })
               .returning()
