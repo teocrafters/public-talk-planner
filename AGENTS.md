@@ -251,7 +251,7 @@ AND en.json** ⛔ **MAINTAIN Polish-first strategy**
 - Environment files (`.env.*`)
 - Generated type definitions (`.d.ts`)
 - Core config files (`nuxt.config.ts`, `wrangler.toml`, `drizzle.config.ts`)
-- Migration files in `server/database/migrations/`
+- Migration files in `server/db/migrations/`
 
 ## Anchor Comments System
 

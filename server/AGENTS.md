@@ -42,7 +42,7 @@ server/
 ### Schema Definition
 
 ```typescript
-// server/database/schema.ts
+// server/db/schema.ts
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 
 export const speakers = sqliteTable("speakers", {
@@ -151,7 +151,7 @@ export default defineEventHandler(async event => {
 
 **Workflow**:
 
-1. Modify `server/database/schema.ts`
+1. Modify `server/db/schema.ts`
 2. Prompt user: "Please run `pnpm db:generate`"
 3. User generates migration files
 4. Review generated migration before committing
@@ -385,7 +385,7 @@ export default defineTask({
 // server/utils/drizzle.ts
 import { drizzle } from "drizzle-orm/d1"
 export { sql, eq, and, or, gte, lte, desc, asc } from "drizzle-orm"
-import * as schema from "~/server/database/schema"
+import * as schema from "~/server/db/schema"
 
 export function useDrizzle() {
   return drizzle(hubDatabase(), { schema })

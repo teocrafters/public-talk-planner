@@ -8,7 +8,7 @@ project.
 ### NEVER Execute SQL Files Manually
 
 **Rule:** ALL database changes MUST be applied through schema modifications in
-`server/database/schema.ts`
+`server/db/schema.ts`
 
 **Why This Rule Exists:**
 
@@ -30,7 +30,7 @@ project.
 **Correct Workflow:**
 
 ```typescript
-// ✅ Correct: Modify schema in server/database/schema.ts
+// ✅ Correct: Modify schema in server/db/schema.ts
 export const speakers = sqliteTable("speakers", {
   id: text("id").primaryKey(),
   firstName: text("first_name").notNull(),
@@ -90,12 +90,12 @@ prompt the user to run it manually.
 **User Prompt Template:**
 
 ```
-Database schema has been updated in `server/database/schema.ts`.
+Database schema has been updated in `server/db/schema.ts`.
 
 Please run the following command to generate migration files:
   pnpm db:generate
 
-After generation, review the migration files in `server/database/migrations/`
+After generation, review the migration files in `server/db/migrations/`
 before committing.
 ```
 
@@ -145,7 +145,7 @@ UPDATE speakers SET first_name = UPPER(first_name) WHERE legacy_format = 1;
 
 ### Table Definition Standards
 
-- DEFINE all tables in `server/database/schema.ts`
+- DEFINE all tables in `server/db/schema.ts`
 - USE descriptive table and column names that reflect domain concepts
 - INCLUDE `createdAt` and `updatedAt` timestamps on all tables
 - USE `mode: "timestamp"` for datetime fields (automatic conversion)
@@ -191,7 +191,7 @@ export type NewSpeaker = typeof speakers.$inferInsert
 // server/utils/drizzle.ts
 import { drizzle } from "drizzle-orm/d1"
 export { sql, eq, and, or, gte, lte, desc, asc } from "drizzle-orm"
-import * as schema from "~/server/database/schema"
+import * as schema from "~/server/db/schema"
 
 export function useDrizzle() {
   return drizzle(hubDatabase(), { schema })
@@ -260,7 +260,7 @@ await db.batch([
 ### Complete Migration Workflow
 
 1. **Modify Schema**
-   - Edit `server/database/schema.ts`
+   - Edit `server/db/schema.ts`
    - Add, remove, or modify table definitions
    - Update TypeScript types as needed
 
@@ -274,11 +274,11 @@ await db.batch([
 3. **User Generates Migration**
    - User executes `pnpm db:generate`
    - Drizzle analyzes schema differences
-   - Generates SQL migration files in `server/database/migrations/`
-   - Creates snapshot in `server/database/migrations/meta/`
+   - Generates SQL migration files in `server/db/migrations/`
+   - Creates snapshot in `server/db/migrations/meta/`
 
 4. **Review Migration**
-   - Open generated `.sql` file in `server/database/migrations/`
+   - Open generated `.sql` file in `server/db/migrations/`
    - Verify SQL statements match intended changes
    - Check for unintended table drops or data loss
    - Validate foreign key relationships
@@ -290,7 +290,7 @@ await db.batch([
    - Confirm TypeScript types work correctly
 
 6. **Commit Changes**
-   - Commit schema changes in `server/database/schema.ts`
+   - Commit schema changes in `server/db/schema.ts`
    - Commit generated migration files together
    - Commit updated meta/snapshot files
    - Include descriptive commit message explaining schema changes
@@ -300,7 +300,7 @@ await db.batch([
 Drizzle generates migration files with timestamp prefixes:
 
 ```
-server/database/migrations/
+server/db/migrations/
 ├── 0000_initial_setup.sql
 ├── 0001_add_speakers_table.sql
 ├── 0002_add_talks_table.sql
@@ -507,8 +507,8 @@ Without batch operations, partial updates can occur if errors happen during mult
 
 ## Reference Files
 
-- Schema definition: `server/database/schema.ts`
-- Migration files: `server/database/migrations/`
+- Schema definition: `server/db/schema.ts`
+- Migration files: `server/db/migrations/`
 - Database utilities: `server/utils/drizzle.ts`
 - Validation schemas: `shared/utils/schemas/`
 - Date/time utilities: `app/utils/date.ts`
