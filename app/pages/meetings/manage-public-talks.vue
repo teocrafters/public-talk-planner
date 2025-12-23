@@ -31,6 +31,14 @@
     },
   })
 
+  // Fetch meeting exceptions for calendar chip display
+  const { data: exceptions } = await useFetch("/api/meeting-exceptions", {
+    query: {
+      startDate: dayjs().subtract(1, "month").unix(),
+      endDate: dayjs().add(3, "month").unix(),
+    },
+  })
+
   // Responsive months display - start with mobile size
   const windowWidth = ref(1)
   const numberOfMonths = computed(() => {
@@ -64,9 +72,14 @@
     return weekendPrograms.value.filter(p => p.isCircuitOverseerVisit).map(p => p.date)
   })
 
+  const exceptionDates = computed(() => {
+    if (!exceptions.value) return []
+    return exceptions.value.map(e => e.date)
+  })
+
   // Map chip color to UChip-compatible color
   function getUChipColor(date: DateValue): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
-    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, [])
+    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, exceptionDates.value)
     return color === "purple" ? "primary" : color
   }
 

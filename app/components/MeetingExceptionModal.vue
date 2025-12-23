@@ -55,6 +55,7 @@
 	// Form instance ref
 	const form = useTemplateRef("form")
 	const isLoading = ref(false)
+	const showDeleteConfirm = ref(false)
 	const existingMeetingConflict = ref<{
 		id: number
 		date: number
@@ -233,9 +234,11 @@
 
 	async function handleDelete() {
 		if (!props.exception) return
+		showDeleteConfirm.value = true
+	}
 
-		const confirmed = confirm(t("meetings.meetingExceptions.confirmDeleteExceptionDescription"))
-		if (!confirmed) return
+	async function executeDelete() {
+		if (!props.exception) return
 
 		isLoading.value = true
 
@@ -411,4 +414,13 @@
 			</div>
 		</template>
 	</UModal>
+
+	<ConfirmDialog
+		v-model="showDeleteConfirm"
+		:title="t('meetings.meetingExceptions.confirmDeleteExceptionTitle')"
+		:message="t('meetings.meetingExceptions.confirmDeleteExceptionDescription')"
+		:confirm-text="t('common.delete')"
+		:cancel-text="t('common.cancel')"
+		variant="danger"
+		@confirm="executeDelete" />
 </template>
