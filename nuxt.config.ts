@@ -30,9 +30,9 @@ export default defineNuxtConfig({
     },
   },
   hub: {
-    cache: true,
-    database: true,
+    db: "sqlite",
     kv: true,
+    cache: true,
   },
   nitro: {
     preset: "cloudflare_module",

@@ -25,6 +25,10 @@ logs
 
 .wrangler
 
+# Wrangler environment configs (keep only local)
+wrangler.stage.jsonc
+wrangler.prod.jsonc
+
 # Playwright
 /test-results/
 /playwright-report/
