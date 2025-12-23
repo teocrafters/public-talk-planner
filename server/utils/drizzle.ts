@@ -1,12 +1,20 @@
-import { drizzle } from "drizzle-orm/d1"
+import { schema } from "hub:db"
 
-import * as schema from "../database/schema"
+// Re-export Drizzle utilities
 export { sql, eq, and, or } from "drizzle-orm"
 
+// Re-export schema for backward compatibility
 export const tables = schema
 
+// DEPRECATED: db is auto-imported on server-side
+// Use `db` directly instead of useDrizzle()
 export function useDrizzle() {
-  return drizzle(hubDatabase(), { schema })
+	return db
 }
 
+// Re-export types for backward compatibility
 export type PublicTalk = typeof schema.publicTalks.$inferSelect
+export type Publisher = typeof schema.publishers.$inferSelect
+export type NewPublisher = typeof schema.publishers.$inferInsert
+export type Speaker = typeof schema.speakers.$inferSelect
+export type NewSpeaker = typeof schema.speakers.$inferInsert

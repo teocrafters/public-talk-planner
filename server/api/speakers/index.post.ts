@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq, sql } from "drizzle-orm"
-import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { createSpeakerSchema } from "#shared/utils/schemas"
 
@@ -9,12 +9,11 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, createSpeakerSchema)
 
-  const db = useDrizzle()
 
   const congregationExists = await db
     .select()
-    .from(organization)
-    .where(eq(organization.id, body.congregationId))
+    .from(schema.organization)
+    .where(eq(schema.organization.id, body.congregationId))
     .limit(1)
 
   if (!congregationExists || congregationExists.length === 0) {
@@ -28,8 +27,8 @@ export default defineEventHandler(async event => {
   if (body.talkIds && body.talkIds.length > 0) {
     const talksExist = await db
       .select()
-      .from(publicTalks)
-      .where(sql`${publicTalks.id} IN ${body.talkIds}`)
+      .from(schema.publicTalks)
+      .where(sql`${schema.publicTalks.id} IN ${body.talkIds}`)
 
     if (talksExist.length !== body.talkIds.length) {
       throw createError({
@@ -43,7 +42,7 @@ export default defineEventHandler(async event => {
   const speakerId = crypto.randomUUID()
 
   const result = await db
-    .insert(speakers)
+    .insert(schema.speakers)
     .values({
       id: speakerId,
       firstName: body.firstName,
@@ -73,7 +72,7 @@ export default defineEventHandler(async event => {
       createdAt: new Date(),
     }))
 
-    await db.insert(speakerTalks).values(talkAssignments)
+    await db.insert(schema.speakerTalks).values(talkAssignments)
   }
 
   await logAuditEvent(event, {
@@ -91,20 +90,20 @@ export default defineEventHandler(async event => {
 
   const congregation = await db
     .select()
-    .from(organization)
-    .where(eq(organization.id, newSpeaker.congregationId))
+    .from(schema.organization)
+    .where(eq(schema.organization.id, newSpeaker.congregationId))
     .limit(1)
 
   const talks =
     body.talkIds && body.talkIds.length > 0
       ? await db
           .select({
-            id: publicTalks.id,
-            no: publicTalks.no,
-            title: publicTalks.title,
+            id: schema.publicTalks.id,
+            no: schema.publicTalks.no,
+            title: schema.publicTalks.title,
           })
-          .from(publicTalks)
-          .where(sql`${publicTalks.id} IN ${body.talkIds}`)
+          .from(schema.publicTalks)
+          .where(sql`${schema.publicTalks.id} IN ${body.talkIds}`)
       : []
 
   return {

@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { publicTalks } from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { updateTalkSchema } from "#shared/utils/schemas"
 
@@ -18,9 +18,7 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, updateTalkSchema)
 
-  const db = useDrizzle()
-
-  const existingTalk = await db.select().from(publicTalks).where(eq(publicTalks.id, id)).limit(1)
+  const existingTalk = await db.select().from(schema.publicTalks).where(eq(schema.publicTalks.id, id)).limit(1)
 
   if (!existingTalk || existingTalk.length === 0) {
     throw createError({
@@ -46,9 +44,9 @@ export default defineEventHandler(async event => {
     }
   }
 
-  await db.update(publicTalks).set(body).where(eq(publicTalks.id, id))
+  await db.update(schema.publicTalks).set(body).where(eq(schema.publicTalks.id, id))
 
-  const updatedTalk = await db.select().from(publicTalks).where(eq(publicTalks.id, id)).limit(1)
+  const updatedTalk = await db.select().from(schema.publicTalks).where(eq(schema.publicTalks.id, id)).limit(1)
 
   const updated = updatedTalk[0]
   if (!updated) {

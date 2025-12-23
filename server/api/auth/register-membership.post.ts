@@ -1,7 +1,6 @@
 import { generateId } from "better-auth"
 import { z } from "zod"
-import { member } from "../../database/auth-schema"
-import { publishers } from "../../database/schema"
+import { schema } from "hub:db"
 
 const membershipRequestSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
@@ -25,10 +24,9 @@ export default defineEventHandler(async (event): Promise<MembershipResponse> => 
   const { userId, congregationId, firstName, lastName } = validation.data
 
   try {
-    const db = useDrizzle()
 
     // Create organization membership
-    await db.insert(member).values({
+    await db.insert(schema.member).values({
       id: generateId(),
       organizationId: congregationId,
       userId: userId,
@@ -37,7 +35,7 @@ export default defineEventHandler(async (event): Promise<MembershipResponse> => 
     })
 
     // Create publisher profile for the user
-    await db.insert(publishers).values({
+    await db.insert(schema.publishers).values({
       id: crypto.randomUUID(),
       userId: userId,
       firstName: firstName,

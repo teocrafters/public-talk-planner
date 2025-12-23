@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { publishers, user } from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { createPublisherSchema } from "#shared/utils/schemas"
 
@@ -9,11 +9,10 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, createPublisherSchema)
 
-  const db = useDrizzle()
 
   // Validate userId if provided
   if (body.userId) {
-    const userExists = await db.select().from(user).where(eq(user.id, body.userId)).limit(1)
+    const userExists = await db.select().from(schema.user).where(eq(schema.user.id, body.userId)).limit(1)
 
     if (!userExists || userExists.length === 0) {
       throw createError({
@@ -26,8 +25,8 @@ export default defineEventHandler(async event => {
     // Check if user is already linked to another publisher
     const existingPublisher = await db
       .select()
-      .from(publishers)
-      .where(eq(publishers.userId, body.userId))
+      .from(schema.publishers)
+      .where(eq(schema.publishers.userId, body.userId))
       .limit(1)
 
     if (existingPublisher && existingPublisher.length > 0) {
@@ -42,7 +41,7 @@ export default defineEventHandler(async event => {
   const publisherId = crypto.randomUUID()
 
   const result = await db
-    .insert(publishers)
+    .insert(schema.publishers)
     .values({
       id: publisherId,
       firstName: body.firstName,

@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { admin, organization } from "better-auth/plugins"
 import { passkey } from "better-auth/plugins/passkey"
+import { kv } from "hub:kv"
 import { sendVerificationEmail } from "./email"
 import {
   ac,
@@ -9,7 +10,7 @@ import {
   public_talk_coordinator,
   boe_coordinator,
 } from "~~/shared/utils/permissions/declare"
-import { member as memberTable } from "../database/auth-schema"
+import { member as memberTable } from "../db/auth-schema"
 
 let _auth: ReturnType<typeof getBetterAuth>
 
@@ -32,11 +33,11 @@ function getBetterAuth() {
       provider: "sqlite",
     }),
     secondaryStorage: {
-      get: key => hubKV().getItemRaw(`_auth:${key}`),
+      get: key => kv.get(`_auth:${key}`),
       set: (key, value, ttl) => {
-        return hubKV().set(`_auth:${key}`, value, { ttl })
+        return kv.set(`_auth:${key}`, value, { ttl })
       },
-      delete: key => hubKV().del(`_auth:${key}`),
+      delete: key => kv.del(`_auth:${key}`),
     },
     plugins: [
       admin(),

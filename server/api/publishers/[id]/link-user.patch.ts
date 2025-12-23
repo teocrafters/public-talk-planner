@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { publishers, user } from "../../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../../utils/validation"
 import { linkUserSchema } from "#shared/utils/schemas"
 
@@ -17,13 +17,12 @@ export default defineEventHandler(async event => {
   }
   const body = await validateBody(event, linkUserSchema)
 
-  const db = useDrizzle()
 
   // Check if publisher exists
   const existingPublisher = await db
     .select()
-    .from(publishers)
-    .where(eq(publishers.id, publisherId))
+    .from(schema.publishers)
+    .where(eq(schema.publishers.id, publisherId))
     .limit(1)
 
   if (!existingPublisher || existingPublisher.length === 0) {
@@ -37,7 +36,7 @@ export default defineEventHandler(async event => {
   // If linking to a user (not unlinking)
   if (body.userId) {
     // Validate user exists
-    const userExists = await db.select().from(user).where(eq(user.id, body.userId)).limit(1)
+    const userExists = await db.select().from(schema.user).where(eq(schema.user.id, body.userId)).limit(1)
 
     if (!userExists || userExists.length === 0) {
       throw createError({
@@ -50,8 +49,8 @@ export default defineEventHandler(async event => {
     // Check if user is already linked to another publisher
     const existingLink = await db
       .select()
-      .from(publishers)
-      .where(eq(publishers.userId, body.userId))
+      .from(schema.publishers)
+      .where(eq(schema.publishers.userId, body.userId))
       .limit(1)
 
     if (existingLink.length > 0 && existingLink[0]!.id !== publisherId) {
@@ -65,12 +64,12 @@ export default defineEventHandler(async event => {
 
   // Update publisher with new userId (or null to unlink)
   const result = await db
-    .update(publishers)
+    .update(schema.publishers)
     .set({
       userId: body.userId,
       updatedAt: new Date(),
     })
-    .where(eq(publishers.id, publisherId))
+    .where(eq(schema.publishers.id, publisherId))
     .returning()
 
   const updatedPublisher = result[0]

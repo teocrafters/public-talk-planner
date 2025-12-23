@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { meetingExceptions } from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { updateMeetingExceptionSchema } from "#shared/utils/schemas/meeting-exception"
 
@@ -17,11 +17,10 @@ export default defineEventHandler(async event => {
 	}
 
 	const body = await validateBody(event, updateMeetingExceptionSchema)
-	const db = useDrizzle()
 
 	// Check if exception exists
 	const exception = await db.query.meetingExceptions.findFirst({
-		where: eq(meetingExceptions.id, exceptionId),
+		where: eq(schema.meetingExceptions.id, exceptionId),
 	})
 
 	if (!exception) {
@@ -33,7 +32,7 @@ export default defineEventHandler(async event => {
 	}
 
 	// Build update object
-	const updates: Partial<typeof meetingExceptions.$inferInsert> = {
+	const updates: Partial<typeof schema.meetingExceptions.$inferInsert> = {
 		updatedAt: new Date(),
 	}
 
@@ -46,7 +45,7 @@ export default defineEventHandler(async event => {
 	}
 
 	// Update exception
-	await db.update(meetingExceptions).set(updates).where(eq(meetingExceptions.id, exceptionId))
+	await db.update(schema.meetingExceptions).set(updates).where(eq(schema.meetingExceptions.id, exceptionId))
 
 	// Log audit event
 	await logAuditEvent(event, {
@@ -65,7 +64,7 @@ export default defineEventHandler(async event => {
 
 	// Fetch updated exception
 	const updatedException = await db.query.meetingExceptions.findFirst({
-		where: eq(meetingExceptions.id, exceptionId),
+		where: eq(schema.meetingExceptions.id, exceptionId),
 	})
 
 	return {

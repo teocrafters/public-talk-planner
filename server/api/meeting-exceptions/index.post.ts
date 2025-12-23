@@ -1,20 +1,13 @@
-import { createError } from "h3"
+import { createError, type H3Event } from "h3"
 import { eq, and, gte, lte, inArray } from "drizzle-orm"
-import {
-  meetingExceptions,
-  meetingPrograms,
-  meetingProgramParts,
-  meetingScheduledParts,
-  scheduledPublicTalks,
-} from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { createMeetingExceptionSchema } from "#shared/utils/schemas/meeting-exception"
 
-export default defineEventHandler(async event => {
+export default defineEventHandler(async (event: H3Event) => {
   await requirePermission({ weekend_meetings: ["manage_exceptions"] })(event)
 
   const body = await validateBody(event, createMeetingExceptionSchema)
-  const db = useDrizzle()
 
   // Check if exception already exists for this date (any time during the day)
   const requestDate = dayjs.unix(body.date)
@@ -22,7 +15,7 @@ export default defineEventHandler(async event => {
   const dayEndUnix = requestDate.endOf("day").unix()
 
   const existingException = await db.query.meetingExceptions.findFirst({
-    where: and(gte(meetingExceptions.date, dayStartUnix), lte(meetingExceptions.date, dayEndUnix)),
+    where: and(gte(schema.meetingExceptions.date, dayStartUnix), lte(schema.meetingExceptions.date, dayEndUnix)),
   })
 
   if (existingException) {
@@ -36,9 +29,9 @@ export default defineEventHandler(async event => {
   // Check if meeting program exists for this date (any time during the day)
   const existingProgram = await db.query.meetingPrograms.findFirst({
     where: and(
-      eq(meetingPrograms.type, "weekend"),
-      gte(meetingPrograms.date, dayStartUnix),
-      lte(meetingPrograms.date, dayEndUnix)
+      eq(schema.meetingPrograms.type, "weekend"),
+      gte(schema.meetingPrograms.date, dayStartUnix),
+      lte(schema.meetingPrograms.date, dayEndUnix)
     ),
     with: {
       parts: {
@@ -58,8 +51,11 @@ export default defineEventHandler(async event => {
   // Validate confirmation before proceeding
   if (existingProgram && !body.confirmDeleteExisting) {
     // Return 409 with meeting details for user confirmation
-    const parts = existingProgram.parts.flatMap(part =>
-      part.meetingScheduledParts.map(scheduled => ({
+    type ProgramPart = NonNullable<typeof existingProgram>["parts"][number]
+    type ScheduledPart = ProgramPart["meetingScheduledParts"][number]
+
+    const parts = existingProgram.parts.flatMap((part: ProgramPart) =>
+      part.meetingScheduledParts.map((scheduled: ScheduledPart) => ({
         type: part.type,
         personName: `${scheduled.publisher.firstName} ${scheduled.publisher.lastName}`,
       }))
@@ -89,8 +85,8 @@ export default defineEventHandler(async event => {
     ...(existingProgram
       ? [
           db
-            .delete(scheduledPublicTalks)
-            .where(eq(scheduledPublicTalks.meetingProgramId, existingProgram.id)),
+            .delete(schema.scheduledPublicTalks)
+            .where(eq(schema.scheduledPublicTalks.meetingProgramId, existingProgram.id)),
         ]
       : []),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,16 +98,16 @@ export default defineEventHandler(async event => {
 
     // Step 2: Fetch meeting program part IDs BEFORE batch (dependent query - must be outside batch)
     const partIds = await db
-      .select({ id: meetingProgramParts.id })
-      .from(meetingProgramParts)
-      .where(eq(meetingProgramParts.meetingProgramId, existingProgram.id))
+      .select({ id: schema.meetingProgramParts.id })
+      .from(schema.meetingProgramParts)
+      .where(eq(schema.meetingProgramParts.meetingProgramId, existingProgram.id))
 
     // Step 3: Delete meeting scheduled parts (needs to be deleted before program parts)
     if (partIds.length > 0) {
       operations.push(
-        db.delete(meetingScheduledParts).where(
+        db.delete(schema.meetingScheduledParts).where(
           inArray(
-            meetingScheduledParts.meetingProgramPartId,
+            schema.meetingScheduledParts.meetingProgramPartId,
             partIds.map(p => p.id)
           )
         )
@@ -121,12 +117,12 @@ export default defineEventHandler(async event => {
     // Step 4: Delete meeting program parts
     operations.push(
       db
-        .delete(meetingProgramParts)
-        .where(eq(meetingProgramParts.meetingProgramId, existingProgram.id))
+        .delete(schema.meetingProgramParts)
+        .where(eq(schema.meetingProgramParts.meetingProgramId, existingProgram.id))
     )
 
     // Step 5: Finally delete the meeting program itself
-    operations.push(db.delete(meetingPrograms).where(eq(meetingPrograms.id, existingProgram.id)))
+    operations.push(db.delete(schema.meetingPrograms).where(eq(schema.meetingPrograms.id, existingProgram.id)))
   }
 
   // Create the exception (within the same batch)
@@ -134,7 +130,7 @@ export default defineEventHandler(async event => {
   const now = new Date()
 
   operations.push(
-    db.insert(meetingExceptions).values({
+    db.insert(schema.meetingExceptions).values({
       id: exceptionId,
       date: body.date,
       exceptionType: body.exceptionType,

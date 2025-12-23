@@ -1,14 +1,6 @@
 import { createError } from "h3"
 import { eq, and, between } from "drizzle-orm"
-import {
-  speakers,
-  publishers,
-  meetingPrograms,
-  meetingProgramParts,
-  publicTalks,
-  scheduledPublicTalks,
-  speakerTalks,
-} from "../../database/schema"
+import { schema } from "hub:db"
 import { createScheduleSchema } from "#shared/utils/schemas"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
@@ -20,7 +12,6 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, createScheduleSchema)
 
-  const db = useDrizzle()
 
   const date = dayjs.unix(body.date).toDate()
   const startOfDay = dayjs(date).startOf("day").toDate()
@@ -46,8 +37,8 @@ export default defineEventHandler(async event => {
       })
     }
 
-    const speaker = await db.query.speakers.findFirst({
-      where: eq(speakers.id, body.speakerId),
+    const speaker = await db.query.schema.speakers.findFirst({
+      where: eq(schema.speakers.id, body.speakerId),
     })
 
     if (!speaker || speaker.archived) {
@@ -66,8 +57,8 @@ export default defineEventHandler(async event => {
       })
     }
 
-    const publisher = await db.query.publishers.findFirst({
-      where: eq(publishers.id, body.publisherId),
+    const publisher = await db.query.schema.publishers.findFirst({
+      where: eq(schema.publishers.id, body.publisherId),
     })
 
     if (!publisher) {
@@ -87,8 +78,8 @@ export default defineEventHandler(async event => {
     }
   }
 
-  const existing = await db.query.scheduledPublicTalks.findFirst({
-    where: and(between(scheduledPublicTalks.date, startOfDay, endOfDay)),
+  const existing = await db.query.schema.scheduledPublicTalks.findFirst({
+    where: and(between(schema.scheduledPublicTalks.date, startOfDay, endOfDay)),
     with: {
       speaker: true,
       publisher: true,
@@ -126,17 +117,17 @@ export default defineEventHandler(async event => {
   }
 
   // Find or create meetingPrograms entry for this date
-  let meetingProgram = await db.query.meetingPrograms.findFirst({
+  let meetingProgram = await db.query.schema.meetingPrograms.findFirst({
     where: and(
-      eq(meetingPrograms.type, "weekend"),
-      eq(meetingPrograms.date, body.date),
-      between(scheduledPublicTalks.date, startOfDay, endOfDay)
+      eq(schema.meetingPrograms.type, "weekend"),
+      eq(schema.meetingPrograms.date, body.date),
+      between(schema.scheduledPublicTalks.date, startOfDay, endOfDay)
     ),
   })
 
   if (!meetingProgram) {
     const programResult = await db
-      .insert(meetingPrograms)
+      .insert(schema.meetingPrograms)
       .values({
         type: "weekend",
         date: body.date,
@@ -157,16 +148,16 @@ export default defineEventHandler(async event => {
   }
 
   // Find or create PUBLIC_TALK part for this meeting
-  let part = await db.query.meetingProgramParts.findFirst({
+  let part = await db.query.schema.meetingProgramParts.findFirst({
     where: and(
-      eq(meetingProgramParts.meetingProgramId, meetingProgram.id),
-      eq(meetingProgramParts.type, MEETING_PART_TYPES.PUBLIC_TALK)
+      eq(schema.meetingProgramParts.meetingProgramId, meetingProgram.id),
+      eq(schema.meetingProgramParts.type, MEETING_PART_TYPES.PUBLIC_TALK)
     ),
   })
 
   if (!part) {
     const partResult = await db
-      .insert(meetingProgramParts)
+      .insert(schema.meetingProgramParts)
       .values({
         meetingProgramId: meetingProgram.id,
         type: MEETING_PART_TYPES.PUBLIC_TALK,
@@ -187,8 +178,8 @@ export default defineEventHandler(async event => {
   }
 
   if (body.talkId) {
-    const talk = await db.query.publicTalks.findFirst({
-      where: eq(publicTalks.id, body.talkId),
+    const talk = await db.query.schema.publicTalks.findFirst({
+      where: eq(schema.publicTalks.id, body.talkId),
     })
 
     if (!talk) {
@@ -204,10 +195,10 @@ export default defineEventHandler(async event => {
       body.speakerSourceType === SPEAKER_SOURCE_TYPES.VISITING_SPEAKER &&
       !body.overrideValidation
     ) {
-      const speakerHasTalk = await db.query.speakerTalks.findFirst({
+      const speakerHasTalk = await db.query.schema.speakerTalks.findFirst({
         where: and(
-          eq(speakerTalks.speakerId, body.speakerId!),
-          eq(speakerTalks.talkId, body.talkId)
+          eq(schema.speakerTalks.speakerId, body.speakerId!),
+          eq(schema.speakerTalks.talkId, body.talkId)
         ),
       })
 
@@ -224,7 +215,7 @@ export default defineEventHandler(async event => {
   const scheduleId = crypto.randomUUID()
   const now = dayjs().toDate()
 
-  await db.insert(scheduledPublicTalks).values({
+  await db.insert(schema.scheduledPublicTalks).values({
     id: scheduleId,
     date: date,
     meetingProgramId: meetingProgram.id,
@@ -260,8 +251,8 @@ export default defineEventHandler(async event => {
     } satisfies AuditEventDetails[typeof AUDIT_EVENTS.SCHEDULE_CREATED],
   })
 
-  const schedule = await db.query.scheduledPublicTalks.findFirst({
-    where: eq(scheduledPublicTalks.id, scheduleId),
+  const schedule = await db.query.schema.scheduledPublicTalks.findFirst({
+    where: eq(schema.scheduledPublicTalks.id, scheduleId),
     with: {
       speaker: true,
       publisher: true,

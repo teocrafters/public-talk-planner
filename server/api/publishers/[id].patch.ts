@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { publishers } from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { updatePublisherSchema } from "#shared/utils/schemas"
 
@@ -18,13 +18,12 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, updatePublisherSchema)
 
-  const db = useDrizzle()
 
   // Check if publisher exists
   const existingPublisher = await db
     .select()
-    .from(publishers)
-    .where(eq(publishers.id, publisherId))
+    .from(schema.publishers)
+    .where(eq(schema.publishers.id, publisherId))
     .limit(1)
 
   if (!existingPublisher || existingPublisher.length === 0) {
@@ -37,12 +36,12 @@ export default defineEventHandler(async event => {
 
   // Update publisher
   const result = await db
-    .update(publishers)
+    .update(schema.publishers)
     .set({
       ...body,
       updatedAt: new Date(),
     })
-    .where(eq(publishers.id, publisherId))
+    .where(eq(schema.publishers.id, publisherId))
     .returning()
 
   const updatedPublisher = result[0]

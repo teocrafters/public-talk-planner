@@ -1,22 +1,14 @@
-import { createError } from "h3"
+import { createError, type H3Event } from "h3"
 import { eq, and, gte, lte } from "drizzle-orm"
-import {
-  meetingPrograms,
-  meetingProgramParts,
-  meetingScheduledParts,
-  publishers,
-  scheduledPublicTalks,
-  meetingExceptions,
-} from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { planWeekendMeetingSchema } from "#shared/utils/schemas"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 
-export default defineEventHandler(async event => {
+export default defineEventHandler(async (event: H3Event) => {
   await requirePermission({ weekend_meetings: ["schedule_rest"] })(event)
 
   const body = await validateBody(event, planWeekendMeetingSchema)
-  const db = useDrizzle()
 
   const date = dayjs.unix(body.date)
 
@@ -42,8 +34,8 @@ export default defineEventHandler(async event => {
   const dayStartUnix = requestDate.startOf("day").unix()
   const dayEndUnix = requestDate.endOf("day").unix()
 
-  const exception = await db.query.meetingExceptions.findFirst({
-    where: and(gte(meetingExceptions.date, dayStartUnix), lte(meetingExceptions.date, dayEndUnix)),
+  const exception = await db.query.schema.meetingExceptions.findFirst({
+    where: and(gte(schema.meetingExceptions.date, dayStartUnix), lte(schema.meetingExceptions.date, dayEndUnix)),
   })
 
   if (exception) {
@@ -58,8 +50,8 @@ export default defineEventHandler(async event => {
   }
 
   // Check if meeting program already exists for this date
-  const existingProgram = await db.query.meetingPrograms.findFirst({
-    where: and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, body.date)),
+  const existingProgram = await db.query.schema.meetingPrograms.findFirst({
+    where: and(eq(schema.meetingPrograms.type, "weekend"), eq(schema.meetingPrograms.date, body.date)),
   })
 
   if (existingProgram && !body.overrideDuplicates) {
@@ -80,10 +72,10 @@ export default defineEventHandler(async event => {
   ].filter(Boolean) as string[]
 
   // Fetch all publishers
-  const allPublishers = new Map<string, typeof publishers.$inferSelect>()
+  const allPublishers = new Map<string, typeof schema.publishers.$inferSelect>()
   for (const id of publisherIds) {
-    const publisher = await db.query.publishers.findFirst({
-      where: eq(publishers.id, id),
+    const publisher = await db.query.schema.publishers.findFirst({
+      where: eq(schema.publishers.id, id),
     })
     if (!publisher) {
       throw createError({
@@ -150,7 +142,7 @@ export default defineEventHandler(async event => {
 
   // Check for duplicate assignments on same date (unless override)
   if (!body.overrideDuplicates) {
-    const existingAssignments = await db.query.meetingScheduledParts.findMany({
+    const existingAssignments = await db.query.schema.meetingScheduledParts.findMany({
       with: {
         part: {
           with: {
@@ -160,13 +152,15 @@ export default defineEventHandler(async event => {
       },
     })
 
+    type AssignmentResult = typeof existingAssignments[number]
+
     const conflictingPublishers = existingAssignments
       .filter(
-        assignment =>
+        (assignment: AssignmentResult) =>
           assignment.part.meetingProgram.date === body.date &&
           publisherIds.includes(assignment.publisherId)
       )
-      .map(a => a.publisherId)
+      .map((a: AssignmentResult) => a.publisherId)
 
     if (conflictingPublishers.length > 0) {
       throw createError({
@@ -182,7 +176,7 @@ export default defineEventHandler(async event => {
 
   // Create meeting program
   const programResult = await db
-    .insert(meetingPrograms)
+    .insert(schema.meetingPrograms)
     .values({
       type: "weekend",
       date: body.date,
@@ -235,7 +229,7 @@ export default defineEventHandler(async event => {
   const createdParts = new Map<string, number>()
   for (const part of partsToCreate) {
     const partResult = await db
-      .insert(meetingProgramParts)
+      .insert(schema.meetingProgramParts)
       .values({
         meetingProgramId: program.id,
         type: part.type,
@@ -288,7 +282,7 @@ export default defineEventHandler(async event => {
   }
 
   for (const assignment of assignmentsToCreate) {
-    await db.insert(meetingScheduledParts).values({
+    await db.insert(schema.meetingScheduledParts).values({
       id: crypto.randomUUID(),
       meetingProgramPartId: assignment.partId,
       publisherId: assignment.publisherId,
@@ -303,7 +297,7 @@ export default defineEventHandler(async event => {
     const publicTalkPartId = createdParts.get(MEETING_PART_TYPES.PUBLIC_TALK)
 
     if (publicTalkPartId) {
-      await db.insert(scheduledPublicTalks).values({
+      await db.insert(schema.scheduledPublicTalks).values({
         id: crypto.randomUUID(),
         date: date.toDate(),
         meetingProgramId: program.id,

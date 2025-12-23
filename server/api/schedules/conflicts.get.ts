@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq, and } from "drizzle-orm"
-import { scheduledPublicTalks } from "../../database/schema"
+import { schema } from "hub:db"
 
 export default defineEventHandler(async event => {
   await requirePermission({ weekend_meetings: ["schedule_public_talks"] })(event)
@@ -32,13 +32,12 @@ export default defineEventHandler(async event => {
 
   const date = parsedDate.startOf("day").toDate()
 
-  const db = useDrizzle()
 
-  const existingSchedule = await db.query.scheduledPublicTalks.findFirst({
+  const existingSchedule = await db.query.schema.scheduledPublicTalks.findFirst({
     where: and(
-      eq(scheduledPublicTalks.date, date),
-      eq(scheduledPublicTalks.meetingProgramId, meetingProgramId),
-      eq(scheduledPublicTalks.partId, partId)
+      eq(schema.scheduledPublicTalks.date, date),
+      eq(schema.scheduledPublicTalks.meetingProgramId, meetingProgramId),
+      eq(schema.scheduledPublicTalks.partId, partId)
     ),
     with: {
       speaker: true,

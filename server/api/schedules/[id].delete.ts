@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { scheduledPublicTalks } from "../../database/schema"
+import { schema } from "hub:db"
 import { logAuditEvent } from "../../utils/audit-log"
 
 export default defineEventHandler(async event => {
@@ -15,10 +15,9 @@ export default defineEventHandler(async event => {
     })
   }
 
-  const db = useDrizzle()
 
-  const existingSchedule = await db.query.scheduledPublicTalks.findFirst({
-    where: eq(scheduledPublicTalks.id, scheduleId),
+  const existingSchedule = await db.query.schema.scheduledPublicTalks.findFirst({
+    where: eq(schema.scheduledPublicTalks.id, scheduleId),
   })
 
   if (!existingSchedule) {
@@ -39,7 +38,7 @@ export default defineEventHandler(async event => {
     })
   }
 
-  await db.delete(scheduledPublicTalks).where(eq(scheduledPublicTalks.id, scheduleId))
+  await db.delete(schema.scheduledPublicTalks).where(eq(schema.scheduledPublicTalks.id, scheduleId))
 
   await logAuditEvent(event, {
     action: AUDIT_EVENTS.SCHEDULE_DELETED,

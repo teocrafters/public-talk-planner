@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq, sql } from "drizzle-orm"
-import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { editSpeakerSchema } from "#shared/utils/schemas"
 
@@ -18,12 +18,11 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, editSpeakerSchema)
 
-  const db = useDrizzle()
 
   const existingSpeaker = await db
     .select()
-    .from(speakers)
-    .where(eq(speakers.id, speakerId))
+    .from(schema.speakers)
+    .where(eq(schema.speakers.id, speakerId))
     .limit(1)
 
   if (!existingSpeaker || existingSpeaker.length === 0 || !existingSpeaker[0]) {
@@ -37,8 +36,8 @@ export default defineEventHandler(async event => {
   if (body.congregationId) {
     const congregationExists = await db
       .select()
-      .from(organization)
-      .where(eq(organization.id, body.congregationId))
+      .from(schema.organization)
+      .where(eq(schema.organization.id, body.congregationId))
       .limit(1)
 
     if (!congregationExists || congregationExists.length === 0) {
@@ -53,8 +52,8 @@ export default defineEventHandler(async event => {
   if (body.talkIds && body.talkIds.length > 0) {
     const talksExist = await db
       .select()
-      .from(publicTalks)
-      .where(sql`${publicTalks.id} IN ${body.talkIds}`)
+      .from(schema.publicTalks)
+      .where(sql`${schema.publicTalks.id} IN ${body.talkIds}`)
 
     if (talksExist.length !== body.talkIds.length) {
       throw createError({
@@ -65,7 +64,7 @@ export default defineEventHandler(async event => {
     }
   }
 
-  const updateData: Partial<typeof speakers.$inferInsert> = {
+  const updateData: Partial<typeof schema.speakers.$inferInsert> = {
     updatedAt: new Date(),
   }
 
@@ -86,9 +85,9 @@ export default defineEventHandler(async event => {
   }
 
   const result = await db
-    .update(speakers)
+    .update(schema.speakers)
     .set(updateData)
-    .where(eq(speakers.id, speakerId))
+    .where(eq(schema.speakers.id, speakerId))
     .returning()
 
   const updatedSpeaker = result[0]
@@ -101,7 +100,7 @@ export default defineEventHandler(async event => {
   }
 
   if (body.talkIds !== undefined) {
-    await db.delete(speakerTalks).where(eq(speakerTalks.speakerId, speakerId))
+    await db.delete(schema.speakerTalks).where(eq(schema.speakerTalks.speakerId, speakerId))
 
     if (body.talkIds.length > 0) {
       const talkAssignments = body.talkIds.map((talkId: number) => ({
@@ -110,7 +109,7 @@ export default defineEventHandler(async event => {
         createdAt: new Date(),
       }))
 
-      await db.insert(speakerTalks).values(talkAssignments)
+      await db.insert(schema.speakerTalks).values(talkAssignments)
     }
   }
 
@@ -128,19 +127,19 @@ export default defineEventHandler(async event => {
 
   const congregation = await db
     .select()
-    .from(organization)
-    .where(eq(organization.id, updatedSpeaker.congregationId))
+    .from(schema.organization)
+    .where(eq(schema.organization.id, updatedSpeaker.congregationId))
     .limit(1)
 
   const talks = await db
     .select({
-      id: publicTalks.id,
-      no: publicTalks.no,
-      title: publicTalks.title,
+      id: schema.publicTalks.id,
+      no: schema.publicTalks.no,
+      title: schema.publicTalks.title,
     })
-    .from(speakerTalks)
-    .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
-    .where(eq(speakerTalks.speakerId, speakerId))
+    .from(schema.speakerTalks)
+    .innerJoin(schema.publicTalks, eq(schema.speakerTalks.talkId, schema.publicTalks.id))
+    .where(eq(schema.speakerTalks.speakerId, speakerId))
 
   return {
     success: true,

@@ -1,33 +1,33 @@
-import { eq, gte, lte, and } from "drizzle-orm"
-import { meetingPrograms } from "../../database/schema"
+import type { H3Event } from "h3"
+import { eq, gte, lte, and, asc as ascHelper } from "drizzle-orm"
+import { schema } from "hub:db"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 
-export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[]> => {
+export default defineEventHandler(async (event: H3Event): Promise<WeekendMeetingListItem[]> => {
   await requirePermission({ weekend_meetings: ["list"] })(event)
 
-  const db = useDrizzle()
   const query = getQuery(event)
 
   // Build where conditions
-  const whereConditions = [eq(meetingPrograms.type, "weekend")]
+  const whereConditions = [eq(schema.meetingPrograms.type, "weekend")]
 
   // Date range filter
   if (query.startDate && typeof query.startDate === "string") {
     const startTimestamp = parseInt(query.startDate)
-    whereConditions.push(gte(meetingPrograms.date, startTimestamp))
+    whereConditions.push(gte(schema.meetingPrograms.date, startTimestamp))
   }
 
   if (query.endDate && typeof query.endDate === "string") {
     const endTimestamp = parseInt(query.endDate)
-    whereConditions.push(lte(meetingPrograms.date, endTimestamp))
+    whereConditions.push(lte(schema.meetingPrograms.date, endTimestamp))
   }
 
   // Fetch programs with parts and assignments
-  const programs = await db.query.meetingPrograms.findMany({
+  const programs = await db.query.schema.meetingPrograms.findMany({
     where: and(...whereConditions),
     with: {
       parts: {
-        orderBy: (parts, { asc }) => [asc(parts.order)],
+        orderBy: [ascHelper(schema.meetingProgramParts.order)],
         with: {
           meetingScheduledParts: {
             with: {
@@ -44,15 +44,19 @@ export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[
         },
       },
     },
-    orderBy: (programs, { asc }) => [asc(programs.date)],
+    orderBy: [ascHelper(schema.meetingPrograms.date)],
   })
 
+  // Type helpers for query results
+  type ProgramResult = NonNullable<typeof programs[number]>
+  type PartResult = ProgramResult["parts"][number]
+
   // Transform to response format
-  const result: WeekendMeetingListItem[] = programs.map(program => ({
+  const result: WeekendMeetingListItem[] = programs.map((program: ProgramResult) => ({
     id: program.id,
     date: program.date,
     isCircuitOverseerVisit: program.isCircuitOverseerVisit,
-    parts: program.parts.map(part => {
+    parts: program.parts.map((part: PartResult) => {
       let assignment: WeekendMeetingListItem["parts"][number]["assignment"] = undefined
       let talkName: string | null = part.name
 
@@ -89,7 +93,7 @@ export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[
           }
         }
       } else {
-        // For all other parts, use meetingScheduledParts (publishers)
+        // For all other parts, use meetingScheduledParts (schema.publishers)
         const scheduledPart = part.meetingScheduledParts[0]
         if (scheduledPart?.publisher) {
           assignment = {

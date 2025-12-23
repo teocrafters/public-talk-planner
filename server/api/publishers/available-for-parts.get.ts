@@ -1,4 +1,4 @@
-import { publishers, type Publisher } from "../../database/schema"
+import { schema } from "hub:db"
 
 interface AvailablePublishers {
   chairman: Publisher[]
@@ -11,13 +11,12 @@ interface AvailablePublishers {
 export default defineEventHandler(async (event): Promise<AvailablePublishers> => {
   await requirePermission({ publishers: ["list"] })(event)
 
-  const db = useDrizzle()
 
   // Fetch all publishers once
   const allPublishers = await db
     .select()
-    .from(publishers)
-    .orderBy(publishers.lastName, publishers.firstName)
+    .from(schema.publishers)
+    .orderBy(schema.publishers.lastName, schema.publishers.firstName)
 
   // Filter by capability
   return {

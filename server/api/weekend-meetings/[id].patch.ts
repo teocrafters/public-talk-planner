@@ -1,16 +1,11 @@
-import { createError } from "h3"
+import { createError, type H3Event } from "h3"
 import { eq } from "drizzle-orm"
-import {
-  meetingPrograms,
-  meetingProgramParts,
-  meetingScheduledParts,
-  publishers,
-} from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { updateWeekendMeetingSchema } from "#shared/utils/schemas"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 
-export default defineEventHandler(async event => {
+export default defineEventHandler(async (event: H3Event) => {
   await requirePermission({ weekend_meetings: ["schedule_rest"] })(event)
 
   const programId = getRouterParam(event, "id")
@@ -23,11 +18,10 @@ export default defineEventHandler(async event => {
   }
 
   const body = await validateBody(event, updateWeekendMeetingSchema)
-  const db = useDrizzle()
 
   // Check if program exists
-  const program = await db.query.meetingPrograms.findFirst({
-    where: eq(meetingPrograms.id, parseInt(programId)),
+  const program = await db.query.schema.meetingPrograms.findFirst({
+    where: eq(schema.meetingPrograms.id, parseInt(programId)),
     with: {
       parts: {
         with: {
@@ -45,12 +39,15 @@ export default defineEventHandler(async event => {
     })
   }
 
+  // Type helper for program parts
+  type ProgramPart = NonNullable<typeof program>["parts"][number]
+
   // Update CO visit flag if provided
   if (body.isCircuitOverseerVisit !== undefined) {
     await db
-      .update(meetingPrograms)
+      .update(schema.meetingPrograms)
       .set({ isCircuitOverseerVisit: body.isCircuitOverseerVisit })
-      .where(eq(meetingPrograms.id, parseInt(programId)))
+      .where(eq(schema.meetingPrograms.id, parseInt(programId)))
   }
 
   // Update parts if provided
@@ -65,8 +62,8 @@ export default defineEventHandler(async event => {
 
     // Validate all publishers exist and have capabilities
     for (const id of publisherIds) {
-      const publisher = await db.query.publishers.findFirst({
-        where: eq(publishers.id, id),
+      const publisher = await db.query.schema.publishers.findFirst({
+        where: eq(schema.publishers.id, id),
       })
       if (!publisher) {
         throw createError({
@@ -79,68 +76,68 @@ export default defineEventHandler(async event => {
 
     // Update chairman
     if (body.parts.chairman) {
-      const chairmanPart = program.parts.find(p => p.type === MEETING_PART_TYPES.CHAIRMAN)
+      const chairmanPart = program.parts.find((p: ProgramPart) => p.type === MEETING_PART_TYPES.CHAIRMAN)
       if (chairmanPart) {
         const existingAssignment = chairmanPart.meetingScheduledParts[0]
         if (existingAssignment) {
           await db
-            .update(meetingScheduledParts)
+            .update(schema.meetingScheduledParts)
             .set({
               publisherId: body.parts.chairman,
               updatedAt: new Date(),
             })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
+            .where(eq(schema.meetingScheduledParts.id, existingAssignment.id))
         }
       }
     }
 
     // Update watchtower study
     if (body.parts.watchtowerStudy) {
-      const watchtowerPart = program.parts.find(p => p.type === MEETING_PART_TYPES.WATCHTOWER_STUDY)
+      const watchtowerPart = program.parts.find((p: ProgramPart) => p.type === MEETING_PART_TYPES.WATCHTOWER_STUDY)
       if (watchtowerPart) {
         const existingAssignment = watchtowerPart.meetingScheduledParts[0]
         if (existingAssignment) {
           await db
-            .update(meetingScheduledParts)
+            .update(schema.meetingScheduledParts)
             .set({
               publisherId: body.parts.watchtowerStudy,
               updatedAt: new Date(),
             })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
+            .where(eq(schema.meetingScheduledParts.id, existingAssignment.id))
         }
       }
     }
 
     // Update reader
     if (body.parts.reader) {
-      const readerPart = program.parts.find(p => p.type === MEETING_PART_TYPES.READER)
+      const readerPart = program.parts.find((p: ProgramPart) => p.type === MEETING_PART_TYPES.READER)
       if (readerPart) {
         const existingAssignment = readerPart.meetingScheduledParts[0]
         if (existingAssignment) {
           await db
-            .update(meetingScheduledParts)
+            .update(schema.meetingScheduledParts)
             .set({
               publisherId: body.parts.reader,
               updatedAt: new Date(),
             })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
+            .where(eq(schema.meetingScheduledParts.id, existingAssignment.id))
         }
       }
     }
 
     // Update prayer
     if (body.parts.prayer) {
-      const prayerPart = program.parts.find(p => p.type === MEETING_PART_TYPES.CLOSING_PRAYER)
+      const prayerPart = program.parts.find((p: ProgramPart) => p.type === MEETING_PART_TYPES.CLOSING_PRAYER)
       if (prayerPart) {
         const existingAssignment = prayerPart.meetingScheduledParts[0]
         if (existingAssignment) {
           await db
-            .update(meetingScheduledParts)
+            .update(schema.meetingScheduledParts)
             .set({
               publisherId: body.parts.prayer,
               updatedAt: new Date(),
             })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
+            .where(eq(schema.meetingScheduledParts.id, existingAssignment.id))
         }
       }
     }
@@ -148,25 +145,25 @@ export default defineEventHandler(async event => {
     // Update circuit overseer talk
     if (body.parts.circuitOverseerTalk) {
       const coTalkPart = program.parts.find(
-        p => p.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK
+        (p: ProgramPart) => p.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK
       )
       if (coTalkPart) {
         // Update part name (title)
         await db
-          .update(meetingProgramParts)
+          .update(schema.meetingProgramParts)
           .set({ name: body.parts.circuitOverseerTalk.title })
-          .where(eq(meetingProgramParts.id, coTalkPart.id))
+          .where(eq(schema.meetingProgramParts.id, coTalkPart.id))
 
         // Update publisher assignment
         const existingAssignment = coTalkPart.meetingScheduledParts[0]
         if (existingAssignment) {
           await db
-            .update(meetingScheduledParts)
+            .update(schema.meetingScheduledParts)
             .set({
               publisherId: body.parts.circuitOverseerTalk.publisherId,
               updatedAt: new Date(),
             })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
+            .where(eq(schema.meetingScheduledParts.id, existingAssignment.id))
         }
       }
     }
@@ -184,8 +181,8 @@ export default defineEventHandler(async event => {
   })
 
   // Fetch updated program
-  const updatedProgram = await db.query.meetingPrograms.findFirst({
-    where: eq(meetingPrograms.id, parseInt(programId)),
+  const updatedProgram = await db.query.schema.meetingPrograms.findFirst({
+    where: eq(schema.meetingPrograms.id, parseInt(programId)),
     with: {
       parts: {
         with: {

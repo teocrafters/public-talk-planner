@@ -1,5 +1,5 @@
 import { isNull, eq } from "drizzle-orm"
-import { user, publishers } from "../../database/schema"
+import { schema } from "hub:db"
 
 interface UnlinkedUser {
   id: string
@@ -10,19 +10,18 @@ interface UnlinkedUser {
 export default defineEventHandler(async (event): Promise<UnlinkedUser[]> => {
   await requirePermission({ publishers: ["link_to_user"] })(event)
 
-  const db = useDrizzle()
 
   // Get all users that are not linked to any publisher
   const unlinkedUsers = await db
     .select({
-      id: user.id,
-      name: user.name,
-      email: user.email,
+      id: schema.user.id,
+      name: schema.user.name,
+      email: schema.user.email,
     })
-    .from(user)
-    .leftJoin(publishers, eq(publishers.userId, user.id))
-    .where(isNull(publishers.userId))
-    .orderBy(user.name)
+    .from(schema.user)
+    .leftJoin(schema.publishers, eq(schema.publishers.userId, schema.user.id))
+    .where(isNull(schema.publishers.userId))
+    .orderBy(schema.user.name)
 
   return unlinkedUsers
 })

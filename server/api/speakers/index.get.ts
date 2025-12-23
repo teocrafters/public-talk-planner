@@ -1,17 +1,10 @@
 import { eq, desc, asc, sql } from "drizzle-orm"
-import {
-  speakers,
-  speakerTalks,
-  organization,
-  publicTalks,
-  scheduledPublicTalks,
-} from "../../database/schema"
+import { schema } from "hub:db"
 
 export default defineEventHandler(async event => {
   await requirePermission({ speakers: ["list"] })(event)
 
   const query = getQuery(event)
-  const db = useDrizzle()
 
   // Extract sorting parameters
   const sortBy = (query.sortBy as string) || "name" // Default: sort by name
@@ -20,35 +13,35 @@ export default defineEventHandler(async event => {
   // Optimized single query with JSON aggregation using speakerTalks relationship
   let speakersQuery = db
     .select({
-      id: speakers.id,
-      firstName: speakers.firstName,
-      lastName: speakers.lastName,
-      phone: speakers.phone,
-      congregationId: speakers.congregationId,
-      congregationName: organization.name,
-      archived: speakers.archived,
-      archivedAt: speakers.archivedAt,
-      createdAt: speakers.createdAt,
-      updatedAt: speakers.updatedAt,
+      id: schema.speakers.id,
+      firstName: schema.speakers.firstName,
+      lastName: schema.speakers.lastName,
+      phone: schema.speakers.phone,
+      congregationId: schema.speakers.congregationId,
+      congregationName: schema.organization.name,
+      archived: schema.speakers.archived,
+      archivedAt: schema.speakers.archivedAt,
+      createdAt: schema.speakers.createdAt,
+      updatedAt: schema.speakers.updatedAt,
       // Include last talk date from scheduled talks
-      lastTalkDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("lastTalkDate"),
+      lastTalkDate: sql<number | null>`MAX(${schema.scheduledPublicTalks.date})`.as("lastTalkDate"),
       // Aggregate talks using JSON aggregation through speakerTalks relationship
       talks: sql<string>`
         JSON_GROUP_ARRAY(
           DISTINCT JSON_OBJECT(
-            'id', ${publicTalks.id},
-            'no', ${publicTalks.no},
-            'title', ${publicTalks.title}
+            'id', ${schema.publicTalks.id},
+            'no', ${schema.publicTalks.no},
+            'title', ${schema.publicTalks.title}
           )
-        ) FILTER (WHERE ${publicTalks.id} IS NOT NULL)
+        ) FILTER (WHERE ${schema.publicTalks.id} IS NOT NULL)
       `.as("talks"),
     })
-    .from(speakers)
-    .leftJoin(organization, eq(speakers.congregationId, organization.id))
-    .leftJoin(scheduledPublicTalks, eq(speakers.id, scheduledPublicTalks.speakerId))
-    .leftJoin(speakerTalks, eq(speakers.id, speakerTalks.speakerId))
-    .leftJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
-    .groupBy(speakers.id, organization.id)
+    .from(schema.speakers)
+    .leftJoin(schema.organization, eq(schema.speakers.congregationId, schema.organization.id))
+    .leftJoin(schema.scheduledPublicTalks, eq(schema.speakers.id, schema.scheduledPublicTalks.speakerId))
+    .leftJoin(schema.speakerTalks, eq(schema.speakers.id, schema.speakerTalks.speakerId))
+    .leftJoin(schema.publicTalks, eq(schema.speakerTalks.talkId, schema.publicTalks.id))
+    .groupBy(schema.speakers.id, schema.organization.id)
     .$dynamic()
 
   // Add sorting based on the sortBy parameter
@@ -57,8 +50,8 @@ export default defineEventHandler(async event => {
       // Sort by last name first, then first name
       speakersQuery =
         sortOrder === "desc"
-          ? speakersQuery.orderBy(desc(speakers.lastName), desc(speakers.firstName))
-          : speakersQuery.orderBy(asc(speakers.lastName), asc(speakers.firstName))
+          ? speakersQuery.orderBy(desc(schema.speakers.lastName), desc(schema.speakers.firstName))
+          : speakersQuery.orderBy(asc(schema.speakers.lastName), asc(schema.speakers.firstName))
       break
 
     case "congregation":
@@ -66,14 +59,14 @@ export default defineEventHandler(async event => {
       speakersQuery =
         sortOrder === "desc"
           ? speakersQuery.orderBy(
-              desc(organization.name),
-              desc(speakers.lastName),
-              desc(speakers.firstName)
+              desc(schema.organization.name),
+              desc(schema.speakers.lastName),
+              desc(schema.speakers.firstName)
             )
           : speakersQuery.orderBy(
-              asc(organization.name),
-              asc(speakers.lastName),
-              asc(speakers.firstName)
+              asc(schema.organization.name),
+              asc(schema.speakers.lastName),
+              asc(schema.speakers.firstName)
             )
       break
 
@@ -81,8 +74,8 @@ export default defineEventHandler(async event => {
       // Sort by last talk date
       speakersQuery =
         sortOrder === "desc"
-          ? speakersQuery.orderBy(desc(sql`MAX(${scheduledPublicTalks.date})`))
-          : speakersQuery.orderBy(asc(sql`MAX(${scheduledPublicTalks.date})`))
+          ? speakersQuery.orderBy(desc(sql`MAX(${schema.scheduledPublicTalks.date})`))
+          : speakersQuery.orderBy(asc(sql`MAX(${schema.scheduledPublicTalks.date})`))
   }
 
   const speakersList = await speakersQuery

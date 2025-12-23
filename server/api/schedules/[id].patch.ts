@@ -1,12 +1,6 @@
 import { createError } from "h3"
 import { eq, and } from "drizzle-orm"
-import {
-  speakers,
-  publishers,
-  publicTalks,
-  scheduledPublicTalks,
-  speakerTalks,
-} from "../../database/schema"
+import { schema } from "hub:db"
 import { updateScheduleSchema } from "#shared/utils/schemas"
 import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
 
@@ -24,10 +18,9 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, updateScheduleSchema)
 
-  const db = useDrizzle()
 
-  const existingSchedule = await db.query.scheduledPublicTalks.findFirst({
-    where: eq(scheduledPublicTalks.id, scheduleId),
+  const existingSchedule = await db.query.schema.scheduledPublicTalks.findFirst({
+    where: eq(schema.scheduledPublicTalks.id, scheduleId),
   })
 
   if (!existingSchedule) {
@@ -64,8 +57,8 @@ export default defineEventHandler(async event => {
     }
 
     if (body.speakerId) {
-      const speaker = await db.query.speakers.findFirst({
-        where: eq(speakers.id, body.speakerId),
+      const speaker = await db.query.schema.speakers.findFirst({
+        where: eq(schema.speakers.id, body.speakerId),
       })
 
       if (!speaker || speaker.archived) {
@@ -88,8 +81,8 @@ export default defineEventHandler(async event => {
     }
 
     if (body.publisherId) {
-      const publisher = await db.query.publishers.findFirst({
-        where: eq(publishers.id, body.publisherId),
+      const publisher = await db.query.schema.publishers.findFirst({
+        where: eq(schema.publishers.id, body.publisherId),
       })
 
       if (!publisher) {
@@ -111,8 +104,8 @@ export default defineEventHandler(async event => {
   }
 
   if (body.talkId) {
-    const talk = await db.query.publicTalks.findFirst({
-      where: eq(publicTalks.id, body.talkId),
+    const talk = await db.query.schema.publicTalks.findFirst({
+      where: eq(schema.publicTalks.id, body.talkId),
     })
 
     if (!talk) {
@@ -128,10 +121,10 @@ export default defineEventHandler(async event => {
       const speakerIdToCheck = body.speakerId || existingSchedule.speakerId
 
       if (speakerIdToCheck) {
-        const speakerHasTalk = await db.query.speakerTalks.findFirst({
+        const speakerHasTalk = await db.query.schema.speakerTalks.findFirst({
           where: and(
-            eq(speakerTalks.speakerId, speakerIdToCheck),
-            eq(speakerTalks.talkId, body.talkId)
+            eq(schema.speakerTalks.speakerId, speakerIdToCheck),
+            eq(schema.speakerTalks.talkId, body.talkId)
           ),
         })
 
@@ -146,7 +139,7 @@ export default defineEventHandler(async event => {
     }
   }
 
-  const updateData: Partial<typeof scheduledPublicTalks.$inferInsert> = {
+  const updateData: Partial<typeof schema.scheduledPublicTalks.$inferInsert> = {
     updatedAt: new Date(),
   }
 
@@ -178,9 +171,9 @@ export default defineEventHandler(async event => {
   }
 
   await db
-    .update(scheduledPublicTalks)
+    .update(schema.scheduledPublicTalks)
     .set(updateData)
-    .where(eq(scheduledPublicTalks.id, scheduleId))
+    .where(eq(schema.scheduledPublicTalks.id, scheduleId))
 
   await logAuditEvent(event, {
     action: AUDIT_EVENTS.SCHEDULE_UPDATED,
@@ -195,8 +188,8 @@ export default defineEventHandler(async event => {
     } satisfies AuditEventDetails[typeof AUDIT_EVENTS.SCHEDULE_UPDATED],
   })
 
-  const updatedSchedule = await db.query.scheduledPublicTalks.findFirst({
-    where: eq(scheduledPublicTalks.id, scheduleId),
+  const updatedSchedule = await db.query.schema.scheduledPublicTalks.findFirst({
+    where: eq(schema.scheduledPublicTalks.id, scheduleId),
     with: {
       speaker: true,
       publisher: true,

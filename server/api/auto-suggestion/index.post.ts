@@ -1,13 +1,6 @@
 import { createError } from "h3"
 import { eq, and, inArray, asc, sql, notInArray } from "drizzle-orm"
-import {
-  speakers,
-  publishers,
-  scheduledPublicTalks,
-  speakerTalks,
-  publicTalks,
-  organization,
-} from "../../database/schema"
+import { schema } from "hub:db"
 import { autoSuggestionSchema } from "#shared/utils/schemas"
 
 export default defineEventHandler(async event => {
@@ -17,7 +10,6 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, autoSuggestionSchema)
 
-  const db = useDrizzle()
 
   // Set 20-second timeout
   const timeoutMs = 20000
@@ -40,10 +32,10 @@ export default defineEventHandler(async event => {
     // Get all non-archived visiting speakers
     const visitingSpeakers = await db
       .select({
-        id: speakers.id,
+        id: schema.speakers.id,
       })
-      .from(speakers)
-      .where(eq(speakers.archived, false))
+      .from(schema.speakers)
+      .where(eq(schema.speakers.archived, false))
 
     if (visitingSpeakers.length === 0) {
       // Fallback: No visiting speakers available, suggest local publisher
@@ -55,26 +47,26 @@ export default defineEventHandler(async event => {
     checkTimeout()
 
     // Get talks with their last given dates for visiting speakers
-    // Note: scheduledPublicTalks.date is timestamp mode (Date), need to extract as integer
+    // Note: schema.scheduledPublicTalks.date is timestamp mode (Date), need to extract as integer
     const talkPoolQuery = db
       .select({
-        talkId: publicTalks.id,
-        talkNo: publicTalks.no,
-        talkTitle: publicTalks.title,
-        lastGivenDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
+        talkId: schema.publicTalks.id,
+        talkNo: schema.publicTalks.no,
+        talkTitle: schema.publicTalks.title,
+        lastGivenDate: sql<Date | null>`MAX(${schema.scheduledPublicTalks.date})`.as("last_given_date"),
       })
-      .from(speakerTalks)
-      .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
-      .innerJoin(speakers, eq(speakerTalks.speakerId, speakers.id))
+      .from(schema.speakerTalks)
+      .innerJoin(schema.publicTalks, eq(schema.speakerTalks.talkId, schema.publicTalks.id))
+      .innerJoin(schema.speakers, eq(schema.speakerTalks.speakerId, schema.speakers.id))
       .leftJoin(
-        scheduledPublicTalks,
+        schema.scheduledPublicTalks,
         and(
-          eq(scheduledPublicTalks.talkId, publicTalks.id),
-          eq(scheduledPublicTalks.speakerId, speakers.id)
+          eq(schema.scheduledPublicTalks.talkId, schema.publicTalks.id),
+          eq(schema.scheduledPublicTalks.speakerId, schema.speakers.id)
         )
       )
-      .where(and(eq(speakers.archived, false), inArray(speakers.id, visitingSpeakerIds)))
-      .groupBy(publicTalks.id, publicTalks.no, publicTalks.title)
+      .where(and(eq(schema.speakers.archived, false), inArray(schema.speakers.id, visitingSpeakerIds)))
+      .groupBy(schema.publicTalks.id, schema.publicTalks.no, schema.publicTalks.title)
       .orderBy(asc(sql`last_given_date`))
       .limit(10)
 
@@ -93,20 +85,20 @@ export default defineEventHandler(async event => {
     // Exclude archived and session-excluded speakers
     const eligibleSpeakersQuery = db
       .select({
-        speakerId: speakers.id,
+        speakerId: schema.speakers.id,
       })
-      .from(speakerTalks)
-      .innerJoin(speakers, eq(speakerTalks.speakerId, speakers.id))
+      .from(schema.speakerTalks)
+      .innerJoin(schema.speakers, eq(schema.speakerTalks.speakerId, schema.speakers.id))
       .where(
         and(
-          inArray(speakerTalks.talkId, talkPoolIds),
-          eq(speakers.archived, false),
+          inArray(schema.speakerTalks.talkId, talkPoolIds),
+          eq(schema.speakers.archived, false),
           body.excludedSpeakerIds.length > 0
-            ? notInArray(speakers.id, body.excludedSpeakerIds)
+            ? notInArray(schema.speakers.id, body.excludedSpeakerIds)
             : undefined
         )
       )
-      .groupBy(speakers.id)
+      .groupBy(schema.speakers.id)
 
     const eligibleSpeakers = await eligibleSpeakersQuery
 
@@ -127,22 +119,22 @@ export default defineEventHandler(async event => {
     // Calculate last scheduled talk date for each eligible speaker
     const speakerLastTalkQuery = db
       .select({
-        speakerId: speakers.id,
-        firstName: speakers.firstName,
-        lastName: speakers.lastName,
-        phone: speakers.phone,
-        congregationId: speakers.congregationId,
-        lastTalkDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
+        speakerId: schema.speakers.id,
+        firstName: schema.speakers.firstName,
+        lastName: schema.speakers.lastName,
+        phone: schema.speakers.phone,
+        congregationId: schema.speakers.congregationId,
+        lastTalkDate: sql<Date | null>`MAX(${schema.scheduledPublicTalks.date})`.as("last_talk_date"),
       })
-      .from(speakers)
-      .leftJoin(scheduledPublicTalks, eq(scheduledPublicTalks.speakerId, speakers.id))
-      .where(inArray(speakers.id, eligibleSpeakerIds))
+      .from(schema.speakers)
+      .leftJoin(schema.scheduledPublicTalks, eq(schema.scheduledPublicTalks.speakerId, schema.speakers.id))
+      .where(inArray(schema.speakers.id, eligibleSpeakerIds))
       .groupBy(
-        speakers.id,
-        speakers.firstName,
-        speakers.lastName,
-        speakers.phone,
-        speakers.congregationId
+        schema.speakers.id,
+        schema.speakers.firstName,
+        schema.speakers.lastName,
+        schema.speakers.phone,
+        schema.speakers.congregationId
       )
       .orderBy(asc(sql`last_talk_date`))
       .limit(1)
@@ -165,10 +157,10 @@ export default defineEventHandler(async event => {
     // Get congregation name
     const congregationData = await db
       .select({
-        name: organization.name,
+        name: schema.organization.name,
       })
-      .from(organization)
-      .where(eq(organization.id, selectedSpeaker.congregationId))
+      .from(schema.organization)
+      .where(eq(schema.organization.id, selectedSpeaker.congregationId))
       .limit(1)
 
     const congregationName = congregationData[0]?.name || ""
@@ -178,27 +170,27 @@ export default defineEventHandler(async event => {
     // Step 4: Filter available talks that selected speaker can deliver from the pool
     const availableTalksQuery = db
       .select({
-        talkId: publicTalks.id,
-        talkNo: publicTalks.no,
-        talkTitle: publicTalks.title,
-        lastGivenDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
+        talkId: schema.publicTalks.id,
+        talkNo: schema.publicTalks.no,
+        talkTitle: schema.publicTalks.title,
+        lastGivenDate: sql<Date | null>`MAX(${schema.scheduledPublicTalks.date})`.as("last_given_date"),
       })
-      .from(speakerTalks)
-      .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
+      .from(schema.speakerTalks)
+      .innerJoin(schema.publicTalks, eq(schema.speakerTalks.talkId, schema.publicTalks.id))
       .leftJoin(
-        scheduledPublicTalks,
+        schema.scheduledPublicTalks,
         and(
-          eq(scheduledPublicTalks.talkId, publicTalks.id),
-          eq(scheduledPublicTalks.speakerId, selectedSpeaker.speakerId)
+          eq(schema.scheduledPublicTalks.talkId, schema.publicTalks.id),
+          eq(schema.scheduledPublicTalks.speakerId, selectedSpeaker.speakerId)
         )
       )
       .where(
         and(
-          eq(speakerTalks.speakerId, selectedSpeaker.speakerId),
-          inArray(publicTalks.id, talkPoolIds)
+          eq(schema.speakerTalks.speakerId, selectedSpeaker.speakerId),
+          inArray(schema.publicTalks.id, talkPoolIds)
         )
       )
-      .groupBy(publicTalks.id, publicTalks.no, publicTalks.title)
+      .groupBy(schema.publicTalks.id, schema.publicTalks.no, schema.publicTalks.title)
       .orderBy(asc(sql`last_given_date`))
 
     const availableTalks = await availableTalksQuery
@@ -211,18 +203,18 @@ export default defineEventHandler(async event => {
 
     const remainingSpeakersQuery = db
       .select({
-        speakerId: speakers.id,
+        speakerId: schema.speakers.id,
       })
-      .from(speakerTalks)
-      .innerJoin(speakers, eq(speakerTalks.speakerId, speakers.id))
+      .from(schema.speakerTalks)
+      .innerJoin(schema.speakers, eq(schema.speakerTalks.speakerId, schema.speakers.id))
       .where(
         and(
-          inArray(speakerTalks.talkId, talkPoolIds),
-          eq(speakers.archived, false),
-          notInArray(speakers.id, allExcluded)
+          inArray(schema.speakerTalks.talkId, talkPoolIds),
+          eq(schema.speakers.archived, false),
+          notInArray(schema.speakers.id, allExcluded)
         )
       )
-      .groupBy(speakers.id)
+      .groupBy(schema.speakers.id)
 
     const remainingSpeakers = await remainingSpeakersQuery
 
@@ -265,15 +257,15 @@ async function getFallbackSuggestion(db: ReturnType<typeof useDrizzle>) {
   // Find local publishers who can deliver public talks
   const localPublishersQuery = db
     .select({
-      publisherId: publishers.id,
-      firstName: publishers.firstName,
-      lastName: publishers.lastName,
-      lastTalkDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
+      publisherId: schema.publishers.id,
+      firstName: schema.publishers.firstName,
+      lastName: schema.publishers.lastName,
+      lastTalkDate: sql<Date | null>`MAX(${schema.scheduledPublicTalks.date})`.as("last_talk_date"),
     })
-    .from(publishers)
-    .leftJoin(scheduledPublicTalks, eq(scheduledPublicTalks.publisherId, publishers.id))
-    .where(eq(publishers.deliversPublicTalks, true))
-    .groupBy(publishers.id, publishers.firstName, publishers.lastName)
+    .from(schema.publishers)
+    .leftJoin(schema.scheduledPublicTalks, eq(schema.scheduledPublicTalks.publisherId, schema.publishers.id))
+    .where(eq(schema.publishers.deliversPublicTalks, true))
+    .groupBy(schema.publishers.id, schema.publishers.firstName, schema.publishers.lastName)
     .orderBy(asc(sql`last_talk_date`))
     .limit(1)
 
@@ -293,12 +285,12 @@ async function getFallbackSuggestion(db: ReturnType<typeof useDrizzle>) {
   // Get all public talks for local publisher suggestions
   const allTalks = await db
     .select({
-      talkId: publicTalks.id,
-      talkNo: publicTalks.no,
-      talkTitle: publicTalks.title,
+      talkId: schema.publicTalks.id,
+      talkNo: schema.publicTalks.no,
+      talkTitle: schema.publicTalks.title,
     })
-    .from(publicTalks)
-    .orderBy(asc(publicTalks.no))
+    .from(schema.publicTalks)
+    .orderBy(asc(schema.publicTalks.no))
 
   return {
     speaker: {

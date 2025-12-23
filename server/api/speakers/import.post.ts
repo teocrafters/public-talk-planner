@@ -3,13 +3,7 @@ import { generateObject } from "ai"
 import { anthropic } from "@ai-sdk/anthropic"
 import { z } from "zod"
 import { eq, sql, and, gt } from "drizzle-orm"
-import {
-  organization,
-  publicTalks,
-  speakers,
-  speakerTalks,
-  scheduledPublicTalks,
-} from "../../database/schema"
+import { schema } from "hub:db"
 import { createJob, updateJob } from "../../utils/import-jobs"
 
 export default defineEventHandler(async event => {
@@ -95,17 +89,16 @@ async function findMatchingSpeaker(
   lastName: string,
   congregationId: string
 ): Promise<MatchedSpeaker | null> {
-  const db = useDrizzle()
 
   const matches = await db
     .select()
-    .from(speakers)
-    .innerJoin(organization, eq(speakers.congregationId, organization.id))
+    .from(schema.speakers)
+    .innerJoin(schema.organization, eq(schema.speakers.congregationId, schema.organization.id))
     .where(
       and(
-        eq(speakers.firstName, firstName),
-        eq(speakers.lastName, lastName),
-        eq(speakers.congregationId, congregationId)
+        eq(schema.speakers.firstName, firstName),
+        eq(schema.speakers.lastName, lastName),
+        eq(schema.speakers.congregationId, congregationId)
       )
     )
     .limit(1)
@@ -119,9 +112,9 @@ async function findMatchingSpeaker(
   const congregation = match.organization
 
   const talks = await db
-    .select({ talkId: speakerTalks.talkId })
-    .from(speakerTalks)
-    .where(eq(speakerTalks.speakerId, speaker.id))
+    .select({ talkId: schema.speakerTalks.talkId })
+    .from(schema.speakerTalks)
+    .where(eq(schema.speakerTalks.speakerId, speaker.id))
 
   return {
     id: speaker.id,
@@ -188,14 +181,14 @@ async function matchCongregationWithAI(
   extractedName: string,
   congregations: Array<{ id: string; name: string }>
 ): Promise<{ id: string; name: string } | null> {
-  const schema = z.object({
+  const matchSchema = z.object({
     congregationId: z.string().nullable(),
     confidence: z.number().min(0).max(1),
   })
 
   const result = await generateObject({
     model: anthropic("claude-sonnet-4-5-20250929"),
-    schema,
+    schema: matchSchema,
     messages: [
       {
         role: "user",
@@ -230,7 +223,7 @@ async function processFileAsync(jobId: string, fileData: Buffer, mimeType: strin
   try {
     updateJob(jobId, { status: "processing" })
 
-    const schema = z.object({
+    const speakerImportSchema = z.object({
       congregation: z.string(),
       speakers: z.array(
         z.object({
@@ -247,7 +240,7 @@ async function processFileAsync(jobId: string, fileData: Buffer, mimeType: strin
 
     const result = await generateObject({
       model: anthropic("claude-sonnet-4-5-20250929"),
-      schema,
+      schema: speakerImportSchema,
       messages: [
         {
           role: "user",
@@ -270,15 +263,14 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
       ],
     })
 
-    const db = useDrizzle()
 
     const allCongregations = await db
       .select({
-        id: organization.id,
-        name: organization.name,
+        id: schema.organization.id,
+        name: schema.organization.name,
       })
-      .from(organization)
-      .orderBy(organization.name)
+      .from(schema.organization)
+      .orderBy(schema.organization.name)
 
     const aiMatch = await matchCongregationWithAI(result.object.congregation, allCongregations)
 
@@ -286,8 +278,8 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
       ? aiMatch
       : await db
           .select()
-          .from(organization)
-          .where(sql`LOWER(${organization.name}) = LOWER(${result.object.congregation})`)
+          .from(schema.organization)
+          .where(sql`LOWER(${schema.organization.name}) = LOWER(${result.object.congregation})`)
           .limit(1)
           .then(rows => (rows[0] ? { id: rows[0].id, name: rows[0].name } : null))
 
@@ -299,8 +291,8 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
         for (const talkNo of speaker.talkNumbers) {
           const talk = await db
             .select()
-            .from(publicTalks)
-            .where(eq(publicTalks.no, talkNo))
+            .from(schema.publicTalks)
+            .where(eq(schema.publicTalks.no, talkNo))
             .limit(1)
 
           if (talk[0]) {
@@ -370,16 +362,16 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
       // 1. Fetch all active speakers from this congregation
       const activeSpeakers = await db
         .select({
-          id: speakers.id,
-          firstName: speakers.firstName,
-          lastName: speakers.lastName,
-          phone: speakers.phone,
-          congregationId: speakers.congregationId,
-          congregationName: organization.name,
+          id: schema.speakers.id,
+          firstName: schema.speakers.firstName,
+          lastName: schema.speakers.lastName,
+          phone: schema.speakers.phone,
+          congregationId: schema.speakers.congregationId,
+          congregationName: schema.organization.name,
         })
-        .from(speakers)
-        .leftJoin(organization, eq(speakers.congregationId, organization.id))
-        .where(and(eq(speakers.congregationId, congregationId), eq(speakers.archived, false)))
+        .from(schema.speakers)
+        .leftJoin(schema.organization, eq(schema.speakers.congregationId, schema.organization.id))
+        .where(and(eq(schema.speakers.congregationId, congregationId), eq(schema.speakers.archived, false)))
 
       // 2. Create Set of imported names for O(n) lookup
       const importedNames = new Set(enrichedSpeakers.map(s => `${s.firstName}|${s.lastName}`))
@@ -393,21 +385,21 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
           // Fetch assigned talks
           const assignedTalks = await db
             .select({
-              talkId: speakerTalks.talkId,
-              talkNo: publicTalks.no,
+              talkId: schema.speakerTalks.talkId,
+              talkNo: schema.publicTalks.no,
             })
-            .from(speakerTalks)
-            .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
-            .where(eq(speakerTalks.speakerId, speaker.id))
+            .from(schema.speakerTalks)
+            .innerJoin(schema.publicTalks, eq(schema.speakerTalks.talkId, schema.publicTalks.id))
+            .where(eq(schema.speakerTalks.speakerId, speaker.id))
 
           // Count scheduled future talks
           const scheduledCount = await db
             .select({ count: sql<number>`count(*)` })
-            .from(scheduledPublicTalks)
+            .from(schema.scheduledPublicTalks)
             .where(
               and(
-                eq(scheduledPublicTalks.speakerId, speaker.id),
-                gt(scheduledPublicTalks.date, new Date())
+                eq(schema.scheduledPublicTalks.speakerId, speaker.id),
+                gt(schema.scheduledPublicTalks.date, new Date())
               )
             )
 

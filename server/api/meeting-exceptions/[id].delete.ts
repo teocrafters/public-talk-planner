@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { meetingExceptions } from "../../database/schema"
+import { schema } from "hub:db"
 
 export default defineEventHandler(async event => {
 	await requirePermission({ weekend_meetings: ["manage_exceptions"] })(event)
@@ -14,10 +14,8 @@ export default defineEventHandler(async event => {
 		})
 	}
 
-	const db = useDrizzle()
-
 	const existingException = await db.query.meetingExceptions.findFirst({
-		where: eq(meetingExceptions.id, exceptionId),
+		where: eq(schema.meetingExceptions.id, exceptionId),
 	})
 
 	if (!existingException) {
@@ -28,7 +26,7 @@ export default defineEventHandler(async event => {
 		})
 	}
 
-	await db.delete(meetingExceptions).where(eq(meetingExceptions.id, exceptionId))
+	await db.delete(schema.meetingExceptions).where(eq(schema.meetingExceptions.id, exceptionId))
 
 	await logAuditEvent(event, {
 		action: AUDIT_EVENTS.MEETING_EXCEPTION_DELETED,

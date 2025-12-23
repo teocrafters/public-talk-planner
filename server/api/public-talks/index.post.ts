@@ -1,5 +1,5 @@
 import { createError } from "h3"
-import { publicTalks } from "../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../utils/validation"
 import { createTalkSchema } from "#shared/utils/schemas"
 
@@ -8,10 +8,8 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, createTalkSchema)
 
-  const db = useDrizzle()
-
   const result = await db
-    .insert(publicTalks)
+    .insert(schema.publicTalks)
     .values({
       no: body.no,
       title: body.title,

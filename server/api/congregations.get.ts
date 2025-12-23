@@ -1,16 +1,14 @@
-import { organization } from "../database/auth-schema"
+import { organization } from "../db/auth-schema"
 
 export default defineEventHandler(async (_event): Promise<Congregation[]> => {
-  const db = useDrizzle()
+	const congregations = await db
+		.select({
+			id: organization.id,
+			name: organization.name,
+			slug: organization.slug,
+		})
+		.from(organization)
+		.orderBy(organization.name)
 
-  const congregations = await db
-    .select({
-      id: organization.id,
-      name: organization.name,
-      slug: organization.slug,
-    })
-    .from(organization)
-    .orderBy(organization.name)
-
-  return congregations satisfies Congregation[]
+	return congregations satisfies Congregation[]
 })

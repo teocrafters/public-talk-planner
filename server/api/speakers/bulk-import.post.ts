@@ -1,6 +1,6 @@
 import { createError, type H3Event } from "h3"
 import { eq } from "drizzle-orm"
-import { speakers, speakerTalks, organization } from "../../database/schema"
+import { schema } from "hub:db"
 
 interface EnhancedSpeakerImportInput {
   firstName: string
@@ -49,7 +49,6 @@ export default defineEventHandler(async event => {
 
   const speakersToArchive: string[] = body.speakersToArchive || []
 
-  const db = useDrizzle()
   const counts: BulkImportCounts = {
     created: 0,
     updated: 0,
@@ -72,8 +71,8 @@ export default defineEventHandler(async event => {
 
       const congregationExists = await db
         .select()
-        .from(organization)
-        .where(eq(organization.id, speaker.congregationId))
+        .from(schema.organization)
+        .where(eq(schema.organization.id, speaker.congregationId))
         .limit(1)
 
       if (!congregationExists || congregationExists.length === 0) {
@@ -144,7 +143,7 @@ async function createSpeaker(
 ) {
   const speakerId = crypto.randomUUID()
 
-  await db.insert(speakers).values({
+  await db.insert(schema.speakers).values({
     id: speakerId,
     firstName: speaker.firstName.trim(),
     lastName: speaker.lastName.trim(),
@@ -157,7 +156,7 @@ async function createSpeaker(
   })
 
   if (speaker.talkIds && speaker.talkIds.length > 0) {
-    await db.insert(speakerTalks).values(
+    await db.insert(schema.speakerTalks).values(
       speaker.talkIds.map((talkId: number) => ({
         speakerId,
         talkId,
@@ -195,8 +194,8 @@ async function updateSpeaker(
 
   const existingSpeaker = await db
     .select()
-    .from(speakers)
-    .where(eq(speakers.id, speaker.existingSpeakerId))
+    .from(schema.speakers)
+    .where(eq(schema.speakers.id, speaker.existingSpeakerId))
     .limit(1)
 
   if (!existingSpeaker || existingSpeaker.length === 0 || !existingSpeaker[0]) {
@@ -209,18 +208,18 @@ async function updateSpeaker(
 
   // Update speaker record
   await db
-    .update(speakers)
+    .update(schema.speakers)
     .set({
       phone: speaker.phone.replace(/\D/g, ""),
       updatedAt: new Date(),
     })
-    .where(eq(speakers.id, speaker.existingSpeakerId))
+    .where(eq(schema.speakers.id, speaker.existingSpeakerId))
 
   // Update talks: delete all existing and insert new ones
-  await db.delete(speakerTalks).where(eq(speakerTalks.speakerId, speaker.existingSpeakerId))
+  await db.delete(schema.speakerTalks).where(eq(schema.speakerTalks.speakerId, speaker.existingSpeakerId))
 
   if (speaker.talkIds && speaker.talkIds.length > 0) {
-    await db.insert(speakerTalks).values(
+    await db.insert(schema.speakerTalks).values(
       speaker.talkIds.map((talkId: number) => ({
         speakerId: speaker.existingSpeakerId!,
         talkId,
@@ -275,8 +274,8 @@ async function restoreSpeaker(
 
   const existingSpeaker = await db
     .select()
-    .from(speakers)
-    .where(eq(speakers.id, speaker.existingSpeakerId))
+    .from(schema.speakers)
+    .where(eq(schema.speakers.id, speaker.existingSpeakerId))
     .limit(1)
 
   if (!existingSpeaker || existingSpeaker.length === 0 || !existingSpeaker[0]) {
@@ -292,7 +291,7 @@ async function restoreSpeaker(
 
   // Update speaker: unarchive and update data
   await db
-    .update(speakers)
+    .update(schema.speakers)
     .set({
       archived: false,
       archivedAt: null,
@@ -300,13 +299,13 @@ async function restoreSpeaker(
       phone: speaker.phone.replace(/\D/g, ""),
       updatedAt: new Date(),
     })
-    .where(eq(speakers.id, speaker.existingSpeakerId))
+    .where(eq(schema.speakers.id, speaker.existingSpeakerId))
 
   // Update talks: delete all existing and insert new ones
-  await db.delete(speakerTalks).where(eq(speakerTalks.speakerId, speaker.existingSpeakerId))
+  await db.delete(schema.speakerTalks).where(eq(schema.speakerTalks.speakerId, speaker.existingSpeakerId))
 
   if (speaker.talkIds && speaker.talkIds.length > 0) {
-    await db.insert(speakerTalks).values(
+    await db.insert(schema.speakerTalks).values(
       speaker.talkIds.map((talkId: number) => ({
         speakerId: speaker.existingSpeakerId!,
         talkId,
@@ -374,11 +373,11 @@ async function archiveSpeaker(
   // Fetch speaker data for audit log
   const [speaker] = await db
     .select({
-      firstName: speakers.firstName,
-      lastName: speakers.lastName,
+      firstName: schema.speakers.firstName,
+      lastName: schema.speakers.lastName,
     })
-    .from(speakers)
-    .where(eq(speakers.id, speakerId))
+    .from(schema.speakers)
+    .where(eq(schema.speakers.id, speakerId))
     .limit(1)
 
   if (!speaker) {
@@ -387,13 +386,13 @@ async function archiveSpeaker(
 
   // Archive speaker
   await db
-    .update(speakers)
+    .update(schema.speakers)
     .set({
       archived: true,
       archivedAt: new Date(),
       updatedAt: new Date(),
     })
-    .where(eq(speakers.id, speakerId))
+    .where(eq(schema.speakers.id, speakerId))
 
   // Log audit event
   await logAuditEvent(event, {

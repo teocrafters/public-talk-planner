@@ -1,6 +1,6 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
-import { speakers, organization, speakerTalks, publicTalks } from "../../../database/schema"
+import { schema } from "hub:db"
 import { validateBody } from "../../../utils/validation"
 import { archiveSpeakerSchema } from "#shared/utils/schemas"
 
@@ -18,12 +18,11 @@ export default defineEventHandler(async event => {
 
   const body = await validateBody(event, archiveSpeakerSchema)
 
-  const db = useDrizzle()
 
   const existingSpeaker = await db
     .select()
-    .from(speakers)
-    .where(eq(speakers.id, speakerId))
+    .from(schema.speakers)
+    .where(eq(schema.speakers.id, speakerId))
     .limit(1)
 
   if (!existingSpeaker || existingSpeaker.length === 0 || !existingSpeaker[0]) {
@@ -35,13 +34,13 @@ export default defineEventHandler(async event => {
   }
 
   const result = await db
-    .update(speakers)
+    .update(schema.speakers)
     .set({
       archived: body.archived,
       archivedAt: body.archived ? new Date() : null,
       updatedAt: new Date(),
     })
-    .where(eq(speakers.id, speakerId))
+    .where(eq(schema.speakers.id, speakerId))
     .returning()
 
   const updatedSpeaker = result[0]
@@ -68,19 +67,19 @@ export default defineEventHandler(async event => {
 
   const congregation = await db
     .select()
-    .from(organization)
-    .where(eq(organization.id, updatedSpeaker.congregationId))
+    .from(schema.organization)
+    .where(eq(schema.organization.id, updatedSpeaker.congregationId))
     .limit(1)
 
   const talks = await db
     .select({
-      id: publicTalks.id,
-      no: publicTalks.no,
-      title: publicTalks.title,
+      id: schema.publicTalks.id,
+      no: schema.publicTalks.no,
+      title: schema.publicTalks.title,
     })
-    .from(speakerTalks)
-    .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
-    .where(eq(speakerTalks.speakerId, speakerId))
+    .from(schema.speakerTalks)
+    .innerJoin(schema.publicTalks, eq(schema.speakerTalks.talkId, schema.publicTalks.id))
+    .where(eq(schema.speakerTalks.speakerId, speakerId))
 
   return {
     success: true,

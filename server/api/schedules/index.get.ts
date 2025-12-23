@@ -1,13 +1,5 @@
 import { eq, gte, lt, between, asc, desc } from "drizzle-orm"
-import {
-  scheduledPublicTalks,
-  speakers,
-  publishers,
-  publicTalks,
-  organization,
-  meetingPrograms,
-  meetingProgramParts,
-} from "../../database/schema"
+import { schema } from "hub:db"
 
 export default defineEventHandler(async event => {
   const query = getQuery(event)
@@ -21,60 +13,59 @@ export default defineEventHandler(async event => {
     await requirePermission({ weekend_meetings: ["list"] })(event)
   }
 
-  const db = useDrizzle()
   const today = dayjs().startOf("day").toDate()
 
   let dateCondition
   if (startDate && endDate) {
-    dateCondition = between(scheduledPublicTalks.date, startDate, endDate)
+    dateCondition = between(schema.scheduledPublicTalks.date, startDate, endDate)
   } else if (startDate) {
-    dateCondition = gte(scheduledPublicTalks.date, startDate)
+    dateCondition = gte(schema.scheduledPublicTalks.date, startDate)
   } else if (endDate) {
-    dateCondition = lt(scheduledPublicTalks.date, endDate)
+    dateCondition = lt(schema.scheduledPublicTalks.date, endDate)
   } else if (history) {
-    dateCondition = lt(scheduledPublicTalks.date, today)
+    dateCondition = lt(schema.scheduledPublicTalks.date, today)
   } else {
-    dateCondition = gte(scheduledPublicTalks.date, today)
+    dateCondition = gte(schema.scheduledPublicTalks.date, today)
   }
 
   const schedules = await db
     .select({
-      id: scheduledPublicTalks.id,
-      date: scheduledPublicTalks.date,
-      meetingProgramId: scheduledPublicTalks.meetingProgramId,
-      meetingProgramName: meetingPrograms.name,
-      partId: scheduledPublicTalks.partId,
-      partName: meetingProgramParts.name,
-      speakerSourceType: scheduledPublicTalks.speakerSourceType,
-      speakerId: scheduledPublicTalks.speakerId,
-      publisherId: scheduledPublicTalks.publisherId,
+      id: schema.scheduledPublicTalks.id,
+      date: schema.scheduledPublicTalks.date,
+      meetingProgramId: schema.scheduledPublicTalks.meetingProgramId,
+      meetingProgramName: schema.meetingPrograms.name,
+      partId: schema.scheduledPublicTalks.partId,
+      partName: schema.meetingProgramParts.name,
+      speakerSourceType: schema.scheduledPublicTalks.speakerSourceType,
+      speakerId: schema.scheduledPublicTalks.speakerId,
+      publisherId: schema.scheduledPublicTalks.publisherId,
       // Speaker fields (for visiting speakers)
-      visitingSpeakerFirstName: speakers.firstName,
-      visitingSpeakerLastName: speakers.lastName,
-      visitingSpeakerPhone: speakers.phone,
-      visitingSpeakerCongregationId: speakers.congregationId,
+      visitingSpeakerFirstName: schema.speakers.firstName,
+      visitingSpeakerLastName: schema.speakers.lastName,
+      visitingSpeakerPhone: schema.speakers.phone,
+      visitingSpeakerCongregationId: schema.speakers.congregationId,
       // Publisher fields (for local publishers)
-      localPublisherFirstName: publishers.firstName,
-      localPublisherLastName: publishers.lastName,
+      localPublisherFirstName: schema.publishers.firstName,
+      localPublisherLastName: schema.publishers.lastName,
       // Shared fields
-      congregationName: organization.name,
-      talkId: scheduledPublicTalks.talkId,
-      talkNumber: publicTalks.no,
-      talkTitle: publicTalks.title,
-      customTalkTitle: scheduledPublicTalks.customTalkTitle,
-      overrideValidation: scheduledPublicTalks.overrideValidation,
-      createdAt: scheduledPublicTalks.createdAt,
-      updatedAt: scheduledPublicTalks.updatedAt,
+      congregationName: schema.organization.name,
+      talkId: schema.scheduledPublicTalks.talkId,
+      talkNumber: schema.publicTalks.no,
+      talkTitle: schema.publicTalks.title,
+      customTalkTitle: schema.scheduledPublicTalks.customTalkTitle,
+      overrideValidation: schema.scheduledPublicTalks.overrideValidation,
+      createdAt: schema.scheduledPublicTalks.createdAt,
+      updatedAt: schema.scheduledPublicTalks.updatedAt,
     })
-    .from(scheduledPublicTalks)
-    .leftJoin(speakers, eq(scheduledPublicTalks.speakerId, speakers.id))
-    .leftJoin(publishers, eq(scheduledPublicTalks.publisherId, publishers.id))
-    .leftJoin(publicTalks, eq(scheduledPublicTalks.talkId, publicTalks.id))
-    .leftJoin(organization, eq(speakers.congregationId, organization.id))
-    .leftJoin(meetingPrograms, eq(scheduledPublicTalks.meetingProgramId, meetingPrograms.id))
-    .leftJoin(meetingProgramParts, eq(scheduledPublicTalks.partId, meetingProgramParts.id))
+    .from(schema.scheduledPublicTalks)
+    .leftJoin(schema.speakers, eq(schema.scheduledPublicTalks.speakerId, schema.speakers.id))
+    .leftJoin(schema.publishers, eq(schema.scheduledPublicTalks.publisherId, schema.publishers.id))
+    .leftJoin(schema.publicTalks, eq(schema.scheduledPublicTalks.talkId, schema.publicTalks.id))
+    .leftJoin(schema.organization, eq(schema.speakers.congregationId, schema.organization.id))
+    .leftJoin(schema.meetingPrograms, eq(schema.scheduledPublicTalks.meetingProgramId, schema.meetingPrograms.id))
+    .leftJoin(schema.meetingProgramParts, eq(schema.scheduledPublicTalks.partId, schema.meetingProgramParts.id))
     .where(dateCondition)
-    .orderBy(history ? desc(scheduledPublicTalks.date) : asc(scheduledPublicTalks.date))
+    .orderBy(history ? desc(schema.scheduledPublicTalks.date) : asc(schema.scheduledPublicTalks.date))
 
   return schedules.map(schedule => ({
     id: schedule.id,
