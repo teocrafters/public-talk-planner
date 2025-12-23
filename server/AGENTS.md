@@ -7,7 +7,7 @@ Guidelines for developing the backend API using Nitro, Drizzle ORM, and Cloudfla
 - **Serverless-first** - Cloudflare Workers with edge computing
 - **Type-safe API routes** - Drizzle ORM with TypeScript
 - **Validation at boundaries** - Zod schemas for all request validation
-- **Transaction safety** - Use transactions for related operations
+- **Batch operation safety for D1** - Use db.batch() for related operations on D1
 - **Security-first** - Input validation, SQL injection prevention, proper error handling
 
 ## Project Structure
@@ -95,46 +95,55 @@ export default defineEventHandler(async event => {
 - Operators: `eq`, `and`, `or`, `sql`, `gte`, `lte`, `desc`, `asc`
 - Tables: `tables.speakers`, `tables.meetings`, etc.
 
-### Transaction Patterns
+### Cloudflare D1 Transaction Limitations
+
+⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`, `SAVEPOINT`).
+
+**Why D1 is Different:**
+- D1 is a serverless SQLite database running in Cloudflare Workers
+- Traditional SQL transactions don't work in the Workers environment
+- Drizzle's `db.transaction()` uses SQL BEGIN which D1 will reject
+
+**Recommended Alternative:**
+
+1. **Use `db.batch()` for atomic operations** (D1-compatible approach)
+
+### Batch Operations Pattern (D1-Compatible)
 
 ```typescript
-// Use transactions for operations affecting multiple tables
+// Use batch() for operations affecting multiple tables on D1
 export default defineEventHandler(async event => {
   const db = useDrizzle()
 
-  await db.transaction(async tx => {
+  // All operations execute atomically - if any fails, all are rolled back
+  await db.batch([
     // Insert talk
-    const [talk] = await tx
-      .insert(tables.talks)
-      .values({
-        id: crypto.randomUUID(),
-        title: "New Talk",
-        speakerId: speaker.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning()
-
-    // Create schedule entry
-    await tx.insert(tables.schedules).values({
+    db.insert(tables.talks).values({
       id: crypto.randomUUID(),
-      talkId: talk.id,
+      title: "New Talk",
+      speakerId: speaker.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+
+    // Create schedule entry (talkId must be known beforehand)
+    db.insert(tables.schedules).values({
+      id: crypto.randomUUID(),
+      talkId: talkId,
       scheduledDate: dateTimestamp,
       createdAt: new Date(),
       updatedAt: new Date(),
-    })
-
-    // If any operation fails, both are rolled back
-  })
+    }),
+  ])
 })
 ```
 
 **Key Points**:
 
-- USE transactions when updating multiple related records
-- ROLLBACK happens automatically on any error
-- KEEP transactions short and focused
-- AVOID long-running operations within transactions
+- USE `db.batch()` when updating multiple related records (D1 requirement)
+- ROLLBACK happens automatically on any error within batch
+- KEEP batches short and focused
+- MOVE dependent queries outside the batch (e.g., fetch data first)
 
 ### Migration Workflow (CRITICAL)
 
