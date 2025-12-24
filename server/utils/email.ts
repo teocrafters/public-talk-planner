@@ -1,7 +1,16 @@
 import { Resend } from "resend"
 import { consola } from "consola"
 
-const resend = new Resend(process.env.RESEND_API_KEY || "dummy-key-for-build")
+let _resend: Resend | undefined
+
+function getResendClient() {
+  if (_resend) {
+    return _resend
+  }
+
+  _resend = new Resend(process.env.RESEND_API_KEY || "dummy-key-for-build")
+  return _resend
+}
 
 export async function sendVerificationEmail(email: string, verificationUrl: string) {
   // Skip sending email in development and log activation link instead
@@ -19,6 +28,7 @@ export async function sendVerificationEmail(email: string, verificationUrl: stri
     return { id: "dev-email-id" }
   }
 
+  const resend = getResendClient()
   const { data, error } = await resend.emails.send({
     from: "noreply@your-domain.com",
     to: email,

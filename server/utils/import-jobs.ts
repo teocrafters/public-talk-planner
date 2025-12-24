@@ -71,6 +71,8 @@ export function createJob(jobId: string): void {
 }
 
 export function getJob(jobId: string): Job | undefined {
+  // Opportunistic cleanup on access (Cloudflare Workers compatible)
+  cleanupOldJobs()
   return jobs.get(jobId)
 }
 
@@ -96,4 +98,5 @@ export function cleanupOldJobs(): void {
   }
 }
 
-setInterval(cleanupOldJobs, 10 * 60 * 1000)
+// Note: Removed global setInterval (not compatible with Cloudflare Workers)
+// Cleanup now happens opportunistically when jobs are accessed via getJob()
