@@ -97,9 +97,11 @@ export default defineEventHandler(async event => {
 
 ### Cloudflare D1 Transaction Limitations
 
-⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`, `SAVEPOINT`).
+⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`,
+`SAVEPOINT`).
 
 **Why D1 is Different:**
+
 - D1 is a serverless SQLite database running in Cloudflare Workers
 - Traditional SQL transactions don't work in the Workers environment
 - Drizzle's `db.transaction()` uses SQL BEGIN which D1 will reject

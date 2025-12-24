@@ -202,9 +202,11 @@ export const tables = schema
 
 ### Cloudflare D1 Transaction Limitations
 
-⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`, `SAVEPOINT`).
+⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`,
+`SAVEPOINT`).
 
 **Why D1 is Different:**
+
 - D1 is a serverless SQLite database running in Cloudflare Workers
 - Traditional SQL transactions don't work in the Workers environment
 - Drizzle's `db.transaction()` uses SQL BEGIN which D1 will reject
@@ -250,9 +252,11 @@ await db.batch([
 ```
 
 **Important Batch API Considerations:**
+
 - All statements in batch must be independent (no dependencies on results from previous statements)
 - Move dependent queries outside the batch (e.g., fetch IDs before executing batch)
 - If any operation fails, D1 rolls back the entire batch
+
 ```
 
 ## Migration Workflow Best Practices
@@ -266,50 +270,47 @@ await db.batch([
 
 2. **Prompt User for Migration**
 
-   ```
-   Database schema has been updated.
-   Please run: pnpm db:generate
-   ```
+```
+
+Database schema has been updated. Please run: pnpm db:generate
+
+```
 
 3. **User Generates Migration**
-   - User executes `pnpm db:generate`
-   - Drizzle analyzes schema differences
-   - Generates SQL migration files in `server/database/migrations/`
-   - Creates snapshot in `server/database/migrations/meta/`
+- User executes `pnpm db:generate`
+- Drizzle analyzes schema differences
+- Generates SQL migration files in `server/database/migrations/`
+- Creates snapshot in `server/database/migrations/meta/`
 
 4. **Review Migration**
-   - Open generated `.sql` file in `server/database/migrations/`
-   - Verify SQL statements match intended changes
-   - Check for unintended table drops or data loss
-   - Validate foreign key relationships
+- Open generated `.sql` file in `server/database/migrations/`
+- Verify SQL statements match intended changes
+- Check for unintended table drops or data loss
+- Validate foreign key relationships
 
 5. **Test Migration**
-   - Test migration in local development environment
-   - Verify data integrity after migration
-   - Test application functionality with new schema
-   - Confirm TypeScript types work correctly
+- Test migration in local development environment
+- Verify data integrity after migration
+- Test application functionality with new schema
+- Confirm TypeScript types work correctly
 
 6. **Commit Changes**
-   - Commit schema changes in `server/database/schema.ts`
-   - Commit generated migration files together
-   - Commit updated meta/snapshot files
-   - Include descriptive commit message explaining schema changes
+- Commit schema changes in `server/database/schema.ts`
+- Commit generated migration files together
+- Commit updated meta/snapshot files
+- Include descriptive commit message explaining schema changes
 
 ### Migration Naming Convention
 
 Drizzle generates migration files with timestamp prefixes:
 
 ```
-server/database/migrations/
-├── 0000_initial_setup.sql
-├── 0001_add_speakers_table.sql
-├── 0002_add_talks_table.sql
-├── meta/
-│   ├── 0000_snapshot.json
-│   ├── 0001_snapshot.json
-│   ├── 0002_snapshot.json
-│   └── _journal.json
-```
+
+server/database/migrations/ ├── 0000_initial_setup.sql ├── 0001_add_speakers_table.sql ├──
+0002_add_talks_table.sql ├── meta/ │ ├── 0000_snapshot.json │ ├── 0001_snapshot.json │ ├──
+0002_snapshot.json │ └── \_journal.json
+
+````
 
 - Migrations execute in numerical order
 - Each migration builds on previous state
@@ -371,7 +372,7 @@ export default defineEventHandler(async event => {
 
   return speaker
 })
-```
+````
 
 ### SQL Injection Prevention
 
