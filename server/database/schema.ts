@@ -197,22 +197,22 @@ export const meetingScheduledParts = sqliteTable(
 )
 
 export const meetingExceptions = sqliteTable(
-	"meeting_exceptions",
-	{
-		id: text("id").primaryKey(),
-		date: integer("date", { mode: "number" }).notNull(),
-		exceptionType: text("exception_type")
-			.$type<"circuit_assembly" | "regional_convention" | "memorial">()
-			.notNull(),
-		description: text("description"),
-		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-	},
-	table => {
-		return {
-			uniqueDate: uniqueIndex("meeting_exceptions_date_unique").on(table.date),
-		}
-	}
+  "meeting_exceptions",
+  {
+    id: text("id").primaryKey(),
+    date: integer("date", { mode: "number" }).notNull(),
+    exceptionType: text("exception_type")
+      .$type<"circuit_assembly" | "regional_convention" | "memorial">()
+      .notNull(),
+    description: text("description"),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  table => {
+    return {
+      uniqueDate: uniqueIndex("meeting_exceptions_date_unique").on(table.date),
+    }
+  }
 )
 
 export type MeetingProgram = typeof meetingPrograms.$inferSelect

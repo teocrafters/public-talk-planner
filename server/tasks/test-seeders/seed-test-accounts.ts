@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { eq } from "drizzle-orm"
 import { generateRandomString } from "better-auth/crypto"
-import { organization, member, user } from "../database/auth-schema"
-import { serverAuth } from "../utils/auth"
+import { organization, member, user } from "../../database/auth-schema"
+import { serverAuth } from "../../utils/auth"
 
 export default defineTask({
   meta: {
@@ -19,6 +19,16 @@ export default defineTask({
 
       const db = useDrizzle()
       const auth = serverAuth()
+
+      // Filter users based on environment
+      const staging = isStaging()
+      const usersToSeed = staging
+        ? data.users.filter((u: { role: string }) => u.role === "admin")
+        : data.users
+
+      if (staging) {
+        console.log(`ℹ️  Staging mode: Seeding ${usersToSeed.length} admin user(s) only`)
+      }
 
       // Check if organization already exists
       const existingOrg = await db.query.organization.findFirst({
@@ -46,7 +56,10 @@ export default defineTask({
       }
 
       // Create users with Better Auth sign-up API
-      for (const userData of data.users) {
+      let createdCount = 0
+      let skippedCount = 0
+
+      for (const userData of usersToSeed) {
         const existing = await db.query.user.findFirst({
           where: eq(user.email, userData.email),
         })
@@ -83,14 +96,23 @@ export default defineTask({
             createdAt: new Date(),
           })
 
+          createdCount++
           console.log(`✅ User created with role ${userData.role}: ${userData.email}`)
         } else {
+          skippedCount++
           console.log(`User already exists: ${userData.email}`)
         }
       }
 
-      console.log(`✅ Seeded ${data.users.length} test accounts successfully`)
-      return { result: "success", count: data.users.length }
+      console.log(
+        `✅ Seeded ${usersToSeed.length} test account(s) successfully (${createdCount} created, ${skippedCount} existing)`
+      )
+      return {
+        result: "success",
+        count: usersToSeed.length,
+        created: createdCount,
+        skipped: skippedCount,
+      }
     } catch (error: unknown) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         console.error("File not found: tests/fixtures/test-accounts.json")

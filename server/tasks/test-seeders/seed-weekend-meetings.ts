@@ -1,12 +1,12 @@
 import { eq, and } from "drizzle-orm"
-import type { publishers } from "../database/schema"
+import type { publishers } from "../../database/schema"
 import {
   meetingPrograms,
   meetingProgramParts,
   meetingScheduledParts,
   scheduledPublicTalks,
   speakers,
-} from "../database/schema"
+} from "../../database/schema"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 
 /**

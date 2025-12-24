@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm"
 import { generateId } from "better-auth"
-import { organization } from "../database/auth-schema"
+import { organization } from "../../database/auth-schema"
 
 export default defineTask({
   meta: {

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
 import { eq } from "drizzle-orm"
-import { speakers, speakerTalks, organization, publicTalks } from "../database/schema"
+import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
 
 const SpeakerSeedSchema = z.object({
   id: z.string().min(1),

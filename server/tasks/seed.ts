@@ -1,19 +1,20 @@
-import seedCongregations from "./seed-congregations"
-import seedTestAccounts from "./seed-test-accounts"
-import seedPublicTalks from "./seed-public-talks"
-import seedSpeakers from "./seed-speakers"
-import seedPublishers from "./seed-publishers"
-import seedWeekendMeetings from "./seed-weekend-meetings"
-import seedPreviousTalks from "./seed-previous-talks"
+import seedCongregations from "./seed-congregations-from-json"
+import seedCoordinatorAccounts from "./seed-coordinator-accounts"
+import seedPublicTalks from "./seed-public-talks-from-json"
+import seedPublishers from "./seed-publishers-from-json"
+import seedSpeakers from "./seed-speakers-from-json"
+import seedSpeakerTalks from "./seed-speaker-talks-from-json"
+import seedPreviousTalks from "./seed-previous-talks-from-json"
 
 export default defineTask({
   meta: {
     name: "db:seed",
-    description: "Run all database seeders in correct order",
+    description: "Run all database seeders for real data in correct order",
   },
   async run(event) {
-    console.log("Starting complete database seeding...")
-    console.log("=".repeat(60))
+    console.log("Starting complete database seeding (real data)...")
+    console.log(`Environment: ${getNodeEnv()}`)
+    console.log("-".repeat(60))
 
     const results: Record<string, string> = {}
 
@@ -24,35 +25,35 @@ export default defineTask({
       results.congregations = "success"
       console.log("✅ Congregations seeded")
 
-      // 2. Seed test accounts (users)
-      console.log("\n[2/7] Seeding test accounts...")
-      await seedTestAccounts.run(event)
-      results.testAccounts = "success"
-      console.log("✅ Test accounts seeded")
-
-      // 3. Seed public talks
-      console.log("\n[3/7] Seeding public talks...")
+      // 2. Seed public talks
+      console.log("\n[2/7] Seeding public talks...")
       await seedPublicTalks.run(event)
       results.publicTalks = "success"
       console.log("✅ Public talks seeded")
 
-      // 4. Seed speakers
-      console.log("\n[4/7] Seeding speakers...")
-      await seedSpeakers.run(event)
-      results.speakers = "success"
-      console.log("✅ Speakers seeded")
-
-      // 5. Seed publishers
-      console.log("\n[5/7] Seeding publishers...")
+      // 3. Seed publishers (Żychlin congregation members)
+      console.log("\n[3/7] Seeding publishers...")
       await seedPublishers.run(event)
       results.publishers = "success"
       console.log("✅ Publishers seeded")
 
-      // 6. Seed weekend meetings
-      console.log("\n[6/7] Seeding weekend meetings...")
-      await seedWeekendMeetings.run(event)
-      results.weekendMeetings = "success"
-      console.log("✅ Weekend meetings seeded")
+      // 4. Seed coordinator accounts (links to publisher profiles)
+      console.log("\n[4/7] Seeding coordinator accounts...")
+      await seedCoordinatorAccounts.run(event)
+      results.coordinatorAccounts = "success"
+      console.log("✅ Coordinator accounts seeded")
+
+      // 5. Seed speakers (visiting speakers from other congregations)
+      console.log("\n[5/7] Seeding speakers...")
+      await seedSpeakers.run(event)
+      results.speakers = "success"
+      console.log("✅ Speakers seeded")
+
+      // 6. Seed speaker-talks relationships
+      console.log("\n[6/7] Seeding speaker-talks...")
+      await seedSpeakerTalks.run(event)
+      results.speakerTalks = "success"
+      console.log("✅ Speaker-talks seeded")
 
       // 7. Seed previous talks
       console.log("\n[7/7] Seeding previous talks...")
@@ -60,12 +61,13 @@ export default defineTask({
       results.previousTalks = "success"
       console.log("✅ Previous talks seeded")
 
-      console.log("\n" + "=".repeat(60))
-      console.log("✅ Complete database seeding finished successfully")
+      console.log("\n" + "-".repeat(60))
+      console.log("✅ Complete database seeding (real data) finished successfully")
       console.log("=".repeat(60))
 
       return {
         result: "success",
+        environment: getNodeEnv(),
         seeders: results,
       }
     } catch (error: unknown) {
@@ -80,6 +82,7 @@ export default defineTask({
 
       return {
         result: "error",
+        environment: getNodeEnv(),
         seeders: results,
         error: error instanceof Error ? error.message : "Unknown error",
       }
