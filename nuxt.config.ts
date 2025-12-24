@@ -43,5 +43,6 @@ export default defineNuxtConfig({
     experimental: {
       tasks: true,
     },
+    compatibilityDate: "2025-10-04",
   },
 })
