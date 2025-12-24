@@ -162,7 +162,6 @@
           extractedSpeakers.value = status.data.speakers.map(s => ({
             ...s,
             selected: true,
-            errors: validateSpeaker(s),
           }))
           missingSpeakers.value = status.data.missingSpeakers || []
           jobStatus.value = "review"
@@ -198,15 +197,16 @@
   function validateSpeaker(speaker: ExtractedSpeaker): string[] {
     const errors: string[] = []
 
-    if (!speaker.firstName || speaker.firstName.trim().length === 0) {
+    if (!speaker.firstName?.trim()) {
       errors.push(t("validation.firstNameRequired"))
     }
 
-    if (!speaker.lastName || speaker.lastName.trim().length === 0) {
+    if (!speaker.lastName?.trim()) {
       errors.push(t("validation.lastNameRequired"))
     }
 
-    if (!speaker.phone || !/^\d{9}$/.test(speaker.phone.replace(/\D/g, ""))) {
+    const cleanedPhone = speaker.phone?.replace(/\D/g, "") || ""
+    if (!cleanedPhone || cleanedPhone.length !== 9) {
       errors.push(t("validation.phoneInvalid"))
     }
 
@@ -215,9 +215,7 @@
 
   function selectAll() {
     extractedSpeakers.value.forEach(s => {
-      if (!s.errors || s.errors.length === 0) {
-        s.selected = true
-      }
+      s.selected = true
     })
   }
 
@@ -228,8 +226,7 @@
   }
 
   const selectedCount = computed(() => {
-    return extractedSpeakers.value.filter(s => s.selected && (!s.errors || s.errors.length === 0))
-      .length
+    return extractedSpeakers.value.filter(s => s.selected).length
   })
 
   const allUnchanged = computed(() => {
@@ -421,15 +418,13 @@
     }
 
     const speakersToImport = extractedSpeakers.value
-      .filter(
-        s => s.selected && s.matchStatus !== "no-change" && (!s.errors || s.errors.length === 0)
-      )
+      .filter(s => s.selected && s.matchStatus !== "no-change")
       .map(s => ({
         firstName: s.firstName,
         lastName: s.lastName,
         phone: s.phone,
         congregationId: s.congregationId || globalCongregationId.value!,
-        talkIds: s.talkIds || [],
+        talkIds: s.talkNumbers.map(no => getTalkId(no)).filter(id => id !== 0),
         operation: determineOperation(s),
         existingSpeakerId: s.matchedSpeakerId,
         diff: s.diff,
@@ -597,12 +592,11 @@
           <UCard
             v-for="(speaker, index) in extractedSpeakers"
             :key="index"
-            :class="{ 'border-error': speaker.errors?.length }"
             :data-testid="`speaker-import-card-${index}`">
             <div class="flex items-start gap-3">
               <UCheckbox
                 v-model="speaker.selected"
-                :disabled="!!speaker.errors?.length || speaker.matchStatus === 'no-change'"
+                :disabled="speaker.matchStatus === 'no-change'"
                 :data-testid="`speaker-import-checkbox-${index}`" />
 
               <div class="flex-1 space-y-3">
@@ -733,16 +727,6 @@
                       </template>
                     </USelect>
                   </UFormField>
-                </div>
-
-                <div
-                  v-if="speaker.errors?.length"
-                  class="text-xs text-error">
-                  <p
-                    v-for="error in speaker.errors"
-                    :key="error">
-                    ⚠️ {{ error }}
-                  </p>
                 </div>
               </div>
             </div>

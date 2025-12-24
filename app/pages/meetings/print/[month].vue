@@ -207,7 +207,9 @@
 
     <!-- Print Content -->
     <div
-      v-else-if="unifiedTimelineByMonth.get(monthParam) && unifiedTimelineByMonth.get(monthParam)!.length > 0"
+      v-else-if="
+        unifiedTimelineByMonth.get(monthParam) && unifiedTimelineByMonth.get(monthParam)!.length > 0
+      "
       class="print-content">
       <!-- Print Header -->
       <header class="print-header mb-6">
@@ -223,9 +225,12 @@
       <div class="meetings-list space-y-4">
         <article
           v-for="item in unifiedTimelineByMonth.get(monthParam)"
-          :key="item.type === 'meeting' ? `meeting-${item.meeting.id}` : `exception-${item.exception.id}`"
+          :key="
+            item.type === 'meeting'
+              ? `meeting-${item.meeting.id}`
+              : `exception-${item.exception.id}`
+          "
           class="meeting-block">
-
           <!-- Exception Block -->
           <template v-if="item.type === 'exception'">
             <div class="meeting-header mb-2">
@@ -262,7 +267,11 @@
             <div class="meeting-parts space-y-2">
               <MeetingPartItem
                 v-for="partItem in prepareDisplayItems(item.meeting.parts)"
-                :key="partItem.type === 'watchtower_with_reader' ? partItem.watchtowerPart.id : partItem.part.id"
+                :key="
+                  partItem.type === 'watchtower_with_reader'
+                    ? partItem.watchtowerPart.id
+                    : partItem.part.id
+                "
                 :item="partItem" />
             </div>
           </template>

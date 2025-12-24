@@ -78,8 +78,15 @@
   })
 
   // Map chip color to UChip-compatible color
-  function getUChipColor(date: DateValue): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
-    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, exceptionDates.value)
+  function getUChipColor(
+    date: DateValue
+  ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
+    const color = getChipColor(
+      date,
+      plannedDates.value,
+      circuitOverseerDates.value,
+      exceptionDates.value
+    )
     return color === "purple" ? "primary" : color
   }
 

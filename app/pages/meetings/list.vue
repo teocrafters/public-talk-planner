@@ -23,15 +23,15 @@
     },
   })
 
-  const {
-    data: exceptions,
-    refresh: refreshExceptions,
-  } = await useFetch("/api/meeting-exceptions", {
-    query: {
-      startDate: dayjs().subtract(6, "month").unix(),
-      endDate: dayjs().add(6, "month").unix(),
-    },
-  })
+  const { data: exceptions, refresh: refreshExceptions } = await useFetch(
+    "/api/meeting-exceptions",
+    {
+      query: {
+        startDate: dayjs().subtract(6, "month").unix(),
+        endDate: dayjs().add(6, "month").unix(),
+      },
+    }
+  )
 
   // Refresh exceptions when page becomes visible (e.g., after navigating back)
   onMounted(() => {
@@ -269,7 +269,9 @@
           <template
             v-for="item in monthItems"
             :key="
-              item.type === 'meeting' ? `meeting-${item.meeting.id}` : `exception-${item.exception.id}`
+              item.type === 'meeting'
+                ? `meeting-${item.meeting.id}`
+                : `exception-${item.exception.id}`
             ">
             <!-- Exception Card -->
             <UCard

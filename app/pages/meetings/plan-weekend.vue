@@ -30,12 +30,15 @@
   })
 
   // Fetch meeting exceptions
-  const { data: exceptions, refresh: refreshExceptions } = await useFetch("/api/meeting-exceptions", {
-    query: {
-      startDate: dayjs().subtract(1, "month").unix(),
-      endDate: dayjs().add(3, "month").unix(),
-    },
-  })
+  const { data: exceptions, refresh: refreshExceptions } = await useFetch(
+    "/api/meeting-exceptions",
+    {
+      query: {
+        startDate: dayjs().subtract(1, "month").unix(),
+        endDate: dayjs().add(3, "month").unix(),
+      },
+    }
+  )
 
   // Responsive months display
   const windowWidth = ref(1)
@@ -93,8 +96,15 @@
   })
 
   // Map chip color to UChip-compatible color
-  function getUChipColor(date: DateValue): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
-    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, exceptionDates.value)
+  function getUChipColor(
+    date: DateValue
+  ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
+    const color = getChipColor(
+      date,
+      plannedDates.value,
+      circuitOverseerDates.value,
+      exceptionDates.value
+    )
     return color === "purple" ? "primary" : color
   }
 

@@ -61,7 +61,7 @@ export default defineEventHandler(async event => {
         talkId: publicTalks.id,
         talkNo: publicTalks.no,
         talkTitle: publicTalks.title,
-        lastGivenDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
+        lastGivenDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
       })
       .from(speakerTalks)
       .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
@@ -132,7 +132,7 @@ export default defineEventHandler(async event => {
         lastName: speakers.lastName,
         phone: speakers.phone,
         congregationId: speakers.congregationId,
-        lastTalkDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
+        lastTalkDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
       })
       .from(speakers)
       .leftJoin(scheduledPublicTalks, eq(scheduledPublicTalks.speakerId, speakers.id))
@@ -181,7 +181,7 @@ export default defineEventHandler(async event => {
         talkId: publicTalks.id,
         talkNo: publicTalks.no,
         talkTitle: publicTalks.title,
-        lastGivenDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
+        lastGivenDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
       })
       .from(speakerTalks)
       .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
@@ -235,16 +235,14 @@ export default defineEventHandler(async event => {
         lastName: selectedSpeaker.lastName,
         phone: selectedSpeaker.phone,
         congregationName: congregationName,
-        lastTalkDate: selectedSpeaker.lastTalkDate
-          ? dayjs(selectedSpeaker.lastTalkDate).unix()
-          : null,
+        lastTalkDate: selectedSpeaker.lastTalkDate,
         isVisiting: true,
       },
       availableTalks: availableTalks.map(talk => ({
         id: talk.talkId,
         no: talk.talkNo,
         title: talk.talkTitle,
-        lastGivenDate: talk.lastGivenDate ? dayjs(talk.lastGivenDate).unix() : null,
+        lastGivenDate: talk.lastGivenDate,
       })),
       hasMoreSuggestions: remainingSpeakers.length > 0,
     }
@@ -268,7 +266,7 @@ async function getFallbackSuggestion(db: ReturnType<typeof useDrizzle>) {
       publisherId: publishers.id,
       firstName: publishers.firstName,
       lastName: publishers.lastName,
-      lastTalkDate: sql<Date | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
+      lastTalkDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
     })
     .from(publishers)
     .leftJoin(scheduledPublicTalks, eq(scheduledPublicTalks.publisherId, publishers.id))
@@ -307,7 +305,7 @@ async function getFallbackSuggestion(db: ReturnType<typeof useDrizzle>) {
       lastName: publisher.lastName,
       phone: "",
       congregationName: "Local",
-      lastTalkDate: publisher.lastTalkDate ? dayjs(publisher.lastTalkDate).unix() : null,
+      lastTalkDate: publisher.lastTalkDate,
       isVisiting: false,
     },
     availableTalks: allTalks.map(talk => ({
