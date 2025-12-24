@@ -18,8 +18,7 @@
     error,
   } = await useFetch("/api/weekend-meetings", {
     query: {
-      startDate: dayjs().subtract(6, "month").unix(),
-      endDate: dayjs().add(6, "month").unix(),
+      startDate: dayjs().startOf("month").unix(),
     },
   })
 
@@ -27,8 +26,7 @@
     "/api/meeting-exceptions",
     {
       query: {
-        startDate: dayjs().subtract(6, "month").unix(),
-        endDate: dayjs().add(6, "month").unix(),
+        startDate: dayjs().startOf("month").unix(),
       },
     }
   )
