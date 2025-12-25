@@ -420,8 +420,7 @@
           <!-- Prayer -->
           <UFormField
             :label="t('weekendMeetings.prayer')"
-            name="parts.prayer"
-            required>
+            name="parts.prayer">
             <USelectMenu
               v-model="state.parts.prayer"
               class="w-full"

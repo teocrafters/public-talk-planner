@@ -128,13 +128,15 @@ export default defineEventHandler(async event => {
     }
   }
 
-  const prayerPublisher = allPublishers.get(body.parts.prayer)!
-  if (!prayerPublisher.offersPublicPrayer) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.publisherCannotPray" },
-    })
+  if (body.parts.prayer) {
+    const prayerPublisher = allPublishers.get(body.parts.prayer)!
+    if (!prayerPublisher.offersPublicPrayer) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Bad Request",
+        data: { message: "errors.publisherCannotPray" },
+      })
+    }
   }
 
   if (body.parts.circuitOverseerTalk) {
@@ -230,7 +232,9 @@ export default defineEventHandler(async event => {
     partsToCreate.push({ type: MEETING_PART_TYPES.READER, order: currentOrder++ })
   }
 
-  partsToCreate.push({ type: MEETING_PART_TYPES.CLOSING_PRAYER, order: currentOrder++ })
+  if (body.parts.prayer) {
+    partsToCreate.push({ type: MEETING_PART_TYPES.CLOSING_PRAYER, order: currentOrder++ })
+  }
 
   const createdParts = new Map<string, number>()
   for (const part of partsToCreate) {
@@ -267,11 +271,14 @@ export default defineEventHandler(async event => {
       partId: createdParts.get(MEETING_PART_TYPES.WATCHTOWER_STUDY)!,
       publisherId: body.parts.watchtowerStudy,
     },
-    {
+  ]
+
+  if (body.parts.prayer) {
+    assignmentsToCreate.push({
       partId: createdParts.get(MEETING_PART_TYPES.CLOSING_PRAYER)!,
       publisherId: body.parts.prayer,
-    },
-  ]
+    })
+  }
 
   if (body.parts.reader) {
     assignmentsToCreate.push({

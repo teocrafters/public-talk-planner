@@ -27,7 +27,7 @@ export const planWeekendMeetingSchema = (t: (key: string) => string) => {
       chairman: z.string().uuid(t("validation.publisherRequired")),
       watchtowerStudy: z.string().uuid(t("validation.publisherRequired")),
       reader: z.string().uuid(t("validation.publisherRequired")).optional(),
-      prayer: z.string().uuid(t("validation.publisherRequired")),
+      prayer: z.string().uuid(t("validation.publisherRequired")).optional(),
       publicTalk: z
         .object({
           title: z
