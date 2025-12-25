@@ -109,12 +109,11 @@
     return parsed.format("YYYY-MM")
   }
 
-  // Open print page in new tab
   function handlePrintMonth(monthKey: string): void {
     const monthParam = getMonthParam(monthKey)
     console.log(">>> monthParam: ", monthParam, "monthKey: ", monthKey)
     const printUrl = `/meetings/print/${monthParam}`
-    window.open(printUrl, "_blank")
+    navigateTo(printUrl)
   }
 
   function getSortOrder(partType: string): number {
@@ -149,7 +148,9 @@
   function prepareDisplayItems(parts: WeekendMeetingPart[]): DisplayItem[] {
     // Filter out closing_prayer parts
     const filteredParts = parts.filter(part => part.type !== "closing_prayer")
-    const sortedParts = [...filteredParts].sort((a, b) => getSortOrder(a.type) - getSortOrder(b.type))
+    const sortedParts = [...filteredParts].sort(
+      (a, b) => getSortOrder(a.type) - getSortOrder(b.type)
+    )
     const displayItems: DisplayItem[] = []
 
     for (const part of sortedParts) {
