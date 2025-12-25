@@ -44,8 +44,15 @@
 
   const { t } = useI18n()
   const { signIn } = useAuth()
+  const route = useRoute()
 
   const authFormRef = ref()
+
+  const redirectUrl = computed(() => {
+    const redirect = route.query.redirect as string | undefined
+    // Validate: must be internal path
+    return redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/user"
+  })
 
   // SEO meta with i18n
   useSeoPage("auth.signIn")
@@ -67,8 +74,8 @@
         return
       }
 
-      // Success - redirect directly to user dashboard
-      await navigateTo("/user")
+      // Success - redirect to original URL or user dashboard
+      await navigateTo(redirectUrl.value)
     } catch (error) {
       console.error("Authentication error:", error)
       const message = error instanceof Error ? error.message : t("errors.unexpectedError")
@@ -79,8 +86,8 @@
   }
 
   const handlePasskeySuccess = async () => {
-    // Passkey login successful - redirect to user dashboard
-    await navigateTo("/user")
+    // Passkey login successful - redirect to original URL or user dashboard
+    await navigateTo(redirectUrl.value)
   }
 
   const handleForgotPassword = () => {

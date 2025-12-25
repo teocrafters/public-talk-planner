@@ -34,13 +34,24 @@ export default defineNuxtRouteMiddleware(async to => {
   if (to.meta?.auth === false) {
     return
   }
-  const { loggedIn, options, fetchSession } = useAuth()
-  await fetchSession()
+  const { loggedIn, options } = useAuth()
+  // Session already loaded by plugin
 
   const { only, redirectUserTo, redirectGuestTo } = defu(to.meta?.auth, options)
 
   // If guest mode, redirect if authenticated
   if (only === "guest" && loggedIn.value) {
+    // Check for redirect URL from query
+    const redirectUrl = to.query.redirect as string | undefined
+
+    if (redirectUrl && redirectUrl.startsWith("/") && !redirectUrl.startsWith("//")) {
+      // Avoid infinite redirect
+      if (to.path === redirectUrl) {
+        return
+      }
+      return navigateTo(redirectUrl)
+    }
+
     // Avoid infinite redirect
     if (to.path === redirectUserTo) {
       return
@@ -48,12 +59,13 @@ export default defineNuxtRouteMiddleware(async to => {
     return navigateTo(redirectUserTo)
   }
 
-  // If not authenticated, redirect to home
+  // If not authenticated, redirect with original URL
   if (!loggedIn.value) {
     // Avoid infinite redirect
     if (to.path === redirectGuestTo) {
       return
     }
-    return navigateTo(redirectGuestTo)
+    const fullPath = String(to.fullPath || to.path)
+    return navigateTo(`${redirectGuestTo}?redirect=${encodeURIComponent(fullPath)}`)
   }
 })

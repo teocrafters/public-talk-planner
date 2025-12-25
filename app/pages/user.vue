@@ -32,16 +32,18 @@
   const { user, client } = useAuth()
 
   const passkeyPromptRef = ref()
+  const hasPasskeys = useState<boolean>("user-has-passkeys", () => false)
 
-  await useState("user-has-passkeys", async () => {
-    if (!user.value) return false
+  onMounted(async () => {
+    // Client-only: Check for passkeys after hydration
+    if (!user.value) return
 
     try {
       const passkeys = await client.passkey.listUserPasskeys()
-      return Array.isArray(passkeys) && passkeys.length > 0
+      hasPasskeys.value = Array.isArray(passkeys) && passkeys.length > 0
     } catch (error) {
-      console.warn("Server-side passkey check failed:", error)
-      return null
+      console.warn("Passkey check failed:", error)
+      hasPasskeys.value = false
     }
   })
 

@@ -45,11 +45,14 @@ export function useAuth() {
   })
   const session = useState<InferSessionFromClient<ClientOptions> | null>("auth:session", () => null)
   const user = useState<InferUserFromClient<ClientOptions> | null>("auth:user", () => null)
-  const sessionFetching = import.meta.server
-    ? ref(false)
-    : useState("auth:sessionFetching", () => false)
+  const sessionFetching = useState("auth:sessionFetching", () => false)
 
   const fetchSession = async () => {
+    // Plugin already loaded session on server - skip HTTP request
+    if (import.meta.server && session.value !== null) {
+      return { session: session.value, user: user.value }
+    }
+
     if (sessionFetching.value) {
       console.log("already fetching session")
       return
