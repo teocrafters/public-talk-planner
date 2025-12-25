@@ -195,7 +195,6 @@
       <UCalendar
         data-testid="schedule-calendar"
         color="primary"
-        :week-starts-on="1"
         :number-of-months="numberOfMonths"
         @update:model-value="handleDateClick">
         <template #day="{ day }">

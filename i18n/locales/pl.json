@@ -11,7 +11,8 @@
     "sending": "Wysyłanie...",
     "or": "lub",
     "error": "Błąd",
-    "success": "Sukces"
+    "success": "Sukces",
+    "default": "Usuń"
   },
   "auth": {
     "signIn": "Zaloguj się",

@@ -315,7 +315,6 @@
               <UCalendar
                 data-testid="exception-date-calendar"
                 color="primary"
-                :week-starts-on="1"
                 :is-date-disabled="date => !isSundayInFuture(date)"
                 @update:model-value="handleCalendarDateSelect" />
               <template #fallback>
