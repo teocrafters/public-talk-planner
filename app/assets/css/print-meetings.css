@@ -95,7 +95,7 @@
 .meeting-parts > * {
   padding: 0.05cm 0.1cm !important;
   margin: 0 !important;
-  gap: 0.15cm !important;
+  gap: 0.28cm !important; /* Increased for better spacing */
 }
 
 /* Override all Tailwind text size classes */
@@ -139,11 +139,7 @@
   color-adjust: exact !important; /* Standard */
 }
 
-/* Fix vertical alignment of badges with content */
-.print-page .flex.items-start {
-  align-items: center !important;
-}
-
+/* Remove margin-top */
 .print-page .mt-1 {
   margin-top: 0 !important;
 }
@@ -242,6 +238,45 @@
     margin: 1cm 1.5cm;
   }
 
+  /* Force desktop flex layout in print (override md: breakpoint) */
+  .print-page [class*="md:flex-row"] {
+    flex-direction: row !important;
+  }
+
+  /* Ensure flex items align to start (left/top), never center */
+  .print-page .flex {
+    align-items: flex-start !important;
+  }
+
+  /* Text alignment - only for actual text content, not containers */
+  .print-page p,
+  .print-page span:not([class*="flex"]):not([data-testid="meeting-talk-number"]),
+  .print-page h1,
+  .print-page h2,
+  .print-page h3 {
+    text-align: left !important;
+  }
+
+  /* Exception: Allow centering inside talk number badge - MUST come after text alignment */
+  .print-page [data-testid="meeting-talk-number"],
+  .print-page span[data-testid="meeting-talk-number"],
+  .print-page [class*="w-8"][class*="h-6"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  /* Prevent any justify-content: center */
+  .print-page [class*="justify-center"] {
+    justify-content: flex-start !important;
+  }
+
+  /* Prevent any items-center on flex containers */
+  .print-page .flex[class*="items-center"] {
+    align-items: flex-start !important;
+  }
+
   /* Hide non-print elements */
   .no-print,
   nav,
@@ -316,10 +351,16 @@
     border: 1px solid #94a3b8 !important;
   }
 
-  .print-page span[class*="bg-neutral"] {
+  /* Neutral (gray) - for reader and talk numbers */
+  .print-page span[class*="bg-neutral"],
+  .print-page span.bg-neutral-100,
+  .print-page [class*="neutral"] span {
     background-color: #f3f4f6 !important;
     color: #374151 !important;
     border: 1px solid #6b7280 !important;
+    display: inline-flex !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   /* Badge sizing in print */
@@ -333,5 +374,21 @@
   a {
     text-decoration: underline;
     color: #000;
+  }
+
+  /* Force print colors for talk number badge specifically */
+  .print-page [data-testid="meeting-talk-number"] {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #6b7280 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    -moz-print-color-adjust: exact !important;
+  }
+
+  /* Preserve display properties for badges in print */
+  .print-page span[class*="inline-flex"] {
+    display: inline-flex !important;
+    print-color-adjust: exact !important;
   }
 }

@@ -58,7 +58,7 @@
   <!-- Talk layout (public_talk, circuit_overseer_talk) -->
   <div
     v-if="item.type === 'talk'"
-    class="flex items-start gap-2">
+    class="flex flex-col md:flex-row items-start gap-2">
     <UBadge
       :color="getPartColor(item.part.type)"
       variant="subtle"
@@ -66,46 +66,49 @@
       class="w-40 mt-1 whitespace-normal text-left leading-tight">
       {{ getPartLabel(item.part.type) }}
     </UBadge>
-    <!-- Talk number badge -->
-    <UBadge
-      v-if="item.part.talkNumber"
-      color="neutral"
-      variant="soft"
-      size="sm"
-      class="w-8 h-6 flex items-center justify-center text-xs font-medium leading-none mt-1"
-      data-testid="meeting-talk-number">
-      {{ item.part.talkNumber }}
-    </UBadge>
-    <div class="flex-1 min-w-0">
-      <!-- Talk title (prominent) -->
-      <p
-        data-testid="meeting-talk"
-        class="text-base font-semibold text-primary line-clamp-2 mb-1">
-        <template v-if="item.part.name">
-          {{ item.part.name }}
-        </template>
-        <template v-else>
-          <span class="italic">{{ t("meetings.noTalkTitle") }}</span>
-        </template>
-      </p>
-      <!-- Speaker name (more prominent than before) -->
-      <p
-        data-testid="meeting-speaker"
-        class="text-base text-default font-medium">
-        <template v-if="item.part.assignment">
-          {{ item.part.assignment.personName }}
-        </template>
-        <template v-else>
-          <span class="italic">{{ t("meetings.noSchedules") }}</span>
-        </template>
-      </p>
+    <!-- Content wrapper with title, speaker, and talk number -->
+    <div class="flex-1 min-w-0 flex items-start gap-2">
+      <div class="flex-1 min-w-0">
+        <!-- Talk title (prominent) -->
+        <p
+          data-testid="meeting-talk"
+          class="text-base font-semibold text-primary line-clamp-2 mb-1">
+          <template v-if="item.part.name">
+            {{ item.part.name }}
+          </template>
+          <template v-else>
+            <span class="italic">{{ t("meetings.noTalkTitle") }}</span>
+          </template>
+        </p>
+        <!-- Speaker name (more prominent than before) -->
+        <p
+          data-testid="meeting-speaker"
+          class="text-base text-default font-medium">
+          <template v-if="item.part.assignment">
+            {{ item.part.assignment.personName }}
+          </template>
+          <template v-else>
+            <span class="italic">{{ t("meetings.noSchedules") }}</span>
+          </template>
+        </p>
+      </div>
+      <!-- Talk number badge (moved to right side) -->
+      <UBadge
+        v-if="item.part.talkNumber"
+        color="neutral"
+        variant="soft"
+        size="sm"
+        class="w-8 h-6 flex items-center justify-center text-xs font-medium leading-none mt-1 flex-shrink-0"
+        data-testid="meeting-talk-number">
+        {{ item.part.talkNumber }}
+      </UBadge>
     </div>
   </div>
 
   <!-- Watchtower with reader layout (two columns) -->
   <div
     v-else-if="item.type === 'watchtower_with_reader'"
-    class="flex items-start gap-2">
+    class="flex flex-col md:flex-row items-start gap-2">
     <UBadge
       :color="getPartColor(item.watchtowerPart.type)"
       variant="subtle"
@@ -154,7 +157,7 @@
   <!-- Single person layout (chairman, closing_prayer) -->
   <div
     v-else-if="item.type === 'single'"
-    class="flex items-start gap-2">
+    class="flex flex-col md:flex-row items-start gap-2">
     <UBadge
       :color="getPartColor(item.part.type)"
       variant="subtle"
