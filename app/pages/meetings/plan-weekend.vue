@@ -188,6 +188,9 @@
   function handleModalSaved(): void {
     refresh()
     showPlanningModal.value = false
+    // Clear selected props to prevent stale state on next open
+    selectedProgram.value = null
+    selectedDateForModal.value = null
   }
 
   function handleExceptionModalSaved(): void {

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-  import type { FormSubmitEvent } from "#ui/types"
+  import {
+    createDefaultWeekendMeetingFormState,
+    buildStateFromProgram,
+  } from "~/utils/weekend-meeting-form"
 
   interface Publisher {
     id: string
@@ -57,23 +60,7 @@
   const toast = useToast()
 
   // Form state
-  const state = reactive({
-    isCircuitOverseerVisit: false,
-    parts: {
-      chairman: "",
-      watchtowerStudy: "",
-      reader: "",
-      prayer: "",
-      publicTalk: {
-        title: "",
-      },
-      circuitOverseerTalk: {
-        publisherId: "",
-        title: "",
-      },
-    },
-    overrideDuplicates: false,
-  })
+  const state = ref(createDefaultWeekendMeetingFormState())
 
   // Fetch available publishers
   const { data: availablePublishers, pending: loadingPublishers } =
@@ -132,51 +119,15 @@
     if (open) {
       if (props.program) {
         // Edit mode: populate form with existing program data
-        state.isCircuitOverseerVisit = props.program.isCircuitOverseerVisit
-        state.overrideDuplicates = false
-
-        // Map parts to form fields
-        for (const part of props.program.parts) {
-          const assignment = part.assignment
-
-          switch (part.type) {
-            case "chairman":
-              state.parts.chairman = assignment?.personId || ""
-              break
-            case "watchtower_study":
-              state.parts.watchtowerStudy = assignment?.personId || ""
-              break
-            case "reader":
-              state.parts.reader = assignment?.personId || ""
-              break
-            case "closing_prayer":
-              state.parts.prayer = assignment?.personId || ""
-              break
-            case "public_talk":
-              state.parts.publicTalk.title = part.name || ""
-              break
-            case "circuit_overseer_talk":
-              state.parts.circuitOverseerTalk.publisherId = assignment?.personId || ""
-              state.parts.circuitOverseerTalk.title = part.name || ""
-              break
-          }
-        }
+        state.value = buildStateFromProgram(props.program)
       } else {
-        // Create mode: reset form
-        state.isCircuitOverseerVisit = false
-        state.parts.chairman = ""
-        state.parts.watchtowerStudy = ""
-        state.parts.reader = ""
-        state.parts.prayer = ""
-        state.parts.publicTalk.title = ""
-        state.parts.circuitOverseerTalk.publisherId = ""
-        state.parts.circuitOverseerTalk.title = ""
-        state.overrideDuplicates = false
+        // Create mode: reset form to default state
+        state.value = createDefaultWeekendMeetingFormState()
       }
     }
   })
 
-  async function onSubmit(event: FormSubmitEvent<typeof state>) {
+  async function onSubmit() {
     if (!props.date) return
 
     isLoading.value = true
@@ -189,43 +140,47 @@
           chairman: string
           watchtowerStudy: string
           reader?: string
-          prayer: string
+          prayer?: string
           publicTalk?: { title: string }
           circuitOverseerTalk?: { publisherId: string; title: string }
         }
         overrideDuplicates: boolean
       } = {
         date: props.date,
-        isCircuitOverseerVisit: event.data.isCircuitOverseerVisit,
+        isCircuitOverseerVisit: state.value.isCircuitOverseerVisit,
         parts: {
-          chairman: event.data.parts.chairman,
-          watchtowerStudy: event.data.parts.watchtowerStudy,
-          prayer: event.data.parts.prayer,
+          chairman: state.value.parts.chairman,
+          watchtowerStudy: state.value.parts.watchtowerStudy,
         },
-        overrideDuplicates: event.data.overrideDuplicates,
+        overrideDuplicates: state.value.overrideDuplicates,
       }
 
       // Add optional reader
-      if (event.data.parts.reader) {
-        requestBody.parts.reader = event.data.parts.reader
+      if (state.value.parts.reader) {
+        requestBody.parts.reader = state.value.parts.reader
+      }
+
+      // Add optional prayer
+      if (state.value.parts.prayer) {
+        requestBody.parts.prayer = state.value.parts.prayer
       }
 
       // Add public talk title if CO visit
-      if (event.data.isCircuitOverseerVisit && event.data.parts.publicTalk.title) {
+      if (state.value.isCircuitOverseerVisit && state.value.parts.publicTalk.title) {
         requestBody.parts.publicTalk = {
-          title: event.data.parts.publicTalk.title,
+          title: state.value.parts.publicTalk.title,
         }
       }
 
       // Add circuit overseer talk if CO visit
       if (
-        event.data.isCircuitOverseerVisit &&
-        event.data.parts.circuitOverseerTalk.publisherId &&
-        event.data.parts.circuitOverseerTalk.title
+        state.value.isCircuitOverseerVisit &&
+        state.value.parts.circuitOverseerTalk.publisherId &&
+        state.value.parts.circuitOverseerTalk.title
       ) {
         requestBody.parts.circuitOverseerTalk = {
-          publisherId: event.data.parts.circuitOverseerTalk.publisherId,
-          title: event.data.parts.circuitOverseerTalk.title,
+          publisherId: state.value.parts.circuitOverseerTalk.publisherId,
+          title: state.value.parts.circuitOverseerTalk.title,
         }
       }
 

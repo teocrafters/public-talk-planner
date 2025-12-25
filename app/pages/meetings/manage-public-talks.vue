@@ -146,6 +146,9 @@
   function handleModalSaved(): void {
     refresh()
     showScheduleModal.value = false
+    // Clear selected props to prevent stale state on next open
+    selectedSchedule.value = null
+    selectedDateForModal.value = null
   }
 
   function handleSundayClick(sunday: Date): void {
