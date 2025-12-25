@@ -7,6 +7,7 @@
     id: string
     firstName: string
     lastName: string
+    sex: "male" | "female"
     userId: string | null
     isElder: boolean
     isMinisterialServant: boolean
@@ -45,6 +46,7 @@
       return {
         firstName: props.publisher.firstName,
         lastName: props.publisher.lastName,
+        sex: props.publisher.sex,
         isElder: props.publisher.isElder,
         isMinisterialServant: props.publisher.isMinisterialServant,
         isRegularPioneer: props.publisher.isRegularPioneer,
@@ -61,6 +63,7 @@
     return {
       firstName: "",
       lastName: "",
+      sex: "male" as const,
       isElder: false,
       isMinisterialServant: false,
       isRegularPioneer: false,
@@ -191,6 +194,20 @@
             <UInput
               v-model="formState.lastName"
               data-testid="publisher-lastname-input"
+              class="w-full" />
+          </UFormField>
+
+          <UFormField
+            name="sex"
+            :label="t('publishers.modal.sex')"
+            required>
+            <USelect
+              v-model="formState.sex"
+              :options="[
+                { value: 'male', label: t('publishers.sex.male') },
+                { value: 'female', label: t('publishers.sex.female') }
+              ]"
+              data-testid="publisher-sex-select"
               class="w-full" />
           </UFormField>
 

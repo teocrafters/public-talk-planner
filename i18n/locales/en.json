@@ -172,8 +172,13 @@
       "editTitle": "Edit Publisher",
       "firstName": "First Name",
       "lastName": "Last Name",
+      "sex": "Sex",
       "capabilities": "Capabilities",
       "save": "Save"
+    },
+    "sex": {
+      "male": "Brother",
+      "female": "Sister"
     }
   },
   "publicTalks": {
@@ -320,7 +325,8 @@
     "serviceTalkTitleRequired": "Service talk title is required",
     "exceptionTypeRequired": "Select exception type",
     "descriptionTooLong": "Description cannot exceed 500 characters",
-    "atLeastOneFieldRequired": "At least one field is required for update"
+    "atLeastOneFieldRequired": "At least one field is required for update",
+    "sexRequired": "Sex is required"
   },
   "meetings": {
     "title": "Weekend Meetings",

@@ -344,8 +344,13 @@
       "editTitle": "Edytuj głosiciela",
       "firstName": "Imię",
       "lastName": "Nazwisko",
+      "sex": "Płeć",
       "capabilities": "Zadania",
       "save": "Zapisz"
+    },
+    "sex": {
+      "male": "Brat",
+      "female": "Siostra"
     }
   },
   "validation": {
@@ -386,7 +391,8 @@
     "atLeastOneSpeaker": "Wybierz przynajmniej jednego mówcę",
     "exceptionTypeRequired": "Wybierz typ wyjątku",
     "descriptionTooLong": "Opis nie może przekraczać 500 znaków",
-    "atLeastOneFieldRequired": "Wymagane jest co najmniej jedno pole do aktualizacji"
+    "atLeastOneFieldRequired": "Wymagane jest co najmniej jedno pole do aktualizacji",
+    "sexRequired": "Płeć jest wymagana"
   },
   "meetings": {
     "title": "Zebrania w weekend",

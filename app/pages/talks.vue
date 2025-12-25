@@ -7,6 +7,9 @@
     videoCount: number
     status: "circuit_overseer" | "will_be_replaced" | null
     createdAt: Date
+  }
+
+  interface PublicTalkWithLastGiven extends PublicTalk {
     lastGivenDate: number | null
   }
 
@@ -37,7 +40,7 @@
     pending,
     error,
     refresh,
-  } = await useFetch<PublicTalk[]>("/api/public-talks", {
+  } = await useFetch<PublicTalkWithLastGiven[]>("/api/public-talks", {
     query: {
       sortBy,
       sortOrder,
@@ -45,7 +48,7 @@
   })
   const editModalOpen = ref(false)
   const editMode = ref<"add" | "edit">("add")
-  const selectedTalk = ref<PublicTalk | null>(null)
+  const selectedTalk = ref<PublicTalkWithLastGiven | null>(null)
 
   const showConfirmDialog = ref(false)
   const confirmDialogConfig = ref({
@@ -98,18 +101,23 @@
     return result
   })
 
-  const handleStatusChanged = (updatedTalk: PublicTalk) => {
+  const handleStatusChanged = (updatedTalk: PublicTalk | PublicTalkWithLastGiven) => {
     if (!talks.value) return
 
     const index = talks.value.findIndex(talk => talk.id === updatedTalk.id)
     if (index !== -1) {
+      const existingTalk = talks.value[index]
+      const talkWithLastGiven: PublicTalkWithLastGiven = {
+        ...updatedTalk,
+        lastGivenDate: "lastGivenDate" in updatedTalk ? updatedTalk.lastGivenDate : (existingTalk?.lastGivenDate ?? null),
+      }
       const updatedTalks = [...talks.value]
-      updatedTalks[index] = updatedTalk
+      updatedTalks[index] = talkWithLastGiven
       talks.value = updatedTalks
     }
   }
 
-  const handleEditRequested = (talk: PublicTalk) => {
+  const handleEditRequested = (talk: PublicTalkWithLastGiven) => {
     selectedTalk.value = talk
     editMode.value = "edit"
     editModalOpen.value = true
@@ -127,7 +135,11 @@
     } else if (talks.value) {
       const index = talks.value.findIndex(talk => talk.id === savedTalk.id)
       if (index !== -1) {
-        talks.value[index] = savedTalk
+        const existingTalk = talks.value[index]
+        talks.value[index] = {
+          ...savedTalk,
+          lastGivenDate: existingTalk?.lastGivenDate ?? null,
+        }
       }
     }
   }
@@ -161,8 +173,13 @@
         }
       )
 
-      if (response.success && response.talk) {
-        handleStatusChanged(response.talk)
+      if (response.success && response.talk && talks.value) {
+        const existingTalk = talks.value.find(t => t.id === talkId)
+        const updatedTalk: PublicTalkWithLastGiven = {
+          ...response.talk,
+          lastGivenDate: existingTalk?.lastGivenDate ?? null,
+        }
+        handleStatusChanged(updatedTalk)
         useToast().add({
           title: t("publicTalks.messages.statusUpdated"),
           color: "success",

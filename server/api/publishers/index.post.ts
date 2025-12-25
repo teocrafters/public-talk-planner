@@ -47,6 +47,7 @@ export default defineEventHandler(async event => {
       id: publisherId,
       firstName: body.firstName,
       lastName: body.lastName,
+      sex: body.sex,
       userId: body.userId || null,
       isElder: body.isElder || false,
       isMinisterialServant: body.isMinisterialServant || false,

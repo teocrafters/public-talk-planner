@@ -14,6 +14,10 @@ export const createPublisherSchema = (t: (key: string) => string) => {
       .max(100, t("validation.lastNameTooLong"))
       .transform(s => s.trim()),
 
+    sex: z.enum(["male", "female"], {
+      message: t("validation.sexRequired"),
+    }),
+
     userId: z.string().uuid().optional().nullable(),
 
     isElder: z.boolean().optional().default(false),

@@ -8,6 +8,11 @@ const membershipRequestSchema = z.object({
   congregationId: z.string().min(1, "Congregation ID is required"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
+  sex: z
+    .enum(["male", "female"], {
+      message: "Sex is required",
+    })
+    .default("male"),
 })
 
 export default defineEventHandler(async (event): Promise<MembershipResponse> => {
@@ -22,7 +27,7 @@ export default defineEventHandler(async (event): Promise<MembershipResponse> => 
     })
   }
 
-  const { userId, congregationId, firstName, lastName } = validation.data
+  const { userId, congregationId, firstName, lastName, sex } = validation.data
 
   try {
     const db = useDrizzle()
@@ -42,6 +47,7 @@ export default defineEventHandler(async (event): Promise<MembershipResponse> => 
       userId: userId,
       firstName: firstName,
       lastName: lastName,
+      sex: sex,
       isElder: false,
       isMinisterialServant: false,
       isRegularPioneer: false,

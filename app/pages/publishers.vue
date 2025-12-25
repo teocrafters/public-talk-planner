@@ -5,6 +5,7 @@
     id: string
     firstName: string
     lastName: string
+    sex: "male" | "female"
     userId: string | null
     isElder: boolean
     isMinisterialServant: boolean
