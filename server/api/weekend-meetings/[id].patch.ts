@@ -8,7 +8,85 @@ import {
 } from "../../database/schema"
 import { validateBody } from "../../utils/validation"
 import { updateWeekendMeetingSchema } from "#shared/utils/schemas"
-import { MEETING_PART_TYPES } from "#shared/constants/meetings"
+import type { MeetingPartType } from "#shared/constants/meetings"
+import { MEETING_PART_TYPES, MEETING_PART_ORDER } from "#shared/constants/meetings"
+
+/**
+ * Helper function to ensure a meeting part exists and has an assignment
+ * Creates the part if it doesn't exist, then creates or updates the assignment
+ */
+async function ensurePartAndAssignment(
+  db: ReturnType<typeof useDrizzle>,
+  program: {
+    id: number
+    parts: Array<{
+      id: number
+      type: string
+      meetingScheduledParts: Array<{ id: string; publisherId: string }>
+    }>
+  },
+  partType: string,
+  publisherId: string,
+  partName?: string
+): Promise<void> {
+  let part = program.parts.find(p => p.type === partType)
+
+  // Create part if it doesn't exist
+  if (!part) {
+    const order = MEETING_PART_ORDER.indexOf(partType as MeetingPartType) + 1
+    const createdParts = await db
+      .insert(meetingProgramParts)
+      .values({
+        meetingProgramId: program.id,
+        type: partType,
+        name: partName || null,
+        order,
+        createdAt: new Date(),
+      })
+      .returning()
+
+    const createdPart = createdParts[0]
+    if (!createdPart) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        data: { message: "errors.partCreateFailed" },
+      })
+    }
+
+    part = {
+      id: createdPart.id,
+      type: createdPart.type,
+      meetingScheduledParts: [],
+    }
+  } else if (partName !== undefined) {
+    // Update part name if provided (for CO Talk)
+    await db
+      .update(meetingProgramParts)
+      .set({ name: partName })
+      .where(eq(meetingProgramParts.id, part.id))
+  }
+
+  // Update or create assignment
+  const existingAssignment = part.meetingScheduledParts[0]
+  if (existingAssignment) {
+    await db
+      .update(meetingScheduledParts)
+      .set({
+        publisherId,
+        updatedAt: new Date(),
+      })
+      .where(eq(meetingScheduledParts.id, existingAssignment.id))
+  } else {
+    await db.insert(meetingScheduledParts).values({
+      id: crypto.randomUUID(),
+      meetingProgramPartId: part.id,
+      publisherId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+  }
+}
 
 export default defineEventHandler(async event => {
   await requirePermission({ weekend_meetings: ["schedule_rest"] })(event)
@@ -79,96 +157,43 @@ export default defineEventHandler(async event => {
 
     // Update chairman
     if (body.parts.chairman) {
-      const chairmanPart = program.parts.find(p => p.type === MEETING_PART_TYPES.CHAIRMAN)
-      if (chairmanPart) {
-        const existingAssignment = chairmanPart.meetingScheduledParts[0]
-        if (existingAssignment) {
-          await db
-            .update(meetingScheduledParts)
-            .set({
-              publisherId: body.parts.chairman,
-              updatedAt: new Date(),
-            })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
-        }
-      }
+      await ensurePartAndAssignment(db, program, MEETING_PART_TYPES.CHAIRMAN, body.parts.chairman)
     }
 
     // Update watchtower study
     if (body.parts.watchtowerStudy) {
-      const watchtowerPart = program.parts.find(p => p.type === MEETING_PART_TYPES.WATCHTOWER_STUDY)
-      if (watchtowerPart) {
-        const existingAssignment = watchtowerPart.meetingScheduledParts[0]
-        if (existingAssignment) {
-          await db
-            .update(meetingScheduledParts)
-            .set({
-              publisherId: body.parts.watchtowerStudy,
-              updatedAt: new Date(),
-            })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
-        }
-      }
+      await ensurePartAndAssignment(
+        db,
+        program,
+        MEETING_PART_TYPES.WATCHTOWER_STUDY,
+        body.parts.watchtowerStudy
+      )
     }
 
     // Update reader
     if (body.parts.reader) {
-      const readerPart = program.parts.find(p => p.type === MEETING_PART_TYPES.READER)
-      if (readerPart) {
-        const existingAssignment = readerPart.meetingScheduledParts[0]
-        if (existingAssignment) {
-          await db
-            .update(meetingScheduledParts)
-            .set({
-              publisherId: body.parts.reader,
-              updatedAt: new Date(),
-            })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
-        }
-      }
+      await ensurePartAndAssignment(db, program, MEETING_PART_TYPES.READER, body.parts.reader)
     }
 
     // Update prayer
     if (body.parts.prayer) {
-      const prayerPart = program.parts.find(p => p.type === MEETING_PART_TYPES.CLOSING_PRAYER)
-      if (prayerPart) {
-        const existingAssignment = prayerPart.meetingScheduledParts[0]
-        if (existingAssignment) {
-          await db
-            .update(meetingScheduledParts)
-            .set({
-              publisherId: body.parts.prayer,
-              updatedAt: new Date(),
-            })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
-        }
-      }
+      await ensurePartAndAssignment(
+        db,
+        program,
+        MEETING_PART_TYPES.CLOSING_PRAYER,
+        body.parts.prayer
+      )
     }
 
     // Update circuit overseer talk
     if (body.parts.circuitOverseerTalk) {
-      const coTalkPart = program.parts.find(
-        p => p.type === MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK
+      await ensurePartAndAssignment(
+        db,
+        program,
+        MEETING_PART_TYPES.CIRCUIT_OVERSEER_TALK,
+        body.parts.circuitOverseerTalk.publisherId,
+        body.parts.circuitOverseerTalk.title
       )
-      if (coTalkPart) {
-        // Update part name (title)
-        await db
-          .update(meetingProgramParts)
-          .set({ name: body.parts.circuitOverseerTalk.title })
-          .where(eq(meetingProgramParts.id, coTalkPart.id))
-
-        // Update publisher assignment
-        const existingAssignment = coTalkPart.meetingScheduledParts[0]
-        if (existingAssignment) {
-          await db
-            .update(meetingScheduledParts)
-            .set({
-              publisherId: body.parts.circuitOverseerTalk.publisherId,
-              updatedAt: new Date(),
-            })
-            .where(eq(meetingScheduledParts.id, existingAssignment.id))
-        }
-      }
     }
   }
 
