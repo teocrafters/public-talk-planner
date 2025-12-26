@@ -12,12 +12,13 @@
   const { t } = useI18n()
   const route = useRoute()
 
-  // Force light mode for print (ignore user dark mode preference)
-  const colorMode = useColorMode()
-  colorMode.preference = "light"
+  // Force light mode for print with automatic restoration
+  const { forceColorMode, restoreColorMode } = usePreserveColorMode()
+  forceColorMode("light")
 
-  onUnmounted(() => {
-    colorMode.preference = "system"
+  // Additional safety: Restore on navigation
+  onBeforeRouteLeave(() => {
+    restoreColorMode()
   })
 
   // Parse month parameter (format: YYYY-MM)

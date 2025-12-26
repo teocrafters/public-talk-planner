@@ -3,7 +3,7 @@
     <div class="border-dashed border-2 rounded-lg p-12 flex items-center justify-center min-h-96">
       <div class="text-center">
         <h1 class="text-4xl font-bold tracking-tight text-default">
-          {{ t("dashboard.welcomeUser", { email: user?.email }) }}
+          {{ t("dashboard.welcomeUser", { email: user?.name }) }}
         </h1>
         <p class="mt-4 text-lg text-muted">
           {{ t("dashboard.userDashboard") }}
