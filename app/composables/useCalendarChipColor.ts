@@ -1,13 +1,11 @@
 import type { DateValue } from "@internationalized/date"
 
 type ChipColor =
-  | "error"
-  | "info"
-  | "primary"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "neutral"
+  | "red"
+  | "blue"
+  | "green"
+  | "yellow"
+  | "gray"
   | "purple"
 
 /**
@@ -42,10 +40,10 @@ export function useCalendarChipColor() {
    *
    * Color logic (priority order):
    * - purple: Exception date (circuit assembly, regional convention, memorial)
-   * - secondary (blue): Circuit Overseer visit
-   * - success (green): Planned date
-   * - error (red): Unplanned and less than 4 weeks away
-   * - warning (yellow): Unplanned and 4+ weeks away
+   * - blue: Circuit Overseer visit
+   * - green: Planned date
+   * - red: Unplanned and less than 4 weeks away
+   * - yellow: Unplanned and 4+ weeks away
    *
    * @param date - The calendar date value to check
    * @param plannedDates - Array of unix timestamps (seconds) of planned dates
@@ -59,7 +57,7 @@ export function useCalendarChipColor() {
     circuitOverseerDates: number[] = [],
     exceptionDates: number[] = []
   ): ChipColor {
-    if (!("day" in date)) return "neutral"
+    if (!("day" in date)) return "gray"
 
     const dayjsDate = dayjs(date.toString())
     const dateToCheck = dayjsDate.toDate()
@@ -76,22 +74,22 @@ export function useCalendarChipColor() {
       const coDate = dayjs.unix(timestamp).utc().toDate()
       return isSameDay(dateToCheck, coDate)
     })
-    if (isCircuitOverseer) return "secondary"
+    if (isCircuitOverseer) return "blue"
 
     // Priority 3: Check if it's planned
     const isPlanned = plannedDates.some(timestamp => {
       const plannedDate = dayjs.unix(timestamp).utc().toDate()
       return isSameDay(dateToCheck, plannedDate)
     })
-    if (isPlanned) return "success"
+    if (isPlanned) return "green"
 
     // If not planned, check if within 4 weeks
     const fourWeeksFromNow = dayjs().add(4, "week")
     if (dayjsDate.isBefore(fourWeeksFromNow)) {
-      return "error" // Less than 4 weeks - red
+      return "red" // Less than 4 weeks - red
     }
 
-    return "warning" // More than 4 weeks - yellow
+    return "yellow" // More than 4 weeks - yellow
   }
 
   return {

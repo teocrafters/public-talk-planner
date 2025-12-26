@@ -249,9 +249,8 @@
   )
 
   function calendarChipColor(date: DateValue | undefined) {
-    if (!date) return "neutral" as const
-    const color = getChipColor(date, plannedDates.value, circuitOverseerDates.value, [])
-    return color === "purple" ? "primary" : color
+    if (!date) return "gray" as const
+    return getChipColor(date, plannedDates.value, circuitOverseerDates.value, [])
   }
 
   function shouldCalendarShowChip(date: DateValue | undefined) {
@@ -413,7 +412,8 @@
               <template #day="{ day }">
                 <UChip
                   :show="shouldCalendarShowChip(day)"
-                  :color="calendarChipColor(day)"
+                  color="neutral"
+                  :ui="getChipColorUI(calendarChipColor(day))"
                   size="2xs">
                   {{ day.day }}
                 </UChip>

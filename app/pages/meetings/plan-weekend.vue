@@ -79,10 +79,31 @@
   const selectedProgram = ref<WeekendProgram | null>(null)
   const showPlanningModal = ref(false)
 
+  // Helper function to check if a meeting is complete
+  function isMeetingComplete(program: WeekendProgram): boolean {
+    // Required parts for a complete meeting (prayer is optional)
+    const hasChairman = program.parts.some(
+      p => p.type === "chairman" && p.assignment
+    )
+    const hasWatchtower = program.parts.some(
+      p => p.type === "watchtower_study" && p.assignment
+    )
+    const hasTalk = program.parts.some(
+      p => (p.type === "public_talk" || p.type === "circuit_overseer_talk") && p.assignment
+    )
+
+    return hasChairman && hasWatchtower && hasTalk
+  }
+
   // Computed properties for chip color logic
-  const plannedDates = computed(() => {
+  const completeMeetingDates = computed(() => {
     if (!programs.value) return []
-    return programs.value.map(p => p.date)
+    return programs.value.filter(p => isMeetingComplete(p)).map(p => p.date)
+  })
+
+  const incompleteMeetingDates = computed(() => {
+    if (!programs.value) return []
+    return programs.value.filter(p => !isMeetingComplete(p)).map(p => p.date)
   })
 
   const circuitOverseerDates = computed(() => {
@@ -95,17 +116,43 @@
     return exceptions.value.map(e => e.date)
   })
 
-  // Map chip color to UChip-compatible color
-  function getUChipColor(
-    date: DateValue
-  ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
-    const color = getChipColor(
-      date,
-      plannedDates.value,
-      circuitOverseerDates.value,
-      exceptionDates.value
-    )
-    return color === "purple" ? "primary" : color
+  // Get chip color for calendar dots with meeting completeness logic
+  function getUChipColor(date: DateValue) {
+    if (!("day" in date)) return "gray"
+
+    const dayjsDate = dayjs(date.toString())
+    const dateToCheck = dayjsDate.toDate()
+
+    // Priority 1: Check if it's an exception date (highest priority)
+    const isException = exceptionDates.value.some(timestamp => {
+      const exceptionDate = dayjs.unix(timestamp).utc().toDate()
+      return isSameDay(dateToCheck, exceptionDate)
+    })
+    if (isException) return "purple"
+
+    // Priority 2: Check if it's a Circuit Overseer visit
+    const isCircuitOverseer = circuitOverseerDates.value.some(timestamp => {
+      const coDate = dayjs.unix(timestamp).utc().toDate()
+      return isSameDay(dateToCheck, coDate)
+    })
+    if (isCircuitOverseer) return "blue"
+
+    // Priority 3: Check if it's a complete meeting
+    const isComplete = completeMeetingDates.value.some(timestamp => {
+      const completeDate = dayjs.unix(timestamp).utc().toDate()
+      return isSameDay(dateToCheck, completeDate)
+    })
+    if (isComplete) return "green"
+
+    // Priority 4: Check if it's an incomplete meeting
+    const isIncomplete = incompleteMeetingDates.value.some(timestamp => {
+      const incompleteDate = dayjs.unix(timestamp).utc().toDate()
+      return isSameDay(dateToCheck, incompleteDate)
+    })
+    if (isIncomplete) return "yellow"
+
+    // If not planned at all, always red
+    return "red"
   }
 
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
@@ -270,7 +317,8 @@
         <template #day="{ day }">
           <UChip
             :show="shouldShowChip(day)"
-            :color="getUChipColor(day)"
+            color="neutral"
+            :ui="getChipColorUI(getUChipColor(day))"
             size="2xs">
             {{ day.day }}
           </UChip>

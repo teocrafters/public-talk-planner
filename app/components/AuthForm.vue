@@ -213,22 +213,14 @@
   })
 
   // Submit handler
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!isFormValid.value || loading.value) return
 
-    try {
-      loading.value = true
-      error.value = null
-
-      emit("submit", {
-        email: formData.email,
-        password: formData.password,
-      })
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : t("errors.unexpectedError")
-    } finally {
-      loading.value = false
-    }
+    error.value = null
+    emit("submit", {
+      email: formData.email,
+      password: formData.password,
+    })
   }
 
   // Handle passkey login

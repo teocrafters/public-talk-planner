@@ -332,7 +332,7 @@
                       :key="talk.id"
                       color="primary"
                       variant="subtle"
-                      size="xs">
+                      size="xl">
                       {{ talk.no }}
                     </UBadge>
                   </div>
@@ -342,16 +342,18 @@
                 <div>
                   <UBadge
                     v-if="speaker.lastTalkDate"
-                    color="info"
+                    color="neutral"
                     variant="subtle"
-                    size="xs">
+                    size="xl"
+                    :ui="getBadgeColorUI('blue', 'subtle')">
                     {{ t("speakers.lastTalkDate") }}: {{ formatDatePL(speaker.lastTalkDate) }}
                   </UBadge>
                   <UBadge
                     v-else
-                    color="warning"
+                    color="neutral"
                     variant="subtle"
-                    size="xs">
+                    size="xl"
+                    :ui="getBadgeColorUI('yellow', 'subtle')">
                     {{ t("speakers.never") }}
                   </UBadge>
                 </div>

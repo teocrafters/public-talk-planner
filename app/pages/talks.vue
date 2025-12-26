@@ -274,7 +274,7 @@
                   data-testid="talk-number-chip"
                   color="primary"
                   variant="subtle"
-                  size="sm"
+                  size="xl"
                   class="shrink-0">
                   {{ talk.no }}
                 </UBadge>
@@ -299,9 +299,10 @@
               <!-- Last given date -->
               <UBadge
                 data-testid="talk-last-given-date"
-                :color="talk.lastGivenDate ? 'success' : 'error'"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI(talk.lastGivenDate ? 'green' : 'red', 'subtle')">
                 <UIcon
                   name="i-heroicons-calendar"
                   class="w-3.5 h-3.5 mr-1" />
@@ -313,9 +314,10 @@
               <UBadge
                 v-if="talk.multimediaCount > 0"
                 data-testid="talk-multimedia-count"
-                color="info"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('blue', 'subtle')">
                 <UIcon
                   name="i-heroicons-photo"
                   class="w-3.5 h-3.5 mr-1" />
@@ -326,9 +328,10 @@
               <UBadge
                 v-if="talk.videoCount > 0"
                 data-testid="talk-video-count"
-                color="secondary"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('blue', 'subtle')">
                 <UIcon
                   name="i-heroicons-video-camera"
                   class="w-3.5 h-3.5 mr-1" />

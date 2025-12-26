@@ -244,8 +244,10 @@
               </h3>
               <UBadge
                 v-if="publisher.userId"
-                color="success"
+                color="neutral"
                 variant="subtle"
+                size="xl"
+                :ui="getBadgeColorUI('green', 'subtle')"
                 data-testid="linked-badge">
                 {{ t("publishers.linkedToUser") }}
               </UBadge>
@@ -253,65 +255,74 @@
             <div class="flex flex-wrap gap-2 mt-2">
               <UBadge
                 v-if="publisher.isElder"
-                color="primary"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.elder") }}
               </UBadge>
               <UBadge
                 v-if="publisher.isMinisterialServant"
-                color="primary"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.ministerialServant") }}
               </UBadge>
               <UBadge
                 v-if="publisher.canChairWeekendMeeting"
-                color="info"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.canChairWeekendMeeting") }}
               </UBadge>
               <UBadge
                 v-if="publisher.conductsWatchtowerStudy"
-                color="info"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.conductsWatchtowerStudy") }}
               </UBadge>
               <UBadge
                 v-if="publisher.backupWatchtowerConductor"
-                color="info"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.backupWatchtowerConductor") }}
               </UBadge>
               <UBadge
                 v-if="publisher.isReader"
-                color="info"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.reader") }}
               </UBadge>
               <UBadge
                 v-if="publisher.offersPublicPrayer"
-                color="info"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.offersPublicPrayer") }}
               </UBadge>
               <UBadge
                 v-if="publisher.deliversPublicTalks"
-                color="success"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.deliversPublicTalks") }}
               </UBadge>
               <UBadge
                 v-if="publisher.isCircuitOverseer"
-                color="warning"
+                color="neutral"
                 variant="subtle"
-                size="xs">
+                size="xl"
+                :ui="getBadgeColorUI('gray', 'subtle')">
                 {{ t("publishers.capabilities.circuitOverseer") }}
               </UBadge>
             </div>

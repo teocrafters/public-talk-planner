@@ -77,17 +77,14 @@
     return exceptions.value.map(e => e.date)
   })
 
-  // Map chip color to UChip-compatible color
-  function getUChipColor(
-    date: DateValue
-  ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
-    const color = getChipColor(
+  // Get chip color for calendar dots
+  function getUChipColor(date: DateValue) {
+    return getChipColor(
       date,
       plannedDates.value,
       circuitOverseerDates.value,
       exceptionDates.value
     )
-    return color === "purple" ? "primary" : color
   }
 
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {
@@ -200,7 +197,8 @@
         <template #day="{ day }">
           <UChip
             :show="shouldShowChip(day)"
-            :color="getUChipColor(day)"
+            color="neutral"
+            :ui="getChipColorUI(getUChipColor(day))"
             size="2xs">
             {{ day.day }}
           </UChip>

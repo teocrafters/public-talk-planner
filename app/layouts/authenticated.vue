@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-background">
+    <NuxtLoadingIndicator />
     <nav class="border-b border-default">
       <UContainer>
         <div class="flex items-center justify-between h-16">
