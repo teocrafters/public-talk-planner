@@ -8,7 +8,8 @@ import {
   publisher,
   public_talk_coordinator,
   boe_coordinator,
-} from "~~/shared/utils/permissions/declare"
+} from "#shared/utils/permissions/declare"
+import { AUTH_COOKIE_NAME } from "#shared/constants/cookies"
 import { member as memberTable } from "../database/auth-schema"
 
 let _auth: ReturnType<typeof getBetterAuth>
@@ -50,6 +51,24 @@ function getBetterAuth() {
       }),
       passkey(),
     ],
+    advanced: {
+      useSecureCookies: false,
+      cookies: {
+        session_token: {
+          name: AUTH_COOKIE_NAME,
+          attributes: {
+            secure: true,
+            httpOnly: true,
+          },
+        },
+      },
+    },
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 300,
+      },
+    },
     emailVerification: {
       sendVerificationEmail: async ({ user, url }, _request) => {
         await sendVerificationEmail(user.email, url)
