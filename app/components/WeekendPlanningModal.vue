@@ -4,6 +4,8 @@
     buildStateFromProgram,
   } from "~/utils/weekend-meeting-form"
 
+  import type { YYYYMMDD } from "#shared/types/date"
+
   interface Publisher {
     id: string
     firstName: string
@@ -25,8 +27,6 @@
     prayer: Publisher[]
     circuitOverseerTalk: Publisher[]
   }
-
-  import type { YYYYMMDD } from "#shared/types/date"
 
   interface WeekendProgram {
     id: number

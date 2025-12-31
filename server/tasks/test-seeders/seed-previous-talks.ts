@@ -1,19 +1,11 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
-import { eq, and, gte, lte } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { generateId } from "better-auth"
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
-import {
-  organization,
-  speakers,
-  publicTalks,
-  meetingPrograms,
-  meetingProgramParts,
-  scheduledPublicTalks,
-} from "../../database/schema"
-import { MEETING_PART_TYPES, MEETING_PART_ORDER } from "#shared/constants/meetings"
+import { organization, speakers } from "../../database/schema"
 
 // Extend dayjs with customParseFormat plugin for DD.MM.YYYY format support
 dayjs.extend(customParseFormat)

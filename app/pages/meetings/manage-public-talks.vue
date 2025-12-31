@@ -144,8 +144,9 @@
   function handleSundayClick(sunday: YYYYMMDD): void {
     // Find existing schedule for this date
     selectedSchedule.value =
-      (schedules.value?.find(s => isSameDate(s.date, sunday)) as ScheduleWithRelations | undefined) ??
-      null
+      (schedules.value?.find(s => isSameDate(s.date, sunday)) as
+        | ScheduleWithRelations
+        | undefined) ?? null
 
     selectedDateForModal.value = sunday
     showScheduleModal.value = true

@@ -194,25 +194,6 @@
     }
   }
 
-  function validateSpeaker(speaker: ExtractedSpeaker): string[] {
-    const errors: string[] = []
-
-    if (!speaker.firstName?.trim()) {
-      errors.push(t("validation.firstNameRequired"))
-    }
-
-    if (!speaker.lastName?.trim()) {
-      errors.push(t("validation.lastNameRequired"))
-    }
-
-    const cleanedPhone = speaker.phone?.replace(/\D/g, "") || ""
-    if (!cleanedPhone || cleanedPhone.length !== 9) {
-      errors.push(t("validation.phoneInvalid"))
-    }
-
-    return errors
-  }
-
   function selectAll() {
     extractedSpeakers.value.forEach(s => {
       s.selected = true

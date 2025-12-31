@@ -20,7 +20,7 @@
   await fetchPermissions()
 
   // Use composable for calendar chip logic
-  const { shouldShowChip, getChipColor } = useCalendarChipColor()
+  const { shouldShowChip } = useCalendarChipColor()
 
   // Fetch weekend meeting programs for calendar range (3 months)
   const { data: programs, refresh } = await useFetch("/api/weekend-meetings", {
@@ -159,9 +159,8 @@
 
     // Find existing program for this date
     selectedProgram.value =
-      (programs.value?.find(p => isSameDate(p.date, dateYYYYMMDD)) as
-        | WeekendProgram
-        | undefined) || null
+      (programs.value?.find(p => isSameDate(p.date, dateYYYYMMDD)) as WeekendProgram | undefined) ||
+      null
 
     selectedDateForModal.value = dateYYYYMMDD
     showPlanningModal.value = true
