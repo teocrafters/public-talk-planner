@@ -1,5 +1,5 @@
 import { createError } from "h3"
-import { eq, and, gte, lte } from "drizzle-orm"
+import { eq, and } from "drizzle-orm"
 import {
   meetingPrograms,
   meetingProgramParts,
@@ -11,6 +11,7 @@ import {
 import { validateBody } from "../../utils/validation"
 import { planWeekendMeetingSchema } from "#shared/utils/schemas"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
+import { isSunday, isFutureDate } from "#shared/utils/date-yyyymmdd"
 
 export default defineEventHandler(async event => {
   await requirePermission({ weekend_meetings: ["schedule_rest"] })(event)
@@ -18,10 +19,8 @@ export default defineEventHandler(async event => {
   const body = await validateBody(event, planWeekendMeetingSchema)
   const db = useDrizzle()
 
-  const date = dayjs.unix(body.date)
-
   // Validate date is Sunday and future
-  if (date.day() !== 0) {
+  if (!isSunday(body.date)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Bad Request",
@@ -29,7 +28,7 @@ export default defineEventHandler(async event => {
     })
   }
 
-  if (!date.isAfter(dayjs(), "day")) {
+  if (!isFutureDate(body.date)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Bad Request",
@@ -37,13 +36,9 @@ export default defineEventHandler(async event => {
     })
   }
 
-  // Check if date has an exception (using day-range check for consistency)
-  const requestDate = dayjs.unix(body.date)
-  const dayStartUnix = requestDate.startOf("day").unix()
-  const dayEndUnix = requestDate.endOf("day").unix()
-
+  // Check if date has an exception
   const exception = await db.query.meetingExceptions.findFirst({
-    where: and(gte(meetingExceptions.date, dayStartUnix), lte(meetingExceptions.date, dayEndUnix)),
+    where: eq(meetingExceptions.date, body.date),
   })
 
   if (exception) {
@@ -312,7 +307,7 @@ export default defineEventHandler(async event => {
     if (publicTalkPartId) {
       await db.insert(scheduledPublicTalks).values({
         id: crypto.randomUUID(),
-        date: date.toDate(),
+        date: body.date,
         meetingProgramId: program.id,
         partId: publicTalkPartId,
         speakerSourceType: "local_publisher", // CO is a local publisher

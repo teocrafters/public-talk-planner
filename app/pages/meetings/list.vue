@@ -18,7 +18,7 @@
     error,
   } = await useFetch("/api/weekend-meetings", {
     query: {
-      startDate: dayjs().startOf("month").unix(),
+      startDate: formatToYYYYMMDD(dayjs().startOf("month").toDate()),
     },
   })
 
@@ -26,7 +26,7 @@
     "/api/meeting-exceptions",
     {
       query: {
-        startDate: dayjs().startOf("month").unix(),
+        startDate: formatToYYYYMMDD(dayjs().startOf("month").toDate()),
       },
     }
   )
@@ -60,13 +60,12 @@
     // 1. Add all exceptions to timeline and remember dates
     exceptions.value?.forEach(exception => {
       timeline.push({ type: "exception", exception })
-      exceptionDates.add(dayjs.unix(exception.date).format("YYYY-MM-DD"))
+      exceptionDates.add(exception.date)
     })
 
     // 2. Add programs ONLY if there's NO exception on that day
     programs.value?.forEach(program => {
-      const programDate = dayjs.unix(program.date).format("YYYY-MM-DD")
-      if (!exceptionDates.has(programDate)) {
+      if (!exceptionDates.has(program.date)) {
         timeline.push({ type: "meeting", meeting: program })
       }
     })
@@ -75,14 +74,14 @@
     timeline.sort((a, b) => {
       const dateA = a.type === "meeting" ? a.meeting.date : a.exception.date
       const dateB = b.type === "meeting" ? b.meeting.date : b.exception.date
-      return dateA - dateB
+      return compareDates(dateA, dateB)
     })
 
     // 4. Group by months (MMMM YYYY)
     const groups = new Map<string, TimelineItem[]>()
     timeline.forEach(item => {
       const date = item.type === "meeting" ? item.meeting.date : item.exception.date
-      const monthKey = dayjs.unix(date).format("MMMM YYYY")
+      const monthKey = dayjs(date).format("MMMM YYYY")
 
       if (!groups.has(monthKey)) {
         groups.set(monthKey, [])
@@ -286,7 +285,7 @@
                   class="text-purple-500" />
                 <div>
                   <p class="text-sm text-muted">
-                    {{ formatDatePL(item.exception.date) }}
+                    {{ dayjs(item.exception.date).format("dddd, D MMMM YYYY") }}
                   </p>
                   <p class="font-semibold text-default">
                     {{ t(`meetings.meetingExceptions.types.${item.exception.exceptionType}`) }}
@@ -311,7 +310,7 @@
                   <p
                     data-testid="meeting-date"
                     class="text-lg font-semibold text-default">
-                    {{ dayjs.unix(item.meeting.date).format("dddd, D MMMM YYYY") }}
+                    {{ dayjs(item.meeting.date).format("dddd, D MMMM YYYY") }}
                   </p>
                   <UBadge
                     v-if="item.meeting.isCircuitOverseerVisit"

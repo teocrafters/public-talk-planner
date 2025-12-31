@@ -1,6 +1,7 @@
 import type { SpeakerSourceType } from "#shared/constants/speaker-sources"
 import type { MeetingExceptionType } from "#shared/constants/meeting-exceptions"
 import type { AUDIT_EVENTS } from "../utils/audit-events"
+import type { YYYYMMDD } from "./date"
 import type {
   TalkUpdateInput,
   SpeakerEditInput,
@@ -79,7 +80,7 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.SCHEDULE_CREATED]: {
     scheduleId: string
-    date: Date
+    date: YYYYMMDD
     meetingProgramId: number
     partId: number
     speakerSourceType: SpeakerSourceType
@@ -91,20 +92,20 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.SCHEDULE_UPDATED]: {
     scheduleId: string
-    date: Date
+    date: YYYYMMDD
     meetingProgramId: number
     partId: number
     changes: Record<string, unknown>
   }
   [AUDIT_EVENTS.SCHEDULE_DELETED]: {
     scheduleId: string
-    date: Date
+    date: YYYYMMDD
     meetingProgramId: number
     partId: number
   }
   [AUDIT_EVENTS.SCHEDULE_VALIDATION_OVERRIDDEN]: {
     scheduleId: string
-    date: Date
+    date: YYYYMMDD
     validationReason: string
     overriddenBy: string
   }
@@ -132,7 +133,7 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.WEEKEND_MEETING_PLANNED]: {
     programId: number
-    date: number
+    date: YYYYMMDD
     isCircuitOverseerVisit: boolean
     parts: Record<string, unknown>
   }
@@ -142,7 +143,7 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.MEETING_EXCEPTION_CREATED]: {
     exceptionId: string
-    date: number
+    date: YYYYMMDD
     exceptionType: MeetingExceptionType
     description: string | null
     deletedExistingMeeting: boolean
@@ -150,7 +151,7 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.MEETING_EXCEPTION_UPDATED]: {
     exceptionId: string
-    date: number
+    date: YYYYMMDD
     changes: {
       exceptionType?: MeetingExceptionType
       description?: string | null
@@ -158,7 +159,7 @@ export interface AuditEventDetails {
   }
   [AUDIT_EVENTS.MEETING_EXCEPTION_DELETED]: {
     exceptionId: string
-    date: number
+    date: YYYYMMDD
     exceptionType: MeetingExceptionType
   }
 }

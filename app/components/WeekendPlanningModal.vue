@@ -26,9 +26,11 @@
     circuitOverseerTalk: Publisher[]
   }
 
+  import type { YYYYMMDD } from "#shared/types/date"
+
   interface WeekendProgram {
     id: number
-    date: number
+    date: YYYYMMDD
     isCircuitOverseerVisit: boolean
     parts: Array<{
       id: number
@@ -44,7 +46,7 @@
   }
 
   interface Props {
-    date: number | null
+    date: YYYYMMDD | null
     program?: WeekendProgram | null
   }
 
@@ -134,7 +136,7 @@
 
     try {
       const requestBody: {
-        date: number
+        date: YYYYMMDD
         isCircuitOverseerVisit: boolean
         parts: {
           chairman: string

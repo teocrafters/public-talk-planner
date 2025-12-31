@@ -1,6 +1,8 @@
+import type { YYYYMMDD } from "./date"
+
 export interface WeekendMeetingListItem {
   id: number
-  date: number
+  date: YYYYMMDD
   isCircuitOverseerVisit: boolean
   parts: Array<{
     id: number

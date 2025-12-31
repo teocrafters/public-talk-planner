@@ -1,8 +1,9 @@
+import type { YYYYMMDD } from "./date"
 import type { MeetingExceptionType } from "#shared/constants/meeting-exceptions"
 
 export interface MeetingException {
   id: string
-  date: number
+  date: YYYYMMDD
   exceptionType: MeetingExceptionType
   description: string | null
   createdAt: Date
@@ -10,7 +11,7 @@ export interface MeetingException {
 }
 
 export interface CreateMeetingExceptionInput {
-  date: number
+  date: YYYYMMDD
   exceptionType: MeetingExceptionType
   description?: string
   confirmDeleteExisting: boolean
@@ -23,7 +24,7 @@ export interface UpdateMeetingExceptionInput {
 
 export interface MeetingExceptionListItem {
   id: string
-  date: number
+  date: YYYYMMDD
   exceptionType: MeetingExceptionType
   description: string | null
   createdAt: Date
@@ -32,7 +33,7 @@ export interface MeetingExceptionListItem {
 
 export interface ExistingMeetingConflict {
   id: number
-  date: number
+  date: YYYYMMDD
   isCircuitOverseerVisit: boolean
   parts: Array<{
     type: string

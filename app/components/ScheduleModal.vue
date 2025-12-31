@@ -2,9 +2,10 @@
   import { createScheduleSchema } from "#shared/utils/schemas"
   import { SPEAKER_SOURCE_TYPES, type SpeakerSourceType } from "#shared/constants/speaker-sources"
   import type { ConflictingSchedule } from "#shared/types/api-schedule"
+  import type { YYYYMMDD } from "#shared/types/date"
 
   interface Props {
-    date: number | null
+    date: YYYYMMDD | null
     schedule?: ScheduleWithRelations | null
   }
 
@@ -76,7 +77,7 @@
       if (props.schedule) {
         // Edit mode: populate form with existing schedule data
         formState.value = {
-          date: dateToUnixTimestamp(props.schedule.date),
+          date: props.schedule.date,
           meetingProgramId: props.schedule.meetingProgramId,
           partId: props.schedule.partId,
           speakerSourceType: props.schedule.speakerSourceType as SpeakerSourceType,

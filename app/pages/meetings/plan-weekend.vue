@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { DateValue } from "@internationalized/date"
+  import type { YYYYMMDD } from "#shared/types/date"
 
   type DateRange = { start: DateValue | undefined; end: DateValue | undefined }
 
@@ -24,8 +25,8 @@
   // Fetch weekend meeting programs for calendar range (3 months)
   const { data: programs, refresh } = await useFetch("/api/weekend-meetings", {
     query: {
-      startDate: dayjs().subtract(1, "month").unix(),
-      endDate: dayjs().add(3, "month").unix(),
+      startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
     },
   })
 
@@ -34,8 +35,8 @@
     "/api/meeting-exceptions",
     {
       query: {
-        startDate: dayjs().subtract(1, "month").unix(),
-        endDate: dayjs().add(3, "month").unix(),
+        startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
+        endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
       },
     }
   )
@@ -59,7 +60,7 @@
 
   interface WeekendProgram {
     id: number
-    date: number
+    date: YYYYMMDD
     isCircuitOverseerVisit: boolean
     parts: Array<{
       id: number
@@ -75,7 +76,7 @@
   }
 
   // Calendar logic
-  const selectedDateForModal = ref<number | null>(null)
+  const selectedDateForModal = ref<YYYYMMDD | null>(null)
   const selectedProgram = ref<WeekendProgram | null>(null)
   const showPlanningModal = ref(false)
 
@@ -116,35 +117,28 @@
   function getUChipColor(date: DateValue) {
     if (!("day" in date)) return "gray"
 
-    const dayjsDate = dayjs(date.toString())
-    const dateToCheck = dayjsDate.toDate()
+    const dateYYYYMMDD = formatToYYYYMMDD(new Date(date.toString()))
 
     // Priority 1: Check if it's an exception date (highest priority)
-    const isException = exceptionDates.value.some(timestamp => {
-      const exceptionDate = dayjs.unix(timestamp).utc().toDate()
-      return isSameDay(dateToCheck, exceptionDate)
-    })
+    const isException = exceptionDates.value.some(exDate => isSameDate(exDate, dateYYYYMMDD))
     if (isException) return "purple"
 
     // Priority 2: Check if it's a Circuit Overseer visit
-    const isCircuitOverseer = circuitOverseerDates.value.some(timestamp => {
-      const coDate = dayjs.unix(timestamp).utc().toDate()
-      return isSameDay(dateToCheck, coDate)
-    })
+    const isCircuitOverseer = circuitOverseerDates.value.some(coDate =>
+      isSameDate(coDate, dateYYYYMMDD)
+    )
     if (isCircuitOverseer) return "blue"
 
     // Priority 3: Check if it's a complete meeting
-    const isComplete = completeMeetingDates.value.some(timestamp => {
-      const completeDate = dayjs.unix(timestamp).utc().toDate()
-      return isSameDay(dateToCheck, completeDate)
-    })
+    const isComplete = completeMeetingDates.value.some(completeDate =>
+      isSameDate(completeDate, dateYYYYMMDD)
+    )
     if (isComplete) return "green"
 
     // Priority 4: Check if it's an incomplete meeting
-    const isIncomplete = incompleteMeetingDates.value.some(timestamp => {
-      const incompleteDate = dayjs.unix(timestamp).utc().toDate()
-      return isSameDay(dateToCheck, incompleteDate)
-    })
+    const isIncomplete = incompleteMeetingDates.value.some(incompleteDate =>
+      isSameDate(incompleteDate, dateYYYYMMDD)
+    )
     if (isIncomplete) return "yellow"
 
     // If not planned at all, always red
@@ -156,30 +150,20 @@
     if (!date || Array.isArray(date) || (typeof date === "object" && "start" in date)) return
     if (!date || !("day" in date)) return
 
-    // Keep the LOCAL date (e.g., 2026-01-11) but normalize time to 11:00 UTC to match DB storage
-    const localDate = dayjs(date.toString())
-    const dayjsDate = dayjs
-      .utc()
-      .year(localDate.year())
-      .month(localDate.month())
-      .date(localDate.date())
-      .hour(11)
-      .minute(0)
-      .second(0)
-      .millisecond(0)
+    // Convert calendar Date to YYYYMMDD
+    const dateYYYYMMDD = formatToYYYYMMDD(new Date(date.toString()))
+    const dayjsDate = dayjs(dateYYYYMMDD)
 
     if (dayjsDate.day() !== 0) return // Not Sunday
     if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return // Past date
 
     // Find existing program for this date
-    const dateToCheck = dayjsDate.toDate()
     selectedProgram.value =
-      (programs.value?.find(p => {
-        const programDate = dayjs.unix(p.date).toDate()
-        return isSameDay(dateToCheck, programDate)
-      }) as WeekendProgram | undefined) || null
+      (programs.value?.find(p => isSameDate(p.date, dateYYYYMMDD)) as
+        | WeekendProgram
+        | undefined) || null
 
-    selectedDateForModal.value = dayjsDate.unix()
+    selectedDateForModal.value = dateYYYYMMDD
     showPlanningModal.value = true
   }
 
@@ -187,31 +171,22 @@
   const WEEKS_TO_SHOW = 26
 
   const unplannedSundays = computed(() => {
-    const sundays: Date[] = []
+    const sundays: YYYYMMDD[] = []
 
-    // Start from today at noon to avoid timezone boundary issues
-    const todayAtNoon = dayjs().utc().hour(12).minute(0).second(0).millisecond(0)
+    const today = dayjs()
+    const currentDayOfWeek = today.day()
+    const daysUntilSunday = currentDayOfWeek === 0 ? 7 : 7 - currentDayOfWeek
 
-    const currentDayOfWeek = todayAtNoon.day()
-    const daysUntilSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek
-
-    let currentSunday = todayAtNoon.add(daysUntilSunday, "day")
+    let currentSunday = today.add(daysUntilSunday, "day")
 
     for (let week = 0; week < WEEKS_TO_SHOW; week++) {
-      const sundayDate = currentSunday.toDate()
+      const sundayYYYYMMDD = formatToYYYYMMDD(currentSunday.toDate())
 
-      const isPlanned = programs.value?.some(p => {
-        const programDate = dayjs.unix(p.date).toDate()
-        return isSameDay(sundayDate, programDate)
-      })
-
-      const isException = exceptions.value?.some(e => {
-        const exceptionDate = dayjs.unix(e.date).toDate()
-        return isSameDay(sundayDate, exceptionDate)
-      })
+      const isPlanned = programs.value?.some(p => isSameDate(p.date, sundayYYYYMMDD))
+      const isException = exceptions.value?.some(e => isSameDate(e.date, sundayYYYYMMDD))
 
       if (!isPlanned && !isException) {
-        sundays.push(sundayDate)
+        sundays.push(sundayYYYYMMDD)
       }
 
       currentSunday = currentSunday.add(7, "day")
@@ -222,7 +197,7 @@
 
   // Exception modal state
   const showExceptionModal = ref(false)
-  const selectedDateForException = ref<number | null>(null)
+  const selectedDateForException = ref<YYYYMMDD | null>(null)
   const selectedExceptionForEdit = ref(null)
 
   // Check permission for managing exceptions
@@ -248,18 +223,12 @@
     showExceptionModal.value = true
   }
 
-  function handleSundayClick(sunday: Date): void {
-    const sundayTimestamp = dateToUnixTimestamp(sunday)
-    const sundayDate = dayjs.unix(sundayTimestamp).toDate()
-
+  function handleSundayClick(sunday: YYYYMMDD): void {
     // Find existing program for this date
     selectedProgram.value =
-      (programs.value?.find(p => {
-        const programDate = dayjs.unix(p.date).toDate()
-        return isSameDay(sundayDate, programDate)
-      }) as WeekendProgram | undefined) || null
+      (programs.value?.find(p => isSameDate(p.date, sunday)) as WeekendProgram | undefined) || null
 
-    selectedDateForModal.value = sundayTimestamp
+    selectedDateForModal.value = sunday
     showPlanningModal.value = true
   }
 
@@ -347,8 +316,8 @@
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <UCard
           v-for="sunday in unplannedSundays"
-          :key="sunday.toISOString()"
-          :data-testid="`unplanned-item-${sunday.toISOString().split('T')[0]}`"
+          :key="sunday"
+          :data-testid="`unplanned-item-${sunday}`"
           class="cursor-pointer hover:shadow-md transition-shadow hover:bg-elevated"
           @click="handleSundayClick(sunday)">
           <div class="flex items-center gap-2">
@@ -356,7 +325,7 @@
               name="i-heroicons-calendar-days"
               class="text-warning" />
             <p class="text-sm font-medium">
-              {{ formatDatePL(sunday) }}
+              {{ dayjs(sunday).format("dddd, D MMMM YYYY") }}
             </p>
           </div>
         </UCard>

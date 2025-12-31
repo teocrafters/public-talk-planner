@@ -4,11 +4,12 @@
   import type { MeetingException } from "#shared/types/api-meeting-exceptions"
   import { MEETING_EXCEPTION_TYPES } from "#shared/constants/meeting-exceptions"
   import type { MeetingExceptionType } from "#shared/constants/meeting-exceptions"
+  import type { YYYYMMDD } from "#shared/types/date"
 
   type DateRange = { start: DateValue | undefined; end: DateValue | undefined }
 
   interface Props {
-    date: number | null
+    date: YYYYMMDD | null
     exception?: MeetingException | null
   }
 
@@ -25,7 +26,7 @@
 
   // Form state
   const state = reactive<{
-    selectedDate: number | undefined
+    selectedDate: YYYYMMDD | undefined
     exceptionType: MeetingExceptionType | undefined
     description: string
     confirmDeleteExisting: boolean
@@ -58,7 +59,7 @@
   const showDeleteConfirm = ref(false)
   const existingMeetingConflict = ref<{
     id: number
-    date: number
+    date: YYYYMMDD
     isCircuitOverseerVisit: boolean
     parts: Array<{ type: string; personName: string }>
   } | null>(null)
@@ -102,18 +103,8 @@
     if (!value || Array.isArray(value)) return
     if (typeof value === "object" && "start" in value) return
     if (!("day" in value)) return
-    // Normalize to 11:00 UTC to match meeting storage
-    const localDate = dayjs(value.toString())
-    const dayjsDate = dayjs
-      .utc()
-      .year(localDate.year())
-      .month(localDate.month())
-      .date(localDate.date())
-      .hour(11)
-      .minute(0)
-      .second(0)
-      .millisecond(0)
-    state.selectedDate = dayjsDate.unix()
+    // Convert calendar Date to YYYYMMDD
+    state.selectedDate = formatToYYYYMMDD(new Date(value.toString()))
   }
 
   // Watch for modal opening - populate form based on mode
@@ -197,7 +188,7 @@
         if ("meeting" in responseData && responseData.meeting) {
           existingMeetingConflict.value = responseData.meeting as {
             id: number
-            date: number
+            date: YYYYMMDD
             isCircuitOverseerVisit: boolean
             parts: Array<{ type: string; personName: string }>
           }

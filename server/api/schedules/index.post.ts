@@ -1,5 +1,5 @@
 import { createError } from "h3"
-import { eq, and, between } from "drizzle-orm"
+import { eq, and } from "drizzle-orm"
 import {
   speakers,
   publishers,
@@ -22,13 +22,8 @@ export default defineEventHandler(async event => {
 
   const db = useDrizzle()
 
-  const date = dayjs.unix(body.date).toDate()
-  const startOfDay = dayjs(date).startOf("day").toDate()
-  const endOfDay = dayjs(date).endOf("day").toDate()
-
-  console.log("startOfDay", startOfDay)
-  console.log("endOfDay", endOfDay)
-  if (date.getDay() !== 0) {
+  // body.date is already YYYYMMDD string (validated and transformed by Zod)
+  if (!isSunday(body.date)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Bad Request",
@@ -88,7 +83,7 @@ export default defineEventHandler(async event => {
   }
 
   const existing = await db.query.scheduledPublicTalks.findFirst({
-    where: and(between(scheduledPublicTalks.date, startOfDay, endOfDay)),
+    where: eq(scheduledPublicTalks.date, body.date),
     with: {
       speaker: true,
       publisher: true,
@@ -127,11 +122,7 @@ export default defineEventHandler(async event => {
 
   // Find or create meetingPrograms entry for this date
   let meetingProgram = await db.query.meetingPrograms.findFirst({
-    where: and(
-      eq(meetingPrograms.type, "weekend"),
-      eq(meetingPrograms.date, body.date),
-      between(scheduledPublicTalks.date, startOfDay, endOfDay)
-    ),
+    where: and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, body.date)),
   })
 
   if (!meetingProgram) {
@@ -222,11 +213,11 @@ export default defineEventHandler(async event => {
   }
 
   const scheduleId = crypto.randomUUID()
-  const now = dayjs().toDate()
+  const now = new Date()
 
   await db.insert(scheduledPublicTalks).values({
     id: scheduleId,
-    date: date,
+    date: body.date,
     meetingProgramId: meetingProgram.id,
     partId: part.id,
     speakerSourceType: body.speakerSourceType,
@@ -248,7 +239,7 @@ export default defineEventHandler(async event => {
     resourceId: scheduleId,
     details: {
       scheduleId,
-      date: date,
+      date: body.date,
       meetingProgramId: meetingProgram.id,
       partId: part.id,
       speakerSourceType: body.speakerSourceType,

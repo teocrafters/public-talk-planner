@@ -1,6 +1,8 @@
+import type { YYYYMMDD } from "./date"
+
 export interface ScheduleWithRelations {
   id: string
-  date: Date
+  date: YYYYMMDD
   meetingProgramId: number
   meetingProgramName: string
   partId: number
@@ -24,7 +26,7 @@ export interface ScheduleWithRelations {
 
 export interface ConflictingSchedule {
   id: string
-  date: number
+  date: YYYYMMDD
   speakerName: string
   talkNumber: string | null
   talkTitle: string | null

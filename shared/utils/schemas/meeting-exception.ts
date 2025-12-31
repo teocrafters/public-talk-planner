@@ -1,19 +1,24 @@
 import { z } from "zod"
-import { dayjs } from "#shared/utils/date"
+import type { YYYYMMDD } from "#shared/types/date"
+import { toYYYYMMDD, isYYYYMMDD } from "#shared/types/date"
+import { isSunday, isFutureDate } from "#shared/utils/date-yyyymmdd"
 import { MEETING_EXCEPTION_TYPES } from "#shared/constants/meeting-exceptions"
 
 export const createMeetingExceptionSchema = (t: (key: string) => string) => {
   return z.object({
     date: z
-      .number({ message: t("validation.dateRequired") })
-      .int({ message: t("validation.dateRequired") })
-      .positive({ message: t("validation.dateRequired") })
-      .refine(timestamp => dayjs.unix(timestamp).day() === 0, {
+      .string({ message: t("validation.dateRequired") })
+      .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: t("validation.invalidDateFormat"),
+      })
+      .refine(isYYYYMMDD, { message: t("validation.invalidDateFormat") })
+      .refine(dateStr => isSunday(dateStr as YYYYMMDD), {
         message: t("validation.dateMustBeSunday"),
       })
-      .refine(timestamp => dayjs.unix(timestamp).isAfter(dayjs(), "day"), {
+      .refine(dateStr => isFutureDate(dateStr as YYYYMMDD), {
         message: t("validation.dateMustBeFuture"),
-      }),
+      })
+      .transform(dateStr => toYYYYMMDD(dateStr)),
 
     exceptionType: z.enum(
       [

@@ -1,21 +1,22 @@
 import { z } from "zod"
-import { dayjs } from "../date"
+import type { YYYYMMDD } from "#shared/types/date"
+import { toYYYYMMDD, isYYYYMMDD } from "#shared/types/date"
+import { isSunday } from "#shared/utils/date-yyyymmdd"
 import { SPEAKER_SOURCE_TYPE_VALUES } from "#shared/constants/speaker-sources"
 
 export const createScheduleSchema = (t: (key: string) => string) => {
   return z
     .object({
       date: z
-        .number({ message: t("validation.dateRequired") })
-        .int({ message: t("validation.dateRequired") })
-        .positive({ message: t("validation.dateRequired") })
-        .refine(
-          timestamp => {
-            const date = dayjs.unix(timestamp)
-            return date.day() === 0
-          },
-          { message: t("validation.dateMustBeSunday") }
-        ),
+        .string({ message: t("validation.dateRequired") })
+        .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+          message: t("validation.invalidDateFormat"),
+        })
+        .refine(isYYYYMMDD, { message: t("validation.invalidDateFormat") })
+        .refine(dateStr => isSunday(dateStr as YYYYMMDD), {
+          message: t("validation.dateMustBeSunday"),
+        })
+        .transform(dateStr => toYYYYMMDD(dateStr)),
 
       meetingProgramId: z
         .number()

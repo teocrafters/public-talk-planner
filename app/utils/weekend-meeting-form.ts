@@ -1,6 +1,8 @@
+import type { YYYYMMDD } from "#shared/types/date"
+
 interface WeekendProgram {
   id: number
-  date: number
+  date: YYYYMMDD
   isCircuitOverseerVisit: boolean
   parts: Array<{
     id: number

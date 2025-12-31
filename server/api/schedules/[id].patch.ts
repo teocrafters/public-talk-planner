@@ -38,9 +38,7 @@ export default defineEventHandler(async event => {
     })
   }
 
-  const today = dayjs().startOf("day").toDate()
-
-  if (existingSchedule.date < today) {
+  if (isPastDate(existingSchedule.date)) {
     throw createError({
       statusCode: 403,
       statusMessage: "Forbidden",

@@ -376,6 +376,7 @@
     "archivedInvalid": "Flaga archiwizacji musi być wartością logiczną",
     "statusInvalid": "Nieprawidłowa wartość statusu. Dopuszczalne: 'circuit_overseer', 'will_be_replaced' lub null",
     "dateRequired": "Data jest wymagana",
+    "invalidDateFormat": "Błąd aplikacji: nieprawidłowy format daty. Skontaktuj się z administratorem.",
     "dateMustBeSunday": "Data musi być niedzielą",
     "dateMustBeFuture": "Data musi być w przyszłości",
     "meetingProgramRequired": "Program zebrania jest wymagany",

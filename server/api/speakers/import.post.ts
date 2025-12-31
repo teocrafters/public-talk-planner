@@ -407,7 +407,7 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
             .where(
               and(
                 eq(scheduledPublicTalks.speakerId, speaker.id),
-                gt(scheduledPublicTalks.date, new Date())
+                gt(scheduledPublicTalks.date, getTodayYYYYMMDD())
               )
             )
 

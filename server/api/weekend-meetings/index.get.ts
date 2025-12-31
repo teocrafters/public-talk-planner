@@ -1,6 +1,7 @@
 import { eq, gte, lte, and } from "drizzle-orm"
 import { meetingPrograms } from "../../database/schema"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
+import { toYYYYMMDD } from "#shared/types/date"
 
 export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[]> => {
   await requirePermission({ weekend_meetings: ["list"] })(event)
@@ -13,13 +14,11 @@ export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[
 
   // Date range filter
   if (query.startDate && typeof query.startDate === "string") {
-    const startTimestamp = parseInt(query.startDate)
-    whereConditions.push(gte(meetingPrograms.date, startTimestamp))
+    whereConditions.push(gte(meetingPrograms.date, toYYYYMMDD(query.startDate)))
   }
 
   if (query.endDate && typeof query.endDate === "string") {
-    const endTimestamp = parseInt(query.endDate)
-    whereConditions.push(lte(meetingPrograms.date, endTimestamp))
+    whereConditions.push(lte(meetingPrograms.date, toYYYYMMDD(query.endDate)))
   }
 
   // Fetch programs with parts and assignments

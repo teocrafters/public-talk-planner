@@ -308,6 +308,7 @@
     "archivedInvalid": "Archived flag must be a boolean",
     "statusInvalid": "Invalid status value. Must be 'circuit_overseer', 'will_be_replaced', or null",
     "dateRequired": "Date is required",
+    "invalidDateFormat": "Application error: invalid date format. Contact administrator.",
     "dateMustBeSunday": "Date must be a Sunday",
     "dateMustBeFuture": "Date must be in the future",
     "meetingProgramRequired": "Meeting program is required",

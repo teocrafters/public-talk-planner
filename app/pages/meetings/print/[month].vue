@@ -53,16 +53,16 @@
     error,
   } = await useFetch<WeekendMeetingListItem[]>("/api/weekend-meetings", {
     query: {
-      startDate: startOfMonth.unix(),
-      endDate: endOfMonth.unix(),
+      startDate: formatToYYYYMMDD(startOfMonth.toDate()),
+      endDate: formatToYYYYMMDD(endOfMonth.toDate()),
     },
   })
 
   // Fetch meeting exceptions for the month
   const { data: exceptions } = await useFetch("/api/meeting-exceptions", {
     query: {
-      startDate: startOfMonth.unix(),
-      endDate: endOfMonth.unix(),
+      startDate: formatToYYYYMMDD(startOfMonth.toDate()),
+      endDate: formatToYYYYMMDD(endOfMonth.toDate()),
     },
   })
 
@@ -87,13 +87,12 @@
     // 1. Add all exceptions to timeline and remember dates
     exceptions.value?.forEach(exception => {
       timeline.push({ type: "exception", exception })
-      exceptionDates.add(dayjs.unix(exception.date).format("YYYY-MM-DD"))
+      exceptionDates.add(exception.date)
     })
 
     // 2. Add programs ONLY if there's NO exception on that day
     programs.value?.forEach(program => {
-      const programDate = dayjs.unix(program.date).format("YYYY-MM-DD")
-      if (!exceptionDates.has(programDate)) {
+      if (!exceptionDates.has(program.date)) {
         timeline.push({ type: "meeting", meeting: program })
       }
     })
@@ -102,14 +101,14 @@
     timeline.sort((a, b) => {
       const dateA = a.type === "meeting" ? a.meeting.date : a.exception.date
       const dateB = b.type === "meeting" ? b.meeting.date : b.exception.date
-      return dateA - dateB
+      return compareDates(dateA, dateB)
     })
 
     // 4. Group by months (YYYY-MM format)
     const groups = new Map<string, TimelineItem[]>()
     timeline.forEach(item => {
       const date = item.type === "meeting" ? item.meeting.date : item.exception.date
-      const monthKey = dayjs.unix(date).format("YYYY-MM")
+      const monthKey = dayjs(date).format("YYYY-MM")
 
       if (!groups.has(monthKey)) {
         groups.set(monthKey, [])
@@ -240,7 +239,7 @@
           <template v-if="item.type === 'exception'">
             <div class="meeting-header mb-2">
               <h3 class="text-base font-semibold">
-                {{ dayjs.unix(item.exception.date).format("dddd, D MMMM YYYY") }}
+                {{ dayjs(item.exception.date).format("dddd, D MMMM YYYY") }}
               </h3>
             </div>
             <div class="exception-notice border-l-4 border-purple-500 pl-3">
@@ -259,7 +258,7 @@
           <template v-else>
             <div class="meeting-header flex items-center gap-2 mb-2">
               <h3 class="text-base font-semibold">
-                {{ dayjs.unix(item.meeting.date).format("dddd, D MMMM YYYY") }}
+                {{ dayjs(item.meeting.date).format("dddd, D MMMM YYYY") }}
               </h3>
               <span
                 v-if="item.meeting.isCircuitOverseerVisit"

@@ -11,15 +11,13 @@ export default defineEventHandler(async (event): Promise<MeetingExceptionListIte
   // Build where conditions
   const whereConditions = []
 
-  // Date range filter
+  // Date range filter (dates are YYYYMMDD strings, string comparison works correctly)
   if (query.startDate && typeof query.startDate === "string") {
-    const startTimestamp = parseInt(query.startDate)
-    whereConditions.push(gte(meetingExceptions.date, startTimestamp))
+    whereConditions.push(gte(meetingExceptions.date, toYYYYMMDD(query.startDate)))
   }
 
   if (query.endDate && typeof query.endDate === "string") {
-    const endTimestamp = parseInt(query.endDate)
-    whereConditions.push(lte(meetingExceptions.date, endTimestamp))
+    whereConditions.push(lte(meetingExceptions.date, toYYYYMMDD(query.endDate)))
   }
 
   // Fetch exceptions

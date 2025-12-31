@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { DateValue } from "@internationalized/date"
+  import type { YYYYMMDD } from "#shared/types/date"
 
   definePageMeta({
     auth: {
@@ -18,24 +19,24 @@
   // Fetch schedules for calendar range (3 months)
   const { data: schedules, refresh } = await useFetch("/api/schedules", {
     query: {
-      startDate: dayjs().subtract(1, "month").toDate().toISOString(),
-      endDate: dayjs().add(3, "month").toDate().toISOString(),
+      startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
     },
   })
 
   // Fetch weekend meetings for Circuit Overseer visit info
   const { data: weekendPrograms } = await useFetch("/api/weekend-meetings", {
     query: {
-      startDate: dayjs().subtract(1, "month").unix(),
-      endDate: dayjs().add(3, "month").unix(),
+      startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
     },
   })
 
   // Fetch meeting exceptions for calendar chip display
   const { data: exceptions } = await useFetch("/api/meeting-exceptions", {
     query: {
-      startDate: dayjs().subtract(1, "month").unix(),
-      endDate: dayjs().add(3, "month").unix(),
+      startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
     },
   })
 
@@ -57,14 +58,14 @@
   })
 
   // Calendar logic
-  const selectedDateForModal = ref<number | null>(null)
+  const selectedDateForModal = ref<YYYYMMDD | null>(null)
   const selectedSchedule = ref<ScheduleWithRelations | null>(null)
   const showScheduleModal = ref(false)
 
   // Computed properties for chip color logic
   const plannedDates = computed(() => {
     if (!schedules.value) return []
-    return schedules.value.map(s => dayjs(s.date).unix())
+    return schedules.value.map(s => s.date)
   })
 
   const circuitOverseerDates = computed(() => {
@@ -87,17 +88,20 @@
     if (!date || Array.isArray(date) || (typeof date === "object" && "start" in date)) return
     if (!date || !("day" in date)) return
 
-    const dayjsDate = dayjs(date.toString())
+    // Convert calendar Date to YYYYMMDD
+    const dateYYYYMMDD = formatToYYYYMMDD(new Date(date.toString()))
+    const dayjsDate = dayjs(dateYYYYMMDD)
 
     if (dayjsDate.day() !== 0) return // Not Sunday
     if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return // Past date
 
     // Find existing schedule for this date
-    selectedSchedule.value = schedules.value?.find(s =>
-      dayjs(s.date).isSame(dayjsDate, "day")
-    ) as unknown as ScheduleWithRelations | null
+    selectedSchedule.value =
+      (schedules.value?.find(s => isSameDate(s.date, dateYYYYMMDD)) as
+        | ScheduleWithRelations
+        | undefined) ?? null
 
-    selectedDateForModal.value = dayjsDate.unix()
+    selectedDateForModal.value = dateYYYYMMDD
     showScheduleModal.value = true
   }
 
@@ -105,28 +109,22 @@
   const WEEKS_TO_SHOW = 26
 
   const unscheduledSundays = computed(() => {
-    const sundays: Date[] = []
+    const sundays: YYYYMMDD[] = []
 
-    // Start from today at noon to avoid timezone boundary issues
-    const todayAtNoon = dayjs().utc().hour(12).minute(0).second(0).millisecond(0)
+    const today = dayjs()
+    const currentDayOfWeek = today.day() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const daysUntilSunday = currentDayOfWeek === 0 ? 7 : 7 - currentDayOfWeek
 
-    const currentDayOfWeek = todayAtNoon.day() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    const daysUntilSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek
-
-    let currentSunday = todayAtNoon.add(daysUntilSunday, "day")
+    let currentSunday = today.add(daysUntilSunday, "day")
 
     for (let week = 0; week < WEEKS_TO_SHOW; week++) {
-      const sundayDate = currentSunday.toDate()
+      const sundayYYYYMMDD = formatToYYYYMMDD(currentSunday.toDate())
 
-      const isScheduled = schedules.value?.some(s => isSameDay(s.date, sundayDate))
-
-      const isException = exceptions.value?.some(e => {
-        const exceptionDate = dayjs.unix(e.date).toDate()
-        return isSameDay(sundayDate, exceptionDate)
-      })
+      const isScheduled = schedules.value?.some(s => isSameDate(s.date, sundayYYYYMMDD))
+      const isException = exceptions.value?.some(e => isSameDate(e.date, sundayYYYYMMDD))
 
       if (!isScheduled && !isException) {
-        sundays.push(sundayDate)
+        sundays.push(sundayYYYYMMDD)
       }
 
       currentSunday = currentSunday.add(7, "day")
@@ -143,13 +141,13 @@
     selectedDateForModal.value = null
   }
 
-  function handleSundayClick(sunday: Date): void {
+  function handleSundayClick(sunday: YYYYMMDD): void {
     // Find existing schedule for this date
-    selectedSchedule.value = schedules.value?.find(s =>
-      isSameDay(s.date, sunday)
-    ) as unknown as ScheduleWithRelations | null
+    selectedSchedule.value =
+      (schedules.value?.find(s => isSameDate(s.date, sunday)) as ScheduleWithRelations | undefined) ??
+      null
 
-    selectedDateForModal.value = dateToUnixTimestamp(sunday)
+    selectedDateForModal.value = sunday
     showScheduleModal.value = true
   }
 
@@ -226,8 +224,8 @@
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <UCard
           v-for="sunday in unscheduledSundays"
-          :key="sunday.toISOString()"
-          :data-testid="`unscheduled-item-${sunday.toISOString().split('T')[0]}`"
+          :key="sunday"
+          :data-testid="`unscheduled-item-${sunday}`"
           class="cursor-pointer hover:shadow-md transition-shadow hover:bg-elevated"
           @click="handleSundayClick(sunday)">
           <div class="flex items-center gap-2">
@@ -235,7 +233,7 @@
               name="i-heroicons-calendar-days"
               class="text-warning" />
             <p class="text-sm font-medium">
-              {{ formatDatePL(sunday) }}
+              {{ dayjs(sunday).format("dddd, D MMMM YYYY") }}
             </p>
           </div>
         </UCard>

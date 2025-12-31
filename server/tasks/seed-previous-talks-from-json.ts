@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
-import { eq, and, gte, lte } from "drizzle-orm"
+import { eq, and } from "drizzle-orm"
 import { generateId } from "better-auth"
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
@@ -162,8 +162,7 @@ export default defineTask({
         }
 
         // Parse date from DD.MM.YYYY format
-        // Use hour(12) for consistency with seed-weekend-meetings.ts
-        const dateDayjs = dayjs(dateStr, "DD.MM.YYYY").hour(12).minute(0).second(0).millisecond(0)
+        const dateDayjs = dayjs(dateStr, "DD.MM.YYYY")
 
         // Validate date parsing
         if (!dateDayjs.isValid()) {
@@ -172,12 +171,26 @@ export default defineTask({
           continue
         }
 
-        const date = dateDayjs.toDate()
-        const dateUnix = dateDayjs.unix()
+        // Convert to YYYY-MM-DD format
+        const dateYYYYMMDD = formatToYYYYMMDD(dateDayjs.toDate())
 
-        // Calculate day boundaries for range query (resilient to timestamp inconsistencies)
-        const startOfDay = dateDayjs.startOf("day").unix()
-        const endOfDay = dateDayjs.endOf("day").unix()
+        // CRITICAL: Validate Sunday before database insert
+        if (!isSunday(dateYYYYMMDD)) {
+          const dayOfWeek = dateDayjs.day()
+          const dayNames = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ]
+          throw new Error(
+            `Invalid date in seed data: ${dateYYYYMMDD} is not a Sunday (actual day: ${dayNames[dayOfWeek]}). ` +
+              `Seed data must contain only Sunday dates for meeting programs.`
+          )
+        }
 
         // Determine which speaker to use
         let finalSpeakerId = speakerId
@@ -197,13 +210,9 @@ export default defineTask({
           }
         }
 
-        // Check if meeting program already exists for this date (using day range)
+        // Check if meeting program already exists for this date (direct equality)
         const existingProgram = await db.query.meetingPrograms.findFirst({
-          where: and(
-            eq(meetingPrograms.type, "weekend"),
-            gte(meetingPrograms.date, startOfDay),
-            lte(meetingPrograms.date, endOfDay)
-          ),
+          where: and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, dateYYYYMMDD)),
         })
 
         let programId: number
@@ -251,7 +260,7 @@ export default defineTask({
             .insert(meetingPrograms)
             .values({
               type: "weekend",
-              date: dateUnix,
+              date: dateYYYYMMDD,
               isCircuitOverseerVisit: false,
               name: null,
               createdAt: new Date(),
@@ -277,7 +286,7 @@ export default defineTask({
         // Create scheduledPublicTalk (common for both cases)
         await db.insert(scheduledPublicTalks).values({
           id: crypto.randomUUID(),
-          date,
+          date: dateYYYYMMDD,
           meetingProgramId: programId,
           partId: partId,
           speakerSourceType: "visiting_speaker",

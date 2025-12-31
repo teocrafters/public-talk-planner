@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
 import { eq } from "drizzle-orm"
+import { dayjs } from "../../shared/utils/date"
+import { toYYYYMMDD } from "../../shared/types/date"
 import { meetingPrograms, meetingProgramParts, meetingScheduledParts } from "../database/schema"
 
 const ScheduledMeetingPartSchema = z.object({
@@ -11,7 +13,11 @@ const ScheduledMeetingPartSchema = z.object({
 })
 
 const ScheduledMeetingSchema = z.object({
-  date: z.number().int().positive(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid YYYY-MM-DD format")
+    .refine(isYYYYMMDD, "Invalid date format")
+    .transform(toYYYYMMDD),
   parts: z.array(ScheduledMeetingPartSchema).length(4),
 })
 
@@ -42,6 +48,24 @@ export default defineTask({
       let assignmentsCreated = 0
 
       for (const meeting of validatedMeetings) {
+        // CRITICAL: Validate Sunday before processing
+        if (!isSunday(meeting.date)) {
+          const dayOfWeek = dayjs(meeting.date).day()
+          const dayNames = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ]
+          throw new Error(
+            `Invalid date in seed data: ${meeting.date} is not a Sunday (actual day: ${dayNames[dayOfWeek]}). ` +
+              `Seed data must contain only Sunday dates for meeting programs.`
+          )
+        }
+
         // Find existing meeting program by date
         const program = await db.query.meetingPrograms.findFirst({
           where: eq(meetingPrograms.date, meeting.date),

@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer, uniqueIndex, check } from "drizzle-orm/sqlite-core"
 import { relations, sql } from "drizzle-orm"
+import type { YYYYMMDD } from "../../shared/types/date"
 import { organization, user } from "./auth-schema"
 import { SPEAKER_SOURCE_TYPES } from "../../shared/constants/speaker-sources"
 
@@ -110,7 +111,7 @@ export type NewPublisher = typeof publishers.$inferInsert
 export const meetingPrograms = sqliteTable("meeting_programs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   type: text("type").$type<"weekend" | "midweek">().notNull(),
-  date: integer("date", { mode: "number" }).notNull(),
+  date: text("date").notNull().$type<YYYYMMDD>(),
   isCircuitOverseerVisit: integer("is_circuit_overseer_visit", { mode: "boolean" })
     .notNull()
     .default(false),
@@ -134,7 +135,7 @@ export const scheduledPublicTalks = sqliteTable(
   "scheduled_public_talks",
   {
     id: text("id").primaryKey(),
-    date: integer("date", { mode: "timestamp" }).notNull(),
+    date: text("date").notNull().$type<YYYYMMDD>(),
     meetingProgramId: integer("meeting_program_id")
       .notNull()
       .references(() => meetingPrograms.id, { onDelete: "restrict" }),
@@ -200,7 +201,7 @@ export const meetingExceptions = sqliteTable(
   "meeting_exceptions",
   {
     id: text("id").primaryKey(),
-    date: integer("date", { mode: "number" }).notNull(),
+    date: text("date").notNull().$type<YYYYMMDD>(),
     exceptionType: text("exception_type")
       .$type<"circuit_assembly" | "regional_convention" | "memorial">()
       .notNull(),

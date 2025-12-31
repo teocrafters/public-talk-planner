@@ -12,8 +12,8 @@ import {
 export default defineEventHandler(async event => {
   const query = getQuery(event)
   const history = query.history === "true" || query.history === true
-  const startDate = query.startDate ? dayjs(query.startDate as string).toDate() : undefined
-  const endDate = query.endDate ? dayjs(query.endDate as string).toDate() : undefined
+  const startDate = query.startDate ? formatToYYYYMMDD(query.startDate as string) : undefined
+  const endDate = query.endDate ? formatToYYYYMMDD(query.endDate as string) : undefined
 
   if (history) {
     await requirePermission({ weekend_meetings: ["list_history"] })(event)
@@ -22,7 +22,7 @@ export default defineEventHandler(async event => {
   }
 
   const db = useDrizzle()
-  const today = dayjs().startOf("day").toDate()
+  const today = getTodayYYYYMMDD()
 
   let dateCondition
   if (startDate && endDate) {

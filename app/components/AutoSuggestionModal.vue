@@ -7,10 +7,11 @@
     TalkSuggestion,
   } from "#shared/utils/schemas"
   import type { ConflictingSchedule } from "#shared/types/api-schedule"
+  import type { YYYYMMDD } from "#shared/types/date"
 
   interface WeekendMeeting {
     id: number
-    date: number
+    date: YYYYMMDD
     isCircuitOverseerVisit: boolean
     parts: Array<{
       id: number
@@ -37,20 +38,20 @@
   const currentSpeaker = ref<SpeakerSuggestion | null>(null)
   const availableTalks = ref<TalkSuggestion[]>([])
   const selectedTalkId = ref<number | undefined>(undefined)
-  const selectedDate = ref<number | null>(null)
+  const selectedDate = ref<YYYYMMDD | null>(null)
   const hasMoreSuggestions = ref(true)
   const isLocalPublisherFallback = ref(false)
   const showConflictModal = ref(false)
   const conflictingSchedule = ref<ConflictingSchedule | null>(null)
 
   // Fetch weekend meetings for calendar (6 months range for performance)
-  const startOfRange = dayjs().subtract(1, "month").startOf("month").unix()
-  const endOfRange = dayjs().add(5, "month").endOf("month").unix()
+  const startOfRange = formatToYYYYMMDD(dayjs().subtract(1, "month").startOf("month").toDate())
+  const endOfRange = formatToYYYYMMDD(dayjs().add(5, "month").endOf("month").toDate())
 
   const { data: weekendMeetings } = await useFetch<WeekendMeeting[]>("/api/weekend-meetings", {
     query: {
-      startDate: startOfRange.toString(),
-      endDate: endOfRange.toString(),
+      startDate: startOfRange,
+      endDate: endOfRange,
     },
   })
 
@@ -212,21 +213,20 @@
 
     // Check up to 52 weeks ahead
     for (let i = 0; i < 52; i++) {
-      const timestamp = candidate.unix()
-      const isPlanned = plannedDates.value.some(date => dayjs.unix(date).isSame(candidate, "day"))
-      const isCOVisit = circuitOverseerDates.value.some(date =>
-        dayjs.unix(date).isSame(candidate, "day")
-      )
+      const candidateYYYYMMDD = formatToYYYYMMDD(candidate.toDate())
+      const isPlanned = plannedDates.value.some(date => isSameDate(date, candidateYYYYMMDD))
+      const isCOVisit = circuitOverseerDates.value.some(date => isSameDate(date, candidateYYYYMMDD))
 
       if (!isPlanned && !isCOVisit) {
-        return timestamp
+        return candidateYYYYMMDD
       }
 
       candidate = candidate.add(7, "day") // Next Sunday
     }
 
     // Fallback to next Sunday if no free date found in 52 weeks
-    return today.day() === 0 ? today.add(7, "day").unix() : today.day(7).unix()
+    const fallback = today.day() === 0 ? today.add(7, "day") : today.day(7)
+    return formatToYYYYMMDD(fallback.toDate())
   })
 
   watch(isOpen, newValue => {
@@ -264,11 +264,11 @@
     return dayjsDate.day() === 0
   }
 
-  // Convert selectedDate (timestamp) to CalendarDate for UCalendar
+  // Convert selectedDate (YYYYMMDD) to CalendarDate for UCalendar
   const selectedCalendarDate = computed(() => {
     if (!selectedDate.value) return null
 
-    const dayjsDate = dayjs.unix(selectedDate.value)
+    const dayjsDate = dayjs(selectedDate.value)
     return new CalendarDate(
       dayjsDate.year(),
       dayjsDate.month() + 1, // dayjs month is 0-indexed, CalendarDate expects 1-indexed
@@ -291,20 +291,20 @@
 
     if (!singleDate || !("day" in singleDate)) return
 
-    // Convert CalendarDate to unix timestamp
-    const isoDateString = `${singleDate.year}-${String(singleDate.month).padStart(2, "0")}-${String(singleDate.day).padStart(2, "0")}`
-    const dayjsDate = dayjs(isoDateString)
-    selectedDate.value = dayjsDate.unix()
+    // Convert CalendarDate to YYYYMMDD
+    selectedDate.value = formatToYYYYMMDD(new Date(singleDate.toString()))
   }
 
   const displaySelectedDate = computed(() => {
     if (!selectedDate.value) return ""
-    return formatDatePL(selectedDate.value)
+    // YYYYMMDD is already compatible with dayjs parsing
+    return dayjs(selectedDate.value).format("dddd, D MMMM YYYY")
   })
 
   const displayLastTalkDate = computed(() => {
     if (!currentSpeaker.value?.lastTalkDate) return t("speakers.never")
-    return formatDatePL(currentSpeaker.value.lastTalkDate)
+    // lastTalkDate is YYYYMMDD format - dayjs can parse it directly
+    return dayjs(currentSpeaker.value.lastTalkDate).format("dddd, D MMMM YYYY")
   })
 </script>
 

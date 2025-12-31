@@ -20,17 +20,8 @@ export default defineEventHandler(async event => {
     })
   }
 
-  const parsedDate = dayjs(dateStr)
-
-  if (!parsedDate.isValid()) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.invalidDateFormat" },
-    })
-  }
-
-  const date = parsedDate.startOf("day").toDate()
+  // Parse and validate date format
+  const date = formatToYYYYMMDD(dateStr)
 
   const db = useDrizzle()
 

@@ -1,5 +1,5 @@
 import { createError } from "h3"
-import { eq, and, gte, lte, inArray } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import {
   meetingExceptions,
   meetingPrograms,
@@ -16,13 +16,9 @@ export default defineEventHandler(async event => {
   const body = await validateBody(event, createMeetingExceptionSchema)
   const db = useDrizzle()
 
-  // Check if exception already exists for this date (any time during the day)
-  const requestDate = dayjs.unix(body.date)
-  const dayStartUnix = requestDate.startOf("day").unix()
-  const dayEndUnix = requestDate.endOf("day").unix()
-
+  // Check if exception already exists for this date (direct string comparison)
   const existingException = await db.query.meetingExceptions.findFirst({
-    where: and(gte(meetingExceptions.date, dayStartUnix), lte(meetingExceptions.date, dayEndUnix)),
+    where: eq(meetingExceptions.date, body.date),
   })
 
   if (existingException) {
@@ -33,13 +29,9 @@ export default defineEventHandler(async event => {
     })
   }
 
-  // Check if meeting program exists for this date (any time during the day)
+  // Check if meeting program exists for this date (direct string comparison)
   const existingProgram = await db.query.meetingPrograms.findFirst({
-    where: and(
-      eq(meetingPrograms.type, "weekend"),
-      gte(meetingPrograms.date, dayStartUnix),
-      lte(meetingPrograms.date, dayEndUnix)
-    ),
+    where: and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, body.date)),
     with: {
       parts: {
         with: {

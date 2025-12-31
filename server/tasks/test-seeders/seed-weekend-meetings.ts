@@ -171,17 +171,33 @@ export default defineTask({
         const sunday = sundays[i]
         const isCircuitOverseerVisit = i === 3 // Make the 4th Sunday a CO visit
 
+        // CRITICAL: Validate Sunday before processing
+        if (!isSunday(sunday)) {
+          const dayOfWeek = dayjs(sunday).day()
+          const dayNames = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ]
+          throw new Error(
+            `Invalid date in seed data: ${sunday} is not a Sunday (actual day: ${dayNames[dayOfWeek]}). ` +
+              `Seed data must contain only Sunday dates for meeting programs.`
+          )
+        }
+
         // Check if program already exists for this date
         const existingProgram = await db
           .select()
           .from(meetingPrograms)
-          .where(
-            and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, dayjs(sunday).unix()))
-          )
+          .where(and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, sunday)))
           .get()
 
         if (existingProgram) {
-          console.log(`⏭️  Program already exists for ${sunday.toLocaleDateString()}`)
+          console.log(`⏭️  Program already exists for ${sunday}`)
           continue
         }
 
@@ -200,7 +216,7 @@ export default defineTask({
 
         programsCreated++
         console.log(
-          `✅ Created program for ${sunday.toLocaleDateString()}${isCircuitOverseerVisit ? " (CO Visit)" : ""}`
+          `✅ Created program for ${sunday}${isCircuitOverseerVisit ? " (CO Visit)" : ""}`
         )
       }
 
@@ -224,18 +240,16 @@ export default defineTask({
   },
 })
 
-function calculateSundays(count: number): Date[] {
-  // Start from today at noon UTC to avoid timezone boundary issues
-  const todayAtNoon = dayjs().hour(12).minute(0).second(0).millisecond(0)
-
-  const currentDayOfWeek = todayAtNoon.day()
+function calculateSundays(count: number): YYYYMMDD[] {
+  const today = dayjs()
+  const currentDayOfWeek = today.day()
   const daysUntilSunday = currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek
 
-  const sundays: Date[] = []
-  let currentSunday = todayAtNoon.add(daysUntilSunday, "day")
+  const sundays: YYYYMMDD[] = []
+  let currentSunday = today.add(daysUntilSunday, "day")
 
   for (let i = 0; i < count; i++) {
-    sundays.push(currentSunday.toDate())
+    sundays.push(formatToYYYYMMDD(currentSunday.toDate()))
     currentSunday = currentSunday.add(7, "day")
   }
 
@@ -244,7 +258,7 @@ function calculateSundays(count: number): Date[] {
 
 interface CreateProgramOptions {
   db: ReturnType<typeof useDrizzle>
-  date: Date
+  date: YYYYMMDD
   isCircuitOverseerVisit: boolean
   publishers: Array<typeof publishers.$inferSelect>
   speakers: Array<{
@@ -279,7 +293,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
     .insert(meetingPrograms)
     .values({
       type: "weekend",
-      date: dayjs(date).unix(), // Unix timestamp in seconds
+      date, // YYYYMMDD format
       isCircuitOverseerVisit,
       name: null,
       createdAt: new Date(),
@@ -366,7 +380,7 @@ async function createWeekendMeetingProgram(options: CreateProgramOptions): Promi
       if (circuitOverseer) {
         await db.insert(scheduledPublicTalks).values({
           id: crypto.randomUUID(),
-          date,
+          date, // Already YYYYMMDD format
           meetingProgramId: program.id,
           partId: publicTalkPart.id,
           speakerSourceType: "local_publisher", // CO is a local publisher

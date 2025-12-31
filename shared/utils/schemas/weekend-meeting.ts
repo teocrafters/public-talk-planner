@@ -1,25 +1,23 @@
 import { z } from "zod"
-import { dayjs } from "#shared/utils/date"
-// dayjs is auto-imported from shared/utils/date.ts with UTC plugin
+import type { YYYYMMDD } from "#shared/types/date"
+import { toYYYYMMDD, isYYYYMMDD } from "#shared/types/date"
+import { isSunday, isFutureDate } from "#shared/utils/date-yyyymmdd"
 
 export const planWeekendMeetingSchema = (t: (key: string) => string) => {
   return z.object({
     date: z
-      .number({ message: t("validation.dateRequired") })
-      .int({ message: t("validation.dateRequired") })
-      .positive({ message: t("validation.dateRequired") })
-      .refine(
-        timestamp => {
-          return dayjs.unix(timestamp).day() === 0
-        },
-        { message: t("validation.dateMustBeSunday") }
-      )
-      .refine(
-        timestamp => {
-          return dayjs.unix(timestamp).isAfter(dayjs(), "day")
-        },
-        { message: t("validation.dateMustBeFuture") }
-      ),
+      .string({ message: t("validation.dateRequired") })
+      .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+        message: t("validation.invalidDateFormat"),
+      })
+      .refine(isYYYYMMDD, { message: t("validation.invalidDateFormat") })
+      .refine(dateStr => isSunday(dateStr as YYYYMMDD), {
+        message: t("validation.dateMustBeSunday"),
+      })
+      .refine(dateStr => isFutureDate(dateStr as YYYYMMDD), {
+        message: t("validation.dateMustBeFuture"),
+      })
+      .transform(dateStr => toYYYYMMDD(dateStr)),
 
     isCircuitOverseerVisit: z.boolean().default(false),
 
