@@ -1,0 +1,202 @@
+[
+  {
+    "date": "2026-01-04",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "3b48ce50-b772-43ac-a731-c088fca1fb43",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 6
+      }
+    ]
+  },
+  {
+    "date": "2026-01-11",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "0980f74a-8b45-4a60-889c-60ad4e7cb7d4",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "c9a02987-add2-47cb-8473-77e38a20d1f8",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 6
+      }
+    ]
+  },
+  {
+    "date": "2026-01-18",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "c8b6fda6-6785-471c-a164-e2f309402485",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "0980f74a-8b45-4a60-889c-60ad4e7cb7d4",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 6
+      }
+    ]
+  },
+  {
+    "date": "2026-01-25",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "161dfca5-7023-4dcd-acfc-e3157e84c3a2",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "c8b6fda6-6785-471c-a164-e2f309402485",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 6
+      }
+    ]
+  },
+  {
+    "date": "2026-02-01",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "0980f74a-8b45-4a60-889c-60ad4e7cb7d4",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "838b4ee9-2785-4b3e-a9b0-fb558e2d3e03",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 6
+      }
+    ]
+  },
+  {
+    "date": "2026-02-08",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "838b4ee9-2785-4b3e-a9b0-fb558e2d3e03",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 6
+      }
+    ]
+  },
+  {
+    "date": "2026-02-15",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "c9a02987-add2-47cb-8473-77e38a20d1f8",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "5128086d-7873-4423-8302-86bd80b91f3a",
+        "order": 6
+      }
+    ]
+  },
+  {
+    "date": "2026-02-22",
+    "parts": [
+      {
+        "type": "chairman",
+        "publisherId": "c9a02987-add2-47cb-8473-77e38a20d1f8",
+        "order": 1
+      },
+      {
+        "type": "watchtower_study",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 3
+      },
+      {
+        "type": "reader",
+        "publisherId": "c8b6fda6-6785-471c-a164-e2f309402485",
+        "order": 4
+      },
+      {
+        "type": "closing_prayer",
+        "publisherId": "2d6222a8-2ec2-40a2-a372-8f0316c6ccef",
+        "order": 6
+      }
+    ]
+  }
+]

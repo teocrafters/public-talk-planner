@@ -1,14 +1,15 @@
 import { eq } from "drizzle-orm"
 import { generateRandomString } from "better-auth/crypto"
-import { organization, member, user } from "../database/auth-schema"
+import { organization, member, user, verification } from "../database/auth-schema"
 import { publishers } from "../database/schema"
 import { serverAuth } from "../utils/auth"
+import { generateId } from "better-auth"
 
 const ZYCHLIN_SLUG = "zychlin"
 
 const EMAIL_TO_PUBLISHER_MAP: Record<string, string> = {
-	"mateusz.gostanski@gmail.com": "5128086d-7873-4423-8302-86bd80b91f3a",
-	"zetbud.firma@gmail.com": "3b48ce50-b772-43ac-a731-c088fca1fb43",
+  "mateusz.gostanski@gmail.com": "5128086d-7873-4423-8302-86bd80b91f3a",
+  "zetbud.firma@gmail.com": "3b48ce50-b772-43ac-a731-c088fca1fb43",
 }
 
 const COORDINATOR_ACCOUNTS = [
@@ -90,11 +91,11 @@ export default defineTask({
         // Set email_verified to true
         await db.update(user).set({ emailVerified: true }).where(eq(user.id, userId))
 
-        // Create member record with coordinator role
-        const memberId = generateRandomString(32, "a-z", "A-Z", "0-9")
+        // Remove any verification tokens for this user
+        await db.delete(verification).where(eq(verification.identifier, accountData.email))
 
         await db.insert(member).values({
-          id: memberId,
+          id: generateId(),
           organizationId: zychlinCongregation.id,
           userId: userId,
           role: accountData.role,
@@ -109,9 +110,14 @@ export default defineTask({
           })
 
           if (publisher) {
-            await db.update(publishers).set({ userId: userId }).where(eq(publishers.id, publisherId))
+            await db
+              .update(publishers)
+              .set({ userId: userId })
+              .where(eq(publishers.id, publisherId))
 
-            console.log(`✅ Linked to publisher profile: ${publisher.firstName} ${publisher.lastName}`)
+            console.log(
+              `✅ Linked to publisher profile: ${publisher.firstName} ${publisher.lastName}`
+            )
           } else {
             console.warn(`⚠️  Publisher not found (id: ${publisherId})`)
           }
