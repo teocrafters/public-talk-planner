@@ -1,4 +1,5 @@
 import { defu } from "defu"
+import { cosineDistance } from "drizzle-orm"
 
 type MiddlewareOptions =
   | false
@@ -7,14 +8,6 @@ type MiddlewareOptions =
        * Only apply auth middleware to guest or user
        */
       only?: "guest" | "user"
-      /**
-       * Redirect authenticated user to this route
-       */
-      redirectUserTo?: string
-      /**
-       * Redirect guest to this route
-       */
-      redirectGuestTo?: string
     }
 
 declare module "#app" {
@@ -29,6 +22,9 @@ declare module "vue-router" {
   }
 }
 
+const REDIRECT_USER_TO = "/"
+const REDIRECT_GUEST_TO = "/login"
+
 export default defineNuxtRouteMiddleware(async to => {
   // If auth is disabled, skip middleware
   if (to.meta?.auth === false) {
@@ -37,11 +33,10 @@ export default defineNuxtRouteMiddleware(async to => {
   const { loggedIn, options } = useAuth()
   // Session already loaded by plugin
 
-  const { only, redirectUserTo, redirectGuestTo } = defu(to.meta?.auth, options)
+  const { only } = defu(to.meta?.auth, options)
 
   // If guest mode, redirect if authenticated
   if (only === "guest" && loggedIn.value) {
-    // Check for redirect URL from query
     const redirectUrl = to.query.redirect as string | undefined
 
     if (redirectUrl && redirectUrl.startsWith("/") && !redirectUrl.startsWith("//")) {
@@ -53,19 +48,20 @@ export default defineNuxtRouteMiddleware(async to => {
     }
 
     // Avoid infinite redirect
-    if (to.path === redirectUserTo) {
+    if (to.path === REDIRECT_USER_TO) {
       return
     }
-    return navigateTo(redirectUserTo)
+    return navigateTo(REDIRECT_USER_TO)
   }
 
   // If not authenticated, redirect with original URL
   if (!loggedIn.value) {
     // Avoid infinite redirect
-    if (to.path === redirectGuestTo) {
+    if (to.path === REDIRECT_GUEST_TO) {
       return
     }
+    console.log(">>>> HIER")
     const fullPath = String(to.fullPath || to.path)
-    return navigateTo(`${redirectGuestTo}?redirect=${encodeURIComponent(fullPath)}`)
+    return navigateTo(`${REDIRECT_GUEST_TO}?redirect=${encodeURIComponent(fullPath)}`)
   }
 })

@@ -46,6 +46,7 @@ export function useAuth() {
   const session = useState<InferSessionFromClient<ClientOptions> | null>("auth:session", () => null)
   const user = useState<InferUserFromClient<ClientOptions> | null>("auth:user", () => null)
   const sessionFetching = useState("auth:sessionFetching", () => false)
+  const loggedIn = computed(() => !!session.value)
 
   const fetchSession = async () => {
     // Plugin already loaded session on server - skip HTTP request
@@ -79,7 +80,8 @@ export function useAuth() {
   return {
     session,
     user,
-    loggedIn: computed(() => !!session.value),
+    loggedIn,
+    sessionFetching,
     signIn: client.signIn,
     signUp: client.signUp,
     async signOut({ redirectTo }: { redirectTo?: RouteLocationRaw } = {}) {

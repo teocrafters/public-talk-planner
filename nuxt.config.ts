@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
   modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxthub/core", "@nuxtjs/i18n"],
-
+  // ssr: false,
   i18n: {
     defaultLocale: "pl",
     locales: [

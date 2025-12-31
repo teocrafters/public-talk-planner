@@ -10,7 +10,7 @@
 
           <div class="hidden md:flex items-center gap-6">
             <ULink
-              to="/user"
+              to="/"
               active-class="text-primary"
               inactive-class="text-muted hover:text-default">
               {{ t("navigation.dashboard") }}
@@ -106,7 +106,7 @@
     const items = [
       {
         label: t("navigation.dashboard"),
-        to: "/user",
+        to: "/",
         icon: "i-heroicons-home",
       },
     ]

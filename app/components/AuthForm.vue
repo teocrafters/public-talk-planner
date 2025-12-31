@@ -216,6 +216,7 @@
   const handleSubmit = () => {
     if (!isFormValid.value || loading.value) return
 
+    loading.value = true
     error.value = null
     emit("submit", {
       email: formData.email,
