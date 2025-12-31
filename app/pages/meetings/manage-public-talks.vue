@@ -79,12 +79,7 @@
 
   // Get chip color for calendar dots
   function getUChipColor(date: DateValue) {
-    return getChipColor(
-      date,
-      plannedDates.value,
-      circuitOverseerDates.value,
-      exceptionDates.value
-    )
+    return getChipColor(date, plannedDates.value, circuitOverseerDates.value, exceptionDates.value)
   }
 
   function handleDateClick(date: DateValue | DateRange | DateValue[] | null | undefined): void {

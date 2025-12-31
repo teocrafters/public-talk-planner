@@ -205,7 +205,7 @@
               v-model="formState.sex"
               :options="[
                 { value: 'male', label: t('publishers.sex.male') },
-                { value: 'female', label: t('publishers.sex.female') }
+                { value: 'female', label: t('publishers.sex.female') },
               ]"
               data-testid="publisher-sex-select"
               class="w-full" />

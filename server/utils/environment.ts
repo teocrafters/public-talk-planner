@@ -13,17 +13,17 @@
  * - Otherwise returns 'development'
  */
 export function getNodeEnv(): string {
-	// Check for staging flag first (since Nuxt overrides NODE_ENV)
-	if (process.env.NUXT_SEED_STAGING === "1") {
-		return "staging"
-	}
+  // Check for staging flag first (since Nuxt overrides NODE_ENV)
+  if (process.env.NUXT_SEED_STAGING === "1") {
+    return "staging"
+  }
 
-	// Check actual NODE_ENV for production
-	if (process.env.NODE_ENV === "production") {
-		return "production"
-	}
+  // Check actual NODE_ENV for production
+  if (process.env.NODE_ENV === "production") {
+    return "production"
+  }
 
-	return "development"
+  return "development"
 }
 
 /**
@@ -31,19 +31,19 @@ export function getNodeEnv(): string {
  * Set NUXT_SEED_STAGING=1 to enable staging mode
  */
 export function isStaging(): boolean {
-	return process.env.NUXT_SEED_STAGING === "1"
+  return process.env.NUXT_SEED_STAGING === "1"
 }
 
 /**
  * Check if running in production environment
  */
 export function isProduction(): boolean {
-	return process.env.NODE_ENV === "production"
+  return process.env.NODE_ENV === "production"
 }
 
 /**
  * Check if running in development environment
  */
 export function isDevelopment(): boolean {
-	return !isStaging() && !isProduction()
+  return !isStaging() && !isProduction()
 }

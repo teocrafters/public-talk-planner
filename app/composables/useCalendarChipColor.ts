@@ -1,12 +1,6 @@
 import type { DateValue } from "@internationalized/date"
 
-type ChipColor =
-  | "red"
-  | "blue"
-  | "green"
-  | "yellow"
-  | "gray"
-  | "purple"
+type ChipColor = "red" | "blue" | "green" | "yellow" | "gray" | "purple"
 
 /**
  * Composable for calendar chip color logic

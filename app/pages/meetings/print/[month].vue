@@ -155,7 +155,9 @@
   function prepareDisplayItems(parts: WeekendMeetingPart[]): DisplayItem[] {
     // Filter out closing_prayer parts
     const filteredParts = parts.filter(part => part.type !== "closing_prayer")
-    const sortedParts = [...filteredParts].sort((a, b) => getSortOrder(a.type) - getSortOrder(b.type))
+    const sortedParts = [...filteredParts].sort(
+      (a, b) => getSortOrder(a.type) - getSortOrder(b.type)
+    )
     const displayItems: DisplayItem[] = []
 
     for (const part of sortedParts) {

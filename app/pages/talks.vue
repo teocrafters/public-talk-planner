@@ -109,7 +109,10 @@
       const existingTalk = talks.value[index]
       const talkWithLastGiven: PublicTalkWithLastGiven = {
         ...updatedTalk,
-        lastGivenDate: "lastGivenDate" in updatedTalk ? updatedTalk.lastGivenDate : (existingTalk?.lastGivenDate ?? null),
+        lastGivenDate:
+          "lastGivenDate" in updatedTalk
+            ? updatedTalk.lastGivenDate
+            : (existingTalk?.lastGivenDate ?? null),
       }
       const updatedTalks = [...talks.value]
       updatedTalks[index] = talkWithLastGiven

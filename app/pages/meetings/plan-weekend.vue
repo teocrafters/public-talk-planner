@@ -82,12 +82,8 @@
   // Helper function to check if a meeting is complete
   function isMeetingComplete(program: WeekendProgram): boolean {
     // Required parts for a complete meeting (prayer is optional)
-    const hasChairman = program.parts.some(
-      p => p.type === "chairman" && p.assignment
-    )
-    const hasWatchtower = program.parts.some(
-      p => p.type === "watchtower_study" && p.assignment
-    )
+    const hasChairman = program.parts.some(p => p.type === "chairman" && p.assignment)
+    const hasWatchtower = program.parts.some(p => p.type === "watchtower_study" && p.assignment)
     const hasTalk = program.parts.some(
       p => (p.type === "public_talk" || p.type === "circuit_overseer_talk") && p.assignment
     )
