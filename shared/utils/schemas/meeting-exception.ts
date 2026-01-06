@@ -40,6 +40,21 @@ export const createMeetingExceptionSchema = (t: (key: string) => string) => {
 export const updateMeetingExceptionSchema = (t: (key: string) => string) => {
   return z
     .object({
+      date: z
+        .string()
+        .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, {
+          message: t("validation.invalidDateFormat"),
+        })
+        .refine(isYYYYMMDD, { message: t("validation.invalidDateFormat") })
+        .refine(dateStr => isSunday(dateStr as YYYYMMDD), {
+          message: t("validation.dateMustBeSunday"),
+        })
+        .refine(dateStr => isFutureDate(dateStr as YYYYMMDD), {
+          message: t("validation.dateMustBeFuture"),
+        })
+        .transform(dateStr => toYYYYMMDD(dateStr))
+        .optional(),
+
       exceptionType: z
         .enum([
           MEETING_EXCEPTION_TYPES.CIRCUIT_ASSEMBLY,
@@ -49,10 +64,15 @@ export const updateMeetingExceptionSchema = (t: (key: string) => string) => {
         .optional(),
 
       description: z.string().max(500, t("validation.descriptionTooLong")).optional().nullable(),
+
+      confirmDeleteExisting: z.boolean().default(false),
     })
-    .refine(data => data.exceptionType !== undefined || data.description !== undefined, {
-      message: t("validation.atLeastOneFieldRequired"),
-    })
+    .refine(
+      data => data.date !== undefined || data.exceptionType !== undefined || data.description !== undefined,
+      {
+        message: t("validation.atLeastOneFieldRequired"),
+      }
+    )
 }
 
 export type CreateMeetingExceptionInput = z.infer<ReturnType<typeof createMeetingExceptionSchema>>

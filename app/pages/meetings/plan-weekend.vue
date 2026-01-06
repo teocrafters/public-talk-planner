@@ -30,13 +30,13 @@
     },
   })
 
-  // Fetch meeting exceptions
+  // Fetch meeting exceptions - all future exceptions for modal
   const { data: exceptions, refresh: refreshExceptions } = await useFetch(
     "/api/meeting-exceptions",
     {
       query: {
-        startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
-        endDate: formatToYYYYMMDD(dayjs().add(6, "month").toDate()),
+        startDate: formatToYYYYMMDD(dayjs().toDate()),
+        endDate: formatToYYYYMMDD(dayjs().add(5, "year").toDate()),
       },
     }
   )
@@ -345,6 +345,7 @@
       v-model:open="showExceptionModal"
       :date="selectedDateForException"
       :exception="selectedExceptionForEdit"
+      :exceptions="exceptions || []"
       @saved="handleExceptionModalSaved" />
   </div>
 </template>

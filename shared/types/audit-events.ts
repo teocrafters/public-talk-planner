@@ -153,6 +153,7 @@ export interface AuditEventDetails {
     exceptionId: string
     date: YYYYMMDD
     changes: {
+      date?: YYYYMMDD
       exceptionType?: MeetingExceptionType
       description?: string | null
     }

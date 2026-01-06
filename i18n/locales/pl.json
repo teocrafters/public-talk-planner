@@ -483,6 +483,10 @@
       "confirmDeleteMeetingDescription": "Na ten dzień ({date}) zaplanowano już zebranie. Utworzenie wyjątku spowoduje usunięcie tego zebrania i wszystkich przydziałów.",
       "confirmDeleteExceptionTitle": "Usuń wyjątek",
       "confirmDeleteExceptionDescription": "Czy na pewno chcesz usunąć ten wyjątek? Po usunięciu będzie można zaplanować zebranie na ten dzień.",
+      "calendar": "Kalendarz",
+      "upcomingExceptions": "Nadchodzące wyjątki",
+      "noUpcomingExceptions": "Brak zaplanowanych wyjątków",
+      "browseInstructions": "Kliknij datę w kalendarzu aby utworzyć wyjątek lub wybierz istniejący z listy aby edytować",
       "messages": {
         "exceptionCreated": "Wyjątek został utworzony",
         "exceptionUpdated": "Wyjątek został zaktualizowany",
