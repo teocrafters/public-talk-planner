@@ -1,5 +1,4 @@
 import { defu } from "defu"
-import { cosineDistance } from "drizzle-orm"
 
 type MiddlewareOptions =
   | false

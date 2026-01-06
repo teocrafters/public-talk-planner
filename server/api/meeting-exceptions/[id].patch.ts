@@ -1,11 +1,11 @@
 import { createError } from "h3"
 import { eq, and, not, inArray } from "drizzle-orm"
 import {
-	meetingExceptions,
-	meetingPrograms,
-	meetingProgramParts,
-	meetingScheduledParts,
-	scheduledPublicTalks,
+  meetingExceptions,
+  meetingPrograms,
+  meetingProgramParts,
+  meetingScheduledParts,
+  scheduledPublicTalks,
 } from "../../database/schema"
 import { validateBody } from "../../utils/validation"
 import { updateMeetingExceptionSchema } from "#shared/utils/schemas/meeting-exception"

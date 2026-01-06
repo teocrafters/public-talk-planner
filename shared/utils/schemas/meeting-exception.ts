@@ -68,7 +68,10 @@ export const updateMeetingExceptionSchema = (t: (key: string) => string) => {
       confirmDeleteExisting: z.boolean().default(false),
     })
     .refine(
-      data => data.date !== undefined || data.exceptionType !== undefined || data.description !== undefined,
+      data =>
+        data.date !== undefined ||
+        data.exceptionType !== undefined ||
+        data.description !== undefined,
       {
         message: t("validation.atLeastOneFieldRequired"),
       }
