@@ -16,11 +16,11 @@
   // Use composable for calendar chip logic
   const { shouldShowChip, getChipColor } = useCalendarChipColor()
 
-  // Fetch schedules for calendar range (3 months)
+  // Fetch schedules for calendar range (6 months)
   const { data: schedules, refresh } = await useFetch("/api/schedules", {
     query: {
       startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
-      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(6, "month").toDate()),
     },
   })
 
@@ -28,7 +28,7 @@
   const { data: weekendPrograms } = await useFetch("/api/weekend-meetings", {
     query: {
       startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
-      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(6, "month").toDate()),
     },
   })
 
@@ -36,7 +36,7 @@
   const { data: exceptions } = await useFetch("/api/meeting-exceptions", {
     query: {
       startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
-      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(6, "month").toDate()),
     },
   })
 
@@ -94,6 +94,10 @@
 
     if (dayjsDate.day() !== 0) return // Not Sunday
     if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return // Past date
+
+    // Don't allow planning on exception dates
+    const isException = exceptionDates.value.some(exDate => isSameDate(exDate, dateYYYYMMDD))
+    if (isException) return
 
     // Find existing schedule for this date
     selectedSchedule.value =

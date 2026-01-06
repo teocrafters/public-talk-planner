@@ -26,7 +26,7 @@ export const public_talk_coordinator = ac.newRole({
   speakers: ["list", "create", "update", "archive"],
   talks: ["create", "update", "archive", "flag"],
   weekend_meetings: ["schedule_public_talks", "list", "list_history"],
-  publishers: [],
+  publishers: ["list"],
 })
 
 export const boe_coordinator = ac.newRole({

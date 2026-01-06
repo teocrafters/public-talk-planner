@@ -55,6 +55,14 @@
     },
   })
 
+  // Fetch meeting exceptions for calendar chip display
+  const { data: exceptions } = await useFetch("/api/meeting-exceptions", {
+    query: {
+      startDate: startOfRange,
+      endDate: endOfRange,
+    },
+  })
+
   async function fetchSuggestion(excludedIds: string[] = []) {
     isLoading.value = true
 
@@ -206,6 +214,10 @@
     return weekendMeetings.value?.filter(m => m.isCircuitOverseerVisit).map(m => m.date) || []
   })
 
+  const exceptionDates = computed(() => {
+    return exceptions.value?.map(e => e.date) || []
+  })
+
   // Find first available Sunday (not planned, not CO visit)
   const firstAvailableSunday = computed(() => {
     const today = dayjs()
@@ -216,8 +228,9 @@
       const candidateYYYYMMDD = formatToYYYYMMDD(candidate.toDate())
       const isPlanned = plannedDates.value.some(date => isSameDate(date, candidateYYYYMMDD))
       const isCOVisit = circuitOverseerDates.value.some(date => isSameDate(date, candidateYYYYMMDD))
+      const isException = exceptionDates.value.some(date => isSameDate(date, candidateYYYYMMDD))
 
-      if (!isPlanned && !isCOVisit) {
+      if (!isPlanned && !isCOVisit && !isException) {
         return candidateYYYYMMDD
       }
 
@@ -250,7 +263,7 @@
 
   function calendarChipColor(date: DateValue | undefined) {
     if (!date) return "gray" as const
-    return getChipColor(date, plannedDates.value, circuitOverseerDates.value, [])
+    return getChipColor(date, plannedDates.value, circuitOverseerDates.value, exceptionDates.value)
   }
 
   function shouldCalendarShowChip(date: DateValue | undefined) {

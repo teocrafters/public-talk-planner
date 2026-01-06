@@ -22,11 +22,11 @@
   // Use composable for calendar chip logic
   const { shouldShowChip } = useCalendarChipColor()
 
-  // Fetch weekend meeting programs for calendar range (3 months)
+  // Fetch weekend meeting programs for calendar range (6 months)
   const { data: programs, refresh } = await useFetch("/api/weekend-meetings", {
     query: {
       startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
-      endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
+      endDate: formatToYYYYMMDD(dayjs().add(6, "month").toDate()),
     },
   })
 
@@ -36,7 +36,7 @@
     {
       query: {
         startDate: formatToYYYYMMDD(dayjs().subtract(1, "month").toDate()),
-        endDate: formatToYYYYMMDD(dayjs().add(3, "month").toDate()),
+        endDate: formatToYYYYMMDD(dayjs().add(6, "month").toDate()),
       },
     }
   )
@@ -156,6 +156,10 @@
 
     if (dayjsDate.day() !== 0) return // Not Sunday
     if (!dayjsDate.isSameOrAfter(dayjs(), "day")) return // Past date
+
+    // Don't allow planning on exception dates
+    const isException = exceptionDates.value.some(exDate => isSameDate(exDate, dateYYYYMMDD))
+    if (isException) return
 
     // Find existing program for this date
     selectedProgram.value =
