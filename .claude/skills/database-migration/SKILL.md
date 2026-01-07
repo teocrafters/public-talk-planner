@@ -1,3 +1,8 @@
+---
+name: database-migration
+description: Guide through safe database schema modification and migration generation for Drizzle ORM with D1 database. Use when modifying server/database/schema.ts or managing database changes.
+---
+
 # Database Migration Workflow Skill
 
 Guides through the safe process of database schema modification and migration generation for Drizzle
@@ -180,9 +185,9 @@ Ensure all 4 types of files are included in the commit.
 // server/database/schema.ts
 
 export const newTable = sqliteTable("new_table", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
 
 export type NewTable = typeof newTable.$inferSelect

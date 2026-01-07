@@ -159,9 +159,32 @@ export default defineEventHandler(async event => {
 4. Review generated migration before committing
 5. Commit schema + migration files together
 
-**USE SKILL**: `database-migration-workflow` for all schema changes
+**USE SKILL**: `database-migration` for all schema changes
 
 **Reference**: `.agents/database-patterns.md`
+
+## Active Hooks (Enforcement)
+
+These hooks actively enforce backend best practices:
+
+**BLOCK Operations:**
+- **database-safety-bash** - Blocks manual database commands (sqlite3, pnpm db:generate)
+- **database-safety-files** - Blocks manual migration file edits
+- **git-safety** - Blocks force push to main/master branches
+
+**WARN Operations:**
+- **git-force-warn** - Suggests --force-with-lease over --force
+- **security-validation** - Detects security vulnerabilities (SQL injection, exposed secrets)
+
+**Note:** Hooks run automatically and require no invocation. See root AGENTS.md for complete hook list.
+
+## Available Skills
+
+Use these skills during backend development:
+
+- **database-migration** - Safe database schema modification workflow
+- **zod-schema-creation** - Create Zod validation schemas with i18n
+- **date-time-implementation** - Unix timestamps with dayjs
 
 ## API Routes & HTTP Methods
 

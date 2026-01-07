@@ -455,14 +455,26 @@ test("displays speakers list", async ({ page }) => {
 </script>
 ```
 
+## Active Hooks (Enforcement)
+
+These hooks actively enforce best practices:
+
+**WARN Operations:**
+- **test-readiness** - Warns when creating interactive components without data-testid attributes
+- **security-validation** - Detects security vulnerabilities in Vue components
+
+**Note:** Hooks run automatically and require no invocation.
+
 ## Available Skills
 
 Use these skills during frontend development:
 
-- **i18n-key-validation** - Validate translation keys before commit
-- **test-ready-component-check** - Verify component is ready for E2E testing
-- **ssr-data-fetching-implementation** - Guide through proper SSR data fetching
-- **pre-commit-quality-check** - Run all quality checks before commit
+- **i18n-validation** - Validate translation keys before commit
+- **ssr-data-fetching** - Guide through proper SSR data fetching
+- **nuxt-ui-integration** - Verify Nuxt UI component usage
+- **date-time-implementation** - Unix timestamps with dayjs
+- **playwright-fixtures-implementation** - Playwright fixtures and Page Object Models
+- **e2e-testing** - Complete E2E test creation workflow
 
 ## References
 

@@ -1,3 +1,8 @@
+---
+name: e2e-testing
+description: Orchestrate complete E2E test creation workflow from feature analysis to test implementation and healing. Use when a feature is developed and needs comprehensive E2E tests.
+---
+
 # E2E Test Workflow Skill
 
 Orchestrates the complete E2E test creation workflow from feature analysis to test implementation
@@ -166,13 +171,13 @@ USE this skill when:
 
 - VERIFY all components have data-testid attributes
 - FOLLOW naming convention: `{feature}-{element}-{type}`
-- REFERENCE @.agents/test-ready-component-checklist.md
+- REFERENCE .agents/test-ready-component-checklist.md
 
 **Fixture Integration:**
 
 - USE existing fixtures from `tests/fixtures/`
 - IMPORT test and expect from `tests/fixtures/index.ts`
-- FOLLOW @.agents/e2e-testing-patterns.md
+- FOLLOW .agents/e2e-testing-patterns.md
 
 **Module Syntax:**
 
