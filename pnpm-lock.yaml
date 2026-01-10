@@ -27,8 +27,8 @@ importers:
         specifier: 10.2.1
         version: 10.2.1(@netlify/blobs@9.1.2)(@vue/compiler-dom@3.5.26)(db0@0.3.4(@libsql/client@0.15.15)(better-sqlite3@12.4.1)(drizzle-orm@0.44.7(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(better-sqlite3@12.4.1)(kysely@0.28.5)(sql.js@1.13.0)(sqlite3@5.1.7))(sqlite3@5.1.7))(eslint@9.39.2(jiti@2.6.1))(ioredis@5.8.2)(magicast@0.5.1)(rollup@4.52.5)(vue@3.5.26(typescript@5.9.3))
       ai:
-        specifier: 5.0.118
-        version: 5.0.118(zod@4.1.13)
+        specifier: 6.0.19
+        version: 6.0.19(zod@4.1.13)
       better-auth:
         specifier: 1.3.34
         version: 1.3.34(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(vue@3.5.26(typescript@5.9.3))
@@ -102,14 +102,14 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@2.0.24':
-    resolution: {integrity: sha512-mflk80YF8hj8vrF9e1IHhovGKC1ubX+sY88pesSk3pUiXfH5VPO8dgzNnxjwsqsCZrnkHcztxS5cSl4TzSiEuA==}
+  '@ai-sdk/gateway@2.0.3':
+    resolution: {integrity: sha512-/vCoMKtod+A74/BbkWsaAflWKz1ovhX5lmJpIaXQXtd6gyexZncjotBTbFM8rVJT9LKJ/Kx7iVVo3vh+KT+IJg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@2.0.3':
-    resolution: {integrity: sha512-/vCoMKtod+A74/BbkWsaAflWKz1ovhX5lmJpIaXQXtd6gyexZncjotBTbFM8rVJT9LKJ/Kx7iVVo3vh+KT+IJg==}
+  '@ai-sdk/gateway@3.0.10':
+    resolution: {integrity: sha512-sRlPMKd38+fdp2y11USW44c0o8tsIsT6T/pgyY04VXC3URjIRnkxugxd9AkU2ogfpPDMz50cBAGPnMxj+6663Q==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -126,12 +126,22 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/provider-utils@4.0.4':
+    resolution: {integrity: sha512-VxhX0B/dWGbpNHxrKCWUAJKXIXV015J4e7qYjdIU9lLWeptk0KMLGcqkB4wFxff5Njqur8dt8wRi1MN9lZtDqg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider@2.0.0':
     resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
     engines: {node: '>=18'}
 
   '@ai-sdk/provider@2.0.1':
     resolution: {integrity: sha512-KCUwswvsC5VsW2PWFqF8eJgSCu5Ysj7m1TxiHTVA6g7k360bk0RNQENT8KTMAYEs+8fWPD3Uu4dEmzGHc+jGng==}
+    engines: {node: '>=18'}
+
+  '@ai-sdk/provider@3.0.2':
+    resolution: {integrity: sha512-HrEmNt/BH/hkQ7zpi2o6N3k1ZR1QTb7z85WYhYygiTxOQuaml4CMtHCWRbric5WPU+RNsYI7r1EpyVQMKO1pYw==}
     engines: {node: '>=18'}
 
   '@ai-sdk/vue@2.0.82':
@@ -2471,6 +2481,9 @@ packages:
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
   '@stylistic/eslint-plugin@5.5.0':
     resolution: {integrity: sha512-IeZF+8H0ns6prg4VrkhgL+yrvDXWDH2cKchrbh80ejG9dQgZWp10epHMbgRuQvgchLII/lfh6Xn3lu6+6L86Hw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -2807,8 +2820,8 @@ packages:
     resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
     engines: {node: '>= 20'}
 
-  '@vercel/oidc@3.0.5':
-    resolution: {integrity: sha512-fnYhv671l+eTTp48gB4zEsTW/YtRgRPnkI2nT7x6qw5rkI1Lq2hTmQIpHPgyThI0znLK+vX2n9XxKdXZ7BUbbw==}
+  '@vercel/oidc@3.1.0':
+    resolution: {integrity: sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w==}
     engines: {node: '>= 20'}
 
   '@vitejs/plugin-vue-jsx@5.1.2':
@@ -3108,14 +3121,14 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@5.0.118:
-    resolution: {integrity: sha512-sKJHfhJkvAyq5NC3yJJ4R8Z3tn4pSHF760/jInKAtmLwPLWTHfGo293DSO4un8QUAgJOagHd09VSXOXv+STMNQ==}
+  ai@5.0.82:
+    resolution: {integrity: sha512-wmZZfsU40qB77umrcj3YzMSk6cUP5gxLXZDPfiSQLBLegTVXPUdSJC603tR7JB5JkhBDzN5VLaliuRKQGKpUXg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  ai@5.0.82:
-    resolution: {integrity: sha512-wmZZfsU40qB77umrcj3YzMSk6cUP5gxLXZDPfiSQLBLegTVXPUdSJC603tR7JB5JkhBDzN5VLaliuRKQGKpUXg==}
+  ai@6.0.19:
+    resolution: {integrity: sha512-LCqc4/ecL2jNvUfJ3vwz+UPuZvtPDONEjZJSw9XtYCjI6FuyBu9oJKlPMK2Mlj/10bWaNoJ+PnI+tDZLl4y06A==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -7023,18 +7036,18 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.20(zod@4.1.13)
       zod: 4.1.13
 
-  '@ai-sdk/gateway@2.0.24(zod@4.1.13)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.1
-      '@ai-sdk/provider-utils': 3.0.20(zod@4.1.13)
-      '@vercel/oidc': 3.0.5
-      zod: 4.1.13
-
   '@ai-sdk/gateway@2.0.3(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.14(zod@4.1.13)
       '@vercel/oidc': 3.0.3
+      zod: 4.1.13
+
+  '@ai-sdk/gateway@3.0.10(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.2
+      '@ai-sdk/provider-utils': 4.0.4(zod@4.1.13)
+      '@vercel/oidc': 3.1.0
       zod: 4.1.13
 
   '@ai-sdk/provider-utils@3.0.14(zod@4.1.13)':
@@ -7051,11 +7064,22 @@ snapshots:
       eventsource-parser: 3.0.6
       zod: 4.1.13
 
+  '@ai-sdk/provider-utils@4.0.4(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.2
+      '@standard-schema/spec': 1.1.0
+      eventsource-parser: 3.0.6
+      zod: 4.1.13
+
   '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
 
   '@ai-sdk/provider@2.0.1':
+    dependencies:
+      json-schema: 0.4.0
+
+  '@ai-sdk/provider@3.0.2':
     dependencies:
       json-schema: 0.4.0
 
@@ -9515,6 +9539,8 @@ snapshots:
 
   '@standard-schema/spec@1.0.0': {}
 
+  '@standard-schema/spec@1.1.0': {}
+
   '@stylistic/eslint-plugin@5.5.0(eslint@9.39.2(jiti@2.6.1))':
     dependencies:
       '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.2(jiti@2.6.1))
@@ -9843,7 +9869,7 @@ snapshots:
 
   '@vercel/oidc@3.0.3': {}
 
-  '@vercel/oidc@3.0.5': {}
+  '@vercel/oidc@3.1.0': {}
 
   '@vitejs/plugin-vue-jsx@5.1.2(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.43.1)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))':
     dependencies:
@@ -10227,19 +10253,19 @@ snapshots:
       indent-string: 4.0.0
     optional: true
 
-  ai@5.0.118(zod@4.1.13):
-    dependencies:
-      '@ai-sdk/gateway': 2.0.24(zod@4.1.13)
-      '@ai-sdk/provider': 2.0.1
-      '@ai-sdk/provider-utils': 3.0.20(zod@4.1.13)
-      '@opentelemetry/api': 1.9.0
-      zod: 4.1.13
-
   ai@5.0.82(zod@4.1.13):
     dependencies:
       '@ai-sdk/gateway': 2.0.3(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.14(zod@4.1.13)
+      '@opentelemetry/api': 1.9.0
+      zod: 4.1.13
+
+  ai@6.0.19(zod@4.1.13):
+    dependencies:
+      '@ai-sdk/gateway': 3.0.10(zod@4.1.13)
+      '@ai-sdk/provider': 3.0.2
+      '@ai-sdk/provider-utils': 4.0.4(zod@4.1.13)
       '@opentelemetry/api': 1.9.0
       zod: 4.1.13
 
