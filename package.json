@@ -46,7 +46,7 @@
   "devDependencies": {
     "@libsql/client": "0.15.15",
     "@playwright/test": "1.56.1",
-    "@react-email/render": "2.0.2",
+    "@react-email/render": "2.0.3",
     "@types/node": "24.10.9",
     "adm-zip": "0.5.16",
     "drizzle-kit": "0.31.8",
