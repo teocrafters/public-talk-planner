@@ -5,7 +5,6 @@
   definePageMeta({
     auth: {
       only: "user",
-      redirectGuestTo: "/",
     },
     layout: "authenticated",
     middleware: ["public-talks-manager"],

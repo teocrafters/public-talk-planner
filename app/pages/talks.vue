@@ -16,7 +16,6 @@
   definePageMeta({
     auth: {
       only: "user",
-      redirectGuestTo: "/",
     },
     layout: "authenticated",
     middleware: ["talks-manager"],

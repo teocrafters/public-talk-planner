@@ -2,7 +2,6 @@
   definePageMeta({
     auth: {
       only: "user",
-      redirectGuestTo: "/",
     },
     layout: "authenticated",
   })
