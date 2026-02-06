@@ -47,7 +47,7 @@
     "@libsql/client": "0.15.15",
     "@playwright/test": "1.56.1",
     "@react-email/render": "2.0.4",
-    "@types/node": "24.10.9",
+    "@types/node": "24.10.10",
     "adm-zip": "0.5.16",
     "drizzle-kit": "0.31.8",
     "prettier": "3.6.2",
