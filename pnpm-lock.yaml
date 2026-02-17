@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/anthropic':
-        specifier: 2.0.62
-        version: 2.0.62(zod@4.1.13)
+        specifier: 2.0.63
+        version: 2.0.63(zod@4.1.13)
       '@internationalized/date':
         specifier: 3.10.1
         version: 3.10.1
@@ -27,8 +27,8 @@ importers:
         specifier: 10.2.3
         version: 10.2.3(@vue/compiler-dom@3.5.28)(db0@0.3.4(@libsql/client@0.15.15)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260214.0)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(kysely@0.28.11)))(eslint@9.39.2(jiti@2.6.1))(ioredis@5.9.3)(magicast@0.5.2)(rollup@4.57.1)(vue@3.5.28(typescript@5.9.3))
       ai:
-        specifier: 5.0.131
-        version: 5.0.131(zod@4.1.13)
+        specifier: 5.0.133
+        version: 5.0.133(zod@4.1.13)
       better-auth:
         specifier: 1.3.34
         version: 1.3.34(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vue@3.5.28(typescript@5.9.3))
@@ -96,14 +96,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/anthropic@2.0.62':
-    resolution: {integrity: sha512-I3RhaOEMnWlWnrvjNBOYvUb19Dwf2nw01IruZrVJRDi688886e11wnd5DxrBZLd2V29Gizo3vpOPnnExsA+wTA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/gateway@2.0.37':
-    resolution: {integrity: sha512-9ZxIFZS6f1zjYO5vMkUKkhgT9c1H6agZnPEePz87KHlFCmdV21F5Vnh5kz6Dq/9A4Z1OFwM1pQf7GdxBrbiZHg==}
+  '@ai-sdk/anthropic@2.0.63':
+    resolution: {integrity: sha512-zXlUPCkumnvp8lWS9VFcen/MLF6CL/t1zAKDhpobYj9y/nmylQrKtRvn3RwH871Wd3dF3KYEUXd6M2c6dfCKOA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3062,12 +3056,6 @@ packages:
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
-
-  ai@5.0.131:
-    resolution: {integrity: sha512-KYuhcpiigvPCpFbNzNKcoZ7AWKnTeE++HRqnWqX0MgSbk1xVi0Q5wvfMmnF71n7l5JjytefLV3NkJwbU+7AR/g==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
 
   ai@5.0.133:
     resolution: {integrity: sha512-N6KnwSWKcXEWPnAri3anRuzRvcrvtDz1W1JG9CvMrQ0Xdp8Vu8ZToNW/eHt63CmrbmzTwVw/HaCtJuO+MYtS7A==}
@@ -6349,17 +6337,10 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/anthropic@2.0.62(zod@4.1.13)':
+  '@ai-sdk/anthropic@2.0.63(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.1
       '@ai-sdk/provider-utils': 3.0.21(zod@4.1.13)
-      zod: 4.1.13
-
-  '@ai-sdk/gateway@2.0.37(zod@4.1.13)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.1
-      '@ai-sdk/provider-utils': 3.0.21(zod@4.1.13)
-      '@vercel/oidc': 3.1.0
       zod: 4.1.13
 
   '@ai-sdk/gateway@2.0.39(zod@4.1.13)':
@@ -9329,14 +9310,6 @@ snapshots:
   adm-zip@0.5.16: {}
 
   agent-base@7.1.4: {}
-
-  ai@5.0.131(zod@4.1.13):
-    dependencies:
-      '@ai-sdk/gateway': 2.0.37(zod@4.1.13)
-      '@ai-sdk/provider': 2.0.1
-      '@ai-sdk/provider-utils': 3.0.21(zod@4.1.13)
-      '@opentelemetry/api': 1.9.0
-      zod: 4.1.13
 
   ai@5.0.133(zod@4.1.13):
     dependencies:
