@@ -25,7 +25,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "2.0.63",
+    "@ai-sdk/anthropic": "2.0.64",
     "@internationalized/date": "3.10.1",
     "@nuxt/eslint": "1.10.0",
     "@nuxt/ui": "4.1.0",
