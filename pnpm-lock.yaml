@@ -27,8 +27,8 @@ importers:
         specifier: 10.2.3
         version: 10.2.3(@vue/compiler-dom@3.5.30)(db0@0.3.4(@libsql/client@0.15.15)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260313.1)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(kysely@0.28.12)))(eslint@9.39.4(jiti@2.6.1))(ioredis@5.10.0)(magicast@0.5.2)(rollup@4.59.0)(vue@3.5.30(typescript@5.9.3))
       ai:
-        specifier: 5.0.154
-        version: 5.0.154(zod@4.1.13)
+        specifier: 5.0.155
+        version: 5.0.155(zod@4.1.13)
       better-auth:
         specifier: 1.3.34
         version: 1.3.34(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vue@3.5.30(typescript@5.9.3))
@@ -104,6 +104,12 @@ packages:
 
   '@ai-sdk/gateway@2.0.58':
     resolution: {integrity: sha512-HLPfF5k/rUre8fBMSJnJP6UL7ONx+W/BksTGdand0/Jkq5nCVlwmoUC4URc8PtZ+UtnMP6waQlD4b9/rPOHk7A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/gateway@2.0.59':
+    resolution: {integrity: sha512-hmXtD2InGIMoHm3gf1yZM4GURS0/4ZL4ff9O0jkF1tXcKl9V/72omLZlwlOM9r7pgpr/65H7anaV2t8kbip0FQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3069,6 +3075,12 @@ packages:
 
   ai@5.0.154:
     resolution: {integrity: sha512-xdUSSfliDWIQq/9Easp1z5oRIFwNS07Ys4BCGDtroDcyEbNDMw5Rj1m2i7Fh8khPbAEByxFfWyUzlrPi2VIlDA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  ai@5.0.155:
+    resolution: {integrity: sha512-lq6PafJobpWyxnQofOukwIBwWNWKpf4AJMWISwHOOXEjMCcsHR1cKw92rQ/cy9O/tneQpP8uXgNWUDU+f+270A==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6362,6 +6374,13 @@ snapshots:
       '@vercel/oidc': 3.1.0
       zod: 4.1.13
 
+  '@ai-sdk/gateway@2.0.59(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.1
+      '@ai-sdk/provider-utils': 3.0.22(zod@4.1.13)
+      '@vercel/oidc': 3.1.0
+      zod: 4.1.13
+
   '@ai-sdk/provider-utils@3.0.22(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.1
@@ -9330,6 +9349,14 @@ snapshots:
   ai@5.0.154(zod@4.1.13):
     dependencies:
       '@ai-sdk/gateway': 2.0.58(zod@4.1.13)
+      '@ai-sdk/provider': 2.0.1
+      '@ai-sdk/provider-utils': 3.0.22(zod@4.1.13)
+      '@opentelemetry/api': 1.9.0
+      zod: 4.1.13
+
+  ai@5.0.155(zod@4.1.13):
+    dependencies:
+      '@ai-sdk/gateway': 2.0.59(zod@4.1.13)
       '@ai-sdk/provider': 2.0.1
       '@ai-sdk/provider-utils': 3.0.22(zod@4.1.13)
       '@opentelemetry/api': 1.9.0
