@@ -11,6 +11,7 @@ pattern: git\s+push.*--force.*(main|master)|git\s+push.*-f.*(main|master)
 You attempted to force push to main/master branch, which is extremely dangerous.
 
 **Why this is blocked:**
+
 - Force pushing to main/master can destroy team history
 - Overwrites commits that others may have pulled
 - Can cause data loss and team disruption

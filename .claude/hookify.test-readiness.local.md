@@ -20,6 +20,7 @@ conditions:
 You're creating or modifying an interactive Vue component without `data-testid` attributes.
 
 **Why this matters:**
+
 - E2E tests rely on data-testid for reliable element selection
 - CSS classes and text content are fragile selectors
 - Adding test IDs retroactively is inefficient
@@ -30,6 +31,7 @@ You're creating or modifying an interactive Vue component without `data-testid` 
 **Naming convention:** `{feature}-{element}-{type}` in kebab-case
 
 Examples:
+
 ```vue
 <!-- Buttons -->
 <UButton data-testid="speakers-create-button" />
@@ -49,6 +51,7 @@ Examples:
 ```
 
 **Elements that MUST have data-testid:**
+
 - All buttons (UButton, button elements)
 - All inputs (UInput, UTextarea, USelect, etc.)
 - All forms (UForm)

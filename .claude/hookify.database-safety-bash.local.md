@@ -11,12 +11,14 @@ pattern: (sqlite3.*migrations/|\.sql$|pnpm\s+db:generate|pnpm\s+db:push|drizzle-
 You attempted to run a database command that violates the project's safety rules.
 
 **What was blocked:**
+
 - Manual SQL file execution
 - Direct `pnpm db:generate` or `pnpm db:push` execution
 - Manual drizzle-kit commands
 - Direct sqlite3 access to migration files
 
 **Why this is blocked:**
+
 - Database migrations must be user-executed for safety
 - Automated migration generation can cause issues
 - Direct SQL execution bypasses schema validation

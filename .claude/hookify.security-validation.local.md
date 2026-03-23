@@ -33,6 +33,7 @@ Your code may contain a security vulnerability.
    - Never trust client-side data
 
 **Recommended actions:**
+
 - Review the code for security issues
 - Use Zod validation for all user inputs
 - Use parameterized queries for database operations
