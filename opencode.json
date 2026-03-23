@@ -3,8 +3,20 @@
   "mcp": {
     "playwright-test": {
       "type": "local",
-      "command": ["npx", "playwright", "run-test-mcp-server"],
+      "command": [
+        "npx",
+        "playwright",
+        "run-test-mcp-server"
+      ],
       "enabled": true
+    },
+    "uidotsh": {
+      "type": "remote",
+      "url": "https://ui.sh/mcp?agent=opencode",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer I7a0EWnX0IfzLyoWThIzaGbapdA1vTno"
+      }
     }
   },
   "tools": {

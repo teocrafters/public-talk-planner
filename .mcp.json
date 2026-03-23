@@ -55,6 +55,13 @@
       "headers": {
         "CONTEXT7_API_KEY": "your-context7-api-key-here"
       }
+    },
+    "uidotsh": {
+      "type": "http",
+      "url": "https://ui.sh/mcp?agent=claude",
+      "headers": {
+        "Authorization": "Bearer I7a0EWnX0IfzLyoWThIzaGbapdA1vTno"
+      }
     }
   }
 }

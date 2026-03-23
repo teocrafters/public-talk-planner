@@ -1,0 +1,4 @@
+
+[mcp_servers.uidotsh]
+url = "https://ui.sh/mcp?agent=codex"
+http_headers = { Authorization = "Bearer I7a0EWnX0IfzLyoWThIzaGbapdA1vTno" }
