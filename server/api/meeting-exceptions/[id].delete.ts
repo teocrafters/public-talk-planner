@@ -1,47 +1,43 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { meetingExceptions } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
+import { uuidParamsSchema } from "#shared/utils/schemas/query-params"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ weekend_meetings: ["manage_exceptions"] })(event)
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["manage_exceptions"] },
+  params: uuidParamsSchema,
+  handler: async (event, { params }): Promise<unknown> => {
+    const exceptionId = params.id
+    const db = useDrizzle()
 
-  const exceptionId = getRouterParam(event, "id")
-  if (!exceptionId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.exceptionIdRequired" },
+    const existingException = await db.query.meetingExceptions.findFirst({
+      where: eq(meetingExceptions.id, exceptionId),
     })
-  }
 
-  const db = useDrizzle()
+    if (!existingException) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Not Found",
+        data: { message: "errors.exceptionNotFound" },
+      })
+    }
 
-  const existingException = await db.query.meetingExceptions.findFirst({
-    where: eq(meetingExceptions.id, exceptionId),
-  })
+    await db.delete(meetingExceptions).where(eq(meetingExceptions.id, exceptionId))
 
-  if (!existingException) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Not Found",
-      data: { message: "errors.exceptionNotFound" },
+    await logAuditEvent(event, {
+      action: AUDIT_EVENTS.MEETING_EXCEPTION_DELETED,
+      resourceType: "meeting_exception",
+      resourceId: exceptionId,
+      details: {
+        exceptionId,
+        date: existingException.date,
+        exceptionType: existingException.exceptionType,
+      } satisfies AuditEventDetails[typeof AUDIT_EVENTS.MEETING_EXCEPTION_DELETED],
     })
-  }
 
-  await db.delete(meetingExceptions).where(eq(meetingExceptions.id, exceptionId))
-
-  await logAuditEvent(event, {
-    action: AUDIT_EVENTS.MEETING_EXCEPTION_DELETED,
-    resourceType: "meeting_exception",
-    resourceId: exceptionId,
-    details: {
-      exceptionId,
-      date: existingException.date,
-      exceptionType: existingException.exceptionType,
-    } satisfies AuditEventDetails[typeof AUDIT_EVENTS.MEETING_EXCEPTION_DELETED],
-  })
-
-  return {
-    success: true,
-  }
+    return {
+      success: true,
+    }
+  },
 })

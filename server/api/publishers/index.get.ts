@@ -1,11 +1,25 @@
 import { like, or, eq, and } from "drizzle-orm"
+import { z } from "zod"
 import { publishers, type Publisher } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
 
-export default defineEventHandler(async (event): Promise<Publisher[]> => {
-  await requirePermission({ publishers: ["list"] })(event)
+const publisherListQuerySchema = () =>
+  z.object({
+    search: z.string().optional(),
+    isElder: z.enum(["true", "false"]).optional(),
+    isMinisterialServant: z.enum(["true", "false"]).optional(),
+    canChairWeekendMeeting: z.enum(["true", "false"]).optional(),
+    conductsWatchtowerStudy: z.enum(["true", "false"]).optional(),
+    isReader: z.enum(["true", "false"]).optional(),
+    offersPublicPrayer: z.enum(["true", "false"]).optional(),
+    isCircuitOverseer: z.enum(["true", "false"]).optional(),
+  })
 
+export default defineEndpoint({
+  permissions: { publishers: ["list"] },
+  query: publisherListQuerySchema,
+  handler: async (event, { query }): Promise<Publisher[]> => {
   const db = useDrizzle()
-  const query = getQuery(event)
 
   // Build where conditions
   const whereConditions = []
@@ -51,4 +65,5 @@ export default defineEventHandler(async (event): Promise<Publisher[]> => {
       : await db.select().from(publishers).orderBy(publishers.lastName, publishers.firstName)
 
   return publishersData
+  }
 })

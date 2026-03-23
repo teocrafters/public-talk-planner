@@ -1,17 +1,19 @@
 import { createError } from "h3"
+import { z } from "zod"
 import { getJob } from "../../../../utils/import-jobs"
+import { defineEndpoint } from "../../../../utils/define-endpoint"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ speakers: ["create"] })(event)
+// UUID params schema
+const uuidParamsSchema = (t: (key: string) => string) =>
+  z.object({
+    id: z.string().uuid(t("validation.invalidUuid")),
+  })
 
-  const jobId = getRouterParam(event, "id")
-  if (!jobId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.invalidJobId" },
-    })
-  }
+export default defineEndpoint({
+  permissions: { speakers: ["create"] },
+  params: uuidParamsSchema,
+  handler: async (event, { params }) => {
+  const jobId = params.id
 
   const job = getJob(jobId)
   if (!job) {
@@ -27,4 +29,5 @@ export default defineEventHandler(async event => {
     data: job.data,
     error: job.error,
   }
+  },
 })

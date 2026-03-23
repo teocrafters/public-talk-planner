@@ -1,15 +1,22 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
+import { z } from "zod"
 import {
   meetingPrograms,
   meetingProgramParts,
   meetingScheduledParts,
   publishers,
 } from "../../database/schema"
-import { validateBody } from "../../utils/validation"
+import { defineEndpoint } from "../../utils/define-endpoint"
 import { updateWeekendMeetingSchema } from "#shared/utils/schemas"
 import type { MeetingPartType } from "#shared/constants/meetings"
 import { MEETING_PART_TYPES, MEETING_PART_ORDER } from "#shared/constants/meetings"
+
+// Numeric ID params schema
+const numericIdParamsSchema = (t: (key: string) => string) =>
+  z.object({
+    id: z.coerce.number().int().positive(t("validation.invalidId")),
+  })
 
 /**
  * Helper function to ensure a meeting part exists and has an assignment
@@ -88,24 +95,17 @@ async function ensurePartAndAssignment(
   }
 }
 
-export default defineEventHandler(async event => {
-  await requirePermission({ weekend_meetings: ["schedule_rest"] })(event)
-
-  const programId = getRouterParam(event, "id")
-  if (!programId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.programIdRequired" },
-    })
-  }
-
-  const body = await validateBody(event, updateWeekendMeetingSchema)
-  const db = useDrizzle()
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["schedule_rest"] },
+  params: numericIdParamsSchema,
+  body: updateWeekendMeetingSchema,
+  handler: async (event, { params, body }) => {
+    const programId = params.id.toString()
+    const db = useDrizzle()
 
   // Check if program exists
   const program = await db.query.meetingPrograms.findFirst({
-    where: eq(meetingPrograms.id, parseInt(programId)),
+    where: eq(meetingPrograms.id, params.id),
     with: {
       parts: {
         with: {
@@ -128,7 +128,7 @@ export default defineEventHandler(async event => {
     await db
       .update(meetingPrograms)
       .set({ isCircuitOverseerVisit: body.isCircuitOverseerVisit })
-      .where(eq(meetingPrograms.id, parseInt(programId)))
+      .where(eq(meetingPrograms.id, params.id))
   }
 
   // Update parts if provided
@@ -203,14 +203,14 @@ export default defineEventHandler(async event => {
     resourceType: "meeting_program",
     resourceId: programId,
     details: {
-      programId: parseInt(programId),
+      programId: params.id,
       changes: body,
     } satisfies AuditEventDetails[typeof AUDIT_EVENTS.WEEKEND_MEETING_UPDATED],
   })
 
   // Fetch updated program
   const updatedProgram = await db.query.meetingPrograms.findFirst({
-    where: eq(meetingPrograms.id, parseInt(programId)),
+    where: eq(meetingPrograms.id, params.id),
     with: {
       parts: {
         with: {
@@ -227,5 +227,6 @@ export default defineEventHandler(async event => {
   return {
     success: true,
     program: updatedProgram,
+  }
   }
 })

@@ -8,15 +8,13 @@ import {
   publicTalks,
   organization,
 } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
 import { autoSuggestionSchema } from "#shared/utils/schemas"
 
-export default defineEventHandler(async event => {
-  await requirePermission({
-    weekend_meetings: ["list"],
-  })(event)
-
-  const body = await validateBody(event, autoSuggestionSchema)
-
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["list"] },
+  body: autoSuggestionSchema,
+  handler: async (event, { body }) => {
   const db = useDrizzle()
 
   // Set 20-second timeout
@@ -253,6 +251,7 @@ export default defineEventHandler(async event => {
     }
     throw error
   }
+  },
 })
 
 /**

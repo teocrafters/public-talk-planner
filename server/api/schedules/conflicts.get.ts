@@ -1,24 +1,21 @@
-import { createError } from "h3"
 import { eq, and } from "drizzle-orm"
+import { z } from "zod"
 import { scheduledPublicTalks } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
+import { formatToYYYYMMDD } from "#shared/utils/date-yyyymmdd"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ weekend_meetings: ["schedule_public_talks"] })(event)
+const conflictsQuerySchema = (t: (key: string) => string) =>
+  z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("validation.invalidDateFormat")),
+    meetingProgramId: z.coerce.number().int().positive(t("validation.invalidId")),
+    partId: z.coerce.number().int().positive(t("validation.invalidId")),
+  })
 
-  const query = getQuery(event)
-  const dateStr = query.date as string
-  const meetingProgramId = query.meetingProgramId
-    ? Number.parseInt(query.meetingProgramId as string, 10)
-    : undefined
-  const partId = query.partId ? Number.parseInt(query.partId as string, 10) : undefined
-
-  if (!dateStr || !meetingProgramId || !partId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.dateAndProgramAndPartRequired" },
-    })
-  }
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["schedule_public_talks"] },
+  query: conflictsQuerySchema,
+  handler: async (event, { query }) => {
+  const { date: dateStr, meetingProgramId, partId } = query
 
   // Parse and validate date format
   const date = formatToYYYYMMDD(dateStr)
@@ -67,4 +64,5 @@ export default defineEventHandler(async event => {
     hasConflict: false,
     existingSchedule: null,
   }
+  },
 })

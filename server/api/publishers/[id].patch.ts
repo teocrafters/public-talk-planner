@@ -1,22 +1,18 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { publishers } from "../../database/schema"
-import { validateBody } from "../../utils/validation"
-import { updatePublisherSchema } from "#shared/utils/schemas"
+import { defineEndpoint } from "../../utils/define-endpoint"
+import { updatePublisherSchema, uuidParamsSchema } from "#shared/utils/schemas"
+import { logAuditEvent } from "../../utils/audit-log"
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import type { AuditEventDetails } from "#shared/types/audit-events"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ publishers: ["update"] })(event)
-
-  const publisherId = getRouterParam(event, "id")
-  if (!publisherId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.publisherIdRequired" },
-    })
-  }
-
-  const body = await validateBody(event, updatePublisherSchema)
+export default defineEndpoint({
+  permissions: { publishers: ["update"] },
+  params: uuidParamsSchema,
+  body: updatePublisherSchema,
+  handler: async (event, { params, body }) => {
+    const publisherId = params.id
 
   const db = useDrizzle()
 
@@ -67,5 +63,6 @@ export default defineEventHandler(async event => {
   return {
     success: true,
     publisher: updatedPublisher,
+  }
   }
 })

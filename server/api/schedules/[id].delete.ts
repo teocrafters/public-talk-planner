@@ -1,21 +1,26 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
+import { z } from "zod"
 import { scheduledPublicTalks } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
 import { logAuditEvent } from "../../utils/audit-log"
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import type { AuditEventDetails } from "#shared/types/audit-events"
+import { isPastDate } from "#shared/utils/date-yyyymmdd"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ weekend_meetings: ["schedule_public_talks"] })(event)
+// UUID params schema
+const uuidParamsSchema = (t: (key: string) => string) =>
+  z.object({
+    id: z.string().uuid(t("validation.invalidUuid")),
+  })
 
-  const scheduleId = getRouterParam(event, "id")
-  if (!scheduleId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.scheduleIdRequired" },
-    })
-  }
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["schedule_public_talks"] },
+  params: uuidParamsSchema,
+  handler: async (event, { params }) => {
+    const scheduleId = params.id
 
-  const db = useDrizzle()
+    const db = useDrizzle()
 
   const existingSchedule = await db.query.scheduledPublicTalks.findFirst({
     where: eq(scheduledPublicTalks.id, scheduleId),
@@ -55,4 +60,5 @@ export default defineEventHandler(async event => {
     success: true,
     message: "Schedule deleted successfully",
   }
+  },
 })

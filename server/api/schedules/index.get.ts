@@ -1,4 +1,5 @@
 import { eq, gte, lt, between, asc, desc } from "drizzle-orm"
+import { z } from "zod"
 import {
   scheduledPublicTalks,
   speakers,
@@ -8,18 +9,22 @@ import {
   meetingPrograms,
   meetingProgramParts,
 } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
+import { dateRangeQuerySchema } from "#shared/utils/schemas/query-params"
+import { formatToYYYYMMDD, getTodayYYYYMMDD } from "#shared/utils/date-yyyymmdd"
 
-export default defineEventHandler(async event => {
-  const query = getQuery(event)
-  const history = query.history === "true" || query.history === true
-  const startDate = query.startDate ? formatToYYYYMMDD(query.startDate as string) : undefined
-  const endDate = query.endDate ? formatToYYYYMMDD(query.endDate as string) : undefined
+const scheduleQuerySchema = (t: (key: string) => string) =>
+  dateRangeQuerySchema(t).extend({
+    history: z.enum(["true", "false"]).default("false"),
+  })
 
-  if (history) {
-    await requirePermission({ weekend_meetings: ["list_history"] })(event)
-  } else {
-    await requirePermission({ weekend_meetings: ["list"] })(event)
-  }
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["list", "list_history"] },
+  query: scheduleQuerySchema,
+  handler: async (event, { query }): Promise<unknown> => {
+  const history = query.history === "true"
+  const startDate = query.startDate ? formatToYYYYMMDD(query.startDate) : undefined
+  const endDate = query.endDate ? formatToYYYYMMDD(query.endDate) : undefined
 
   const db = useDrizzle()
   const today = getTodayYYYYMMDD()
@@ -111,4 +116,5 @@ export default defineEventHandler(async event => {
     createdAt: schedule.createdAt,
     updatedAt: schedule.updatedAt,
   })) as ScheduleWithRelations[]
+  },
 })

@@ -8,19 +8,19 @@ import {
   scheduledPublicTalks,
   meetingExceptions,
 } from "../../database/schema"
-import { validateBody } from "../../utils/validation"
+import { defineEndpoint } from "../../utils/define-endpoint"
 import { planWeekendMeetingSchema } from "#shared/utils/schemas"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 import { isSunday, isFutureDate } from "#shared/utils/date-yyyymmdd"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ weekend_meetings: ["schedule_rest"] })(event)
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["schedule_rest"] },
+  body: planWeekendMeetingSchema,
+  handler: async (event, { body }) => {
+    const db = useDrizzle()
 
-  const body = await validateBody(event, planWeekendMeetingSchema)
-  const db = useDrizzle()
-
-  // Validate date is Sunday and future
-  if (!isSunday(body.date)) {
+    // Validate date is Sunday and future
+    if (!isSunday(body.date)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Bad Request",
@@ -342,5 +342,6 @@ export default defineEventHandler(async event => {
       date: program.date,
       isCircuitOverseerVisit: program.isCircuitOverseerVisit,
     },
+  }
   }
 })

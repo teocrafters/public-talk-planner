@@ -1,5 +1,6 @@
 import { isNull, eq } from "drizzle-orm"
 import { user, publishers } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
 
 interface UnlinkedUser {
   id: string
@@ -7,9 +8,9 @@ interface UnlinkedUser {
   email: string
 }
 
-export default defineEventHandler(async (event): Promise<UnlinkedUser[]> => {
-  await requirePermission({ publishers: ["link_to_user"] })(event)
-
+export default defineEndpoint({
+  permissions: { publishers: ["link_to_user"] },
+  handler: async (): Promise<UnlinkedUser[]> => {
   const db = useDrizzle()
 
   // Get all users that are not linked to any publisher
@@ -25,4 +26,5 @@ export default defineEventHandler(async (event): Promise<UnlinkedUser[]> => {
     .orderBy(user.name)
 
   return unlinkedUsers
+  },
 })

@@ -1,4 +1,5 @@
 import { eq, desc, asc, sql } from "drizzle-orm"
+import { z } from "zod"
 import {
   speakers,
   speakerTalks,
@@ -6,16 +7,23 @@ import {
   publicTalks,
   scheduledPublicTalks,
 } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
+import { sortQuerySchema } from "#shared/utils/schemas/query-params"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ speakers: ["list"] })(event)
+const speakerListQuerySchema = () =>
+  sortQuerySchema().extend({
+    search: z.string().optional(),
+  })
 
-  const query = getQuery(event)
+export default defineEndpoint({
+  permissions: { speakers: ["list"] },
+  query: speakerListQuerySchema,
+  handler: async (event, { query }): Promise<unknown> => {
   const db = useDrizzle()
 
   // Extract sorting parameters
-  const sortBy = (query.sortBy as string) || "name" // Default: sort by name
-  const sortOrder = (query.sortOrder as string) || "asc" // Default: ascending
+  const sortBy = query.sortBy || "name" // Default: sort by name
+  const sortOrder = query.sortOrder || "asc" // Default: ascending
 
   // Optimized single query with JSON aggregation using speakerTalks relationship
   let speakersQuery = db
@@ -117,4 +125,5 @@ export default defineEventHandler(async event => {
 
   // Return the complete data including lastTalkDate
   return speakersWithTalks
+  },
 })

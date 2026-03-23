@@ -67,3 +67,17 @@ export {
   type ExtractedSpeaker,
   type BulkImport,
 } from "./speaker-import"
+
+// Query parameter schemas
+export {
+  paginationQuerySchema,
+  sortQuerySchema,
+  dateRangeQuerySchema,
+  commonQuerySchema,
+  uuidParamsSchema,
+  type PaginationQuery,
+  type SortQuery,
+  type DateRangeQuery,
+  type CommonQuery,
+  type UuidParams,
+} from "./query-params"

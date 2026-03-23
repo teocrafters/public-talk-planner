@@ -1,13 +1,16 @@
 import { createError } from "h3"
 import { eq, sql } from "drizzle-orm"
 import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
-import { validateBody } from "../../utils/validation"
+import { defineEndpoint } from "../../utils/define-endpoint"
+import { logAuditEvent } from "../../utils/audit-log"
 import { createSpeakerSchema } from "#shared/utils/schemas"
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import type { AuditEventDetails } from "#shared/types/audit-events"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ speakers: ["create"] })(event)
-
-  const body = await validateBody(event, createSpeakerSchema)
+export default defineEndpoint({
+  permissions: { speakers: ["create"] },
+  body: createSpeakerSchema,
+  handler: async (event, { body }) => {
 
   const db = useDrizzle()
 
@@ -115,4 +118,5 @@ export default defineEventHandler(async event => {
       talks,
     },
   }
+}
 })

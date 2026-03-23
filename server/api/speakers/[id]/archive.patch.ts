@@ -1,24 +1,27 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
+import { z } from "zod"
 import { speakers, organization, speakerTalks, publicTalks } from "../../../database/schema"
-import { validateBody } from "../../../utils/validation"
+import { defineEndpoint } from "../../../utils/define-endpoint"
 import { archiveSpeakerSchema } from "#shared/utils/schemas"
+import { logAuditEvent } from "../../../utils/audit-log"
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import type { AuditEventDetails } from "#shared/types/audit-events"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ speakers: ["archive"] })(event)
+// UUID params schema
+const uuidParamsSchema = (t: (key: string) => string) =>
+  z.object({
+    id: z.string().uuid(t("validation.invalidUuid")),
+  })
 
-  const speakerId = getRouterParam(event, "id")
-  if (!speakerId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.speakerIdRequired" },
-    })
-  }
+export default defineEndpoint({
+  permissions: { speakers: ["archive"] },
+  params: uuidParamsSchema,
+  body: archiveSpeakerSchema,
+  handler: async (event, { params, body }) => {
+    const speakerId = params.id
 
-  const body = await validateBody(event, archiveSpeakerSchema)
-
-  const db = useDrizzle()
+    const db = useDrizzle()
 
   const existingSpeaker = await db
     .select()
@@ -90,4 +93,5 @@ export default defineEventHandler(async event => {
       talks,
     },
   }
+  },
 })

@@ -1,4 +1,5 @@
 import { publishers, type Publisher } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
 
 interface AvailablePublishers {
   chairman: Publisher[]
@@ -8,10 +9,10 @@ interface AvailablePublishers {
   circuitOverseerTalk: Publisher[]
 }
 
-export default defineEventHandler(async (event): Promise<AvailablePublishers> => {
-  await requirePermission({ publishers: ["list"] })(event)
-
-  const db = useDrizzle()
+export default defineEndpoint({
+  permissions: { publishers: ["list"] },
+  handler: async (): Promise<AvailablePublishers> => {
+    const db = useDrizzle()
 
   // Fetch all publishers once
   const allPublishers = await db
@@ -28,5 +29,6 @@ export default defineEventHandler(async (event): Promise<AvailablePublishers> =>
     reader: allPublishers.filter(p => p.isReader),
     prayer: allPublishers.filter(p => p.offersPublicPrayer),
     circuitOverseerTalk: allPublishers.filter(p => p.isCircuitOverseer),
+  }
   }
 })

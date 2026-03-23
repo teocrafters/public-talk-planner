@@ -2,24 +2,26 @@ import { eq, gte, lte, and } from "drizzle-orm"
 import { meetingPrograms } from "../../database/schema"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 import { toYYYYMMDD } from "#shared/types/date"
+import { defineEndpoint } from "../../utils/define-endpoint"
+import { dateRangeQuerySchema } from "#shared/utils/schemas"
 
-export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[]> => {
-  await requirePermission({ weekend_meetings: ["list"] })(event)
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["list"] },
+  query: dateRangeQuerySchema,
+  handler: async (event, { query }): Promise<WeekendMeetingListItem[]> => {
+    const db = useDrizzle()
 
-  const db = useDrizzle()
-  const query = getQuery(event)
+    // Build where conditions
+    const whereConditions = [eq(meetingPrograms.type, "weekend")]
 
-  // Build where conditions
-  const whereConditions = [eq(meetingPrograms.type, "weekend")]
+    // Date range filter
+    if (query.startDate) {
+      whereConditions.push(gte(meetingPrograms.date, toYYYYMMDD(query.startDate)))
+    }
 
-  // Date range filter
-  if (query.startDate && typeof query.startDate === "string") {
-    whereConditions.push(gte(meetingPrograms.date, toYYYYMMDD(query.startDate)))
-  }
-
-  if (query.endDate && typeof query.endDate === "string") {
-    whereConditions.push(lte(meetingPrograms.date, toYYYYMMDD(query.endDate)))
-  }
+    if (query.endDate) {
+      whereConditions.push(lte(meetingPrograms.date, toYYYYMMDD(query.endDate)))
+    }
 
   // Fetch programs with parts and assignments
   const programs = await db.query.meetingPrograms.findMany({
@@ -118,4 +120,5 @@ export default defineEventHandler(async (event): Promise<WeekendMeetingListItem[
   }))
 
   return result
+  }
 })

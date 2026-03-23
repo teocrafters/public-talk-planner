@@ -1,5 +1,6 @@
 import { createError } from "h3"
 import { eq, and } from "drizzle-orm"
+import { z } from "zod"
 import {
   speakers,
   publishers,
@@ -7,24 +8,28 @@ import {
   scheduledPublicTalks,
   speakerTalks,
 } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
 import { updateScheduleSchema } from "#shared/utils/schemas"
+import { logAuditEvent } from "../../utils/audit-log"
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import type { AuditEventDetails } from "#shared/types/audit-events"
 import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+import { isPastDate } from "#shared/utils/date-yyyymmdd"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ weekend_meetings: ["schedule_public_talks"] })(event)
+// UUID params schema
+const uuidParamsSchema = (t: (key: string) => string) =>
+  z.object({
+    id: z.string().uuid(t("validation.invalidUuid")),
+  })
 
-  const scheduleId = getRouterParam(event, "id")
-  if (!scheduleId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad Request",
-      data: { message: "errors.scheduleIdRequired" },
-    })
-  }
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["schedule_public_talks"] },
+  params: uuidParamsSchema,
+  body: updateScheduleSchema,
+  handler: async (event, { params, body }) => {
+    const scheduleId = params.id
 
-  const body = await validateBody(event, updateScheduleSchema)
-
-  const db = useDrizzle()
+    const db = useDrizzle()
 
   const existingSchedule = await db.query.scheduledPublicTalks.findFirst({
     where: eq(scheduledPublicTalks.id, scheduleId),
@@ -235,4 +240,5 @@ export default defineEventHandler(async event => {
       talkTitle: updatedSchedule.customTalkTitle || updatedSchedule.talk?.title,
     },
   }
+  },
 })

@@ -1,13 +1,16 @@
 import { createError } from "h3"
 import { eq } from "drizzle-orm"
 import { publishers, user } from "../../database/schema"
-import { validateBody } from "../../utils/validation"
+import { defineEndpoint } from "../../utils/define-endpoint"
 import { createPublisherSchema } from "#shared/utils/schemas"
+import { logAuditEvent } from "../../utils/audit-log"
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import type { AuditEventDetails } from "#shared/types/audit-events"
 
-export default defineEventHandler(async event => {
-  await requirePermission({ publishers: ["create"] })(event)
-
-  const body = await validateBody(event, createPublisherSchema)
+export default defineEndpoint({
+  permissions: { publishers: ["create"] },
+  body: createPublisherSchema,
+  handler: async (event, { body }) => {
 
   const db = useDrizzle()
 
@@ -87,5 +90,6 @@ export default defineEventHandler(async event => {
   return {
     success: true,
     publisher: newPublisher,
+  }
   }
 })

@@ -9,17 +9,19 @@ import {
   scheduledPublicTalks,
   speakerTalks,
 } from "../../database/schema"
+import { defineEndpoint } from "../../utils/define-endpoint"
 import { createScheduleSchema } from "#shared/utils/schemas"
+import { logAuditEvent } from "../../utils/audit-log"
+import { AUDIT_EVENTS } from "#shared/utils/audit-events"
+import type { AuditEventDetails } from "#shared/types/audit-events"
 import { MEETING_PART_TYPES } from "#shared/constants/meetings"
 import { SPEAKER_SOURCE_TYPES } from "#shared/constants/speaker-sources"
+import { isSunday } from "#shared/utils/date-yyyymmdd"
 
-export default defineEventHandler(async event => {
-  await requirePermission({
-    weekend_meetings: ["schedule_public_talks", "schedule_public_talks"],
-  })(event)
-
-  const body = await validateBody(event, createScheduleSchema)
-
+export default defineEndpoint({
+  permissions: { weekend_meetings: ["schedule_public_talks"] },
+  body: createScheduleSchema,
+  handler: async (event, { body }) => {
   const db = useDrizzle()
 
   // body.date is already YYYYMMDD string (validated and transformed by Zod)
@@ -290,4 +292,5 @@ export default defineEventHandler(async event => {
       talkTitle: schedule.customTalkTitle || schedule.talk?.title,
     },
   }
+  },
 })
