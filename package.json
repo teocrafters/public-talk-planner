@@ -48,7 +48,7 @@
     "@playwright/test": "1.56.1",
     "@react-email/render": "2.0.5",
     "@types/node": "24.10.15",
-    "adm-zip": "0.5.16",
+    "adm-zip": "0.5.17",
     "drizzle-kit": "0.31.10",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.18",
