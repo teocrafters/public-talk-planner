@@ -168,7 +168,7 @@ export function defineEndpoint<TBody, TQuery, TParams, TResponse>(
     if (requiresAuth) {
       const authResult = await checkAuthentication(event)
 
-      if (!authResult?.session?.user) {
+      if (!authResult?.user) {
         await logAuditEvent(event, {
           action: AUDIT_EVENTS.UNAUTHORIZED_ACCESS,
           resourceType: "api",
@@ -187,7 +187,7 @@ export function defineEndpoint<TBody, TQuery, TParams, TResponse>(
       }
 
       event.context.session = authResult.session
-      event.context.user = authResult.session.user
+      event.context.user = authResult.user
 
       if (requiresPermissions && config.permissions) {
         const membership = await serverAuth().api.getActiveMember({

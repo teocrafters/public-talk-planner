@@ -53,6 +53,11 @@
       "commitMessagePrefix": "ci: ",
       "commitMessageAction": "update ",
       "automerge": true
+    },
+    {
+      "description": "Block @simplewebauthn upgrade past 13.1.2: 13.2+ pulls @peculiar/x509 → tsyringe, which needs a reflect-metadata polyfill that gets tree-shaken from the Cloudflare Workers bundle and breaks auth at runtime.",
+      "matchPackageNames": ["@simplewebauthn/server", "@simplewebauthn/browser"],
+      "enabled": false
     }
   ]
 }
