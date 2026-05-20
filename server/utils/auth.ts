@@ -1,9 +1,3 @@
-// Local polyfill copy: npm side-effect-only `import "reflect-metadata"` was being
-// tree-shaken from the Cloudflare Workers bundle, breaking tsyringe (better-auth
-// → @simplewebauthn/server → @peculiar/x509). Importing a named symbol prevents
-// the bundler from dropping the module.
-import { __reflectMetadataLoaded } from "../_polyfills/reflect-metadata.js"
-void __reflectMetadataLoaded
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { admin, organization } from "better-auth/plugins"
