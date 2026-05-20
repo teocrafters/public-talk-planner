@@ -114,94 +114,104 @@
     return `${action} - ${formatDatePL(props.date)}`
   })
 
+  const overrideTargetId = ref<string | null>(null)
+
+  function buildRequestBody(overrideValidation: boolean = formState.value.overrideValidation) {
+    return {
+      date: formState.value.date,
+      meetingProgramId: formState.value.meetingProgramId,
+      partId: formState.value.partId,
+      speakerSourceType: formState.value.speakerSourceType,
+      speakerId: formState.value.speakerId || undefined,
+      publisherId: formState.value.publisherId || undefined,
+      talkId: formState.value.talkId || undefined,
+      customTalkTitle: formState.value.customTalkTitle?.trim() || undefined,
+      overrideValidation,
+    }
+  }
+
+  async function submitSchedule(opts: { targetId?: string; overrideValidation?: boolean } = {}) {
+    const body = buildRequestBody(opts.overrideValidation)
+    const targetId =
+      opts.targetId ?? (isEditMode.value && props.schedule ? props.schedule.id : null)
+
+    if (targetId) {
+      await $fetch(`/api/schedules/${targetId}`, { method: "PATCH", body })
+      toast.add({ title: t("meetings.messages.scheduleUpdated"), color: "success" })
+    } else {
+      await $fetch("/api/schedules", { method: "POST", body })
+      toast.add({ title: t("meetings.messages.scheduleCreated"), color: "success" })
+    }
+
+    emit("saved")
+    isOpen.value = false
+  }
+
+  function handleScheduleError(
+    error: unknown,
+    opts: { allowConflictModal?: boolean; pendingOverrideTargetId?: string | null } = {}
+  ) {
+    const { allowConflictModal = true, pendingOverrideTargetId = null } = opts
+
+    if (allowConflictModal && isApiValidationError(error) && error.data.statusCode === 409) {
+      const conflictData = error.data.data as {
+        message: string
+        conflictingSchedule: ConflictingSchedule
+      }
+
+      if (conflictData.conflictingSchedule) {
+        conflictingSchedule.value = conflictData.conflictingSchedule
+        showConflictModal.value = true
+        return
+      }
+    }
+
+    if (
+      isApiValidationError(error) &&
+      error.data.data.message === "errors.speakerDoesntHaveTalk"
+    ) {
+      overrideTargetId.value = pendingOverrideTargetId
+      showOverrideWarning.value = true
+      return
+    }
+
+    if (isApiZodValidationError(error)) {
+      const firstError = error.data.data.errors[0]
+      toast.add({
+        title: t("common.error"),
+        description: t(firstError?.messageKey ?? "errors.unexpectedError"),
+        color: "error",
+      })
+      return
+    }
+
+    if (isApiValidationError(error)) {
+      toast.add({
+        title: t("common.error"),
+        description: t(error.data.data.message),
+        color: "error",
+      })
+      return
+    }
+
+    const errorMessage = error instanceof Error ? error.message : t("errors.unexpectedError")
+    toast.add({
+      title: t("common.error"),
+      description: errorMessage,
+      color: "error",
+    })
+  }
+
   const onSubmit = async () => {
     isSubmitting.value = true
 
     try {
-      const requestBody = {
-        date: formState.value.date,
-        meetingProgramId: formState.value.meetingProgramId,
-        partId: formState.value.partId,
-        speakerSourceType: formState.value.speakerSourceType,
-        speakerId: formState.value.speakerId || undefined,
-        publisherId: formState.value.publisherId || undefined,
-        talkId: formState.value.talkId || undefined,
-        customTalkTitle: formState.value.customTalkTitle?.trim() || undefined,
-        overrideValidation: formState.value.overrideValidation,
-      }
-
-      if (isEditMode.value && props.schedule) {
-        // Edit mode: PATCH request
-        await $fetch(`/api/schedules/${props.schedule.id}`, {
-          method: "PATCH",
-          body: requestBody,
-        })
-
-        toast.add({
-          title: t("meetings.messages.scheduleUpdated"),
-          color: "success",
-        })
-      } else {
-        // Create mode: POST request
-        await $fetch("/api/schedules", {
-          method: "POST",
-          body: requestBody,
-        })
-
-        toast.add({
-          title: t("meetings.messages.scheduleCreated"),
-          color: "success",
-        })
-      }
-
-      emit("saved")
-      isOpen.value = false
+      await submitSchedule()
     } catch (error: unknown) {
-      // Check if it's a 409 conflict error
-      if (isApiValidationError(error) && error.data.statusCode === 409) {
-        const conflictData = error.data.data as {
-          message: string
-          conflictingSchedule: ConflictingSchedule
-        }
-
-        if (conflictData.conflictingSchedule) {
-          conflictingSchedule.value = conflictData.conflictingSchedule
-          showConflictModal.value = true
-          return
-        }
-      }
-
-      // Check if it's a validation error (speaker doesn't have talk)
-      // This only applies to visiting speakers, not local publishers
-      if (
-        isApiValidationError(error) &&
-        error.data.data.message === "errors.speakerDoesntHaveTalk"
-      ) {
-        showOverrideWarning.value = true
-      } else if (isApiZodValidationError(error)) {
-        // Handle Zod validation errors (multiple field errors)
-        const firstError = error.data.data.errors[0]
-        toast.add({
-          title: t("common.error"),
-          description: t(firstError?.messageKey ?? "errors.unexpectedError"),
-          color: "error",
-        })
-      } else if (isApiValidationError(error)) {
-        // Handle business logic errors (single error message)
-        toast.add({
-          title: t("common.error"),
-          description: t(error.data.data.message),
-          color: "error",
-        })
-      } else {
-        const errorMessage = error instanceof Error ? error.message : t("errors.unexpectedError")
-
-        toast.add({
-          title: t("common.error"),
-          description: errorMessage,
-          color: "error",
-        })
-      }
+      handleScheduleError(error, {
+        pendingOverrideTargetId:
+          isEditMode.value && props.schedule ? props.schedule.id : null,
+      })
     } finally {
       isSubmitting.value = false
     }
@@ -211,92 +221,30 @@
     formState.value.overrideValidation = true
     showOverrideWarning.value = false
 
-    // Re-submit with override
+    const targetId = overrideTargetId.value ?? undefined
+
     try {
-      const requestBody = {
-        date: formState.value.date,
-        meetingProgramId: formState.value.meetingProgramId,
-        partId: formState.value.partId,
-        speakerSourceType: formState.value.speakerSourceType,
-        speakerId: formState.value.speakerId || undefined,
-        publisherId: formState.value.publisherId || undefined,
-        talkId: formState.value.talkId || undefined,
-        customTalkTitle: formState.value.customTalkTitle?.trim() || undefined,
-        overrideValidation: formState.value.overrideValidation,
-      }
-
-      if (isEditMode.value && props.schedule) {
-        // Edit mode: PATCH request
-        await $fetch(`/api/schedules/${props.schedule.id}`, {
-          method: "PATCH",
-          body: requestBody,
-        })
-
-        toast.add({
-          title: t("meetings.messages.scheduleUpdated"),
-          color: "success",
-        })
-      } else {
-        // Create mode: POST request
-        await $fetch("/api/schedules", {
-          method: "POST",
-          body: requestBody,
-        })
-
-        toast.add({
-          title: t("meetings.messages.scheduleCreated"),
-          color: "success",
-        })
-      }
-
-      emit("saved")
-      isOpen.value = false
+      await submitSchedule({ targetId, overrideValidation: true })
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t("errors.unexpectedError")
-
-      toast.add({
-        title: t("common.error"),
-        description: errorMessage,
-        color: "error",
+      handleScheduleError(error, {
+        allowConflictModal: false,
+        pendingOverrideTargetId: targetId ?? null,
       })
+    } finally {
+      overrideTargetId.value = null
     }
   }
 
   async function handleOverwriteSchedule() {
     if (!conflictingSchedule.value) return
+    const targetId = conflictingSchedule.value.id
 
     try {
-      const requestBody = {
-        date: formState.value.date,
-        meetingProgramId: formState.value.meetingProgramId,
-        partId: formState.value.partId,
-        speakerSourceType: formState.value.speakerSourceType,
-        speakerId: formState.value.speakerId || undefined,
-        publisherId: formState.value.publisherId || undefined,
-        talkId: formState.value.talkId || undefined,
-        customTalkTitle: formState.value.customTalkTitle?.trim() || undefined,
-        overrideValidation: formState.value.overrideValidation,
-      }
-
-      await $fetch(`/api/schedules/${conflictingSchedule.value.id}`, {
-        method: "PATCH",
-        body: requestBody,
-      })
-
-      toast.add({
-        title: t("meetings.messages.scheduleUpdated"),
-        color: "success",
-      })
-
-      emit("saved")
-      isOpen.value = false
+      await submitSchedule({ targetId })
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t("errors.unexpectedError")
-
-      toast.add({
-        title: t("common.error"),
-        description: errorMessage,
-        color: "error",
+      handleScheduleError(error, {
+        allowConflictModal: false,
+        pendingOverrideTargetId: targetId,
       })
     }
   }
