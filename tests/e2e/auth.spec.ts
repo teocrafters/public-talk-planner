@@ -34,7 +34,7 @@ test.describe("Authentication", () => {
     test.use({ storageState: ".auth/admin.json" })
 
     test("logout with admin", async ({ page }) => {
-      await page.goto("/user")
+      await page.goto("/")
 
       // Check if we're on mobile or desktop and handle logout accordingly
       const isMobile = await page.getByTestId("logout-button").isHidden()
