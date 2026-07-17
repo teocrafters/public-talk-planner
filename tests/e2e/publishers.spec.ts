@@ -29,9 +29,9 @@ test.describe("Publishers Management - Access Control", () => {
     // Attempt to navigate to publishers page
     await page.goto(PUBLISHERS_PAGE)
 
-    // Verify redirect to dashboard (access denied - middleware redirects to /, auth redirects to /user)
-    await page.waitForURL("http://localhost:3000/user")
-    expect(page.url()).toBe("http://localhost:3000/user")
+    // Verify redirect to dashboard (access denied - middleware redirects to /)
+    await page.waitForURL("http://localhost:3000/")
+    expect(page.url()).toBe("http://localhost:3000/")
 
     // Verify publishers page content is not visible
     await expect(page.getByTestId("add-publisher-button")).not.toBeVisible()
@@ -44,9 +44,9 @@ test.describe("Publishers Management - Access Control", () => {
     // Attempt to navigate to publishers page
     await page.goto(PUBLISHERS_PAGE)
 
-    // Verify redirect to dashboard (access denied - middleware redirects to /, auth redirects to /user)
-    await page.waitForURL("http://localhost:3000/user")
-    expect(page.url()).toBe("http://localhost:3000/user")
+    // Verify redirect to dashboard (access denied - middleware redirects to /)
+    await page.waitForURL("http://localhost:3000/")
+    expect(page.url()).toBe("http://localhost:3000/")
 
     // Verify publishers page content is not visible
     await expect(page.getByTestId("add-publisher-button")).not.toBeVisible()

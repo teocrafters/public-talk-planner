@@ -48,12 +48,16 @@ setup("Build and start server", async () => {
   console.log("Waiting for server...")
   await waitForServer("http://localhost:3000", 120000)
 
-  // 5. Run main seeder (handles all database seeding in correct order)
-  console.log("Running main database seeder...")
+  // 5. Run test-data seeder (creates @test.local accounts used by auth fixtures)
+  console.log("Running test-data seeder...")
   let seedAttempts = 0
   while (seedAttempts < 3) {
     try {
-      const seedResult = await x("curl", ["-X", "POST", "http://localhost:3000/_nitro/tasks/seed"])
+      const seedResult = await x("curl", [
+        "-X",
+        "POST",
+        "http://localhost:3000/_nitro/tasks/seed-test-data",
+      ])
       console.log("Main seeder response:", seedResult.stdout)
 
       // Check if the response contains an error
