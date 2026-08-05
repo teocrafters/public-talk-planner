@@ -95,57 +95,40 @@ export default defineEventHandler(async event => {
 - Operators: `eq`, `and`, `or`, `sql`, `gte`, `lte`, `desc`, `asc`
 - Tables: `tables.speakers`, `tables.meetings`, etc.
 
-### Cloudflare D1 Transaction Limitations
+### Transactions
 
-⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`,
-`SAVEPOINT`).
-
-**Why D1 is Different:**
-
-- D1 is a serverless SQLite database running in Cloudflare Workers
-- Traditional SQL transactions don't work in the Workers environment
-- Drizzle's `db.transaction()` uses SQL BEGIN which D1 will reject
-
-**Recommended Alternative:**
-
-1. **Use `db.batch()` for atomic operations** (D1-compatible approach)
-
-### Batch Operations Pattern (D1-Compatible)
+PostgreSQL supports real transactions, so multi-table writes use `db.transaction()`.
 
 ```typescript
-// Use batch() for operations affecting multiple tables on D1
 export default defineEventHandler(async event => {
   const db = useDrizzle()
 
-  // All operations execute atomically - if any fails, all are rolled back
-  await db.batch([
-    // Insert talk
-    db.insert(tables.talks).values({
-      id: crypto.randomUUID(),
-      title: "New Talk",
-      speakerId: speaker.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }),
+  await db.transaction(async tx => {
+    const [talk] = await tx
+      .insert(tables.talks)
+      .values({
+        title: "New Talk",
+        speakerId: speaker.id,
+      })
+      .returning()
 
-    // Create schedule entry (talkId must be known beforehand)
-    db.insert(tables.schedules).values({
-      id: crypto.randomUUID(),
-      talkId: talkId,
-      scheduledDate: dateTimestamp,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }),
-  ])
+    await tx.insert(tables.schedules).values({
+      talkId: talk.id,
+      scheduledDate: date,
+    })
+  })
 })
 ```
 
 **Key Points**:
 
-- USE `db.batch()` when updating multiple related records (D1 requirement)
-- ROLLBACK happens automatically on any error within batch
-- KEEP batches short and focused
-- MOVE dependent queries outside the batch (e.g., fetch data first)
+- USE `db.transaction()` when a write depends on another write, or when partial application would
+  leave the data inconsistent
+- READ inside the transaction when the write depends on the value read - a `SELECT` hoisted above
+  the transaction is not part of it
+- ROLLBACK happens automatically when the callback throws
+- KEEP transactions short; they hold a connection from the pool for their whole duration
+- NEVER use `db.batch()` - it is a D1 pseudo-transaction and is not part of this stack
 
 ### Migration Workflow (CRITICAL)
 
@@ -408,12 +391,15 @@ export default defineTask({
 
 ```typescript
 // server/utils/drizzle.ts
-import { drizzle } from "drizzle-orm/d1"
+import { drizzle } from "drizzle-orm/node-postgres"
+import { Pool } from "pg"
 export { sql, eq, and, or, gte, lte, desc, asc } from "drizzle-orm"
 import * as schema from "~/server/database/schema"
 
+const pool = new Pool({ connectionString: useRuntimeConfig().databaseUrl })
+
 export function useDrizzle() {
-  return drizzle(hubDatabase(), { schema })
+  return drizzle(pool, { schema })
 }
 
 export const tables = schema
