@@ -6,11 +6,11 @@ This file provides essential guidance to Claude Code when working with this repo
 
 **Tech Stack:**
 - Frontend: Nuxt 4 + Vue 3 + TypeScript + @nuxt/ui (Tailwind CSS)
-- Backend: Nitro server + Drizzle ORM + D1 Database
+- Backend: Nitro server + Drizzle ORM + PostgreSQL
 - Authentication: Better Auth
 - i18n: @nuxtjs/i18n (Polish primary)
 - Testing: Playwright E2E
-- Deployment: Cloudflare Workers + NuxtHub
+- Deployment: Docker on a Dokploy-managed VPS, behind Cloudflare
 
 **Directory Structure:**
 ```
