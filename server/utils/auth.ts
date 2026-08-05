@@ -12,6 +12,11 @@ import {
 import { AUTH_COOKIE_NAME } from "#shared/constants/cookies"
 import { member as memberTable } from "../database/auth-schema"
 
+// Pinned at the library's own defaults so an upgrade cannot move session lifetime silently.
+const SESSION_EXPIRES_IN = 60 * 60 * 24 * 7
+const SESSION_UPDATE_AGE = 60 * 60 * 24
+const SESSION_FRESH_AGE = 60 * 60 * 24
+
 let _auth: ReturnType<typeof getBetterAuth>
 
 export function serverAuth() {
@@ -52,18 +57,23 @@ function getBetterAuth() {
       passkey(),
     ],
     advanced: {
-      useSecureCookies: false,
+      // A Secure cookie is dropped by the browser over the plain HTTP the local stack
+      // serves, so this follows the environment rather than being pinned on.
+      useSecureCookies: isProduction(),
+      defaultCookieAttributes: {
+        sameSite: "lax",
+        httpOnly: true,
+      },
       cookies: {
         session_token: {
           name: AUTH_COOKIE_NAME,
-          attributes: {
-            secure: true,
-            httpOnly: true,
-          },
         },
       },
     },
     session: {
+      expiresIn: SESSION_EXPIRES_IN,
+      updateAge: SESSION_UPDATE_AGE,
+      freshAge: SESSION_FRESH_AGE,
       cookieCache: {
         enabled: true,
         maxAge: 300,

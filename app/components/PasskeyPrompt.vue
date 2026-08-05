@@ -50,27 +50,25 @@
 
   const show = ref(false)
   const loading = ref(false)
-
-  // Server-side passkey check with useState for SSR (used by PasskeyPrompt component)
-  const userHasPasskeys = useState("user-has-passkeys", () => false)
-
-  // Only check if user is authenticated
-  if (user.value) {
-    await callOnce(async () => {
-      try {
-        const passkeys = await client.passkey.listUserPasskeys()
-        userHasPasskeys.value = Array.isArray(passkeys.data) && passkeys.data.length > 0
-      } catch (error) {
-        console.warn("Server-side passkey check failed:", error)
-      }
-    })
-  }
+  const hasPasskeys = ref(false)
 
   // Check if WebAuthn is supported
   const isWebAuthnSupported = computed(() => {
     if (typeof window === "undefined") return false
     return !!(window.PublicKeyCredential && navigator.credentials?.create)
   })
+
+  const fetchHasPasskeys = async (): Promise<boolean> => {
+    if (!user.value) return false
+
+    try {
+      const passkeys = await client.passkey.listUserPasskeys()
+      return Array.isArray(passkeys.data) && passkeys.data.length > 0
+    } catch (error) {
+      console.warn("Passkey check failed:", error)
+      return false
+    }
+  }
 
   // Complete decision logic for showing prompt
   const shouldShowPrompt = async (): Promise<boolean> => {
@@ -94,7 +92,10 @@
 
   // Initialize visibility with comprehensive async logic
   onMounted(async () => {
-    if (!isWebAuthnSupported.value || !userHasPasskeys.value) return
+    if (!isWebAuthnSupported.value) return
+
+    hasPasskeys.value = await fetchHasPasskeys()
+    if (!hasPasskeys.value) return
 
     try {
       const shouldShow = await shouldShowPrompt()
@@ -135,9 +136,7 @@
       // Mark as completed (updates both localStorage and server-side state)
       markPasskeySetup()
 
-      // Update useState to reflect new passkey
-      const ssrPasskeys = useState<boolean | null>("user-has-passkeys")
-      ssrPasskeys.value = true
+      hasPasskeys.value = true
     } catch (error) {
       console.error("Passkey setup failed:", error)
 
