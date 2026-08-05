@@ -46,3 +46,5 @@ requirements/
 
 wrangler.prod.jsonc
 wrangler.stage.jsonc
+
+CLAUDE.local.md
