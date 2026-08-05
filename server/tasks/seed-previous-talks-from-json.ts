@@ -35,13 +35,13 @@ export default defineTask({
     description: "Seed previous talks from both JSON files (with and without speaker info)",
   },
   async run() {
-    console.log("Starting previous talks seeding from JSON...")
+    logger.info("Starting previous talks seeding from JSON...")
 
     try {
       const db = useDrizzle()
 
       // Step 1: Ensure "Nieznany zbor" exists
-      console.log("Ensuring 'Nieznany zbor' exists...")
+      logger.info("Ensuring 'Nieznany zbor' exists...")
       let unknownCongregation = await db.query.organization.findFirst({
         where: eq(organization.slug, UNKNOWN_CONGREGATION_SLUG),
       })
@@ -59,13 +59,13 @@ export default defineTask({
           })
           .returning()
         unknownCongregation = newCongregation
-        console.log("✅ Created 'Nieznany zbor'")
+        logger.info("✅ Created 'Nieznany zbor'")
       } else {
-        console.log("✅ 'Nieznany zbor' already exists")
+        logger.info("✅ 'Nieznany zbor' already exists")
       }
 
       // Step 2: Ensure "Nieznany mówca" exists
-      console.log("Ensuring 'Nieznany mówca' exists...")
+      logger.info("Ensuring 'Nieznany mówca' exists...")
       let unknownSpeaker = await db.query.speakers.findFirst({
         where: eq(speakers.id, UNKNOWN_SPEAKER_ID),
       })
@@ -86,9 +86,9 @@ export default defineTask({
           })
           .returning()
         unknownSpeaker = newSpeaker
-        console.log("✅ Created 'Nieznany mówca'")
+        logger.info("✅ Created 'Nieznany mówca'")
       } else {
-        console.log("✅ 'Nieznany mówca' already exists")
+        logger.info("✅ 'Nieznany mówca' already exists")
       }
 
       // Step 3: Read and validate both JSON files
@@ -106,10 +106,10 @@ export default defineTask({
         const previousTalksData = await readFile(previousTalksPath, "utf-8")
         const parsedPreviousTalks = PreviousTalksArraySchema.parse(JSON.parse(previousTalksData))
         previousTalks = [...previousTalks, ...parsedPreviousTalks]
-        console.log(`✅ Found ${parsedPreviousTalks.length} talks in previous-talks.json`)
+        logger.info(`✅ Found ${parsedPreviousTalks.length} talks in previous-talks.json`)
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-          console.log("⏭️  previous-talks.json not found, skipping")
+          logger.info("⏭️  previous-talks.json not found, skipping")
         } else {
           throw error
         }
@@ -129,18 +129,18 @@ export default defineTask({
           JSON.parse(previousTalksWithSpeakersData)
         )
         previousTalks = [...previousTalks, ...parsedPreviousTalksWithSpeakers]
-        console.log(
+        logger.info(
           `✅ Found ${parsedPreviousTalksWithSpeakers.length} talks in previous-talks-with-speakers.json`
         )
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-          console.log("⏭️  previous-talks-with-speakers.json not found, skipping")
+          logger.info("⏭️  previous-talks-with-speakers.json not found, skipping")
         } else {
           throw error
         }
       }
 
-      console.log(`Total talks to process: ${previousTalks.length}`)
+      logger.info(`Total talks to process: ${previousTalks.length}`)
 
       // Step 4: Process each talk and its dates
       let scheduledCount = 0
@@ -156,7 +156,7 @@ export default defineTask({
         })
 
         if (!talk) {
-          console.warn(`⚠️  Talk #${talkNo} not found in database, skipping`)
+          logger.warn(`⚠️  Talk #${talkNo} not found in database, skipping`)
           notFoundCount++
           continue
         }
@@ -166,7 +166,7 @@ export default defineTask({
 
         // Validate date parsing
         if (!dateDayjs.isValid()) {
-          console.warn(`⚠️  Invalid date format: ${dateStr}, skipping`)
+          logger.warn(`⚠️  Invalid date format: ${dateStr}, skipping`)
           invalidDateCount++
           continue
         }
@@ -202,7 +202,7 @@ export default defineTask({
           })
 
           if (!speaker) {
-            console.warn(
+            logger.warn(
               `⚠️  Speaker not found for talk #${talkNo} on ${dateStr} (speaker ID: ${speakerId}), using unknown speaker`
             )
             finalSpeakerId = UNKNOWN_SPEAKER_ID
@@ -225,7 +225,7 @@ export default defineTask({
           })
 
           if (existingTalk) {
-            console.log(`⏭️  Talk #${talkNo} on ${dateStr} already scheduled`)
+            logger.info(`⏭️  Talk #${talkNo} on ${dateStr} already scheduled`)
             skippedCount++
             continue
           }
@@ -303,23 +303,23 @@ export default defineTask({
 
         // Log progress every 50 talks
         if (scheduledCount % 50 === 0) {
-          console.log(`✅ Scheduled ${scheduledCount} talks...`)
+          logger.info(`✅ Scheduled ${scheduledCount} talks...`)
         }
       }
 
-      console.log("\n" + "=".repeat(60))
-      console.log("✅ Previous talks seeding completed")
-      console.log("=".repeat(60))
-      console.log(`   - Scheduled:         ${scheduledCount}`)
-      console.log(`   - Skipped:           ${skippedCount}`)
-      console.log(`   - Not found:         ${notFoundCount}`)
+      logger.info("\n" + "=".repeat(60))
+      logger.info("✅ Previous talks seeding completed")
+      logger.info("=".repeat(60))
+      logger.info(`   - Scheduled:         ${scheduledCount}`)
+      logger.info(`   - Skipped:           ${skippedCount}`)
+      logger.info(`   - Not found:         ${notFoundCount}`)
       if (invalidDateCount > 0) {
-        console.log(`   - Invalid dates:     ${invalidDateCount}`)
+        logger.info(`   - Invalid dates:     ${invalidDateCount}`)
       }
       if (missingSpeakerCount > 0) {
-        console.log(`   - Missing speakers:  ${missingSpeakerCount}`)
+        logger.info(`   - Missing speakers:  ${missingSpeakerCount}`)
       }
-      console.log("=".repeat(60))
+      logger.info("=".repeat(60))
 
       return {
         result: "success",
@@ -332,20 +332,16 @@ export default defineTask({
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         const issues = error.issues || []
-        console.error("Validation errors:", JSON.stringify(issues, null, 2))
+        logger.error("Validation errors", { issues })
         throw new Error(`Zod validation failed: ${issues.length} errors found`)
       }
 
       if (error instanceof SyntaxError) {
-        console.error("JSON parsing failed:", error.message)
+        logger.error("JSON parsing failed", { error })
         throw new Error("Invalid JSON in previous-talks JSON files")
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },

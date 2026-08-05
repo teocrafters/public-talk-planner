@@ -36,17 +36,17 @@ export default defineTask({
     description: "Seed publishers (Żychlin congregation members) from JSON file",
   },
   async run() {
-    console.log("Starting publishers seeding from JSON...")
+    logger.info("Starting publishers seeding from JSON...")
 
     try {
       const dataPath = join(process.cwd(), "server", "tasks", "seed", "publishers.json")
       const data = await readFile(dataPath, "utf-8")
       const publishersList = JSON.parse(data)
 
-      console.log("Validating publisher data with Zod...")
-      console.log(`Found ${publishersList.length} publishers in JSON file`)
+      logger.info("Validating publisher data with Zod...")
+      logger.info(`Found ${publishersList.length} publishers in JSON file`)
       const validatedPublishers = PublishersArraySchema.parse(publishersList)
-      console.log(`Validation passed for ${validatedPublishers.length} publishers`)
+      logger.info(`Validation passed for ${validatedPublishers.length} publishers`)
 
       const db = useDrizzle()
 
@@ -63,7 +63,7 @@ export default defineTask({
         )
       }
 
-      console.log(`✅ Found Żychlin congregation (ID: ${zychlinCongregation.id})`)
+      logger.info(`✅ Found Żychlin congregation (ID: ${zychlinCongregation.id})`)
 
       let seededCount = 0
       let skippedCount = 0
@@ -95,21 +95,21 @@ export default defineTask({
             createdAt: new Date(publisher.created_at * 1000),
             updatedAt: new Date(publisher.updated_at * 1000),
           })
-          console.log(`✅ Seeded publisher: ${publisher.first_name} ${publisher.last_name}`)
+          logger.info(`✅ Seeded publisher: ${publisher.first_name} ${publisher.last_name}`)
           seededCount++
         } else {
-          console.log(
+          logger.info(
             `⏭️  Publisher already exists: ${publisher.first_name} ${publisher.last_name}`
           )
           skippedCount++
         }
       }
 
-      console.log("=".repeat(60))
-      console.log(`✅ Publishers seeding completed`)
-      console.log(`   - Seeded:  ${seededCount}`)
-      console.log(`   - Skipped: ${skippedCount}`)
-      console.log("=".repeat(60))
+      logger.info("=".repeat(60))
+      logger.info(`✅ Publishers seeding completed`)
+      logger.info(`   - Seeded:  ${seededCount}`)
+      logger.info(`   - Skipped: ${skippedCount}`)
+      logger.info("=".repeat(60))
 
       return {
         result: "success",
@@ -119,25 +119,21 @@ export default defineTask({
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         const issues = error.issues || []
-        console.error("Validation errors:", JSON.stringify(issues, null, 2))
+        logger.error("Validation errors", { issues })
         throw new Error(`Zod validation failed: ${issues.length} errors found`)
       }
 
       if (error instanceof SyntaxError) {
-        console.error("JSON parsing failed:", error.message)
+        logger.error("JSON parsing failed", { error })
         throw new Error("Invalid JSON in publishers.json file")
       }
 
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("File not found: server/tasks/seed/publishers.json")
+        logger.error("File not found: server/tasks/seed/publishers.json")
         throw new Error("publishers.json not found in server/tasks/seed/ directory")
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },

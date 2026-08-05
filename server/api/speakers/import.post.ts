@@ -434,7 +434,7 @@ Talk numbers should be strings (e.g., ["12", "45", "78"]).`,
       },
     })
   } catch (error) {
-    console.error("File processing error:", error)
+    logger.error("Import file processing failed", { jobId, mimeType, error })
     updateJob(jobId, {
       status: "failed",
       error: error instanceof Error ? error.message : "Unknown error",

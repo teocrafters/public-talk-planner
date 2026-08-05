@@ -280,7 +280,7 @@ export function defineEndpoint<TBody, TQuery, TParams, TResponse>(
       try {
         result = config.response.parse(result) as typeof result
       } catch (error) {
-        console.error("Response validation failed:", {
+        logger.error("Response validation failed", {
           error,
           path: event.path,
           method: event.method,

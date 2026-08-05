@@ -13,64 +13,64 @@ export default defineTask({
     description: "Run all database seeders for real data in correct order",
   },
   async run(event) {
-    console.log("Starting complete database seeding (real data)...")
-    console.log(`Environment: ${getNodeEnv()}`)
-    console.log("-".repeat(60))
+    logger.info("Starting complete database seeding (real data)...")
+    logger.info(`Environment: ${getNodeEnv()}`)
+    logger.info("-".repeat(60))
 
     const results: Record<string, string> = {}
 
     try {
       // 1. Seed congregations (organizations)
-      console.log("\n[1/8] Seeding congregations...")
+      logger.info("\n[1/8] Seeding congregations...")
       await seedCongregations.run(event)
       results.congregations = "success"
-      console.log("✅ Congregations seeded")
+      logger.info("✅ Congregations seeded")
 
       // 2. Seed public talks
-      console.log("\n[2/8] Seeding public talks...")
+      logger.info("\n[2/8] Seeding public talks...")
       await seedPublicTalks.run(event)
       results.publicTalks = "success"
-      console.log("✅ Public talks seeded")
+      logger.info("✅ Public talks seeded")
 
       // 3. Seed publishers (Żychlin congregation members)
-      console.log("\n[3/8] Seeding publishers...")
+      logger.info("\n[3/8] Seeding publishers...")
       await seedPublishers.run(event)
       results.publishers = "success"
-      console.log("✅ Publishers seeded")
+      logger.info("✅ Publishers seeded")
 
       // 4. Seed coordinator accounts (links to publisher profiles)
-      console.log("\n[4/8] Seeding coordinator accounts...")
+      logger.info("\n[4/8] Seeding coordinator accounts...")
       await seedCoordinatorAccounts.run(event)
       results.coordinatorAccounts = "success"
-      console.log("✅ Coordinator accounts seeded")
+      logger.info("✅ Coordinator accounts seeded")
 
       // 5. Seed speakers (visiting speakers from other congregations)
-      console.log("\n[5/8] Seeding speakers...")
+      logger.info("\n[5/8] Seeding speakers...")
       await seedSpeakers.run(event)
       results.speakers = "success"
-      console.log("✅ Speakers seeded")
+      logger.info("✅ Speakers seeded")
 
       // 6. Seed speaker-talks relationships
-      console.log("\n[6/8] Seeding speaker-talks...")
+      logger.info("\n[6/8] Seeding speaker-talks...")
       await seedSpeakerTalks.run(event)
       results.speakerTalks = "success"
-      console.log("✅ Speaker-talks seeded")
+      logger.info("✅ Speaker-talks seeded")
 
       // 7. Seed previous talks
-      console.log("\n[7/8] Seeding previous talks...")
+      logger.info("\n[7/8] Seeding previous talks...")
       await seedPreviousTalks.run(event)
       results.previousTalks = "success"
-      console.log("✅ Previous talks seeded")
+      logger.info("✅ Previous talks seeded")
 
       // 8. Seed scheduled meetings
-      console.log("\n[8/8] Seeding scheduled meetings...")
+      logger.info("\n[8/8] Seeding scheduled meetings...")
       await seedScheduledMeetings.run(event)
       results.scheduledMeetings = "success"
-      console.log("✅ Scheduled meetings seeded")
+      logger.info("✅ Scheduled meetings seeded")
 
-      console.log("\n" + "-".repeat(60))
-      console.log("✅ Complete database seeding (real data) finished successfully")
-      console.log("=".repeat(60))
+      logger.info("\n" + "-".repeat(60))
+      logger.info("✅ Complete database seeding (real data) finished successfully")
+      logger.info("=".repeat(60))
 
       return {
         result: "success",
@@ -78,14 +78,9 @@ export default defineTask({
         seeders: results,
       }
     } catch (error: unknown) {
-      console.error("\n" + "=".repeat(60))
-      console.error("❌ Database seeding failed")
-      console.error("=".repeat(60))
-
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("\n" + "=".repeat(60))
+      logger.error("❌ Database seeding failed", { error })
+      logger.error("=".repeat(60))
 
       return {
         result: "error",

@@ -19,17 +19,17 @@ export default defineTask({
     description: "Seed speaker-to-talk relationships from JSON file",
   },
   async run() {
-    console.log("Starting speaker-talks seeding from JSON...")
+    logger.info("Starting speaker-talks seeding from JSON...")
 
     try {
       const dataPath = join(process.cwd(), "server", "tasks", "seed", "speaker_talks.json")
       const data = await readFile(dataPath, "utf-8")
       const speakerTalksList = JSON.parse(data)
 
-      console.log("Validating speaker-talk data with Zod...")
-      console.log(`Found ${speakerTalksList.length} speaker-talk relationships in JSON file`)
+      logger.info("Validating speaker-talk data with Zod...")
+      logger.info(`Found ${speakerTalksList.length} speaker-talk relationships in JSON file`)
       const validatedSpeakerTalks = SpeakerTalksArraySchema.parse(speakerTalksList)
-      console.log(`Validation passed for ${validatedSpeakerTalks.length} relationships`)
+      logger.info(`Validation passed for ${validatedSpeakerTalks.length} relationships`)
 
       const db = useDrizzle()
 
@@ -87,26 +87,26 @@ export default defineTask({
 
           // Log every 100th relationship to avoid spam
           if (seededCount % 100 === 0) {
-            console.log(`✅ Seeded ${seededCount} relationships...`)
+            logger.info(`✅ Seeded ${seededCount} relationships...`)
           }
         } else {
           skippedCount++
         }
       }
 
-      console.log("=".repeat(60))
-      console.log(`✅ Speaker-talks seeding completed`)
-      console.log(`   - Seeded:  ${seededCount}`)
-      console.log(`   - Skipped: ${skippedCount}`)
+      logger.info("=".repeat(60))
+      logger.info(`✅ Speaker-talks seeding completed`)
+      logger.info(`   - Seeded:  ${seededCount}`)
+      logger.info(`   - Skipped: ${skippedCount}`)
       if (missingSpeakers.size > 0) {
-        console.log(`   - Missing speakers: ${missingSpeakers.size}`)
-        console.log(`     Sample IDs: ${Array.from(missingSpeakers).slice(0, 5).join(", ")}`)
+        logger.info(`   - Missing speakers: ${missingSpeakers.size}`)
+        logger.info(`     Sample IDs: ${Array.from(missingSpeakers).slice(0, 5).join(", ")}`)
       }
       if (missingTalks.size > 0) {
-        console.log(`   - Missing talks: ${missingTalks.size}`)
-        console.log(`     Sample IDs: ${Array.from(missingTalks).slice(0, 5).join(", ")}`)
+        logger.info(`   - Missing talks: ${missingTalks.size}`)
+        logger.info(`     Sample IDs: ${Array.from(missingTalks).slice(0, 5).join(", ")}`)
       }
-      console.log("=".repeat(60))
+      logger.info("=".repeat(60))
 
       return {
         result: missingSpeakers.size > 0 || missingTalks.size > 0 ? "partial_success" : "success",
@@ -118,25 +118,21 @@ export default defineTask({
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         const issues = error.issues || []
-        console.error("Validation errors:", JSON.stringify(issues, null, 2))
+        logger.error("Validation errors", { issues })
         throw new Error(`Zod validation failed: ${issues.length} errors found`)
       }
 
       if (error instanceof SyntaxError) {
-        console.error("JSON parsing failed:", error.message)
+        logger.error("JSON parsing failed", { error })
         throw new Error("Invalid JSON in speaker_talks.json file")
       }
 
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("File not found: server/tasks/seed/speaker_talks.json")
+        logger.error("File not found: server/tasks/seed/speaker_talks.json")
         throw new Error("speaker_talks.json not found in server/tasks/seed/ directory")
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },

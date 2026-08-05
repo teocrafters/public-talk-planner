@@ -11,52 +11,52 @@ export default defineTask({
     description: "Run all database seeders for test data in correct order",
   },
   async run(event) {
-    console.log("Starting complete database seeding (test data)...")
-    console.log(`Environment: ${getNodeEnv()}`)
-    console.log("=".repeat(60))
+    logger.info("Starting complete database seeding (test data)...")
+    logger.info(`Environment: ${getNodeEnv()}`)
+    logger.info("=".repeat(60))
 
     const results: Record<string, string> = {}
 
     try {
       // 1. Seed congregations (organizations)
-      console.log("\n[1/5] Seeding congregations...")
+      logger.info("\n[1/5] Seeding congregations...")
       await seedCongregations.run(event)
       results.congregations = "success"
-      console.log("✅ Congregations seeded")
+      logger.info("✅ Congregations seeded")
 
       // 2. Seed test accounts (users)
-      console.log("\n[2/5] Seeding test accounts...")
+      logger.info("\n[2/5] Seeding test accounts...")
       await seedTestAccounts.run(event)
       results.testAccounts = "success"
-      console.log("✅ Test accounts seeded")
+      logger.info("✅ Test accounts seeded")
 
       // 3. Seed public talks (shared seeder)
-      console.log("\n[3/5] Seeding public talks...")
+      logger.info("\n[3/5] Seeding public talks...")
       await seedPublicTalks.run(event)
       results.publicTalks = "success"
-      console.log("✅ Public talks seeded")
+      logger.info("✅ Public talks seeded")
 
       // 4. Seed speakers
-      console.log("\n[4/5] Seeding speakers...")
+      logger.info("\n[4/5] Seeding speakers...")
       await seedSpeakers.run(event)
       results.speakers = "success"
-      console.log("✅ Speakers seeded")
+      logger.info("✅ Speakers seeded")
 
       // 5. Seed weekend meetings
-      console.log("\n[5/5] Seeding weekend meetings...")
+      logger.info("\n[5/5] Seeding weekend meetings...")
       await seedWeekendMeetings.run(event)
       results.weekendMeetings = "success"
-      console.log("✅ Weekend meetings seeded")
+      logger.info("✅ Weekend meetings seeded")
 
       // 6. Seed previous talks
-      console.log("\n[6/5] Seeding previous talks...")
+      logger.info("\n[6/5] Seeding previous talks...")
       await seedPreviousTalks.run(event)
       results.previousTalks = "success"
-      console.log("✅ Previous talks seeded")
+      logger.info("✅ Previous talks seeded")
 
-      console.log("\n" + "=".repeat(60))
-      console.log("✅ Complete database seeding (test data) finished successfully")
-      console.log("=".repeat(60))
+      logger.info("\n" + "=".repeat(60))
+      logger.info("✅ Complete database seeding (test data) finished successfully")
+      logger.info("=".repeat(60))
 
       return {
         result: "success",
@@ -64,14 +64,9 @@ export default defineTask({
         seeders: results,
       }
     } catch (error: unknown) {
-      console.error("\n" + "=".repeat(60))
-      console.error("❌ Database seeding failed")
-      console.error("=".repeat(60))
-
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("\n" + "=".repeat(60))
+      logger.error("❌ Database seeding failed", { error })
+      logger.error("=".repeat(60))
 
       return {
         result: "error",
