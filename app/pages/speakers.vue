@@ -14,7 +14,7 @@
     updatedAt: Date
     lastTalkDate: number | null
     talks: Array<{
-      id: number
+      id: string
       no: string
       title: string
     }>

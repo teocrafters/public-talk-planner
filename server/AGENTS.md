@@ -1,13 +1,13 @@
 # Backend Development Guidelines (Nitro + Nuxt 4)
 
-Guidelines for developing the backend API using Nitro, Drizzle ORM, and Cloudflare D1 database.
+Guidelines for developing the backend API using Nitro, Drizzle ORM, and PostgreSQL.
 
 ## Core Principles
 
-- **Serverless-first** - Cloudflare Workers with edge computing
+- **Long-lived Node process** - a container behind Dokploy, holding a PostgreSQL connection pool
 - **Type-safe API routes** - Drizzle ORM with TypeScript
 - **Validation at boundaries** - Zod schemas for all request validation
-- **Batch operation safety for D1** - Use db.batch() for related operations on D1
+- **Real transactions** - use db.transaction() for related writes
 - **Security-first** - Input validation, SQL injection prevention, proper error handling
 
 ## Project Structure
@@ -43,18 +43,18 @@ server/
 
 ```typescript
 // server/database/schema.ts
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
+import { pgTable, text, uuid, boolean, timestamp } from "drizzle-orm/pg-core"
 
-export const speakers = sqliteTable("speakers", {
-  id: text("id").primaryKey(),
+export const speakers = pgTable("speakers", {
+  id: uuid("id").primaryKey().defaultRandom(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email"),
   phone: text("phone"),
   congregation: text("congregation"),
-  isArchived: integer("is_archived", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  isArchived: boolean("is_archived").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 })
 
 // Export types for use in application
@@ -66,9 +66,9 @@ export type NewSpeaker = typeof speakers.$inferInsert
 
 - Use descriptive table and column names
 - ALWAYS include `createdAt` and `updatedAt` timestamps
-- Use `mode: "timestamp"` for datetime fields
-- Use `mode: "boolean"` for boolean fields (SQLite compatibility)
-- Store custom dates as unix timestamps (integer, seconds)
+- Use `uuid(...)` for primary keys; the database never hands out integer ids
+- Use `timestamp(..., { withTimezone: true })` for datetime fields and `boolean(...)` for flags
+- Store calendar-only dates with `date(...)`, not a timestamp
 - Export TypeScript types using `$inferSelect` and `$inferInsert`
 
 ### Database Access
@@ -151,7 +151,7 @@ export default defineEventHandler(async event => {
 These hooks actively enforce backend best practices:
 
 **BLOCK Operations:**
-- **database-safety-bash** - Blocks manual database commands (sqlite3, pnpm db:generate)
+- **database-safety-bash** - Blocks manual database commands (psql, pnpm db:generate)
 - **database-safety-files** - Blocks manual migration file edits
 - **git-safety** - Blocks force push to main/master branches
 
@@ -436,7 +436,7 @@ const speakers = await db
 
 ```typescript
 // WRONG: Manual SQL execution
-sqlite3 db.sqlite < migrations/0001_migration.sql
+psql "$NUXT_DATABASE_URL" -f migrations/0001_migration.sql
 
 // WRONG: Running db:generate automatically
 await $`pnpm db:generate`
@@ -500,4 +500,4 @@ Use these skills during backend development:
 - Drizzle ORM: Queries, schema definition, migrations
 - Nitro: Server engine, API routes, event handlers
 - Nuxt 4: Server utilities, composables
-- Cloudflare D1: Database platform, Workers integration
+- PostgreSQL: SQL reference, types, indexes

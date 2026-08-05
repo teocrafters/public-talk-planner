@@ -261,9 +261,9 @@ interface CreateProgramOptions {
     id: string
     firstName: string
     lastName: string
-    speakerTalks?: Array<{ talkId: number }>
+    speakerTalks?: Array<{ talkId: string }>
   }>
-  publicTalks: Array<{ id: number; title: string }>
+  publicTalks: Array<{ id: string; title: string }>
   preAssignedChairman?: typeof publishers.$inferSelect
   preAssignedReader?: typeof publishers.$inferSelect
   preAssignedPrayer?: typeof publishers.$inferSelect

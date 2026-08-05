@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
 import { eq, and } from "drizzle-orm"
-import { speakerTalks, speakers, publicTalks } from "../database/schema"
+import { speakerTalks, speakers } from "../database/schema"
 
 const SpeakerTalkSchema = z.object({
   id: z.number().int().positive().optional(), // Ignore id from JSON, let DB auto-increment
@@ -32,6 +32,7 @@ export default defineTask({
       logger.info(`Validation passed for ${validatedSpeakerTalks.length} relationships`)
 
       const db = useDrizzle()
+      const talkIdsByLegacyId = await loadTalkIdsByLegacyId()
 
       let seededCount = 0
       let skippedCount = 0
@@ -53,13 +54,9 @@ export default defineTask({
         }
 
         // Verify talk exists
-        const talk = await db
-          .select()
-          .from(publicTalks)
-          .where(eq(publicTalks.id, speakerTalk.talk_id))
-          .then(rows => rows[0])
+        const talkId = talkIdsByLegacyId.get(speakerTalk.talk_id)
 
-        if (!talk) {
+        if (!talkId) {
           missingTalks.add(speakerTalk.talk_id)
           skippedCount++
           continue
@@ -72,7 +69,7 @@ export default defineTask({
           .where(
             and(
               eq(speakerTalks.speakerId, speakerTalk.speaker_id),
-              eq(speakerTalks.talkId, speakerTalk.talk_id)
+              eq(speakerTalks.talkId, talkId)
             )
           )
           .then(rows => rows[0])
@@ -80,7 +77,7 @@ export default defineTask({
         if (!existing) {
           await db.insert(speakerTalks).values({
             speakerId: speakerTalk.speaker_id,
-            talkId: speakerTalk.talk_id,
+            talkId,
             createdAt: new Date(speakerTalk.created_at * 1000),
           })
           seededCount++

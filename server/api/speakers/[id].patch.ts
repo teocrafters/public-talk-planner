@@ -107,7 +107,7 @@ export default defineEndpoint({
     await db.delete(speakerTalks).where(eq(speakerTalks.speakerId, speakerId))
 
     if (body.talkIds.length > 0) {
-      const talkAssignments = body.talkIds.map((talkId: number) => ({
+      const talkAssignments = body.talkIds.map((talkId: string) => ({
         speakerId,
         talkId,
         createdAt: new Date(),

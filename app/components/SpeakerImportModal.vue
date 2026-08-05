@@ -12,7 +12,7 @@
     talkNumbers: string[]
     congregation?: string
     congregationId?: string | null
-    talkIds?: number[]
+    talkIds?: string[]
     errors?: string[]
     selected: boolean
 
@@ -26,16 +26,16 @@
       phone: string
       congregationId: string
       congregationName: string
-      talkIds: number[]
+      talkIds: string[]
     }
 
     // Diff information
     diff?: {
       phone?: { old: string; new: string }
       talks?: {
-        added: number[]
-        removed: number[]
-        unchanged: number[]
+        added: string[]
+        removed: string[]
+        unchanged: string[]
       }
       congregation?: {
         oldId: string
@@ -87,7 +87,7 @@
   const { data: congregations } =
     await useFetch<{ id: string; name: string }[]>("/api/congregations")
   const { data: talks } =
-    await useFetch<{ id: number; no: string; title: string }[]>("/api/public-talks")
+    await useFetch<{ id: string; no: string; title: string }[]>("/api/public-talks")
 
   const congregationItems = computed(() => {
     return (
@@ -232,7 +232,7 @@
   }
 
   function getTalkBadgeColor(
-    talkId: number,
+    talkId: string,
     speaker: ExtractedSpeaker,
     row: "old" | "new"
   ): "error" | "info" | "primary" | "secondary" | "success" | "warning" | "neutral" {
@@ -251,19 +251,19 @@
     return "neutral"
   }
 
-  function getExistingTalkIds(speaker: ExtractedSpeaker): number[] {
+  function getExistingTalkIds(speaker: ExtractedSpeaker): string[] {
     if (!speaker.existingSpeaker?.talkIds) return []
     return speaker.existingSpeaker.talkIds
   }
 
-  function getTalkNumber(talkId: number): string {
+  function getTalkNumber(talkId: string): string {
     const talk = talks.value?.find(t => t.id === talkId)
-    return talk?.no || String(talkId)
+    return talk?.no || talkId
   }
 
-  function getTalkId(talkNo: string): number {
+  function getTalkId(talkNo: string): string {
     const talk = talks.value?.find(t => t.no === talkNo)
-    return talk?.id || 0
+    return talk?.id || ""
   }
 
   function handleTreatAsNew(speaker: ExtractedSpeaker) {
@@ -317,7 +317,7 @@
         phone: string
         congregationId: string
         congregation: { name: string }
-        talks: Array<{ id: number }>
+        talks: Array<{ id: string }>
       }>(`/api/speakers/${selectedSpeakerId}`)
 
       // Update speaker with manual match
@@ -405,7 +405,7 @@
         lastName: s.lastName,
         phone: s.phone,
         congregationId: s.congregationId || globalCongregationId.value!,
-        talkIds: s.talkNumbers.map(no => getTalkId(no)).filter(id => id !== 0),
+        talkIds: s.talkNumbers.map(no => getTalkId(no)).filter(id => id !== ""),
         operation: determineOperation(s),
         existingSpeakerId: s.matchedSpeakerId,
         diff: s.diff,

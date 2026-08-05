@@ -23,7 +23,7 @@ export const extractedSpeakerSchema = (t: (key: string) => string) => {
 
     talkNumbers: z.array(z.string()).optional(),
 
-    talkIds: z.array(z.number().int().positive()).optional(),
+    talkIds: z.array(z.string().uuid()).optional(),
   })
 }
 

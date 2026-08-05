@@ -13,18 +13,18 @@ export type AuditEventType = (typeof AUDIT_EVENTS)[keyof typeof AUDIT_EVENTS]
 
 export interface AuditEventDetails {
   [AUDIT_EVENTS.TALK_STATUS_CHANGED]: {
-    talkId: number
+    talkId: string
     talkNo: string
     oldStatus: string | null
     newStatus: string | null
   }
   [AUDIT_EVENTS.TALK_EDITED]: {
-    talkId: number
+    talkId: string
     talkNo: string
     updates: TalkUpdateInput
   }
   [AUDIT_EVENTS.TALK_CREATED]: {
-    talkId: number
+    talkId: string
     talkNo: string
     title: string
     multimediaCount: number
@@ -58,8 +58,8 @@ export interface AuditEventDetails {
         old: string
         new: string
       }
-      talksAdded?: number[]
-      talksRemoved?: number[]
+      talksAdded?: string[]
+      talksRemoved?: string[]
     }
   }
   [AUDIT_EVENTS.SPEAKER_CONGREGATION_TRANSFERRED]: {
@@ -81,27 +81,27 @@ export interface AuditEventDetails {
   [AUDIT_EVENTS.SCHEDULE_CREATED]: {
     scheduleId: string
     date: YYYYMMDD
-    meetingProgramId: number
-    partId: number
+    meetingProgramId: string
+    partId: string
     speakerSourceType: SpeakerSourceType
     speakerId: string | null
     publisherId: string | null
-    talkId: number | null
+    talkId: string | null
     customTalkTitle: string | null
     isCircuitOverseerVisit: boolean
   }
   [AUDIT_EVENTS.SCHEDULE_UPDATED]: {
     scheduleId: string
     date: YYYYMMDD
-    meetingProgramId: number
-    partId: number
+    meetingProgramId: string
+    partId: string
     changes: Record<string, unknown>
   }
   [AUDIT_EVENTS.SCHEDULE_DELETED]: {
     scheduleId: string
     date: YYYYMMDD
-    meetingProgramId: number
-    partId: number
+    meetingProgramId: string
+    partId: string
   }
   [AUDIT_EVENTS.SCHEDULE_VALIDATION_OVERRIDDEN]: {
     scheduleId: string
@@ -132,13 +132,13 @@ export interface AuditEventDetails {
     userId: string | null
   }
   [AUDIT_EVENTS.WEEKEND_MEETING_PLANNED]: {
-    programId: number
+    programId: string
     date: YYYYMMDD
     isCircuitOverseerVisit: boolean
     parts: Record<string, unknown>
   }
   [AUDIT_EVENTS.WEEKEND_MEETING_UPDATED]: {
-    programId: number
+    programId: string
     changes: WeekendMeetingUpdateInput
   }
   [AUDIT_EVENTS.MEETING_EXCEPTION_CREATED]: {
@@ -147,7 +147,7 @@ export interface AuditEventDetails {
     exceptionType: MeetingExceptionType
     description: string | null
     deletedExistingMeeting: boolean
-    deletedMeetingId?: number
+    deletedMeetingId?: string
   }
   [AUDIT_EVENTS.MEETING_EXCEPTION_UPDATED]: {
     exceptionId: string

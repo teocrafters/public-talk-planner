@@ -34,6 +34,10 @@ COPY --from=build /app/.output ./.output
 COPY --from=build /app/server/database/migrations ./.output/server/migrations
 COPY --from=build /app/docker/migrate.mjs ./.output/server/migrate.mjs
 
+# The default jobFilesDir resolves against /app, which the unprivileged user cannot create in.
+RUN mkdir -p /app/.data/job-files && chown -R node:node /app/.data
+VOLUME ["/app/.data/job-files"]
+
 USER node
 EXPOSE 3000
 

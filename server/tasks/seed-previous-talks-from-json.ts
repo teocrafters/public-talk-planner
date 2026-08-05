@@ -215,8 +215,8 @@ export default defineTask({
           where: and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, dateYYYYMMDD)),
         })
 
-        let programId: number
-        let partId: number
+        let programId: string
+        let partId: string
 
         if (existingProgram) {
           // Check if a public talk already exists for this program

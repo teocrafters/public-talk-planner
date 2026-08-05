@@ -16,8 +16,32 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  validate:
+    name: Validate the changes
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NODE_ENV: development
+    steps:
+      - name: 🛎️ Checkout the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: 📦 Init Node, pnpm
+        uses: ./.github/workflows/actions/init
+
+      - name: ✅ Run linting
+        run: pnpm run lint
+
+      - name: ✅ Run typecheck
+        run: pnpm run typecheck
+
+      - name: ✅ Run build
+        run: pnpm run build
+
   deploy:
     name: Build, push and deploy
+    # The image is only built once the same checks CI runs on the pull request have passed.
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read

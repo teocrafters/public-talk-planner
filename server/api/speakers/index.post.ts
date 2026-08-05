@@ -70,7 +70,7 @@ export default defineEndpoint({
   }
 
   if (body.talkIds && body.talkIds.length > 0) {
-    const talkAssignments = body.talkIds.map((talkId: number) => ({
+    const talkAssignments = body.talkIds.map((talkId: string) => ({
       speakerId,
       talkId,
       createdAt: new Date(),

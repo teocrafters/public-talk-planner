@@ -52,20 +52,28 @@ Create the application from a Docker image, not from a repository source:
   registry credentials in the panel (a GitHub token with `read:packages`).
 - Container port: 3000.
 - Replicas: **1**, and see step 6 before changing it.
+- Mount a volume at `/app/.data/job-files`. Speaker-list uploads are written there and read back
+  by the queue worker; without a mount they live in the container's anonymous volume and a
+  redeploy loses any import still in flight.
 - Deployment is triggered by the deploy workflow calling the application's Dokploy webhook. Copy
   the webhook URL into the repository's Actions secrets.
 
 ### 4. Environment variables
 
-Every runtime setting is read from Nuxt's `runtimeConfig` and overridden by environment variables
-set here. Two rules govern this and both bite silently if broken:
+Settings reach the application by two different routes, and mixing them up bites silently:
 
-- Only `NUXT_`-prefixed variables override a `runtimeConfig` property. An unprefixed variable is
-  read by nothing and the built-in default stays in force.
+- Settings held in Nuxt's `runtimeConfig` are overridden only by the `NUXT_`-prefixed name —
+  `NUXT_DATABASE_URL`, `NUXT_JOB_FILES_DIR`. Dropping the prefix leaves the built-in default in
+  force.
+- The rest are read straight from `process.env` under exactly the name they carry in
+  `.env.example`, with no prefix: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `RESEND_API_KEY`,
+  `ANTHROPIC_API_KEY`, `NUXT_SEED_STAGING`. Prefixing these makes them invisible — an app booted
+  without `BETTER_AUTH_SECRET` has no session secret.
 - `.env` files are not read in production. The panel is the only source of these values.
 
-Take the key list from `.env.example` at the commit being deployed. Images are built in CI without
-production secrets, so anything secret exists only here.
+Take the key list from `.env.example` at the commit being deployed and set each name exactly as it
+appears there. Images are built in CI without production secrets, so anything secret exists only
+here.
 
 ### 5. Swarm health check and update configuration
 

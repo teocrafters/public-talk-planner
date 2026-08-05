@@ -7,16 +7,16 @@ interface EnhancedSpeakerImportInput {
   lastName: string
   phone: string
   congregationId: string
-  talkIds?: number[]
+  talkIds?: string[]
   operation: "create" | "update" | "restore" | "skip" | "archive"
   existingSpeakerId?: string
   manuallySelected?: boolean
   diff?: {
     phone?: { old: string; new: string }
     talks?: {
-      added: number[]
-      removed: number[]
-      unchanged: number[]
+      added: string[]
+      removed: string[]
+      unchanged: string[]
     }
     congregation?: {
       oldId: string
@@ -158,7 +158,7 @@ async function createSpeaker(
 
   if (speaker.talkIds && speaker.talkIds.length > 0) {
     await db.insert(speakerTalks).values(
-      speaker.talkIds.map((talkId: number) => ({
+      speaker.talkIds.map((talkId: string) => ({
         speakerId,
         talkId,
         createdAt: new Date(),
@@ -221,7 +221,7 @@ async function updateSpeaker(
 
   if (speaker.talkIds && speaker.talkIds.length > 0) {
     await db.insert(speakerTalks).values(
-      speaker.talkIds.map((talkId: number) => ({
+      speaker.talkIds.map((talkId: string) => ({
         speakerId: speaker.existingSpeakerId!,
         talkId,
         createdAt: new Date(),
@@ -307,7 +307,7 @@ async function restoreSpeaker(
 
   if (speaker.talkIds && speaker.talkIds.length > 0) {
     await db.insert(speakerTalks).values(
-      speaker.talkIds.map((talkId: number) => ({
+      speaker.talkIds.map((talkId: string) => ({
         speakerId: speaker.existingSpeakerId!,
         talkId,
         createdAt: new Date(),

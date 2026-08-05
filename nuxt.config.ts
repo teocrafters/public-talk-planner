@@ -33,8 +33,6 @@ export default defineNuxtConfig({
   // environment variables supply them at runtime, and .env is not read in production.
   runtimeConfig: {
     databaseUrl: "",
-    authSecret: "",
-    authBaseUrl: "",
     // Not a secret: the default keeps local development working, and the container points it at
     // the job-files volume.
     jobFilesDir: ".data/job-files",

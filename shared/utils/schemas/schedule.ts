@@ -18,17 +18,9 @@ export const createScheduleSchema = (t: (key: string) => string) => {
         })
         .transform(dateStr => toYYYYMMDD(dateStr)),
 
-      meetingProgramId: z
-        .number()
-        .int()
-        .positive({ message: t("validation.meetingProgramRequired") })
-        .optional(),
+      meetingProgramId: z.string().uuid(t("validation.meetingProgramRequired")).optional(),
 
-      partId: z
-        .number()
-        .int()
-        .positive({ message: t("validation.partRequired") })
-        .optional(),
+      partId: z.string().uuid(t("validation.partRequired")).optional(),
 
       // Speaker source type: visiting_speaker or local_publisher
       speakerSourceType: z.enum(SPEAKER_SOURCE_TYPE_VALUES, {
@@ -41,7 +33,7 @@ export const createScheduleSchema = (t: (key: string) => string) => {
       // Local publisher ID (from congregation)
       publisherId: z.string().min(1, t("validation.publisherRequired")).optional(),
 
-      talkId: z.number().int().positive().optional(),
+      talkId: z.string().uuid().optional(),
 
       customTalkTitle: z.string().max(200, t("validation.customTalkTitleTooLong")).optional(),
 
@@ -88,7 +80,7 @@ export const updateScheduleSchema = (t: (key: string) => string) => {
 
       publisherId: z.string().min(1, t("validation.publisherRequired")).optional(),
 
-      talkId: z.number().int().positive().optional(),
+      talkId: z.string().uuid().optional(),
 
       customTalkTitle: z.string().max(200, t("validation.customTalkTitleTooLong")).optional(),
 

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { z } from "zod"
 import { eq } from "drizzle-orm"
-import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
+import { speakers, speakerTalks, organization } from "../../database/schema"
 
 const SpeakerSeedSchema = z.object({
   id: z.string().min(1),
@@ -55,21 +55,17 @@ export default defineTask({
 
       // Verify talk IDs exist
       logger.info("Verifying talk IDs exist...")
+      const talkIdsByLegacyId = await loadTalkIdsByLegacyId()
       const allTalkIds = new Set<number>()
       for (const speaker of validated) {
         speaker.talkIds.forEach(id => allTalkIds.add(id))
       }
 
-      if (allTalkIds.size > 0) {
-        const existingTalks = await db.select({ id: publicTalks.id }).from(publicTalks)
+      const missingTalkIds = Array.from(allTalkIds).filter(id => !talkIdsByLegacyId.has(id))
 
-        const existingTalkIds = new Set(existingTalks.map(t => t.id))
-        const missingTalkIds = Array.from(allTalkIds).filter(id => !existingTalkIds.has(id))
-
-        if (missingTalkIds.length > 0) {
-          logger.warn(`Warning: Some talk IDs don't exist: ${missingTalkIds.join(", ")}`)
-          logger.warn("These talk assignments will be skipped")
-        }
+      if (missingTalkIds.length > 0) {
+        logger.warn(`Warning: Some talk IDs don't exist: ${missingTalkIds.join(", ")}`)
+        logger.warn("These talk assignments will be skipped")
       }
 
       // Insert speakers and their talk assignments
@@ -89,19 +85,9 @@ export default defineTask({
 
         // Insert talk assignments
         if (speaker.talkIds.length > 0) {
-          // Verify talk IDs before inserting
-          const validTalkIds: number[] = []
-          for (const talkId of speaker.talkIds) {
-            const talkExists = await db
-              .select({ id: publicTalks.id })
-              .from(publicTalks)
-              .where(eq(publicTalks.id, talkId))
-              .limit(1)
-
-            if (talkExists.length > 0) {
-              validTalkIds.push(talkId)
-            }
-          }
+          const validTalkIds = speaker.talkIds
+            .map(legacyId => talkIdsByLegacyId.get(legacyId))
+            .filter((talkId): talkId is string => talkId !== undefined)
 
           if (validTalkIds.length > 0) {
             const talkAssignments = validTalkIds.map(talkId => ({

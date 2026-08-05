@@ -7,8 +7,8 @@ import { formatToYYYYMMDD } from "#shared/utils/date-yyyymmdd"
 const conflictsQuerySchema = (t: (key: string) => string) =>
   z.object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("validation.invalidDateFormat")),
-    meetingProgramId: z.coerce.number().int().positive(t("validation.invalidId")),
-    partId: z.coerce.number().int().positive(t("validation.invalidId")),
+    meetingProgramId: z.string().uuid(t("validation.invalidUuid")),
+    partId: z.string().uuid(t("validation.invalidUuid")),
   })
 
 export default defineEndpoint({

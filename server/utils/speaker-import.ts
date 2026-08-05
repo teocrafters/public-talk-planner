@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises"
 import { generateObject } from "ai"
 import { anthropic } from "@ai-sdk/anthropic"
 import { z } from "zod"
-import { eq, sql, and, gt } from "drizzle-orm"
+import { eq, sql, and, gt, count } from "drizzle-orm"
 import type { Job } from "pg-boss"
 
 import {
@@ -27,9 +27,9 @@ interface SpeakerDiff {
     new: string
   }
   talks?: {
-    added: number[]
-    removed: number[]
-    unchanged: number[]
+    added: string[]
+    removed: string[]
+    unchanged: string[]
   }
   congregation?: {
     oldId: string
@@ -44,7 +44,7 @@ interface ExistingSpeaker {
   phone: string
   congregationId: string
   congregationName: string
-  talkIds: number[]
+  talkIds: string[]
 }
 
 interface ImportedSpeaker {
@@ -54,7 +54,7 @@ interface ImportedSpeaker {
   talkNumbers: string[]
   congregationId: string | null
   congregation: string
-  talkIds: number[]
+  talkIds: string[]
   selected: boolean
   matchStatus: MatchStatus
   matchedSpeakerId?: string
@@ -88,7 +88,7 @@ interface MatchedSpeaker {
   congregationName: string
   archived: boolean
   archivedAt: Date | null
-  talkIds: number[]
+  talkIds: string[]
 }
 
 const extractionSchema = z.object({
@@ -271,9 +271,9 @@ async function enrichSpeaker(
   }
 }
 
-async function resolveTalkIds(talkNumbers: string[]): Promise<number[]> {
+async function resolveTalkIds(talkNumbers: string[]): Promise<string[]> {
   const db = useDrizzle()
-  const talkIds: number[] = []
+  const talkIds: string[] = []
 
   for (const talkNo of talkNumbers) {
     const talk = await db.select().from(publicTalks).where(eq(publicTalks.no, talkNo)).limit(1)
@@ -333,7 +333,7 @@ async function findMatchingSpeaker(
 }
 
 function calculateDiff(
-  extractedTalkIds: number[],
+  extractedTalkIds: string[],
   extractedPhone: string,
   extractedCongregationId: string,
   extractedCongregationName: string,
@@ -417,7 +417,7 @@ async function findMissingSpeakers(
         .where(eq(speakerTalks.speakerId, speaker.id))
 
       const scheduledCount = await db
-        .select({ count: sql<number>`count(*)` })
+        .select({ count: count() })
         .from(scheduledPublicTalks)
         .where(
           and(

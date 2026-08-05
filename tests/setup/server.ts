@@ -1,6 +1,7 @@
 import { test as setup } from "@playwright/test"
 import { x } from "tinyexec"
-import { rm, writeFile } from "node:fs/promises"
+import { writeFile } from "node:fs/promises"
+import { Pool } from "pg"
 
 setup.setTimeout(120000)
 
@@ -9,21 +10,14 @@ setup("Build and start server", async () => {
 
   // 1. Clean database state
   console.log("Cleaning database...")
-  await rm(".data/hub/d1", { recursive: true, force: true })
+  await truncateApplicationTables()
 
-  // 2. Kill any lingering Nuxt/Workerd processes if they are still running
+  // 2. Kill any lingering Nuxt processes if they are still running
   try {
     await x("pkill", ["-f", "nuxt"])
     console.log("Killed lingering nuxt processes")
   } catch (error) {
     console.log("pkill nuxt failed", error)
-  }
-
-  try {
-    await x("pkill", ["-f", "workerd"])
-    console.log("Killed lingering workerd processes")
-  } catch (error) {
-    console.log("pkill workerd failed", error)
   }
 
   // 3. Start preview server
@@ -78,6 +72,37 @@ setup("Build and start server", async () => {
 
   console.log("Global setup complete!")
 })
+
+/**
+ * Empties the schema the migrations own without dropping it, so the suite starts from a known
+ * state. Most seeders skip rows that already exist, which would otherwise let one run's data
+ * decide the next run's counts and ordering.
+ */
+async function truncateApplicationTables(): Promise<void> {
+  const connectionString = process.env.NUXT_DATABASE_URL
+
+  if (!connectionString) {
+    throw new Error("NUXT_DATABASE_URL must be set to run the E2E suite")
+  }
+
+  const pool = new Pool({ connectionString, max: 1 })
+
+  try {
+    const { rows } = await pool.query<{ qualifiedName: string }>(
+      `SELECT format('%I.%I', schemaname, tablename) AS "qualifiedName"
+       FROM pg_tables
+       WHERE schemaname = 'public'`
+    )
+
+    if (rows.length === 0) return
+
+    await pool.query(
+      `TRUNCATE ${rows.map(row => row.qualifiedName).join(", ")} RESTART IDENTITY CASCADE`
+    )
+  } finally {
+    await pool.end()
+  }
+}
 
 async function waitForServer(url: string, timeout: number = 120000): Promise<void> {
   const startTime = Date.now()

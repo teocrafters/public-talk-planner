@@ -133,37 +133,22 @@ export default defineTask({
         logger.info(`✅ Created coordinator account: ${accountData.email} (${accountData.role})`)
       }
 
-      // Step 3: Display generated credentials
       if (generatedCredentials.length > 0) {
-        logger.info("\n" + "=".repeat(80))
-        logger.info("⚠️  GENERATED CREDENTIALS - SAVE THESE SECURELY!")
-        logger.info("=".repeat(80))
-
-        for (const cred of generatedCredentials) {
-          logger.info(`Email: ${cred.email}`)
-          logger.info(`Role: ${cred.role}`)
-          logger.info(`Password: ${cred.password}`)
-          logger.info("-".repeat(80))
-        }
-
-        logger.info("=".repeat(80))
-        logger.info("⚠️  These passwords will NOT be displayed again!")
-        logger.info("=".repeat(80))
+        logger.info(
+          `⚠️  Generated ${generatedCredentials.length} password(s) - read them from this task's result, they are never logged`
+        )
       }
 
       logger.info(
         `\n✅ Coordinator accounts seeding completed (${createdCount} created, ${skippedCount} existing)`
       )
 
+      // Passwords travel only in the task result: stdout is shipped to Loki and retained there.
       return {
         result: "success",
         created: createdCount,
         skipped: skippedCount,
-        credentials: generatedCredentials.map(c => ({
-          email: c.email,
-          role: c.role,
-          // Don't include password in return value for security
-        })),
+        credentials: generatedCredentials,
       }
     } catch (error: unknown) {
       logger.error("Error during coordinator accounts seeding", { error })

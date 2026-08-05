@@ -15,7 +15,7 @@
     createdAt: Date
     updatedAt: Date
     talks: Array<{
-      id: number
+      id: string
       no: string
       title: string
     }>
@@ -27,7 +27,7 @@
   }
 
   interface PublicTalk {
-    id: number
+    id: string
     no: string
     title: string
   }
@@ -96,7 +96,7 @@
       lastName: "",
       phone: "",
       congregationId: "",
-      talkIds: [] as number[],
+      talkIds: [] as string[],
     }
   })
 
