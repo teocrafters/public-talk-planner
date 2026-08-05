@@ -35,6 +35,9 @@ export default defineNuxtConfig({
     databaseUrl: "",
     authSecret: "",
     authBaseUrl: "",
+    // Not a secret: the default keeps local development working, and the container points it at
+    // the job-files volume.
+    jobFilesDir: ".data/job-files",
   },
   nitro: {
     preset: "node-server",
