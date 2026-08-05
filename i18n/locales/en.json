@@ -279,6 +279,7 @@
     "invalidFile": "Invalid file",
     "invalidJobId": "Invalid job ID",
     "jobNotFound": "Job not found",
+    "importJobNotQueued": "Could not queue the import job",
     "invalidRequestBody": "Invalid request body",
     "meetingDateHasException": "Cannot schedule meeting - this date is marked as exception ({exceptionType})",
     "exceptionAlreadyExists": "Exception already exists for this date",

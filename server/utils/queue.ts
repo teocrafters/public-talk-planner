@@ -1,5 +1,5 @@
 import type { Dirent } from "node:fs"
-import { readdir, rm, stat } from "node:fs/promises"
+import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
 import { PgBoss } from "pg-boss"
@@ -61,6 +61,18 @@ export async function stopPgBoss(): Promise<void> {
   const boss = await starting
 
   await boss.stop()
+}
+
+// A job payload carries the path this returns rather than the bytes: base64 of a 20 MB upload
+// would be roughly 27 MB in a single queue row.
+export async function writeJobFile(contents: Buffer): Promise<string> {
+  const directory = useRuntimeConfig().jobFilesDir
+  await mkdir(directory, { recursive: true })
+
+  const path = join(directory, crypto.randomUUID())
+  await writeFile(path, contents)
+
+  return path
 }
 
 /** Removes job files left behind by finished, abandoned or dead-lettered imports. */
