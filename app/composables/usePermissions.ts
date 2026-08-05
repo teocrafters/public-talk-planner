@@ -1,4 +1,4 @@
-type Role = "publisher" | "public_talk_coordinator" | "boe_coordinator" | "admin"
+type Role = "publisher" | "public_talk_coordinator" | "boe_coordinator" | "admin" | "owner"
 
 export function usePermissions() {
   const { user } = useAuth()

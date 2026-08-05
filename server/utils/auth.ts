@@ -57,16 +57,16 @@ function getBetterAuth() {
       passkey(),
     ],
     advanced: {
-      // A Secure cookie is dropped by the browser over the plain HTTP the local stack
-      // serves, so this follows the environment rather than being pinned on.
-      useSecureCookies: isProduction(),
-      defaultCookieAttributes: {
-        sameSite: "lax",
-        httpOnly: true,
-      },
+      // Off so the session cookie keeps its plain name: better-auth prefixes every cookie
+      // with "__Secure-" when this is on, which would orphan all live sessions.
+      useSecureCookies: false,
       cookies: {
         session_token: {
           name: AUTH_COOKIE_NAME,
+          attributes: {
+            secure: true,
+            httpOnly: true,
+          },
         },
       },
     },

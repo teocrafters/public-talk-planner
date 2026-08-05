@@ -50,7 +50,6 @@
 
   const show = ref(false)
   const loading = ref(false)
-  const hasPasskeys = ref(false)
 
   // Check if WebAuthn is supported
   const isWebAuthnSupported = computed(() => {
@@ -94,8 +93,8 @@
   onMounted(async () => {
     if (!isWebAuthnSupported.value) return
 
-    hasPasskeys.value = await fetchHasPasskeys()
-    if (!hasPasskeys.value) return
+    const hasPasskeys = await fetchHasPasskeys()
+    if (!hasPasskeys) return
 
     try {
       const shouldShow = await shouldShowPrompt()
@@ -135,8 +134,6 @@
 
       // Mark as completed (updates both localStorage and server-side state)
       markPasskeySetup()
-
-      hasPasskeys.value = true
     } catch (error) {
       console.error("Passkey setup failed:", error)
 

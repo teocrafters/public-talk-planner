@@ -1,20 +1,24 @@
-import type { H3Event } from "h3"
 import { defineEndpoint } from "../../utils/define-endpoint"
-import type { PermissionsMap } from "#shared/types/permissions"
-import { statement } from "#shared/utils/permissions/declare"
+import {
+  statement,
+  publisher,
+  public_talk_coordinator,
+  boe_coordinator,
+} from "#shared/utils/permissions/declare"
 
 interface PermissionMap {
   role: string
   permissions: Record<string, boolean>
 }
 
-interface PermissionCheck {
-  key: string
-  permissions: PermissionsMap
-}
-
 const ROLE_WITHOUT_MEMBERSHIP = "publisher"
 const UNRESTRICTED_ROLES = ["admin", "owner"]
+
+const ROLE_STATEMENTS: Record<string, Record<string, readonly string[]>> = {
+  publisher: publisher.statements,
+  public_talk_coordinator: public_talk_coordinator.statements,
+  boe_coordinator: boe_coordinator.statements,
+}
 
 export default defineEndpoint({
   auth: true,
@@ -31,36 +35,32 @@ export default defineEndpoint({
       return { role: member.role, permissions: everyPermissionSetTo(true) }
     }
 
-    return { role: member.role, permissions: await grantedPermissions(event) }
+    return { role: member.role, permissions: grantedPermissions(member.role) }
   },
 })
 
 function everyPermissionSetTo(granted: boolean): Record<string, boolean> {
-  return Object.fromEntries(declaredChecks().map(check => [check.key, granted]))
+  return Object.fromEntries(declaredKeys().map(key => [key, granted]))
 }
 
-async function grantedPermissions(event: H3Event): Promise<Record<string, boolean>> {
-  const granted: Record<string, boolean> = {}
+// Answered from the static declaration: asking better-auth per permission costs one D1
+// round trip each, serialized inside a single SSR render.
+function grantedPermissions(role: string): Record<string, boolean> {
+  const granted = grantedKeys(role)
 
-  for (const check of declaredChecks()) {
-    const result = await serverAuth().api.hasPermission({
-      headers: event.headers,
-      body: { permissions: check.permissions },
-    })
-
-    granted[check.key] = result?.success === true
-  }
-
-  return granted
+  return Object.fromEntries(declaredKeys().map(key => [key, granted.has(key)]))
 }
 
-function declaredChecks(): PermissionCheck[] {
-  const declaration: Record<string, readonly string[]> = statement
+function grantedKeys(role: string): Set<string> {
+  return new Set(permissionKeysOf(ROLE_STATEMENTS[role] ?? {}))
+}
 
+function declaredKeys(): string[] {
+  return permissionKeysOf(statement)
+}
+
+function permissionKeysOf(declaration: Record<string, readonly string[]>): string[] {
   return Object.entries(declaration).flatMap(([resource, actions]) =>
-    actions.map(action => ({
-      key: `${resource}:${action}`,
-      permissions: { [resource]: [action] } as PermissionsMap,
-    }))
+    actions.map(action => `${resource}:${action}`)
   )
 }
