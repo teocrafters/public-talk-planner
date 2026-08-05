@@ -179,6 +179,21 @@ test.describe("Talks - Default Sorting Verification", () => {
     }
   })
 
+  test("last-given sort orders talks by their stored dates", async ({ page }) => {
+    const response = await page.request.get("/api/public-talks?sortBy=lastGiven&sortOrder=desc")
+
+    const talks = (await response.json()) as { lastGivenDate: string | null }[]
+    const givenDates = talks
+      .map(talk => talk.lastGivenDate)
+      .filter((date): date is string => date !== null)
+
+    expect(response.ok()).toBe(true)
+    for (const date of givenDates) {
+      expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    }
+    expect(givenDates).toEqual([...givenDates].sort().reverse())
+  })
+
   test("page refresh maintains default sort selection", async ({ page }) => {
     // Navigate to talks page
     await page.goto("/talks")

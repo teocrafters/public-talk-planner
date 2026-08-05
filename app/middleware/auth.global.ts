@@ -59,7 +59,6 @@ export default defineNuxtRouteMiddleware(async to => {
     if (to.path === REDIRECT_GUEST_TO) {
       return
     }
-    console.log(">>>> HIER")
     const fullPath = String(to.fullPath || to.path)
     return navigateTo(`${REDIRECT_GUEST_TO}?redirect=${encodeURIComponent(fullPath)}`)
   }

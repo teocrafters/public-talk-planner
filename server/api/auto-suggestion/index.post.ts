@@ -10,6 +10,9 @@ import {
 } from "../../database/schema"
 import { defineEndpoint } from "../../utils/define-endpoint"
 import { autoSuggestionSchema } from "#shared/utils/schemas"
+import type { YYYYMMDD } from "#shared/types/date"
+
+const lastScheduledDate = sql<YYYYMMDD | null>`MAX(${scheduledPublicTalks.date})`
 
 export default defineEndpoint({
   permissions: { weekend_meetings: ["list"] },
@@ -53,13 +56,12 @@ export default defineEndpoint({
     checkTimeout()
 
     // Get talks with their last given dates for visiting speakers
-    // Note: scheduledPublicTalks.date is timestamp mode (Date), need to extract as integer
     const talkPoolQuery = db
       .select({
         talkId: publicTalks.id,
         talkNo: publicTalks.no,
         talkTitle: publicTalks.title,
-        lastGivenDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
+        lastGivenDate: lastScheduledDate.as("last_given_date"),
       })
       .from(speakerTalks)
       .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
@@ -130,7 +132,7 @@ export default defineEndpoint({
         lastName: speakers.lastName,
         phone: speakers.phone,
         congregationId: speakers.congregationId,
-        lastTalkDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
+        lastTalkDate: lastScheduledDate.as("last_talk_date"),
       })
       .from(speakers)
       .leftJoin(scheduledPublicTalks, eq(scheduledPublicTalks.speakerId, speakers.id))
@@ -179,7 +181,7 @@ export default defineEndpoint({
         talkId: publicTalks.id,
         talkNo: publicTalks.no,
         talkTitle: publicTalks.title,
-        lastGivenDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_given_date"),
+        lastGivenDate: lastScheduledDate.as("last_given_date"),
       })
       .from(speakerTalks)
       .innerJoin(publicTalks, eq(speakerTalks.talkId, publicTalks.id))
@@ -265,7 +267,7 @@ async function getFallbackSuggestion(db: ReturnType<typeof useDrizzle>) {
       publisherId: publishers.id,
       firstName: publishers.firstName,
       lastName: publishers.lastName,
-      lastTalkDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("last_talk_date"),
+      lastTalkDate: lastScheduledDate.as("last_talk_date"),
     })
     .from(publishers)
     .leftJoin(scheduledPublicTalks, eq(scheduledPublicTalks.publisherId, publishers.id))

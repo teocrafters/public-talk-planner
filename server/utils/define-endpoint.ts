@@ -8,6 +8,7 @@ import {
 } from "h3"
 import { z } from "zod"
 import { serverAuth } from "./auth"
+import { getRequestMember, getRequestSession } from "./auth-session"
 import { logAuditEvent } from "./audit-log"
 import type { PermissionsMap } from "#shared/types/permissions"
 import { AUDIT_EVENTS } from "#shared/utils/audit-events"
@@ -74,71 +75,23 @@ async function validateWithSchema<T>(
   }
 }
 
-async function checkAuthentication(event: H3Event): Promise<{
-  session: ReturnType<typeof serverAuth> extends {
-    api: { getSession: (options: { headers: Headers }) => Promise<infer R> }
-  }
-    ? R
-    : never
-  user: ReturnType<typeof serverAuth> extends {
-    api: { getSession: (options: { headers: Headers }) => Promise<{ user: infer U } | null> }
-  }
-    ? U
-    : never
-} | null> {
-  const auth = serverAuth()
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  })
-
-  return session as {
-    session: Awaited<ReturnType<typeof auth.api.getSession>>
-    user: Awaited<ReturnType<typeof auth.api.getSession>> extends { user: infer U }
-      ? U
-      : never
-  } | null
-}
-
-async function checkAuthorization(
+async function isAuthorized(
   event: H3Event,
-  permissions: PermissionsMap
-): Promise<{
-  authorized: boolean
-  role?: string
-}> {
-  const auth = serverAuth()
-
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  })
-
-  if (!session?.user) {
-    return { authorized: false }
+  permissions: PermissionsMap,
+  role: string
+): Promise<boolean> {
+  if (role === "admin" || role === "owner") {
+    return true
   }
 
-  const member = await auth.api.getActiveMember({
-    headers: event.headers,
-  })
-
-  if (!member) {
-    return { authorized: false }
-  }
-
-  if (member.role === "admin" || member.role === "owner") {
-    return { authorized: true, role: member.role }
-  }
-
-  const result = await auth.api.hasPermission({
+  const result = await serverAuth().api.hasPermission({
     headers: event.headers,
     body: {
       permissions,
     },
   })
 
-  return {
-    authorized: result?.success === true,
-    role: member.role,
-  }
+  return result?.success === true
 }
 
 function getValidatedFields<TBody, TQuery, TParams>(
@@ -166,7 +119,7 @@ export function defineEndpoint<TBody, TQuery, TParams, TResponse>(
     const requiresPermissions = config.permissions !== undefined
 
     if (requiresAuth) {
-      const authResult = await checkAuthentication(event)
+      const authResult = await getRequestSession(event)
 
       if (!authResult?.user) {
         await logAuditEvent(event, {
@@ -190,9 +143,7 @@ export function defineEndpoint<TBody, TQuery, TParams, TResponse>(
       event.context.user = authResult.user
 
       if (requiresPermissions && config.permissions) {
-        const membership = await serverAuth().api.getActiveMember({
-          headers: event.headers,
-        })
+        const membership = await getRequestMember(event)
 
         if (!membership) {
           await logAuditEvent(event, {
@@ -213,9 +164,9 @@ export function defineEndpoint<TBody, TQuery, TParams, TResponse>(
           })
         }
 
-        const authzResult = await checkAuthorization(event, config.permissions)
+        const authorized = await isAuthorized(event, config.permissions, membership.role)
 
-        if (!authzResult.authorized) {
+        if (!authorized) {
           await logAuditEvent(event, {
             action: AUDIT_EVENTS.PERMISSION_DENIED,
             resourceType: "api",
@@ -223,7 +174,7 @@ export function defineEndpoint<TBody, TQuery, TParams, TResponse>(
             details: {
               attemptedAction: event.method,
               requiredPermissions: config.permissions,
-              userRole: authzResult.role || "unknown",
+              userRole: membership.role,
             } satisfies AuditEventDetails[typeof AUDIT_EVENTS.PERMISSION_DENIED],
           })
 

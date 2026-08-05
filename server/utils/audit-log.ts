@@ -10,9 +10,7 @@ interface LogAuditEventOptions {
 }
 
 export async function logAuditEvent(event: H3Event, options: LogAuditEventOptions): Promise<void> {
-  const session = await serverAuth().api.getSession({
-    headers: event.headers,
-  })
+  const session = await getRequestSession(event)
 
   if (!session?.user) {
     return

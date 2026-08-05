@@ -9,6 +9,8 @@ import {
 } from "../../database/schema"
 import { defineEndpoint } from "../../utils/define-endpoint"
 import { sortQuerySchema } from "#shared/utils/schemas/query-params"
+import { compareNullableDates } from "#shared/utils/date-yyyymmdd"
+import type { YYYYMMDD } from "#shared/types/date"
 
 const speakerListQuerySchema = () =>
   sortQuerySchema().extend({
@@ -45,7 +47,7 @@ export default defineEndpoint({
       createdAt: speakers.createdAt,
       updatedAt: speakers.updatedAt,
       // Include last talk date from scheduled talks
-      lastTalkDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("lastTalkDate"),
+      lastTalkDate: sql<YYYYMMDD | null>`MAX(${scheduledPublicTalks.date})`.as("lastTalkDate"),
       // Aggregate talks using JSON aggregation through speakerTalks relationship
       // JSONB_BUILD_OBJECT rather than JSON_BUILD_OBJECT: DISTINCT needs an equality operator,
       // which json lacks and jsonb has.
@@ -108,24 +110,9 @@ export default defineEndpoint({
 
   // Additional sorting for lastTalk when SQL sort needs special handling for nulls
   if (sortBy === "lastTalk") {
-    speakersList.sort((a, b) => {
-      const aHasDate = a.lastTalkDate !== null
-      const bHasDate = b.lastTalkDate !== null
+    const direction = sortOrder === "desc" ? -1 : 1
 
-      if (sortOrder === "desc") {
-        // Newest first, then those without dates
-        if (!aHasDate && !bHasDate) return 0
-        if (!aHasDate) return 1
-        if (!bHasDate) return -1
-        return (b.lastTalkDate || 0) - (a.lastTalkDate || 0)
-      } else {
-        // Oldest first, then those without dates
-        if (!aHasDate && !bHasDate) return 0
-        if (!aHasDate) return -1
-        if (!bHasDate) return 1
-        return (a.lastTalkDate || 0) - (b.lastTalkDate || 0)
-      }
-    })
+    speakersList.sort((a, b) => direction * compareNullableDates(a.lastTalkDate, b.lastTalkDate))
   }
 
   // Return the complete data including lastTalkDate
