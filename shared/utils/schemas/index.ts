@@ -81,3 +81,6 @@ export {
   type CommonQuery,
   type UuidParams,
 } from "./query-params"
+
+// Audit log schemas
+export { clientAuditEventSchema, type ClientAuditEventInput } from "./audit-log"
