@@ -55,7 +55,7 @@ export default defineTask({
         .select()
         .from(organization)
         .where(eq(organization.slug, ZYCHLIN_CONGREGATION_SLUG))
-        .get()
+        .then(rows => rows[0])
 
       if (!zychlinCongregation) {
         throw new Error(
@@ -73,7 +73,7 @@ export default defineTask({
           .select()
           .from(publishers)
           .where(eq(publishers.id, publisher.id))
-          .get()
+          .then(rows => rows[0])
 
         if (!existing) {
           await db.insert(publishers).values({

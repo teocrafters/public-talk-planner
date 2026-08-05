@@ -1,5 +1,5 @@
 import { createError } from "h3"
-import { eq, sql } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { z } from "zod"
 import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
 import { defineEndpoint } from "../../utils/define-endpoint"
@@ -57,7 +57,7 @@ export default defineEndpoint({
     const talksExist = await db
       .select()
       .from(publicTalks)
-      .where(sql`${publicTalks.id} IN ${body.talkIds}`)
+      .where(inArray(publicTalks.id, body.talkIds))
 
     if (talksExist.length !== body.talkIds.length) {
       throw createError({

@@ -15,6 +15,12 @@ const speakerListQuerySchema = () =>
     search: z.string().optional(),
   })
 
+type TalkSummary = {
+  id: string
+  no: string
+  title: string
+}
+
 export default defineEndpoint({
   permissions: { speakers: ["list"] },
   query: speakerListQuerySchema,
@@ -41,14 +47,19 @@ export default defineEndpoint({
       // Include last talk date from scheduled talks
       lastTalkDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("lastTalkDate"),
       // Aggregate talks using JSON aggregation through speakerTalks relationship
-      talks: sql<string>`
-        JSON_GROUP_ARRAY(
-          DISTINCT JSON_OBJECT(
-            'id', ${publicTalks.id},
-            'no', ${publicTalks.no},
-            'title', ${publicTalks.title}
-          )
-        ) FILTER (WHERE ${publicTalks.id} IS NOT NULL)
+      // JSONB_BUILD_OBJECT rather than JSON_BUILD_OBJECT: DISTINCT needs an equality operator,
+      // which json lacks and jsonb has.
+      talks: sql<TalkSummary[]>`
+        COALESCE(
+          JSON_AGG(
+            DISTINCT JSONB_BUILD_OBJECT(
+              'id', ${publicTalks.id},
+              'no', ${publicTalks.no},
+              'title', ${publicTalks.title}
+            )
+          ) FILTER (WHERE ${publicTalks.id} IS NOT NULL),
+          '[]'::JSON
+        )
       `.as("talks"),
     })
     .from(speakers)
@@ -95,15 +106,9 @@ export default defineEndpoint({
 
   const speakersList = await speakersQuery
 
-  // Parse JSON talks and handle empty arrays
-  const speakersWithTalks = speakersList.map(speaker => ({
-    ...speaker,
-    talks: speaker.talks ? JSON.parse(speaker.talks) : [],
-  }))
-
   // Additional sorting for lastTalk when SQL sort needs special handling for nulls
   if (sortBy === "lastTalk") {
-    speakersWithTalks.sort((a, b) => {
+    speakersList.sort((a, b) => {
       const aHasDate = a.lastTalkDate !== null
       const bHasDate = b.lastTalkDate !== null
 
@@ -124,6 +129,6 @@ export default defineEndpoint({
   }
 
   // Return the complete data including lastTalkDate
-  return speakersWithTalks
+  return speakersList
   },
 })

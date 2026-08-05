@@ -44,7 +44,7 @@ export default defineTask({
           .select()
           .from(speakers)
           .where(eq(speakers.id, speakerTalk.speaker_id))
-          .get()
+          .then(rows => rows[0])
 
         if (!speaker) {
           missingSpeakers.add(speakerTalk.speaker_id)
@@ -57,7 +57,7 @@ export default defineTask({
           .select()
           .from(publicTalks)
           .where(eq(publicTalks.id, speakerTalk.talk_id))
-          .get()
+          .then(rows => rows[0])
 
         if (!talk) {
           missingTalks.add(speakerTalk.talk_id)
@@ -75,7 +75,7 @@ export default defineTask({
               eq(speakerTalks.talkId, speakerTalk.talk_id)
             )
           )
-          .get()
+          .then(rows => rows[0])
 
         if (!existing) {
           await db.insert(speakerTalks).values({

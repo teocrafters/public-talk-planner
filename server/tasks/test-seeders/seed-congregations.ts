@@ -213,7 +213,7 @@ export default defineTask({
         .select()
         .from(organization)
         .where(eq(organization.slug, congregation.slug!))
-        .get()
+        .then(rows => rows[0])
 
       if (!existing) {
         await db.insert(organization).values(congregation)

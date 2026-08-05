@@ -3,6 +3,10 @@ import { publicTalks, scheduledPublicTalks } from "../../database/schema"
 import { defineEndpoint } from "../../utils/define-endpoint"
 import { sortQuerySchema } from "#shared/utils/schemas/query-params"
 
+// `no` is free text, so a whole-value cast raises in PostgreSQL where SQLite silently yielded 0;
+// taking the leading digits keeps that 0 for values that start with none.
+const talkNumberOrder = sql`COALESCE(SUBSTRING(${publicTalks.no} FROM '^[0-9]+')::INTEGER, 0)`
+
 export default defineEndpoint({
   auth: false,
   query: sortQuerySchema,
@@ -47,8 +51,8 @@ export default defineEndpoint({
         // Sort by talk number numerically
         talksQuery =
           sortOrder === "desc"
-            ? talksQuery.orderBy(desc(sql`CAST(${publicTalks.no} AS INTEGER)`))
-            : talksQuery.orderBy(asc(sql`CAST(${publicTalks.no} AS INTEGER)`))
+            ? talksQuery.orderBy(desc(talkNumberOrder))
+            : talksQuery.orderBy(asc(talkNumberOrder))
         break
 
       default:

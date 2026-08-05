@@ -51,7 +51,7 @@ export default defineTask({
           .select()
           .from(organization)
           .where(eq(organization.id, speaker.congregation_id))
-          .get()
+          .then(rows => rows[0])
 
         if (!congregation) {
           logger.warn(
@@ -62,7 +62,11 @@ export default defineTask({
           continue
         }
 
-        const existing = await db.select().from(speakers).where(eq(speakers.id, speaker.id)).get()
+        const existing = await db
+          .select()
+          .from(speakers)
+          .where(eq(speakers.id, speaker.id))
+          .then(rows => rows[0])
 
         if (!existing) {
           await db.insert(speakers).values({
