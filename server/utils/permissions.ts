@@ -4,17 +4,13 @@ import { createError } from "h3"
 export async function hasPermission(event: H3Event, permissions: PermissionsMap): Promise<boolean> {
   const auth = serverAuth()
 
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  })
+  const session = await getRequestSession(event)
 
   if (!session?.user) {
     return false
   }
 
-  const member = await auth.api.getActiveMember({
-    headers: event.headers,
-  })
+  const member = await getRequestMember(event)
 
   if (!member) {
     return false
@@ -38,9 +34,7 @@ export function requirePermission(permissions: PermissionsMap) {
   return async (event: H3Event) => {
     const auth = serverAuth()
 
-    const session = await auth.api.getSession({
-      headers: event.headers,
-    })
+    const session = await getRequestSession(event)
 
     if (!session?.user) {
       await logAuditEvent(event, {
@@ -125,8 +119,7 @@ export function requirePermission(permissions: PermissionsMap) {
         details: {
           attemptedAction: event.method,
           requiredPermissions: permissions,
-          // userRole: member.role,
-          userRole: "publisher",
+          userRole: role.role,
         } satisfies AuditEventDetails[typeof AUDIT_EVENTS.PERMISSION_DENIED],
       })
 
