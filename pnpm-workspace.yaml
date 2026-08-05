@@ -1,4 +1,3 @@
 onlyBuiltDependencies:
   - "@tailwindcss/oxide"
   - vue-demi
-  - workerd
