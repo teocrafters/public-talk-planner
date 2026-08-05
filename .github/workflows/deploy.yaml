@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  # Never cancel: a run that already called the webhook must finish so the panel is not left
+  # deploying an image whose push was interrupted.
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  deploy:
+    name: Build, push and deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 🛎️ Checkout the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: 🏷️ Derive image tags
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: 🔧 Set up Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: 🔐 Log in to the registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # No secrets are passed to the build: every runtime value is read from the environment at
+      # boot, so nothing production-specific can be baked into the image.
+      - name: 🐳 Build and push the image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 🚀 Trigger the Dokploy deploy
+        env:
+          WEBHOOK_URL: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK_URL }}
+        run: curl --fail --silent --show-error --request POST "$WEBHOOK_URL"
