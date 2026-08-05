@@ -89,35 +89,24 @@ export default defineEndpoint({
 
       // If confirmed and meeting exists, delete it (cascade)
       if (existingProgramOnNewDate && body.confirmDeleteExisting) {
-        const partIds = existingProgramOnNewDate.parts.map(p => p.id)
+        const partIds = existingProgramOnNewDate.parts.map(part => part.id)
 
-        const operations = [
-          // Delete scheduled public talks
-          ...(existingProgramOnNewDate.id
-            ? [
-                db
-                  .delete(scheduledPublicTalks)
-                  .where(eq(scheduledPublicTalks.meetingProgramId, existingProgramOnNewDate.id)),
-              ]
-            : []),
-          // Delete scheduled parts
-          ...(partIds.length > 0
-            ? [
-                db
-                  .delete(meetingScheduledParts)
-                  .where(inArray(meetingScheduledParts.meetingProgramPartId, partIds)),
-              ]
-            : []),
-          // Delete program parts
-          ...(partIds.length > 0
-            ? [db.delete(meetingProgramParts).where(inArray(meetingProgramParts.id, partIds))]
-            : []),
-          // Delete program
-          db.delete(meetingPrograms).where(eq(meetingPrograms.id, existingProgramOnNewDate.id)),
-        ]
+        await db.transaction(async tx => {
+          // Deletion order is dictated by the RESTRICT constraints, not by cascade
+          await tx
+            .delete(scheduledPublicTalks)
+            .where(eq(scheduledPublicTalks.meetingProgramId, existingProgramOnNewDate.id))
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await db.batch(operations as any)
+          if (partIds.length > 0) {
+            await tx
+              .delete(meetingScheduledParts)
+              .where(inArray(meetingScheduledParts.meetingProgramPartId, partIds))
+
+            await tx.delete(meetingProgramParts).where(inArray(meetingProgramParts.id, partIds))
+          }
+
+          await tx.delete(meetingPrograms).where(eq(meetingPrograms.id, existingProgramOnNewDate.id))
+        })
       }
     }
 

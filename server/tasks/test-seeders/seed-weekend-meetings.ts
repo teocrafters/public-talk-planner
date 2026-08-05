@@ -194,7 +194,7 @@ export default defineTask({
           .select()
           .from(meetingPrograms)
           .where(and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, sunday)))
-          .get()
+          .then(rows => rows[0])
 
         if (existingProgram) {
           logger.info(`⏭️  Program already exists for ${sunday}`)
