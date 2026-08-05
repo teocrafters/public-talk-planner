@@ -35,15 +35,8 @@ function getBetterAuth() {
       requireEmailVerification: true,
     },
     database: drizzleAdapter(useDrizzle(), {
-      provider: "sqlite",
+      provider: "pg",
     }),
-    secondaryStorage: {
-      get: key => hubKV().getItemRaw(`_auth:${key}`),
-      set: (key, value, ttl) => {
-        return hubKV().set(`_auth:${key}`, value, { ttl })
-      },
-      delete: key => hubKV().del(`_auth:${key}`),
-    },
     plugins: [
       admin(),
       organization({
@@ -57,6 +50,11 @@ function getBetterAuth() {
       passkey(),
     ],
     advanced: {
+      database: {
+        // Every key in the database is uuid; the string form "uuid" is not a legal
+        // value here, only a function is.
+        generateId: () => crypto.randomUUID(),
+      },
       // A Secure cookie is dropped by the browser over the plain HTTP the local stack
       // serves, so this follows the environment rather than being pinned on.
       useSecureCookies: isProduction(),
