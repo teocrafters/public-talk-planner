@@ -1,0 +1,44 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  log_level: warn
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    # Single-store TSDB requires a 24h index period for retention to apply at all.
+    - from: "2026-01-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  # 30 days: long enough to investigate a fault reported a few weeks late, short enough that
+  # the log volume of a single small application stays well inside the VPS disk.
+  retention_period: 720h
+  max_query_lookback: 720h
+
+compactor:
+  working_directory: /loki/compactor
+  # Both are mandatory once retention is on; without them the compactor only compacts indexes
+  # and logs are kept forever.
+  retention_enabled: true
+  delete_request_store: filesystem
+
+analytics:
+  reporting_enabled: false
