@@ -2,7 +2,7 @@
   <div>
     <div
       class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div class="relative max-w-md w-full space-y-8">
+      <div class="max-w-md w-full space-y-8">
         <div :class="{ 'pointer-events-none opacity-50': sessionFetching }">
           <AuthForm
             ref="authFormRef"
@@ -12,14 +12,6 @@
             @forgot-password="handleForgotPassword" />
         </div>
       </div>
-    </div>
-    <!-- Loading overlay -->
-    <div
-      v-if="sessionFetching || overlayInitialState || loggedIn"
-      class="absolute inset-0 flex items-center justify-center bg-black/50! w-full h-full">
-      <UIcon
-        name="i-heroicons-arrow-path"
-        class="size-8 animate-spin text-primary" />
     </div>
   </div>
 </template>
@@ -33,14 +25,8 @@
     },
   })
 
-  const { signIn, fetchSession, sessionFetching, loggedIn } = useAuth()
+  const { signIn, fetchSession, sessionFetching } = useAuth()
   const authFormRef = ref()
-  const overlayInitialState = useState("overlayInitialState", () => true)
-  onMounted(() => {
-    nextTick(() => {
-      overlayInitialState.value = false
-    })
-  })
 
   const handleSignIn = async (credentials: { email: string; password: string }) => {
     if (!authFormRef.value) return
