@@ -11,7 +11,7 @@ export default defineTask({
     description: "Seed test accounts for E2E testing",
   },
   async run() {
-    console.log("Starting test accounts seeding...")
+    logger.info("Starting test accounts seeding...")
 
     try {
       const dataPath = join(process.cwd(), "tests", "fixtures", "test-accounts.json")
@@ -27,7 +27,7 @@ export default defineTask({
         : data.users
 
       if (staging) {
-        console.log(`ℹ️  Staging mode: Seeding ${usersToSeed.length} admin user(s) only`)
+        logger.info(`ℹ️  Staging mode: Seeding ${usersToSeed.length} admin user(s) only`)
       }
 
       // Check if organization already exists
@@ -38,11 +38,11 @@ export default defineTask({
       let orgId: string
 
       if (existingOrg) {
-        console.log(`Organization already exists: ${existingOrg.name}`)
+        logger.info(`Organization already exists: ${existingOrg.name}`)
         orgId = existingOrg.id
       } else {
         // Create organization directly in database
-        console.log(`Creating organization: ${data.organization.name}`)
+        logger.info(`Creating organization: ${data.organization.name}`)
         orgId = generateRandomString(32, "a-z", "A-Z", "0-9")
 
         await db.insert(organization).values({
@@ -52,7 +52,7 @@ export default defineTask({
           createdAt: new Date(),
         })
 
-        console.log(`✅ Organization created: ${data.organization.name} (${orgId})`)
+        logger.info(`✅ Organization created: ${data.organization.name} (${orgId})`)
       }
 
       // Create users with Better Auth sign-up API
@@ -65,7 +65,7 @@ export default defineTask({
         })
 
         if (!existing) {
-          console.log(`Creating user: ${userData.email}`)
+          logger.info(`Creating user: ${userData.email}`)
 
           // Create user via Better Auth sign-up API
           const signUpResult = await auth.api.signUpEmail({
@@ -97,14 +97,14 @@ export default defineTask({
           })
 
           createdCount++
-          console.log(`✅ User created with role ${userData.role}: ${userData.email}`)
+          logger.info(`✅ User created with role ${userData.role}: ${userData.email}`)
         } else {
           skippedCount++
-          console.log(`User already exists: ${userData.email}`)
+          logger.info(`User already exists: ${userData.email}`)
         }
       }
 
-      console.log(
+      logger.info(
         `✅ Seeded ${usersToSeed.length} test account(s) successfully (${createdCount} created, ${skippedCount} existing)`
       )
       return {
@@ -115,15 +115,11 @@ export default defineTask({
       }
     } catch (error: unknown) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("File not found: tests/fixtures/test-accounts.json")
+        logger.error("File not found: tests/fixtures/test-accounts.json")
         throw new Error("test-accounts.json not found")
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },

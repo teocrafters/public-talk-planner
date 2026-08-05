@@ -125,7 +125,7 @@ export default defineEventHandler(async event => {
       await archiveSpeaker(db, event, speakerId)
       counts.archived++
     } catch (error) {
-      console.error(`Failed to archive speaker ${speakerId}:`, error)
+      logger.error("Failed to archive speaker", { speakerId, error })
       errors.push(`Failed to archive speaker: ${speakerId}`)
     }
   }

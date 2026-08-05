@@ -8,7 +8,7 @@ export default defineTask({
     description: "Seed congregations (organizations)",
   },
   async run() {
-    console.log("Running congregations seed task...")
+    logger.info("Running congregations seed task...")
 
     const db = useDrizzle()
 
@@ -217,13 +217,13 @@ export default defineTask({
 
       if (!existing) {
         await db.insert(organization).values(congregation)
-        console.log(`Seeded congregation: ${congregation.name}`)
+        logger.info(`Seeded congregation: ${congregation.name}`)
       } else {
-        console.log(`Congregation already exists: ${congregation.name}`)
+        logger.info(`Congregation already exists: ${congregation.name}`)
       }
     }
 
-    console.log("Congregations seeded successfully")
+    logger.info("Congregations seeded successfully")
 
     return { result: "success" }
   },

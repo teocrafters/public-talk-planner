@@ -66,7 +66,7 @@ export default defineEventHandler(async (event): Promise<MembershipResponse> => 
       message: "Membership and publisher profile created successfully",
     } satisfies MembershipResponse
   } catch (error) {
-    console.error("Membership creation error:", error)
+    logger.error("Membership creation failed", { userId, congregationId, error })
     throw createError({
       statusCode: 500,
       statusMessage: "Failed to create membership",
