@@ -28,10 +28,10 @@ export const createScheduleSchema = (t: (key: string) => string) => {
       }),
 
       // Visiting speaker ID (external congregation)
-      speakerId: z.string().min(1, t("validation.speakerRequired")).optional(),
+      speakerId: z.string().uuid(t("validation.speakerRequired")).optional(),
 
       // Local publisher ID (from congregation)
-      publisherId: z.string().min(1, t("validation.publisherRequired")).optional(),
+      publisherId: z.string().uuid(t("validation.publisherRequired")).optional(),
 
       talkId: z.string().uuid().optional(),
 

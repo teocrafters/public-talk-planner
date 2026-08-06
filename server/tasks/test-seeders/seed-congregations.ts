@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm"
-import { generateId } from "better-auth"
 import { organization } from "../../database/auth-schema"
 
 export default defineTask({
@@ -15,7 +14,7 @@ export default defineTask({
     const congregations = [
       // TODO: Add more congregations
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Testowy Zbór",
         slug: "testowy-zbór",
         logo: null,
@@ -23,7 +22,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Żychlin",
         slug: "zychlin",
         logo: null,
@@ -31,7 +30,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Gostynin-Wschód",
         slug: "gostynin-wschod",
         logo: null,
@@ -39,7 +38,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Gostynin-Zachód",
         slug: "gostynin-zachod",
         logo: null,
@@ -47,7 +46,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Izbica Kujawska",
         slug: "izbica-kujawska",
         logo: null,
@@ -55,7 +54,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Kłodawa",
         slug: "klodawa",
         logo: null,
@@ -63,7 +62,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Kutno-Północ",
         slug: "kutno-polnoc",
         logo: null,
@@ -71,7 +70,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Kutno-Południe",
         slug: "kutno-poludnie",
         logo: null,
@@ -79,7 +78,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Lipno",
         slug: "lipno",
         logo: null,
@@ -87,7 +86,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Parzeń",
         slug: "parzen",
         logo: null,
@@ -95,7 +94,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Płock-Północ",
         slug: "plock-polnoc",
         logo: null,
@@ -103,7 +102,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Płock-Południe",
         slug: "plock-poludnie",
         logo: null,
@@ -111,7 +110,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Płock-Zachód",
         slug: "plock-zachod",
         logo: null,
@@ -119,7 +118,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Radziejów",
         slug: "radziejow",
         logo: null,
@@ -127,7 +126,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Sierpc",
         slug: "sierpc",
         logo: null,
@@ -135,7 +134,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Szpetal Górny",
         slug: "szpetal-gorny",
         logo: null,
@@ -143,7 +142,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Włocławek-Południe",
         slug: "wloclawek-poludnie",
         logo: null,
@@ -151,7 +150,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Włocławek-Wschód",
         slug: "wloclawek-wschod",
         logo: null,
@@ -159,7 +158,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Włocławek-Zazamcze",
         slug: "wloclawek-zazamcze",
         logo: null,
@@ -167,7 +166,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Łęczyca",
         slug: "leczyca",
         logo: null,
@@ -175,7 +174,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Łowicz",
         slug: "lowicz",
         logo: null,
@@ -183,7 +182,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Głowno",
         slug: "glowno",
         logo: null,
@@ -191,7 +190,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Sochaczew",
         slug: "sochaczew",
         logo: null,
@@ -199,7 +198,7 @@ export default defineTask({
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: crypto.randomUUID(),
         name: "Ozorków",
         slug: "ozorkow",
         logo: null,

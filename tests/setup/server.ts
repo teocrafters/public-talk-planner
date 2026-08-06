@@ -8,11 +8,15 @@ setup.setTimeout(120000)
 setup("Build and start server", async () => {
   console.log("Starting global setup...")
 
-  // 1. Clean database state
+  // 1. Create the schema, so the suite can bootstrap an empty database
+  console.log("Applying migrations...")
+  await x("pnpm", ["db:migrate"], { throwOnError: true })
+
+  // 2. Clean database state
   console.log("Cleaning database...")
   await truncateApplicationTables()
 
-  // 2. Kill any lingering Nuxt processes if they are still running
+  // 3. Kill any lingering Nuxt processes if they are still running
   try {
     await x("pkill", ["-f", "nuxt"])
     console.log("Killed lingering nuxt processes")
@@ -20,7 +24,7 @@ setup("Build and start server", async () => {
     console.log("pkill nuxt failed", error)
   }
 
-  // 3. Start preview server
+  // 4. Start preview server
   console.log("Starting preview server...")
   const serverProcess = x("pnpm", ["dev"], {
     nodeOptions: {
@@ -38,11 +42,11 @@ setup("Build and start server", async () => {
     })
   )
 
-  // 4. Wait for server
+  // 5. Wait for server
   console.log("Waiting for server...")
   await waitForServer("http://localhost:3000", 120000)
 
-  // 5. Run main seeder (handles all database seeding in correct order)
+  // 6. Run main seeder (handles all database seeding in correct order)
   console.log("Running main database seeder...")
   let seedAttempts = 0
   while (seedAttempts < 3) {

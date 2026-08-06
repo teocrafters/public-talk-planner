@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { eq } from "drizzle-orm"
-import { generateRandomString } from "better-auth/crypto"
 import { organization, member, user } from "../../database/auth-schema"
 import { serverAuth } from "../../utils/auth"
 
@@ -43,7 +42,7 @@ export default defineTask({
       } else {
         // Create organization directly in database
         logger.info(`Creating organization: ${data.organization.name}`)
-        orgId = generateRandomString(32, "a-z", "A-Z", "0-9")
+        orgId = crypto.randomUUID()
 
         await db.insert(organization).values({
           id: orgId,
@@ -86,7 +85,7 @@ export default defineTask({
           await db.update(user).set({ emailVerified: true }).where(eq(user.id, userId))
 
           // Add member to organization directly in database
-          const memberId = generateRandomString(32, "a-z", "A-Z", "0-9")
+          const memberId = crypto.randomUUID()
 
           await db.insert(member).values({
             id: memberId,

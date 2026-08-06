@@ -19,6 +19,7 @@
     "ci": "pnpm lint && pnpm typecheck && pnpm build",
     "check:fix": "pnpm lint:fix && pnpm format",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "auth:schema": "pnpm dlx @better-auth/cli generate --config scripts/auth-cli.ts --output server/database/auth-schema.ts -y",
     "seed": "curl -X POST http://localhost:3000/_nitro/tasks/seed",
     "test:e2e": "playwright test",

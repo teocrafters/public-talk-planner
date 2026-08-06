@@ -24,7 +24,7 @@ export const createSpeakerSchema = (t: (key: string) => string) => {
           .transform(s => s.replace(/\D/g, ""))
       ),
 
-    congregationId: z.string().min(1, t("validation.congregationRequired")),
+    congregationId: z.string().uuid(t("validation.congregationRequired")),
 
     talkIds: z.array(z.string().uuid()).optional().default([]),
   })
