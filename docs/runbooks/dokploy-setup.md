@@ -63,12 +63,13 @@ Create the application from a Docker image, not from a repository source:
 Settings reach the application by two different routes, and mixing them up bites silently:
 
 - Settings held in Nuxt's `runtimeConfig` are overridden only by the `NUXT_`-prefixed name —
-  `NUXT_DATABASE_URL`, `NUXT_JOB_FILES_DIR`. Dropping the prefix leaves the built-in default in
-  force.
+  `NUXT_DATABASE_URL`, `NUXT_JOB_FILES_DIR`, `NUXT_CLOUDFLARE_ACCOUNT_ID`,
+  `NUXT_CLOUDFLARE_EMAIL_TOKEN`, `NUXT_EMAIL_FROM`. Dropping the prefix leaves the built-in default
+  in force.
 - The rest are read straight from `process.env` under exactly the name they carry in
-  `.env.example`, with no prefix: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `RESEND_API_KEY`,
-  `ANTHROPIC_API_KEY`, `NUXT_SEED_STAGING`. Prefixing these makes them invisible — an app booted
-  without `BETTER_AUTH_SECRET` has no session secret.
+  `.env.example`, with no prefix: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `ANTHROPIC_API_KEY`,
+  `NUXT_SEED_STAGING`. Prefixing these makes them invisible — an app booted without
+  `BETTER_AUTH_SECRET` has no session secret.
 - `.env` files are not read in production. The panel is the only source of these values.
 
 Take the key list from `.env.example` at the commit being deployed and set each name exactly as it

@@ -1,3 +1,4 @@
+import type { VerificationEmailPayload } from "../utils/email"
 import type { SpeakerImportPayload } from "../utils/speaker-import"
 
 export default defineNitroPlugin(async nitroApp => {
@@ -14,6 +15,12 @@ export default defineNitroPlugin(async nitroApp => {
     if (!job) return
 
     return await handleSpeakerImport(job)
+  })
+
+  await boss.work<VerificationEmailPayload>(QUEUE_NAMES.SEND_VERIFICATION_EMAIL, async ([job]) => {
+    if (!job) return
+
+    await handleVerificationEmail(job)
   })
 
   await boss.work(QUEUE_NAMES.JOB_FILES_CLEANUP, async () => {

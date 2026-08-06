@@ -33,6 +33,11 @@ export default defineNuxtConfig({
   // environment variables supply them at runtime, and .env is not read in production.
   runtimeConfig: {
     databaseUrl: "",
+    cloudflareAccountId: "",
+    cloudflareEmailToken: "",
+    // Must be an address on a domain onboarded with Cloudflare Email Service, or every send is
+    // rejected.
+    emailFrom: "",
     // Not a secret: the default keeps local development working, and the container points it at
     // the job-files volume.
     jobFilesDir: ".data/job-files",
