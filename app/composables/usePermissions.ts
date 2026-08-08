@@ -1,7 +1,8 @@
-type Role = "publisher" | "public_talk_coordinator" | "boe_coordinator" | "admin"
+type Role = "publisher" | "public_talk_coordinator" | "boe_coordinator" | "admin" | "owner"
 
 export function usePermissions() {
-  const { user, client } = useAuth()
+  const { user } = useAuth()
+  const requestFetch = useRequestFetch()
   const role = useState<Role>("permissions:role", () => "publisher")
   const permissionCache = useState<Map<string, boolean>>("permissions:cache", () => new Map())
   const isLoading = useState<boolean>("permissions:loading", () => false)
@@ -20,62 +21,11 @@ export function usePermissions() {
 
     isLoading.value = true
     try {
-      const { data: activeMember } = await client.organization.getActiveMember()
+      // requestFetch forwards the session cookie, which plain $fetch drops during SSR.
+      const permissionMap = await requestFetch("/api/permissions/me")
 
-      if (activeMember?.role) {
-        role.value = activeMember.role as Role
-      } else {
-        role.value = "publisher"
-      }
-
-      const permissionsToCheck = [
-        { key: "speakers:list", permissions: { speakers: ["list"] } },
-        { key: "speakers:create", permissions: { speakers: ["create"] } },
-        { key: "speakers:update", permissions: { speakers: ["update"] } },
-        { key: "speakers:archive", permissions: { speakers: ["archive"] } },
-        { key: "talks:create", permissions: { talks: ["create"] } },
-        { key: "talks:update", permissions: { talks: ["update"] } },
-        { key: "talks:archive", permissions: { talks: ["archive"] } },
-        { key: "talks:flag", permissions: { talks: ["flag"] } },
-        {
-          key: "weekend_meetings:schedule_public_talks",
-          permissions: { weekend_meetings: ["schedule_public_talks"] },
-        },
-        {
-          key: "weekend_meetings:schedule_rest",
-          permissions: { weekend_meetings: ["schedule_rest"] },
-        },
-        { key: "weekend_meetings:list", permissions: { weekend_meetings: ["list"] } },
-        {
-          key: "weekend_meetings:list_history",
-          permissions: { weekend_meetings: ["list_history"] },
-        },
-        {
-          key: "weekend_meetings:manage_exceptions",
-          permissions: { weekend_meetings: ["manage_exceptions"] },
-        },
-        { key: "publishers:list", permissions: { publishers: ["list"] } },
-        { key: "publishers:create", permissions: { publishers: ["create"] } },
-        { key: "publishers:update", permissions: { publishers: ["update"] } },
-        { key: "publishers:link_to_user", permissions: { publishers: ["link_to_user"] } },
-      ]
-
-      // Admin users have all permissions
-      if (role.value === "admin") {
-        for (const check of permissionsToCheck) {
-          permissionCache.value.set(check.key, true)
-        }
-      } else {
-        // Non-admin users need to check permissions via API
-        for (const check of permissionsToCheck) {
-          const response = await client.organization.hasPermission({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            permissions: check.permissions as any,
-          })
-
-          permissionCache.value.set(check.key, response.data?.success ?? false)
-        }
-      }
+      role.value = permissionMap.role as Role
+      permissionCache.value = new Map(Object.entries(permissionMap.permissions))
 
       isFetched.value = true
     } catch (error) {
