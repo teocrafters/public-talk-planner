@@ -1,62 +1,92 @@
-import { sqliteTable, text, integer, uniqueIndex, check } from "drizzle-orm/sqlite-core"
+import {
+  pgTable,
+  pgEnum,
+  text,
+  integer,
+  uuid,
+  timestamp,
+  boolean,
+  date,
+  jsonb,
+  uniqueIndex,
+  check,
+} from "drizzle-orm/pg-core"
 import { relations, sql } from "drizzle-orm"
 import type { YYYYMMDD } from "../../shared/types/date"
 import { organization, user } from "./auth-schema"
-import { SPEAKER_SOURCE_TYPES } from "../../shared/constants/speaker-sources"
+import { MEETING_EXCEPTION_TYPES } from "../../shared/constants/meeting-exceptions"
+import {
+  SPEAKER_SOURCE_TYPES,
+  SPEAKER_SOURCE_TYPE_VALUES,
+} from "../../shared/constants/speaker-sources"
 
 export * from "./auth-schema"
 
 // AGENT-NOTE: After modifying schema, ALWAYS prompt user to run: pnpm db:generate (NEVER run it automatically)
 
-export const publicTalks = sqliteTable("public_talks", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const talkStatusEnum = pgEnum("talk_status", ["circuit_overseer", "will_be_replaced"])
+
+export const meetingTypeEnum = pgEnum("meeting_type", ["weekend", "midweek"])
+
+export const sexEnum = pgEnum("sex", ["male", "female"])
+
+export const exceptionTypeEnum = pgEnum("exception_type", [
+  MEETING_EXCEPTION_TYPES.CIRCUIT_ASSEMBLY,
+  MEETING_EXCEPTION_TYPES.REGIONAL_CONVENTION,
+  MEETING_EXCEPTION_TYPES.MEMORIAL,
+])
+
+export const speakerSourceTypeEnum = pgEnum("speaker_source_type", SPEAKER_SOURCE_TYPE_VALUES)
+
+export const publicTalks = pgTable("public_talks", {
+  id: uuid("id").primaryKey().defaultRandom(),
   no: text("no").notNull(),
   title: text("title").notNull(),
   multimediaCount: integer("multimedia_count").notNull().default(0),
   videoCount: integer("video_count").notNull().default(0),
-  status: text("status").$type<"circuit_overseer" | "will_be_replaced" | null>(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  status: talkStatusEnum("status"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 })
 
-export const auditLog = sqliteTable("audit_log", {
-  id: text("id").primaryKey(),
+export const auditLog = pgTable("audit_log", {
+  id: uuid("id").primaryKey(),
   userId: text("user_id").notNull(),
   userEmail: text("user_email").notNull(),
   action: text("action").notNull(),
   resourceType: text("resource_type").notNull(),
   resourceId: text("resource_id").notNull(),
-  details: text("details"),
+  details: jsonb("details"),
   ipAddress: text("ip_address"),
-  timestamp: integer("timestamp", { mode: "timestamp" })
+  timestamp: timestamp("timestamp", { withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
 })
 
-export const speakers = sqliteTable("speakers", {
-  id: text("id").primaryKey(),
+export const speakers = pgTable("speakers", {
+  id: uuid("id").primaryKey(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phone: text("phone").notNull(),
-  congregationId: text("congregation_id")
+  congregationId: uuid("congregation_id")
     .notNull()
     .references(() => organization.id, { onDelete: "restrict" }),
-  archived: integer("archived", { mode: "boolean" }).notNull().default(false),
-  archivedAt: integer("archived_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  archived: boolean("archived").notNull().default(false),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 })
 
-export const speakerTalks = sqliteTable(
+export const speakerTalks = pgTable(
   "speaker_talks",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    speakerId: text("speaker_id")
+    id: uuid("id").primaryKey().defaultRandom(),
+    speakerId: uuid("speaker_id")
       .notNull()
       .references(() => speakers.id, { onDelete: "cascade" }),
-    talkId: integer("talk_id")
+    talkId: uuid("talk_id")
       .notNull()
       .references(() => publicTalks.id, { onDelete: "cascade" }),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
   },
   table => {
     return {
@@ -73,90 +103,77 @@ export type NewSpeaker = typeof speakers.$inferInsert
 export type SpeakerTalk = typeof speakerTalks.$inferSelect
 
 // Publishers table - Local congregation publishers
-export const publishers = sqliteTable("publishers", {
-  id: text("id").primaryKey(),
+export const publishers = pgTable("publishers", {
+  id: uuid("id").primaryKey(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  sex: text("sex", { enum: ["male", "female"] }).notNull(),
-  userId: text("user_id")
+  sex: sexEnum("sex").notNull(),
+  userId: uuid("user_id")
     .unique()
     .references(() => user.id, { onDelete: "set null" }),
-  isElder: integer("is_elder", { mode: "boolean" }).notNull().default(false),
-  isMinisterialServant: integer("is_ministerial_servant", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  isRegularPioneer: integer("is_regular_pioneer", { mode: "boolean" }).notNull().default(false),
-  canChairWeekendMeeting: integer("can_chair_weekend_meeting", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  conductsWatchtowerStudy: integer("conducts_watchtower_study", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  backupWatchtowerConductor: integer("backup_watchtower_conductor", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  isReader: integer("is_reader", { mode: "boolean" }).notNull().default(false),
-  offersPublicPrayer: integer("offers_public_prayer", { mode: "boolean" }).notNull().default(false),
-  deliversPublicTalks: integer("delivers_public_talks", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  isCircuitOverseer: integer("is_circuit_overseer", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  isElder: boolean("is_elder").notNull().default(false),
+  isMinisterialServant: boolean("is_ministerial_servant").notNull().default(false),
+  isRegularPioneer: boolean("is_regular_pioneer").notNull().default(false),
+  canChairWeekendMeeting: boolean("can_chair_weekend_meeting").notNull().default(false),
+  conductsWatchtowerStudy: boolean("conducts_watchtower_study").notNull().default(false),
+  backupWatchtowerConductor: boolean("backup_watchtower_conductor").notNull().default(false),
+  isReader: boolean("is_reader").notNull().default(false),
+  offersPublicPrayer: boolean("offers_public_prayer").notNull().default(false),
+  deliversPublicTalks: boolean("delivers_public_talks").notNull().default(false),
+  isCircuitOverseer: boolean("is_circuit_overseer").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 })
 
 export type Publisher = typeof publishers.$inferSelect
 export type NewPublisher = typeof publishers.$inferInsert
 
-export const meetingPrograms = sqliteTable("meeting_programs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  type: text("type").$type<"weekend" | "midweek">().notNull(),
-  date: text("date").notNull().$type<YYYYMMDD>(),
-  isCircuitOverseerVisit: integer("is_circuit_overseer_visit", { mode: "boolean" })
-    .notNull()
-    .default(false),
+export const meetingPrograms = pgTable("meeting_programs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  type: meetingTypeEnum("type").notNull(),
+  date: date("date").notNull().$type<YYYYMMDD>(),
+  isCircuitOverseerVisit: boolean("is_circuit_overseer_visit").notNull().default(false),
   name: text("name"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 })
 
-export const meetingProgramParts = sqliteTable("meeting_program_parts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  meetingProgramId: integer("meeting_program_id")
+export const meetingProgramParts = pgTable("meeting_program_parts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  meetingProgramId: uuid("meeting_program_id")
     .notNull()
     .references(() => meetingPrograms.id, { onDelete: "cascade" }),
   type: text("type").notNull(),
   name: text("name"),
+  // "order" is reserved in PostgreSQL: Drizzle quotes it, and raw SQL touching it must quote it too
   order: integer("order").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
 })
 
 // Scheduled public talks (renamed from scheduledMeetings)
-export const scheduledPublicTalks = sqliteTable(
+export const scheduledPublicTalks = pgTable(
   "scheduled_public_talks",
   {
-    id: text("id").primaryKey(),
-    date: text("date").notNull().$type<YYYYMMDD>(),
-    meetingProgramId: integer("meeting_program_id")
+    id: uuid("id").primaryKey(),
+    date: date("date").notNull().$type<YYYYMMDD>(),
+    meetingProgramId: uuid("meeting_program_id")
       .notNull()
       .references(() => meetingPrograms.id, { onDelete: "restrict" }),
-    partId: integer("part_id")
+    partId: uuid("part_id")
       .notNull()
       .references(() => meetingProgramParts.id, { onDelete: "restrict" }),
     // Speaker source type: visiting_speaker or local_publisher
-    speakerSourceType: text("speaker_source_type")
+    speakerSourceType: speakerSourceTypeEnum("speaker_source_type")
       .notNull()
       .default(SPEAKER_SOURCE_TYPES.VISITING_SPEAKER),
     // Speaker reference (for visiting speakers from external congregations)
-    speakerId: text("speaker_id").references(() => speakers.id, { onDelete: "restrict" }),
+    speakerId: uuid("speaker_id").references(() => speakers.id, { onDelete: "restrict" }),
     // Publisher reference (for local congregation publishers)
-    publisherId: text("publisher_id").references(() => publishers.id, { onDelete: "restrict" }),
-    talkId: integer("talk_id").references(() => publicTalks.id, { onDelete: "restrict" }),
+    publisherId: uuid("publisher_id").references(() => publishers.id, { onDelete: "restrict" }),
+    talkId: uuid("talk_id").references(() => publicTalks.id, { onDelete: "restrict" }),
     customTalkTitle: text("custom_talk_title"),
-    overrideValidation: integer("override_validation", { mode: "boolean" })
-      .notNull()
-      .default(false),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+    overrideValidation: boolean("override_validation").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   table => {
     return {
@@ -175,18 +192,18 @@ export const scheduledPublicTalks = sqliteTable(
 )
 
 // Meeting scheduled parts - Non-public-talk assignments
-export const meetingScheduledParts = sqliteTable(
+export const meetingScheduledParts = pgTable(
   "meeting_scheduled_parts",
   {
-    id: text("id").primaryKey(),
-    meetingProgramPartId: integer("meeting_program_part_id")
+    id: uuid("id").primaryKey(),
+    meetingProgramPartId: uuid("meeting_program_part_id")
       .notNull()
       .references(() => meetingProgramParts.id, { onDelete: "cascade" }),
-    publisherId: text("publisher_id")
+    publisherId: uuid("publisher_id")
       .notNull()
       .references(() => publishers.id, { onDelete: "restrict" }),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   table => {
     return {
@@ -197,17 +214,15 @@ export const meetingScheduledParts = sqliteTable(
   }
 )
 
-export const meetingExceptions = sqliteTable(
+export const meetingExceptions = pgTable(
   "meeting_exceptions",
   {
-    id: text("id").primaryKey(),
-    date: text("date").notNull().$type<YYYYMMDD>(),
-    exceptionType: text("exception_type")
-      .$type<"circuit_assembly" | "regional_convention" | "memorial">()
-      .notNull(),
+    id: uuid("id").primaryKey(),
+    date: date("date").notNull().$type<YYYYMMDD>(),
+    exceptionType: exceptionTypeEnum("exception_type").notNull(),
     description: text("description"),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   table => {
     return {

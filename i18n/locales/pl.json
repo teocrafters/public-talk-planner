@@ -200,6 +200,7 @@
     "invalidFile": "Nieprawidłowy plik",
     "invalidJobId": "Nieprawidłowy identyfikator zadania",
     "jobNotFound": "Zadanie nie znalezione",
+    "importJobNotQueued": "Nie udało się dodać zadania importu do kolejki",
     "invalidRequestBody": "Nieprawidłowe dane żądania",
     "meetingDateHasException": "Nie można zaplanować zebrania - ten dzień jest oznaczony jako wyjątek ({exceptionType})",
     "exceptionAlreadyExists": "Wyjątek na ten dzień już istnieje",

@@ -1,0 +1,26 @@
+name: public-talk-planner
+
+services:
+  postgres:
+    # Must stay on the same major as the migration target, the testcontainers image and the
+    # managed database in Dokploy, or local work and the stage rehearsal diverge from production.
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: public_talk_planner
+    ports:
+      - "5432:5432"
+    volumes:
+      # PostgreSQL 18 moved PGDATA to /var/lib/postgresql/<major>/docker and declares the volume
+      # one level up; mounting /var/lib/postgresql/data here would silently lose the data.
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d public_talk_planner"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:

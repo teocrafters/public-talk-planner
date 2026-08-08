@@ -2,6 +2,12 @@ import { eq, desc, asc, sql } from "drizzle-orm"
 import { publicTalks, scheduledPublicTalks } from "../../database/schema"
 import { defineEndpoint } from "../../utils/define-endpoint"
 import { sortQuerySchema } from "#shared/utils/schemas/query-params"
+import { compareNullableDates } from "#shared/utils/date-yyyymmdd"
+import type { YYYYMMDD } from "#shared/types/date"
+
+// `no` is free text, so a whole-value cast raises in PostgreSQL where SQLite silently yielded 0;
+// taking the leading digits keeps that 0 for values that start with none.
+const talkNumberOrder = sql`COALESCE(SUBSTRING(${publicTalks.no} FROM '^[0-9]+')::INTEGER, 0)`
 
 export default defineEndpoint({
   auth: false,
@@ -26,7 +32,7 @@ export default defineEndpoint({
         status: publicTalks.status,
         createdAt: publicTalks.createdAt,
         // Include last given date from scheduled talks
-        lastGivenDate: sql<number | null>`MAX(${scheduledPublicTalks.date})`.as("lastGivenDate"),
+        lastGivenDate: sql<YYYYMMDD | null>`MAX(${scheduledPublicTalks.date})`.as("lastGivenDate"),
       })
       .from(publicTalks)
       .leftJoin(scheduledPublicTalks, eq(publicTalks.id, scheduledPublicTalks.talkId))
@@ -47,8 +53,8 @@ export default defineEndpoint({
         // Sort by talk number numerically
         talksQuery =
           sortOrder === "desc"
-            ? talksQuery.orderBy(desc(sql`CAST(${publicTalks.no} AS INTEGER)`))
-            : talksQuery.orderBy(asc(sql`CAST(${publicTalks.no} AS INTEGER)`))
+            ? talksQuery.orderBy(desc(talkNumberOrder))
+            : talksQuery.orderBy(asc(talkNumberOrder))
         break
 
       default:
@@ -64,24 +70,9 @@ export default defineEndpoint({
 
     // Additional sorting for lastGiven when SQL sort needs special handling for nulls
     if (sortBy === "lastGiven") {
-      talksList.sort((a, b) => {
-        const aHasDate = a.lastGivenDate !== null
-        const bHasDate = b.lastGivenDate !== null
+      const direction = sortOrder === "desc" ? -1 : 1
 
-        if (sortOrder === "desc") {
-          // Newest first, then those without dates
-          if (!aHasDate && !bHasDate) return 0
-          if (!aHasDate) return 1
-          if (!bHasDate) return -1
-          return (b.lastGivenDate || 0) - (a.lastGivenDate || 0)
-        } else {
-          // Oldest first, then those without dates
-          if (!aHasDate && !bHasDate) return 0
-          if (!aHasDate) return -1
-          if (!bHasDate) return 1
-          return (a.lastGivenDate || 0) - (b.lastGivenDate || 0)
-        }
-      })
+      talksList.sort((a, b) => direction * compareNullableDates(a.lastGivenDate, b.lastGivenDate))
     }
 
     // Return the complete data including lastGivenDate

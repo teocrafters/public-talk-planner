@@ -31,14 +31,14 @@ export default defineTask({
     description: "Seed coordinator accounts for Żychlin congregation",
   },
   async run() {
-    console.log("Starting coordinator accounts seeding...")
+    logger.info("Starting coordinator accounts seeding...")
 
     try {
       const db = useDrizzle()
       const auth = serverAuth()
 
       // Step 1: Find Żychlin congregation
-      console.log(`Looking for Żychlin congregation (slug: ${ZYCHLIN_SLUG})...`)
+      logger.info(`Looking for Żychlin congregation (slug: ${ZYCHLIN_SLUG})...`)
       const zychlinCongregation = await db.query.organization.findFirst({
         where: eq(organization.slug, ZYCHLIN_SLUG),
       })
@@ -47,7 +47,7 @@ export default defineTask({
         throw new Error(`Żychlin congregation not found (slug: ${ZYCHLIN_SLUG})`)
       }
 
-      console.log(
+      logger.info(
         `✅ Found Żychlin congregation: ${zychlinCongregation.name} (${zychlinCongregation.id})`
       )
 
@@ -64,11 +64,11 @@ export default defineTask({
 
         if (existing) {
           skippedCount++
-          console.log(`⏭️  User already exists: ${accountData.email}`)
+          logger.info(`⏭️  User already exists: ${accountData.email}`)
           continue
         }
 
-        console.log(`Creating coordinator account: ${accountData.email} (${accountData.role})`)
+        logger.info(`Creating coordinator account: ${accountData.email} (${accountData.role})`)
 
         // Generate secure 24-character password (mixed case + numbers)
         const password = generateRandomString(24, "a-z", "A-Z", "0-9")
@@ -115,11 +115,11 @@ export default defineTask({
               .set({ userId: userId })
               .where(eq(publishers.id, publisherId))
 
-            console.log(
+            logger.info(
               `✅ Linked to publisher profile: ${publisher.firstName} ${publisher.lastName}`
             )
           } else {
-            console.warn(`⚠️  Publisher not found (id: ${publisherId})`)
+            logger.warn(`⚠️  Publisher not found (id: ${publisherId})`)
           }
         }
 
@@ -130,48 +130,28 @@ export default defineTask({
         })
 
         createdCount++
-        console.log(`✅ Created coordinator account: ${accountData.email} (${accountData.role})`)
+        logger.info(`✅ Created coordinator account: ${accountData.email} (${accountData.role})`)
       }
 
-      // Step 3: Display generated credentials
       if (generatedCredentials.length > 0) {
-        console.log("\n" + "=".repeat(80))
-        console.log("⚠️  GENERATED CREDENTIALS - SAVE THESE SECURELY!")
-        console.log("=".repeat(80))
-
-        for (const cred of generatedCredentials) {
-          console.log(`Email: ${cred.email}`)
-          console.log(`Role: ${cred.role}`)
-          console.log(`Password: ${cred.password}`)
-          console.log("-".repeat(80))
-        }
-
-        console.log("=".repeat(80))
-        console.log("⚠️  These passwords will NOT be displayed again!")
-        console.log("=".repeat(80))
+        logger.info(
+          `⚠️  Generated ${generatedCredentials.length} password(s) - read them from this task's result, they are never logged`
+        )
       }
 
-      console.log(
+      logger.info(
         `\n✅ Coordinator accounts seeding completed (${createdCount} created, ${skippedCount} existing)`
       )
 
+      // Passwords travel only in the task result: stdout is shipped to Loki and retained there.
       return {
         result: "success",
         created: createdCount,
         skipped: skippedCount,
-        credentials: generatedCredentials.map(c => ({
-          email: c.email,
-          role: c.role,
-          // Don't include password in return value for security
-        })),
+        credentials: generatedCredentials,
       }
     } catch (error: unknown) {
-      console.error("Error during coordinator accounts seeding:", error)
-
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Error during coordinator accounts seeding", { error })
 
       throw error
     }

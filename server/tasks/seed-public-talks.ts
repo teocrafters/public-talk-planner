@@ -19,25 +19,25 @@ export default defineTask({
     description: "Seed public talks from JSON data file",
   },
   async run() {
-    console.log("Starting public talks seeding...")
+    logger.info("Starting public talks seeding...")
 
     try {
       const dataPath = join(process.cwd(), "server", "data", "public-talks.json")
       const data = await readFile(dataPath, "utf-8")
       const talks = JSON.parse(data)
 
-      console.log("Validating talk data with Zod...")
-      console.log(`Found ${talks.length} talks in JSON file`)
+      logger.info("Validating talk data with Zod...")
+      logger.info(`Found ${talks.length} talks in JSON file`)
       const validatedTalks = PublicTalksArraySchema.parse(talks)
-      console.log(`Validation passed for ${validatedTalks.length} talks`)
+      logger.info(`Validation passed for ${validatedTalks.length} talks`)
 
       const db = useDrizzle()
 
-      console.log("Deleting existing public talks...")
+      logger.info("Deleting existing public talks...")
       await db.delete(publicTalks)
-      console.log("Deleted existing public talks")
+      logger.info("Deleted existing public talks")
 
-      console.log(`Inserting ${validatedTalks.length} talks...`)
+      logger.info(`Inserting ${validatedTalks.length} talks...`)
       for (const talk of validatedTalks) {
         await db.insert(publicTalks).values({
           no: talk.no,
@@ -49,33 +49,29 @@ export default defineTask({
         })
       }
 
-      console.log(`✅ Seeded ${validatedTalks.length} public talks successfully`)
+      logger.info(`✅ Seeded ${validatedTalks.length} public talks successfully`)
 
       return { result: "success", count: validatedTalks.length }
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         const issues = error.issues || []
-        console.error("Validation errors:", JSON.stringify(issues, null, 2))
+        logger.error("Validation errors", { issues })
         throw new Error(`Zod validation failed: ${issues.length} errors found`)
       }
 
       if (error instanceof SyntaxError) {
-        console.error("JSON parsing failed:", error.message)
+        logger.error("JSON parsing failed", { error })
         throw new Error("Invalid JSON in public-talks.json file")
       }
 
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("File not found: server/data/public-talks.json")
+        logger.error("File not found: server/data/public-talks.json")
         throw new Error(
           "public-talks.json not found. Run the analysis script first: node scripts/analyze-jwpub.cjs"
         )
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },

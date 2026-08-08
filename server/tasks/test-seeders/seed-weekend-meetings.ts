@@ -81,17 +81,17 @@ export default defineTask({
     description: "Seed complete weekend meeting programs with publishers and assignments",
   },
   async run() {
-    console.log("Starting weekend meetings seeding...")
+    logger.info("Starting weekend meetings seeding...")
 
     try {
       const db = useDrizzle()
 
       // Step 1: Get all publishers from database
-      console.log("Fetching publishers from database...")
+      logger.info("Fetching publishers from database...")
       const samplePublishers = await db.query.publishers.findMany()
 
       if (samplePublishers.length === 0) {
-        console.warn("⚠️  No publishers found. Run seed-publishers first.")
+        logger.warn("⚠️  No publishers found. Run seed-publishers first.")
         return {
           result: "success",
           publishersCount: 0,
@@ -99,7 +99,7 @@ export default defineTask({
         }
       }
 
-      console.log(`✅ Found ${samplePublishers.length} publishers`)
+      logger.info(`✅ Found ${samplePublishers.length} publishers`)
 
       // Step 2: Get all active speakers for public talk assignments
       const speakersWithTalks = await db.query.speakers.findMany({
@@ -114,18 +114,18 @@ export default defineTask({
       })
 
       if (speakersWithTalks.length === 0) {
-        console.warn("⚠️  No speakers found. Run seed-speakers first for public talks.")
+        logger.warn("⚠️  No speakers found. Run seed-speakers first for public talks.")
       } else {
-        console.log(`Found ${speakersWithTalks.length} active speakers`)
+        logger.info(`Found ${speakersWithTalks.length} active speakers`)
       }
 
       // Step 3: Get all public talks for random assignment to local speakers
       const allPublicTalks = await db.query.publicTalks.findMany()
-      console.log(`Found ${allPublicTalks.length} public talks`)
+      logger.info(`Found ${allPublicTalks.length} public talks`)
 
       // Step 4: Calculate next 12 Sundays
       const sundays = calculateSundays(12)
-      console.log(`Will create programs for ${sundays.length} Sundays`)
+      logger.info(`Will create programs for ${sundays.length} Sundays`)
 
       // Step 5: Pre-calculate fair distribution of assignments for all roles
       // This ensures each eligible brother gets similar number of assignments
@@ -151,17 +151,17 @@ export default defineTask({
         sundays.length
       )
 
-      console.log(`\n📊 Assignment Distribution:`)
-      console.log(
+      logger.info(`\n📊 Assignment Distribution:`)
+      logger.info(
         `   - Chairmen: ${chairmanAssignments.length} assignments for ${new Set(chairmanAssignments.map(p => p.id)).size} people`
       )
-      console.log(
+      logger.info(
         `   - Readers: ${readerAssignments.length} assignments for ${new Set(readerAssignments.map(p => p.id)).size} people`
       )
-      console.log(
+      logger.info(
         `   - Prayers: ${prayerAssignments.length} assignments for ${new Set(prayerAssignments.map(p => p.id)).size} people`
       )
-      console.log(
+      logger.info(
         `   - Local Speakers: ${localSpeakerAssignments.length} assignments for ${new Set(localSpeakerAssignments.map(p => p.id)).size} people\n`
       )
 
@@ -194,10 +194,10 @@ export default defineTask({
           .select()
           .from(meetingPrograms)
           .where(and(eq(meetingPrograms.type, "weekend"), eq(meetingPrograms.date, sunday)))
-          .get()
+          .then(rows => rows[0])
 
         if (existingProgram) {
-          console.log(`⏭️  Program already exists for ${sunday}`)
+          logger.info(`⏭️  Program already exists for ${sunday}`)
           continue
         }
 
@@ -215,14 +215,14 @@ export default defineTask({
         })
 
         programsCreated++
-        console.log(
+        logger.info(
           `✅ Created program for ${sunday}${isCircuitOverseerVisit ? " (CO Visit)" : ""}`
         )
       }
 
-      console.log(`\n✅ Weekend meetings seeding completed successfully`)
-      console.log(`   - Publishers: ${samplePublishers.length}`)
-      console.log(`   - Programs created: ${programsCreated}`)
+      logger.info(`\n✅ Weekend meetings seeding completed successfully`)
+      logger.info(`   - Publishers: ${samplePublishers.length}`)
+      logger.info(`   - Programs created: ${programsCreated}`)
 
       return {
         result: "success",
@@ -230,11 +230,7 @@ export default defineTask({
         programsCount: programsCreated,
       }
     } catch (error: unknown) {
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },
@@ -265,9 +261,9 @@ interface CreateProgramOptions {
     id: string
     firstName: string
     lastName: string
-    speakerTalks?: Array<{ talkId: number }>
+    speakerTalks?: Array<{ talkId: string }>
   }>
-  publicTalks: Array<{ id: number; title: string }>
+  publicTalks: Array<{ id: string; title: string }>
   preAssignedChairman?: typeof publishers.$inferSelect
   preAssignedReader?: typeof publishers.$inferSelect
   preAssignedPrayer?: typeof publishers.$inferSelect

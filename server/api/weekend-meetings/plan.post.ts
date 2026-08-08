@@ -231,7 +231,7 @@ export default defineEndpoint({
     partsToCreate.push({ type: MEETING_PART_TYPES.CLOSING_PRAYER, order: currentOrder++ })
   }
 
-  const createdParts = new Map<string, number>()
+  const createdParts = new Map<string, string>()
   for (const part of partsToCreate) {
     const partResult = await db
       .insert(meetingProgramParts)
@@ -257,7 +257,7 @@ export default defineEndpoint({
 
   // Create scheduled parts (publisher assignments)
   // Note: PUBLIC_TALK assignments are created via /api/schedules endpoint
-  const assignmentsToCreate: Array<{ partId: number; publisherId: string }> = [
+  const assignmentsToCreate: Array<{ partId: string; publisherId: string }> = [
     {
       partId: createdParts.get(MEETING_PART_TYPES.CHAIRMAN)!,
       publisherId: body.parts.chairman,
@@ -326,7 +326,7 @@ export default defineEndpoint({
   await logAuditEvent(event, {
     action: AUDIT_EVENTS.WEEKEND_MEETING_PLANNED,
     resourceType: "meeting_program",
-    resourceId: program.id.toString(),
+    resourceId: program.id,
     details: {
       programId: program.id,
       date: body.date,

@@ -45,8 +45,6 @@ export default defineEndpoint({
       },
     })
 
-    let deletedMeetingId: number | undefined
-
     // Validate confirmation before proceeding
     if (existingProgram && !body.confirmDeleteExisting) {
       // Return 409 with meeting details for user confirmation
@@ -72,61 +70,39 @@ export default defineEndpoint({
       })
     }
 
-    // Build batch operations array
-    // AGENT-NOTE: Using conditional spread to build array of operations for D1 batch API
-    // All operations must be independent - dependent queries (like partIds) are fetched beforehand
-    // AGENT-NOTE: Using 'any[]' because TypeScript cannot properly infer mixed Drizzle operation types
-    const operations = [
-      // Step 1: Delete scheduled public talks (has RESTRICT constraint on meetingProgramId)
-      ...(existingProgram
-        ? [
-            db
-              .delete(scheduledPublicTalks)
-              .where(eq(scheduledPublicTalks.meetingProgramId, existingProgram.id)),
-          ]
-        : []),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ] as any[]
-
-    if (existingProgram) {
-      // User confirmed deletion - manually delete in correct order due to RESTRICT constraints
-      deletedMeetingId = existingProgram.id
-
-      // Step 2: Fetch meeting program part IDs BEFORE batch (dependent query - must be outside batch)
-      const partIds = await db
-        .select({ id: meetingProgramParts.id })
-        .from(meetingProgramParts)
-        .where(eq(meetingProgramParts.meetingProgramId, existingProgram.id))
-
-      // Step 3: Delete meeting scheduled parts (needs to be deleted before program parts)
-      if (partIds.length > 0) {
-        operations.push(
-          db.delete(meetingScheduledParts).where(
-            inArray(
-              meetingScheduledParts.meetingProgramPartId,
-              partIds.map(p => p.id)
-            )
-          )
-        )
-      }
-
-      // Step 4: Delete meeting program parts
-      operations.push(
-        db
-          .delete(meetingProgramParts)
-          .where(eq(meetingProgramParts.meetingProgramId, existingProgram.id))
-      )
-
-      // Step 5: Finally delete the meeting program itself
-      operations.push(db.delete(meetingPrograms).where(eq(meetingPrograms.id, existingProgram.id)))
-    }
-
-    // Create the exception (within the same batch)
+    const deletedMeetingId = existingProgram?.id
     const exceptionId = crypto.randomUUID()
     const now = new Date()
 
-    operations.push(
-      db.insert(meetingExceptions).values({
+    await db.transaction(async tx => {
+      if (existingProgram) {
+        // Deletion order is dictated by the RESTRICT constraints, not by cascade
+        await tx
+          .delete(scheduledPublicTalks)
+          .where(eq(scheduledPublicTalks.meetingProgramId, existingProgram.id))
+
+        const parts = await tx
+          .select({ id: meetingProgramParts.id })
+          .from(meetingProgramParts)
+          .where(eq(meetingProgramParts.meetingProgramId, existingProgram.id))
+
+        if (parts.length > 0) {
+          await tx.delete(meetingScheduledParts).where(
+            inArray(
+              meetingScheduledParts.meetingProgramPartId,
+              parts.map(part => part.id)
+            )
+          )
+        }
+
+        await tx
+          .delete(meetingProgramParts)
+          .where(eq(meetingProgramParts.meetingProgramId, existingProgram.id))
+
+        await tx.delete(meetingPrograms).where(eq(meetingPrograms.id, existingProgram.id))
+      }
+
+      await tx.insert(meetingExceptions).values({
         id: exceptionId,
         date: body.date,
         exceptionType: body.exceptionType,
@@ -134,10 +110,7 @@ export default defineEndpoint({
         createdAt: now,
         updatedAt: now,
       })
-    )
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await db.batch(operations as any)
+    })
 
     // Log audit event
     await logAuditEvent(event, {

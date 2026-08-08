@@ -1,6 +1,6 @@
 [
   {
-    "id": "speaker-test-001",
+    "id": "1a01107d-6ad3-4345-812d-3126211f1a09",
     "firstName": "Jan",
     "lastName": "Kowalski",
     "phone": "123456789",
@@ -8,7 +8,7 @@
     "archived": false
   },
   {
-    "id": "speaker-test-002",
+    "id": "db57f938-4ea9-4944-8107-760920fa535c",
     "firstName": "Paweł",
     "lastName": "Nowak",
     "phone": "987654321",
@@ -16,7 +16,7 @@
     "archived": false
   },
   {
-    "id": "speaker-test-003",
+    "id": "def8d7d4-4d23-4dcd-9373-9f6cf567ab62",
     "firstName": "Piotr",
     "lastName": "Wiśniewski",
     "phone": "555666777",
@@ -24,7 +24,7 @@
     "archived": false
   },
   {
-    "id": "speaker-test-004",
+    "id": "146f8a03-fbb4-40a7-8110-3285698c1b85",
     "firstName": "Marcin",
     "lastName": "Dąbrowski",
     "phone": "111222333",
@@ -32,7 +32,7 @@
     "archived": false
   },
   {
-    "id": "speaker-test-005",
+    "id": "213ea0dc-d425-4694-9cfe-186e66c6f3ac",
     "firstName": "Tomasz",
     "lastName": "Lewandowski",
     "phone": "444555666",
@@ -40,7 +40,7 @@
     "archived": true
   },
   {
-    "id": "speaker-test-006",
+    "id": "ddc02918-b942-42c3-92da-14642a8324d4",
     "firstName": "Kamil",
     "lastName": "Wójcik",
     "phone": "777888999",
@@ -48,7 +48,7 @@
     "archived": false
   },
   {
-    "id": "speaker-test-007",
+    "id": "79b7a34b-26dc-4bf4-9eba-a23cf5030237",
     "firstName": "Andrzej",
     "lastName": "Kamiński",
     "phone": "222333444",
@@ -56,7 +56,7 @@
     "archived": true
   },
   {
-    "id": "speaker-test-008",
+    "id": "138e2e9f-ca7b-4ceb-b6e4-c9127a4afa1c",
     "firstName": "Mateusz",
     "lastName": "Zieliński",
     "phone": "888999000",

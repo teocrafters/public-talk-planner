@@ -1,5 +1,5 @@
 import { createError } from "h3"
-import { eq, sql } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { speakers, speakerTalks, organization, publicTalks } from "../../database/schema"
 import { defineEndpoint } from "../../utils/define-endpoint"
 import { logAuditEvent } from "../../utils/audit-log"
@@ -32,7 +32,7 @@ export default defineEndpoint({
     const talksExist = await db
       .select()
       .from(publicTalks)
-      .where(sql`${publicTalks.id} IN ${body.talkIds}`)
+      .where(inArray(publicTalks.id, body.talkIds))
 
     if (talksExist.length !== body.talkIds.length) {
       throw createError({
@@ -70,7 +70,7 @@ export default defineEndpoint({
   }
 
   if (body.talkIds && body.talkIds.length > 0) {
-    const talkAssignments = body.talkIds.map((talkId: number) => ({
+    const talkAssignments = body.talkIds.map((talkId: string) => ({
       speakerId,
       talkId,
       createdAt: new Date(),
@@ -107,7 +107,7 @@ export default defineEndpoint({
             title: publicTalks.title,
           })
           .from(publicTalks)
-          .where(sql`${publicTalks.id} IN ${body.talkIds}`)
+          .where(inArray(publicTalks.id, body.talkIds))
       : []
 
   return {

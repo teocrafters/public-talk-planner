@@ -8,15 +8,15 @@ import { logAuditEvent } from "../../utils/audit-log"
 import { AUDIT_EVENTS } from "#shared/utils/audit-events"
 import type { AuditEventDetails } from "#shared/types/audit-events"
 
-// Numeric ID params schema
-const numericIdParamsSchema = (t: (key: string) => string) =>
+// UUID params schema
+const uuidParamsSchema = (t: (key: string) => string) =>
   z.object({
-    id: z.coerce.number().int().positive(t("validation.invalidId")),
+    id: z.string().uuid(t("validation.invalidUuid")),
   })
 
 export default defineEndpoint({
   permissions: { talks: ["update"] },
-  params: numericIdParamsSchema,
+  params: uuidParamsSchema,
   body: updateTalkSchema,
   handler: async (event, { params, body }) => {
     const id = params.id
@@ -65,7 +65,7 @@ export default defineEndpoint({
     await logAuditEvent(event, {
       action: AUDIT_EVENTS.TALK_EDITED,
       resourceType: "public_talk",
-      resourceId: id.toString(),
+      resourceId: id,
       details: {
         talkId: id,
         talkNo: talk.no,

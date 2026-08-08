@@ -3,9 +3,9 @@ import type { YYYYMMDD } from "./date"
 export interface ScheduleWithRelations {
   id: string
   date: YYYYMMDD
-  meetingProgramId: number
+  meetingProgramId: string
   meetingProgramName: string
-  partId: number
+  partId: string
   partName: string
   speakerSourceType: string
   speakerId: string | null
@@ -15,7 +15,7 @@ export interface ScheduleWithRelations {
   speakerPhone: string | null
   congregationId: string | null
   congregationName: string | null
-  talkId: number | null
+  talkId: string | null
   talkNumber: string | null
   talkTitle: string | null
   customTalkTitle: string | null

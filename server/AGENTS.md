@@ -1,13 +1,13 @@
 # Backend Development Guidelines (Nitro + Nuxt 4)
 
-Guidelines for developing the backend API using Nitro, Drizzle ORM, and Cloudflare D1 database.
+Guidelines for developing the backend API using Nitro, Drizzle ORM, and PostgreSQL.
 
 ## Core Principles
 
-- **Serverless-first** - Cloudflare Workers with edge computing
+- **Long-lived Node process** - a container behind Dokploy, holding a PostgreSQL connection pool
 - **Type-safe API routes** - Drizzle ORM with TypeScript
 - **Validation at boundaries** - Zod schemas for all request validation
-- **Batch operation safety for D1** - Use db.batch() for related operations on D1
+- **Real transactions** - use db.transaction() for related writes
 - **Security-first** - Input validation, SQL injection prevention, proper error handling
 
 ## Project Structure
@@ -43,18 +43,18 @@ server/
 
 ```typescript
 // server/database/schema.ts
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
+import { pgTable, text, uuid, boolean, timestamp } from "drizzle-orm/pg-core"
 
-export const speakers = sqliteTable("speakers", {
-  id: text("id").primaryKey(),
+export const speakers = pgTable("speakers", {
+  id: uuid("id").primaryKey().defaultRandom(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email"),
   phone: text("phone"),
   congregation: text("congregation"),
-  isArchived: integer("is_archived", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  isArchived: boolean("is_archived").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 })
 
 // Export types for use in application
@@ -66,9 +66,9 @@ export type NewSpeaker = typeof speakers.$inferInsert
 
 - Use descriptive table and column names
 - ALWAYS include `createdAt` and `updatedAt` timestamps
-- Use `mode: "timestamp"` for datetime fields
-- Use `mode: "boolean"` for boolean fields (SQLite compatibility)
-- Store custom dates as unix timestamps (integer, seconds)
+- Use `uuid(...)` for primary keys; the database never hands out integer ids
+- Use `timestamp(..., { withTimezone: true })` for datetime fields and `boolean(...)` for flags
+- Store calendar-only dates with `date(...)`, not a timestamp
 - Export TypeScript types using `$inferSelect` and `$inferInsert`
 
 ### Database Access
@@ -95,57 +95,40 @@ export default defineEventHandler(async event => {
 - Operators: `eq`, `and`, `or`, `sql`, `gte`, `lte`, `desc`, `asc`
 - Tables: `tables.speakers`, `tables.meetings`, etc.
 
-### Cloudflare D1 Transaction Limitations
+### Transactions
 
-⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`,
-`SAVEPOINT`).
-
-**Why D1 is Different:**
-
-- D1 is a serverless SQLite database running in Cloudflare Workers
-- Traditional SQL transactions don't work in the Workers environment
-- Drizzle's `db.transaction()` uses SQL BEGIN which D1 will reject
-
-**Recommended Alternative:**
-
-1. **Use `db.batch()` for atomic operations** (D1-compatible approach)
-
-### Batch Operations Pattern (D1-Compatible)
+PostgreSQL supports real transactions, so multi-table writes use `db.transaction()`.
 
 ```typescript
-// Use batch() for operations affecting multiple tables on D1
 export default defineEventHandler(async event => {
   const db = useDrizzle()
 
-  // All operations execute atomically - if any fails, all are rolled back
-  await db.batch([
-    // Insert talk
-    db.insert(tables.talks).values({
-      id: crypto.randomUUID(),
-      title: "New Talk",
-      speakerId: speaker.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }),
+  await db.transaction(async tx => {
+    const [talk] = await tx
+      .insert(tables.talks)
+      .values({
+        title: "New Talk",
+        speakerId: speaker.id,
+      })
+      .returning()
 
-    // Create schedule entry (talkId must be known beforehand)
-    db.insert(tables.schedules).values({
-      id: crypto.randomUUID(),
-      talkId: talkId,
-      scheduledDate: dateTimestamp,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }),
-  ])
+    await tx.insert(tables.schedules).values({
+      talkId: talk.id,
+      scheduledDate: date,
+    })
+  })
 })
 ```
 
 **Key Points**:
 
-- USE `db.batch()` when updating multiple related records (D1 requirement)
-- ROLLBACK happens automatically on any error within batch
-- KEEP batches short and focused
-- MOVE dependent queries outside the batch (e.g., fetch data first)
+- USE `db.transaction()` when a write depends on another write, or when partial application would
+  leave the data inconsistent
+- READ inside the transaction when the write depends on the value read - a `SELECT` hoisted above
+  the transaction is not part of it
+- ROLLBACK happens automatically when the callback throws
+- KEEP transactions short; they hold a connection from the pool for their whole duration
+- NEVER use `db.batch()` - it is a D1 pseudo-transaction and is not part of this stack
 
 ### Migration Workflow (CRITICAL)
 
@@ -168,7 +151,7 @@ export default defineEventHandler(async event => {
 These hooks actively enforce backend best practices:
 
 **BLOCK Operations:**
-- **database-safety-bash** - Blocks manual database commands (sqlite3, pnpm db:generate)
+- **database-safety-bash** - Blocks manual database commands (psql, pnpm db:generate)
 - **database-safety-files** - Blocks manual migration file edits
 - **git-safety** - Blocks force push to main/master branches
 
@@ -408,12 +391,15 @@ export default defineTask({
 
 ```typescript
 // server/utils/drizzle.ts
-import { drizzle } from "drizzle-orm/d1"
+import { drizzle } from "drizzle-orm/node-postgres"
+import { Pool } from "pg"
 export { sql, eq, and, or, gte, lte, desc, asc } from "drizzle-orm"
 import * as schema from "~/server/database/schema"
 
+const pool = new Pool({ connectionString: useRuntimeConfig().databaseUrl })
+
 export function useDrizzle() {
-  return drizzle(hubDatabase(), { schema })
+  return drizzle(pool, { schema })
 }
 
 export const tables = schema
@@ -450,7 +436,7 @@ const speakers = await db
 
 ```typescript
 // WRONG: Manual SQL execution
-sqlite3 db.sqlite < migrations/0001_migration.sql
+psql "$NUXT_DATABASE_URL" -f migrations/0001_migration.sql
 
 // WRONG: Running db:generate automatically
 await $`pnpm db:generate`
@@ -514,4 +500,4 @@ Use these skills during backend development:
 - Drizzle ORM: Queries, schema definition, migrations
 - Nitro: Server engine, API routes, event handlers
 - Nuxt 4: Server utilities, composables
-- Cloudflare D1: Database platform, Workers integration
+- PostgreSQL: SQL reference, types, indexes

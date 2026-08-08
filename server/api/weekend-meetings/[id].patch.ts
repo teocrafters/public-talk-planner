@@ -12,10 +12,10 @@ import { updateWeekendMeetingSchema } from "#shared/utils/schemas"
 import type { MeetingPartType } from "#shared/constants/meetings"
 import { MEETING_PART_TYPES, MEETING_PART_ORDER } from "#shared/constants/meetings"
 
-// Numeric ID params schema
-const numericIdParamsSchema = (t: (key: string) => string) =>
+// UUID params schema
+const uuidParamsSchema = (t: (key: string) => string) =>
   z.object({
-    id: z.coerce.number().int().positive(t("validation.invalidId")),
+    id: z.string().uuid(t("validation.invalidUuid")),
   })
 
 /**
@@ -25,9 +25,9 @@ const numericIdParamsSchema = (t: (key: string) => string) =>
 async function ensurePartAndAssignment(
   db: ReturnType<typeof useDrizzle>,
   program: {
-    id: number
+    id: string
     parts: Array<{
-      id: number
+      id: string
       type: string
       meetingScheduledParts: Array<{ id: string; publisherId: string }>
     }>
@@ -97,10 +97,10 @@ async function ensurePartAndAssignment(
 
 export default defineEndpoint({
   permissions: { weekend_meetings: ["schedule_rest"] },
-  params: numericIdParamsSchema,
+  params: uuidParamsSchema,
   body: updateWeekendMeetingSchema,
   handler: async (event, { params, body }) => {
-    const programId = params.id.toString()
+    const programId = params.id
     const db = useDrizzle()
 
   // Check if program exists

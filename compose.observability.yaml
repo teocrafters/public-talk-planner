@@ -1,0 +1,54 @@
+name: public-talk-planner-observability
+
+services:
+  loki:
+    image: grafana/loki:3.7.5
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki.yaml
+    volumes:
+      - ./docker/observability/loki.yaml:/etc/loki/loki.yaml:ro
+      # Chunks, index and compactor markers all live under the config's path_prefix, so a single
+      # volume is what makes a log line outlive the container that wrote it.
+      - loki-data:/loki
+
+  # Container stdout reaches Loki only through a collector; Promtail reached end of life in
+  # March 2026, so Alloy is the supported one.
+  alloy:
+    image: grafana/alloy:v1.18.0
+    restart: unless-stopped
+    command:
+      - run
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    volumes:
+      - ./docker/observability/config.alloy:/etc/alloy/config.alloy:ro
+      # Read-only socket access is enough to discover containers and tail their logs.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Holds the read offsets, so a restart resumes instead of replaying every log file.
+      - alloy-data:/var/lib/alloy/data
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:13.1.2
+    restart: unless-stopped
+    environment:
+      # No default: an unset variable must stop the stack rather than start Grafana on a
+      # guessable password.
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    ports:
+      # Loopback only — Grafana sits behind the VPS's reverse proxy, never on a public port.
+      # Host 3001 because the application already holds 3000.
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - ./docker/observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/loki.yaml:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - loki
+
+volumes:
+  loki-data:
+  alloy-data:
+  grafana-data:

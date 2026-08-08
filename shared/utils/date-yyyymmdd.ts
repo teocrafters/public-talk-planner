@@ -39,6 +39,25 @@ export function compareDates(a: YYYYMMDD, b: YYYYMMDD): -1 | 0 | 1 {
 }
 
 /**
+ * Compare two dates where a missing one means "never happened"
+ *
+ * @param a - First date, or null
+ * @param b - Second date, or null
+ * @returns -1 if a < b, 0 if equal, 1 if a > b — a null sorts before any real date
+ */
+export function compareNullableDates(a: YYYYMMDD | null, b: YYYYMMDD | null): -1 | 0 | 1 {
+  if (a === null) {
+    return b === null ? 0 : -1
+  }
+
+  if (b === null) {
+    return 1
+  }
+
+  return compareDates(a, b)
+}
+
+/**
  * Check if two dates are the same day
  * Uses dayjs().isSame() for reliable equality check
  *

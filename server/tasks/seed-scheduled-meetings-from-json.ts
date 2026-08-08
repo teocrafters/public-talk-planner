@@ -29,19 +29,19 @@ export default defineTask({
     description: "Seed scheduled weekend meetings from JSON file",
   },
   async run() {
-    console.log("Starting scheduled meetings seeding from JSON...")
+    logger.info("Starting scheduled meetings seeding from JSON...")
 
     try {
       const db = useDrizzle()
 
       const dataPath = join(process.cwd(), "server", "tasks", "seed", "scheduled-meetings.json")
 
-      console.log(`Reading data from: ${dataPath}`)
+      logger.info(`Reading data from: ${dataPath}`)
 
       const data = await readFile(dataPath, "utf-8")
       const validatedMeetings = ScheduledMeetingsArraySchema.parse(JSON.parse(data))
 
-      console.log(`✅ Validated ${validatedMeetings.length} meetings from JSON`)
+      logger.info(`✅ Validated ${validatedMeetings.length} meetings from JSON`)
 
       let programsFound = 0
       let partsCreated = 0
@@ -72,7 +72,7 @@ export default defineTask({
         })
 
         if (!program) {
-          console.warn(`⚠️  Meeting program not found for date ${meeting.date} - skipping`)
+          logger.warn(`⚠️  Meeting program not found for date ${meeting.date} - skipping`)
           continue
         }
 
@@ -106,10 +106,10 @@ export default defineTask({
         }
       }
 
-      console.log("✅ Scheduled meetings seeding completed successfully")
-      console.log(`   - Meeting programs found: ${programsFound}`)
-      console.log(`   - Program parts created: ${partsCreated}`)
-      console.log(`   - Publisher assignments created: ${assignmentsCreated}`)
+      logger.info("✅ Scheduled meetings seeding completed successfully")
+      logger.info(`   - Meeting programs found: ${programsFound}`)
+      logger.info(`   - Program parts created: ${partsCreated}`)
+      logger.info(`   - Publisher assignments created: ${assignmentsCreated}`)
 
       return {
         result: "success",
@@ -118,29 +118,26 @@ export default defineTask({
         assignmentsCreated,
       }
     } catch (error: unknown) {
-      console.error("❌ Scheduled meetings seeding failed")
+      logger.error("❌ Scheduled meetings seeding failed")
 
       if (error instanceof z.ZodError) {
-        console.error("Zod validation failed:", JSON.stringify(error.issues, null, 2))
+        logger.error("Zod validation failed", { issues: error.issues })
         throw new Error(`Validation failed: ${error.issues.length} errors found in JSON data`)
       }
 
       if (error instanceof SyntaxError) {
-        console.error("JSON parsing failed:", error.message)
+        logger.error("JSON parsing failed", { error })
         throw new Error(`Invalid JSON in scheduled-meetings.json: ${error.message}`)
       }
 
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("File not found: server/tasks/seed/scheduled-meetings.json")
+        logger.error("File not found: server/tasks/seed/scheduled-meetings.json")
         throw new Error(
           "scheduled-meetings.json file not found. Please ensure it exists in server/tasks/seed/"
         )
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Stack trace:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
 
       throw error
     }

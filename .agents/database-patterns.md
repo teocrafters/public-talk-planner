@@ -189,73 +189,51 @@ export type NewSpeaker = typeof speakers.$inferInsert
 
 ```typescript
 // server/utils/drizzle.ts
-import { drizzle } from "drizzle-orm/d1"
+import { drizzle } from "drizzle-orm/node-postgres"
+import { Pool } from "pg"
 export { sql, eq, and, or, gte, lte, desc, asc } from "drizzle-orm"
 import * as schema from "~/server/database/schema"
 
+const pool = new Pool({ connectionString: useRuntimeConfig().databaseUrl })
+
 export function useDrizzle() {
-  return drizzle(hubDatabase(), { schema })
+  return drizzle(pool, { schema })
 }
 
 export const tables = schema
 ```
 
-### Cloudflare D1 Transaction Limitations
+The pool is created once at module scope and shared by every request; `node-postgres` pins a
+transaction to a single client for its duration.
 
-⛔ **CRITICAL:** Cloudflare D1 does NOT support traditional SQL transactions (`BEGIN TRANSACTION`,
-`SAVEPOINT`).
+### Transaction Pattern
 
-**Why D1 is Different:**
+- USE `db.transaction()` when a write depends on another write, or when partial application would
+  leave the data inconsistent
+- READ inside the transaction when the write depends on the value read
+- ROLLBACK happens automatically when the callback throws
+- KEEP transactions short; they hold a connection from the pool for their whole duration
 
-- D1 is a serverless SQLite database running in Cloudflare Workers
-- Traditional SQL transactions don't work in the Workers environment
-- Drizzle's `db.transaction()` uses SQL BEGIN which D1 will reject
-
-**Recommended Alternative:**
-
-1. **Use `db.batch()` for atomic operations** (D1-compatible approach)
-
-### Batch Operations Pattern (D1-Compatible)
-
-- USE `db.batch()` when updating multiple related records
-- ROLLBACK happens automatically on any error within batch
-- KEEP batches short and focused
-- MOVE dependent queries outside the batch (e.g., fetch data first)
-
-**Example Batch Usage:**
+**Example Transaction Usage:**
 
 ```typescript
 const db = useDrizzle()
 
-// All operations execute atomically - if any fails, all are rolled back
-await db.batch([
-  // Insert talk
-  db.insert(tables.talks).values({
-    id: crypto.randomUUID(),
-    title: "New Talk",
-    speakerId: speaker.id,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }),
+await db.transaction(async tx => {
+  const [talk] = await tx
+    .insert(tables.talks)
+    .values({
+      title: "New Talk",
+      speakerId: speaker.id,
+    })
+    .returning()
 
-  // Create schedule entry (talkId must be known beforehand)
-  db.insert(tables.schedules).values({
-    id: crypto.randomUUID(),
-    talkId: talkId, // Pre-fetched or generated
-    scheduledDate: dateTimestamp,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }),
-])
-
-// If any operation fails, D1 rolls back the entire batch
+  await tx.insert(tables.schedules).values({
+    talkId: talk.id,
+    scheduledDate: date,
+  })
+})
 ```
-
-**Important Batch API Considerations:**
-
-- All statements in batch must be independent (no dependencies on results from previous statements)
-- Move dependent queries outside the batch (e.g., fetch IDs before executing batch)
-- If any operation fails, D1 rolls back the entire batch
 
 ```
 
@@ -469,27 +447,29 @@ database.
 
 Never concatenate user input into SQL queries. Always use Drizzle's parameterized queries.
 
-**❌ Using db.transaction() with Cloudflare D1**
+**❌ Using db.batch()**
 
-Cloudflare D1 does not support SQL BEGIN TRANSACTION. Use `db.batch()` instead.
+`db.batch()` is a D1 pseudo-transaction whose statements cannot depend on each other. PostgreSQL
+supports real transactions.
 
 ```typescript
-// ❌ Wrong: Will fail on D1
-await db.transaction(async tx => {
-  await tx.insert(tables.talks).values(...)
-  await tx.insert(tables.schedules).values(...)
-})
-
-// ✅ Correct: Use batch() for D1
+// ❌ Wrong: statements cannot see each other's results
 await db.batch([
   db.insert(tables.talks).values(...),
   db.insert(tables.schedules).values(...),
 ])
+
+// ✅ Correct
+await db.transaction(async tx => {
+  await tx.insert(tables.talks).values(...)
+  await tx.insert(tables.schedules).values(...)
+})
 ```
 
-**❌ Not Using Batch Operations for Related Operations**
+**❌ Reading Outside the Transaction That Depends on the Read**
 
-Without batch operations, partial updates can occur if errors happen during multi-step operations.
+A `SELECT` hoisted above `db.transaction()` is not part of it, so the read-then-write sequence is
+not atomic and another writer can change the row in between.
 
 ## Context7 References
 

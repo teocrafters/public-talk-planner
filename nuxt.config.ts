@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-10-04",
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
-  modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxthub/core", "@nuxtjs/i18n"],
+  modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxtjs/i18n"],
   // ssr: false,
   i18n: {
     defaultLocale: "pl",
@@ -29,17 +29,21 @@ export default defineNuxtConfig({
       fallbackLocale: "pl",
     },
   },
-  hub: {
-    cache: true,
-    database: true,
-    kv: true,
+  // Defaults are empty so a CI-built image carries no secrets; only NUXT_-prefixed
+  // environment variables supply them at runtime, and .env is not read in production.
+  runtimeConfig: {
+    databaseUrl: "",
+    cloudflareAccountId: "",
+    cloudflareEmailToken: "",
+    // Must be an address on a domain onboarded with Cloudflare Email Service, or every send is
+    // rejected.
+    emailFrom: "",
+    // Not a secret: the default keeps local development working, and the container points it at
+    // the job-files volume.
+    jobFilesDir: ".data/job-files",
   },
   nitro: {
-    preset: "cloudflare_module",
-    cloudflare: {
-      deployConfig: true,
-      nodeCompat: true,
-    },
+    preset: "node-server",
     experimental: {
       tasks: true,
     },

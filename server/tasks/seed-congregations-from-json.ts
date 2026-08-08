@@ -21,17 +21,17 @@ export default defineTask({
     description: "Seed congregations from JSON file",
   },
   async run() {
-    console.log("Starting congregations seeding from JSON...")
+    logger.info("Starting congregations seeding from JSON...")
 
     try {
       const dataPath = join(process.cwd(), "server", "tasks", "seed", "congregation.json")
       const data = await readFile(dataPath, "utf-8")
       const congregations = JSON.parse(data)
 
-      console.log("Validating congregation data with Zod...")
-      console.log(`Found ${congregations.length} congregations in JSON file`)
+      logger.info("Validating congregation data with Zod...")
+      logger.info(`Found ${congregations.length} congregations in JSON file`)
       const validatedCongregations = CongregationsArraySchema.parse(congregations)
-      console.log(`Validation passed for ${validatedCongregations.length} congregations`)
+      logger.info(`Validation passed for ${validatedCongregations.length} congregations`)
 
       const db = useDrizzle()
 
@@ -43,7 +43,7 @@ export default defineTask({
           .select()
           .from(organization)
           .where(eq(organization.slug, congregation.slug))
-          .get()
+          .then(rows => rows[0])
 
         if (!existing) {
           await db.insert(organization).values({
@@ -54,19 +54,19 @@ export default defineTask({
             metadata: congregation.metadata,
             createdAt: new Date(congregation.created_at),
           })
-          console.log(`✅ Seeded congregation: ${congregation.name}`)
+          logger.info(`✅ Seeded congregation: ${congregation.name}`)
           seededCount++
         } else {
-          console.log(`⏭️  Congregation already exists: ${congregation.name}`)
+          logger.info(`⏭️  Congregation already exists: ${congregation.name}`)
           skippedCount++
         }
       }
 
-      console.log("=".repeat(60))
-      console.log(`✅ Congregations seeding completed`)
-      console.log(`   - Seeded:  ${seededCount}`)
-      console.log(`   - Skipped: ${skippedCount}`)
-      console.log("=".repeat(60))
+      logger.info("=".repeat(60))
+      logger.info(`✅ Congregations seeding completed`)
+      logger.info(`   - Seeded:  ${seededCount}`)
+      logger.info(`   - Skipped: ${skippedCount}`)
+      logger.info("=".repeat(60))
 
       return {
         result: "success",
@@ -76,25 +76,21 @@ export default defineTask({
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         const issues = error.issues || []
-        console.error("Validation errors:", JSON.stringify(issues, null, 2))
+        logger.error("Validation errors", { issues })
         throw new Error(`Zod validation failed: ${issues.length} errors found`)
       }
 
       if (error instanceof SyntaxError) {
-        console.error("JSON parsing failed:", error.message)
+        logger.error("JSON parsing failed", { error })
         throw new Error("Invalid JSON in congregation.json file")
       }
 
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("File not found: server/tasks/seed/congregation.json")
+        logger.error("File not found: server/tasks/seed/congregation.json")
         throw new Error("congregation.json not found in server/tasks/seed/ directory")
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },

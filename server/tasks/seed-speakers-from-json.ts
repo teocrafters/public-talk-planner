@@ -27,17 +27,17 @@ export default defineTask({
     description: "Seed visiting speakers from JSON file",
   },
   async run() {
-    console.log("Starting speakers seeding from JSON...")
+    logger.info("Starting speakers seeding from JSON...")
 
     try {
       const dataPath = join(process.cwd(), "server", "tasks", "seed", "speakers.json")
       const data = await readFile(dataPath, "utf-8")
       const speakersList = JSON.parse(data)
 
-      console.log("Validating speaker data with Zod...")
-      console.log(`Found ${speakersList.length} speakers in JSON file`)
+      logger.info("Validating speaker data with Zod...")
+      logger.info(`Found ${speakersList.length} speakers in JSON file`)
       const validatedSpeakers = SpeakersArraySchema.parse(speakersList)
-      console.log(`Validation passed for ${validatedSpeakers.length} speakers`)
+      logger.info(`Validation passed for ${validatedSpeakers.length} speakers`)
 
       const db = useDrizzle()
 
@@ -51,10 +51,10 @@ export default defineTask({
           .select()
           .from(organization)
           .where(eq(organization.id, speaker.congregation_id))
-          .get()
+          .then(rows => rows[0])
 
         if (!congregation) {
-          console.warn(
+          logger.warn(
             `⚠️  Congregation not found for speaker ${speaker.first_name} ${speaker.last_name} (congregation ID: ${speaker.congregation_id})`
           )
           missingCongregations.add(speaker.congregation_id)
@@ -62,7 +62,11 @@ export default defineTask({
           continue
         }
 
-        const existing = await db.select().from(speakers).where(eq(speakers.id, speaker.id)).get()
+        const existing = await db
+          .select()
+          .from(speakers)
+          .where(eq(speakers.id, speaker.id))
+          .then(rows => rows[0])
 
         if (!existing) {
           await db.insert(speakers).values({
@@ -76,23 +80,23 @@ export default defineTask({
             createdAt: new Date(speaker.created_at * 1000),
             updatedAt: new Date(speaker.updated_at * 1000),
           })
-          console.log(`✅ Seeded speaker: ${speaker.first_name} ${speaker.last_name}`)
+          logger.info(`✅ Seeded speaker: ${speaker.first_name} ${speaker.last_name}`)
           seededCount++
         } else {
-          console.log(`⏭️  Speaker already exists: ${speaker.first_name} ${speaker.last_name}`)
+          logger.info(`⏭️  Speaker already exists: ${speaker.first_name} ${speaker.last_name}`)
           skippedCount++
         }
       }
 
-      console.log("=".repeat(60))
-      console.log(`✅ Speakers seeding completed`)
-      console.log(`   - Seeded:  ${seededCount}`)
-      console.log(`   - Skipped: ${skippedCount}`)
+      logger.info("=".repeat(60))
+      logger.info(`✅ Speakers seeding completed`)
+      logger.info(`   - Seeded:  ${seededCount}`)
+      logger.info(`   - Skipped: ${skippedCount}`)
       if (missingCongregations.size > 0) {
-        console.log(`   - Missing congregations: ${missingCongregations.size}`)
-        console.log(`     IDs: ${Array.from(missingCongregations).join(", ")}`)
+        logger.info(`   - Missing congregations: ${missingCongregations.size}`)
+        logger.info(`     IDs: ${Array.from(missingCongregations).join(", ")}`)
       }
-      console.log("=".repeat(60))
+      logger.info("=".repeat(60))
 
       return {
         result: missingCongregations.size > 0 ? "partial_success" : "success",
@@ -103,27 +107,23 @@ export default defineTask({
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         const issues = error.issues || []
-        console.error("Validation errors:", JSON.stringify(issues, null, 2))
+        logger.error("Validation errors", { issues })
         throw new Error(`Zod validation failed: ${issues.length} errors found`)
       }
 
       if (error instanceof SyntaxError) {
-        console.error("JSON parsing failed:", error.message)
+        logger.error("JSON parsing failed", { error })
         throw new Error("Invalid JSON in speakers.json file")
       }
 
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.error("File not found: server/tasks/seed/speakers.json")
+        logger.error("File not found: server/tasks/seed/speakers.json")
         throw new Error(
           "speakers.json not found in server/tasks/seed/ directory - user should provide this file"
         )
       }
 
-      console.error("Unexpected error during seeding:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
+      logger.error("Unexpected error during seeding", { error })
       throw error
     }
   },

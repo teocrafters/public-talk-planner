@@ -1,6 +1,6 @@
 [
   {
-    "id": "7A9e35x0SOSCjz0boAx6Bxi347UpovKD",
+    "id": "ef7c11aa-2b1f-4196-bf56-98c223b0d294",
     "name": "Nieznany zbor",
     "slug": "nieznany-zbor",
     "logo": null,
@@ -8,7 +8,7 @@
     "metadata": null
   },
   {
-    "id": "Dx9pmNqI5wWR5FNfKCEeO1p6LB4sG5BG",
+    "id": "da5e4dfa-3682-494f-8dc8-52a4e074b59e",
     "name": "Gostynin-Zachód",
     "slug": "gostynin-zachod",
     "logo": null,
@@ -16,7 +16,7 @@
     "metadata": null
   },
   {
-    "id": "F3yMgwl9XKnGQqE04Xnu7sLlwqveaDqq",
+    "id": "441f7b39-7bac-4c82-bb48-f20ed3eacdcc",
     "name": "Włocławek-Zazamcze",
     "slug": "wloclawek-zazamcze",
     "logo": null,
@@ -24,7 +24,7 @@
     "metadata": null
   },
   {
-    "id": "FLIqb2qPUqqEQesZylfiOlMa0PSGPJA5",
+    "id": "6ff9538f-7cf5-4461-94cb-ead9f07ea650",
     "name": "Radziejów",
     "slug": "radziejow",
     "logo": null,
@@ -32,7 +32,7 @@
     "metadata": null
   },
   {
-    "id": "FYfQaF8Ih7XC7hpYRLCxT9HevAqzdULU",
+    "id": "80bf0d22-cb61-464e-a02f-1f068b5b3790",
     "name": "Izbica Kujawska",
     "slug": "izbica-kujawska",
     "logo": null,
@@ -40,7 +40,7 @@
     "metadata": null
   },
   {
-    "id": "ISH0TnsbzqLrM7YLGLf1HDQt0pXEpAZ5",
+    "id": "fd1605c5-f282-4a5b-8752-d666eb929cd9",
     "name": "Parzeń",
     "slug": "parzen",
     "logo": null,
@@ -48,7 +48,7 @@
     "metadata": null
   },
   {
-    "id": "Ik714H5R7FM3MfFzyuR7hxZWjChiZKr5",
+    "id": "8e1756a8-0391-46d2-907b-b4d1028c8f3c",
     "name": "Testowy Zbór",
     "slug": "testowy-zbór",
     "logo": null,
@@ -56,7 +56,7 @@
     "metadata": null
   },
   {
-    "id": "L4fV5o6rBGS6uMQ4TN8SYYh4CRIeBE7s",
+    "id": "0d6b730c-778d-4cae-b382-2c1c2a4353df",
     "name": "Żychlin",
     "slug": "zychlin",
     "logo": null,
@@ -64,7 +64,7 @@
     "metadata": null
   },
   {
-    "id": "O4urWUF1R8HabI7yJ0ghosU0i3PQG8Gu",
+    "id": "35b862b0-043b-4adc-bde9-029c550971fc",
     "name": "Kutno-Południe",
     "slug": "kutno-poludnie",
     "logo": null,
@@ -72,7 +72,7 @@
     "metadata": null
   },
   {
-    "id": "P8D2FG54uUMiTSgIEz4B5nEDCBpu5AU1",
+    "id": "d57745f1-9d27-4b92-b10c-c1cbc9680331",
     "name": "Ozorków",
     "slug": "ozorkow",
     "logo": null,
@@ -80,7 +80,7 @@
     "metadata": null
   },
   {
-    "id": "RpCZOyIsnoCm6IA6dDPQJ4wKj50ayGfU",
+    "id": "65b54eee-4a6a-4cb2-85c4-78798e1da285",
     "name": "Kutno-Północ",
     "slug": "kutno-polnoc",
     "logo": null,
@@ -88,7 +88,7 @@
     "metadata": null
   },
   {
-    "id": "Vh4UQfvm5H69FJOG9l1qJLBlkOTpaR8d",
+    "id": "4f9904df-905d-4451-bc36-8452078d43fb",
     "name": "Lipno",
     "slug": "lipno",
     "logo": null,
@@ -96,7 +96,7 @@
     "metadata": null
   },
   {
-    "id": "W6c8ieITOSBog8TBWvAEvlNWsCnAfOHL",
+    "id": "2a41b9be-ae39-4c8e-92b7-c8d671c93b7a",
     "name": "Sierpc",
     "slug": "sierpc",
     "logo": null,
@@ -104,7 +104,7 @@
     "metadata": null
   },
   {
-    "id": "WDwfCLx25Nf9VQao6JEy49CSSJzkScRz",
+    "id": "f39bad0c-1be5-4afe-aa9b-ea6b2ea26400",
     "name": "Płock-Południe",
     "slug": "plock-poludnie",
     "logo": null,
@@ -112,7 +112,7 @@
     "metadata": null
   },
   {
-    "id": "Xn60d9bzoxmxPcqbCIg5bRSiv6QV39Ep",
+    "id": "e59a9185-2387-4b8e-8e18-7bf3c0dcd527",
     "name": "Gostynin-Wschód",
     "slug": "gostynin-wschod",
     "logo": null,
@@ -120,7 +120,7 @@
     "metadata": null
   },
   {
-    "id": "arv0Q969bO9qqV51RE6QhUlx9jHVFm47",
+    "id": "5624df84-c2bb-4c61-b250-11c8130406c0",
     "name": "Kłodawa",
     "slug": "klodawa",
     "logo": null,
@@ -128,7 +128,7 @@
     "metadata": null
   },
   {
-    "id": "hrVUGELjWJjQ2U4cZ3vQ9lO8p2ay8OxN",
+    "id": "a5413813-f81c-41aa-8f12-fab73fbefda8",
     "name": "Łęczyca",
     "slug": "leczyca",
     "logo": null,
@@ -136,7 +136,7 @@
     "metadata": null
   },
   {
-    "id": "kYpqK2IY25O4RJROLj4ZUUxjJdGhlBR1",
+    "id": "eb08ba20-06d2-4ce2-aca4-c97cabb61b7c",
     "name": "Sochaczew",
     "slug": "sochaczew",
     "logo": null,
@@ -144,7 +144,7 @@
     "metadata": null
   },
   {
-    "id": "meBgUhvplfQDp0VoemBCGYtfuy5D5jL6",
+    "id": "d9c0164f-b850-4911-bbe9-6b6c2b5228cb",
     "name": "Płock-Północ",
     "slug": "plock-polnoc",
     "logo": null,
@@ -152,7 +152,7 @@
     "metadata": null
   },
   {
-    "id": "pfpGTQDfEVh3ylcqsjtnn7q5krA1Ezuy",
+    "id": "3b756735-595b-46db-8e96-f5ccc9dd1177",
     "name": "Głowno",
     "slug": "glowno",
     "logo": null,
@@ -160,7 +160,7 @@
     "metadata": null
   },
   {
-    "id": "sBExWUC1gBx6FErRypQWV3OBMupDRgvd",
+    "id": "ec9009b4-6639-48ca-9b42-c2f6ca98b89a",
     "name": "Szpetal Górny",
     "slug": "szpetal-gorny",
     "logo": null,
@@ -168,7 +168,7 @@
     "metadata": null
   },
   {
-    "id": "sklXyWbz8IMVUDNlr9DKGKu09YvPREIh",
+    "id": "b72583eb-f47d-46e4-a356-0cdc60e2937a",
     "name": "Włocławek-Wschód",
     "slug": "wloclawek-wschod",
     "logo": null,
@@ -176,7 +176,7 @@
     "metadata": null
   },
   {
-    "id": "uSBlRC5KZmML1Eybgxeh4MoZvtIN5kiI",
+    "id": "3dc779dd-382b-4510-85b8-07d08661c068",
     "name": "Włocławek-Południe",
     "slug": "wloclawek-poludnie",
     "logo": null,
@@ -184,7 +184,7 @@
     "metadata": null
   },
   {
-    "id": "x0R70YyvwmiX0Hv2uvbmpPf2GOMGASjh",
+    "id": "c7477a93-e8f2-4cb3-9c5f-c23e3137fa89",
     "name": "Łowicz",
     "slug": "lowicz",
     "logo": null,
@@ -192,7 +192,7 @@
     "metadata": null
   },
   {
-    "id": "yQ6w4833o9TKDMPStW5XA4R0zlmCrpxX",
+    "id": "f44aac80-bbf6-430b-8a9c-42d5ac57de1e",
     "name": "Płock-Zachód",
     "slug": "plock-zachod",
     "logo": null,

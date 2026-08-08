@@ -1,11 +1,11 @@
 import type { YYYYMMDD } from "./date"
 
 export interface WeekendMeetingListItem {
-  id: number
+  id: string
   date: YYYYMMDD
   isCircuitOverseerVisit: boolean
   parts: Array<{
-    id: number
+    id: string
     type: string
     name: string | null
     order: number
