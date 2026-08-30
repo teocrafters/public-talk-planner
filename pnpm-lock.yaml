@@ -13,8 +13,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/anthropic':
-        specifier: 2.0.98
-        version: 2.0.98(zod@4.1.13)
+        specifier: 2.0.99
+        version: 2.0.99(zod@4.1.13)
       '@internationalized/date':
         specifier: 3.10.1
         version: 3.10.1
@@ -31,8 +31,8 @@ importers:
         specifier: 10.2.4
         version: 10.2.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@vue/compiler-dom@3.5.42)(db0@0.3.4(@libsql/client@0.15.15)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260702.1)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(kysely@0.28.17)))(esbuild@0.28.2)(eslint@9.39.5(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.4)(rollup@4.62.5)(typescript@5.9.3)(vite@7.3.6(@types/node@24.10.15)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.50.0)(tsx@4.23.12)(yaml@2.9.0))(vue@3.5.42(typescript@5.9.3))
       ai:
-        specifier: 5.0.248
-        version: 5.0.248(zod@4.1.13)
+        specifier: 5.0.249
+        version: 5.0.249(zod@4.1.13)
       better-auth:
         specifier: 1.3.34
         version: 1.3.34(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(vue@3.5.42(typescript@5.9.3))
@@ -100,8 +100,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/anthropic@2.0.98':
-    resolution: {integrity: sha512-/e7XjaLSm72prXRDfOgJNYOQJ1UTli40/Wx7EV2I2mGfmdgX5ALFCyy74t79Hbelpq1N707XBrWXwmb1BPzZCQ==}
+  '@ai-sdk/anthropic@2.0.99':
+    resolution: {integrity: sha512-z5pmzlzHsYZ4FSDdUTJkQMMAbOdTY3FpbbFbWIRC1ZLLNDTfga5/TIpZulXv1+k2c0QKK0Xtgo9IYNSaY19JHQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3295,8 +3295,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  ai@5.0.248:
-    resolution: {integrity: sha512-60hFxMyVHH/M4cw6ubcpnM9aixmGx1wHnsGG9w8RObzXl8n+b7Jm0nBc4i+C6nns8+aBlArTt+/9d0BojZDk0A==}
+  ai@5.0.249:
+    resolution: {integrity: sha512-FDiGfFRKRcMMDMhPZ7MEQnCqcXOzDfc1Rlq8TV/2bkbWgwcH0iBmdjQdNfrYH1z3kqgubJdW+L/U2OHIW3mY2w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6740,7 +6740,7 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/anthropic@2.0.98(zod@4.1.13)':
+  '@ai-sdk/anthropic@2.0.99(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.3
       '@ai-sdk/provider-utils': 3.0.35(zod@4.1.13)
@@ -9985,7 +9985,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       zod: 4.1.13
 
-  ai@5.0.248(zod@4.1.13):
+  ai@5.0.249(zod@4.1.13):
     dependencies:
       '@ai-sdk/gateway': 2.0.143(zod@4.1.13)
       '@ai-sdk/provider': 2.0.3
