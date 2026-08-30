@@ -29,23 +29,9 @@
   })
 
   const { t } = useI18n()
-  const { user, client } = useAuth()
+  const { user } = useAuth()
 
   const passkeyPromptRef = ref()
-  const hasPasskeys = useState<boolean>("user-has-passkeys", () => false)
-
-  onMounted(async () => {
-    // Client-only: Check for passkeys after hydration
-    if (!user.value) return
-
-    try {
-      const passkeys = await client.passkey.listUserPasskeys()
-      hasPasskeys.value = Array.isArray(passkeys) && passkeys.length > 0
-    } catch (error) {
-      console.warn("Passkey check failed:", error)
-      hasPasskeys.value = false
-    }
-  })
 
   useSeoPage("dashboard")
 </script>
