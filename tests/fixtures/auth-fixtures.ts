@@ -6,7 +6,7 @@ type Role = "admin" | "publisher" | "public_talk_coordinator" | "boe_coordinator
 
 /**
  * Authenticates user with specified role and returns the page.
- * Handles login flow including waiting for hydration and redirect.
+ * Handles login flow including waiting for the post-login redirect.
  */
 export async function authenticateAs(page: Page, role: Role): Promise<void> {
   const user = testAccounts.users.find(u => u.role === role)
@@ -15,7 +15,6 @@ export async function authenticateAs(page: Page, role: Role): Promise<void> {
   }
 
   await page.goto("http://localhost:3000/login")
-  await page.waitForTimeout(5000)
 
   await page.getByTestId("auth-email-input").fill(user.email)
   await page.getByTestId("auth-password-input").fill(user.password)
@@ -24,7 +23,6 @@ export async function authenticateAs(page: Page, role: Role): Promise<void> {
   await submitButton.waitFor({ state: "visible" })
   await expect(submitButton).toBeEnabled()
   await submitButton.click()
-  await page.waitForTimeout(2000)
 
   await page.waitForURL("http://localhost:3000/user")
 }

@@ -17,14 +17,9 @@ interface RuntimeAuthConfig {
 }
 
 export function useAuth() {
-  const url = useRequestURL()
-  const headers = import.meta.server ? { ...useRequestHeaders(), Origin: url.origin } : undefined
-
+  // Browser-only client: the SSR pass gets its session in-process, so no origin or
+  // forwarded headers are needed here.
   const client = createAuthClient({
-    baseURL: url.origin,
-    fetchOptions: {
-      headers,
-    },
     plugins: [
       passkeyClient(),
       organizationClient({
@@ -49,21 +44,16 @@ export function useAuth() {
   const loggedIn = computed(() => !!session.value)
 
   const fetchSession = async () => {
-    // Plugin already loaded session on server - skip HTTP request
-    if (import.meta.server && session.value !== null) {
+    if (import.meta.server) {
       return { session: session.value, user: user.value }
     }
 
     if (sessionFetching.value) {
-      console.log("already fetching session")
       return
     }
+
     sessionFetching.value = true
-    const { data } = await client.getSession({
-      fetchOptions: {
-        headers,
-      },
-    })
+    const { data } = await client.getSession()
     session.value = data?.session || null
     user.value = data?.user || null
     sessionFetching.value = false
