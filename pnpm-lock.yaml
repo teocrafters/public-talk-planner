@@ -13,8 +13,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/anthropic':
-        specifier: 2.0.112
-        version: 2.0.112(zod@4.1.13)
+        specifier: 4.0.96
+        version: 4.0.96(zod@4.1.13)
       '@internationalized/date':
         specifier: 3.10.1
         version: 3.10.1
@@ -100,9 +100,9 @@ importers:
 
 packages:
 
-  '@ai-sdk/anthropic@2.0.112':
-    resolution: {integrity: sha512-D3I+qAyfV7c0G3k1evt8unmdVPyME82TFgULECmxrjFkEB7gcgpMD8zHMDsiaYRtbpVc5ag4nTCftt4ytfEV0Q==}
-    engines: {node: '>=18'}
+  '@ai-sdk/anthropic@4.0.96':
+    resolution: {integrity: sha512-eq6rKebpYwvOmFkvhbgrQ7J+TtPsGk3KoEDr+Hu0R1EANm562CAly4s0zaCAQW7Xzw1261oWhOnU8zYLPRxzhA==}
+    engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
@@ -130,9 +130,19 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/provider-utils@5.0.74':
+    resolution: {integrity: sha512-42R/bzs520oy3PMj8FI1KGegjLEjaUsNcaEltb6yxN0KnmhihWvlgMb19pEF8CKKqv6Bq6+qMVji8mtyrMubSQ==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider@2.0.5':
     resolution: {integrity: sha512-cmG40u10QFEUrYXWYom6Lo6DLR+pND3wWABTTT9Nf7zg9F7BD46KNj+STekndp9Kg5ZAIPA0WxmTI0IwRvKvvQ==}
     engines: {node: '>=18'}
+
+  '@ai-sdk/provider@4.0.35':
+    resolution: {integrity: sha512-yBz6fmLS8MSCIzy7NiHEUAq56ZLD4ZA1GR6bpXBxgbwUacP1La7LuwAr/xy9jSzthem4F8Xu2OrhvU/JrE9fYA==}
+    engines: {node: '>=22'}
 
   '@ai-sdk/vue@2.0.283':
     resolution: {integrity: sha512-yf0RulCvu/8B2j68C4OB4qBnoaeSkflg3hzCN11sMSoxjl4bJOP3BOaI1U3bwX3s4pSANIIF+p03OUtlIM2tCA==}
@@ -3241,6 +3251,9 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
+  '@workflow/serde@4.1.0':
+    resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
+
   abbrev@3.0.1:
     resolution: {integrity: sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg==}
     engines: {node: ^18.17.0 || >=20.5.0}
@@ -6136,6 +6149,10 @@ packages:
     resolution: {integrity: sha512-Vqs8HTzjpQXZeXdpsfChQTlafcMQaaIwnGwLam1wudSSjlJeQ3bw1j+TLPePgrCnCpUXx7Ba5Pdpf5OBih62NQ==}
     engines: {node: '>=20.18.1'}
 
+  undici@7.30.2:
+    resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
+    engines: {node: '>=20.18.1'}
+
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
 
@@ -6738,10 +6755,10 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/anthropic@2.0.112(zod@4.1.13)':
+  '@ai-sdk/anthropic@4.0.96(zod@4.1.13)':
     dependencies:
-      '@ai-sdk/provider': 2.0.5
-      '@ai-sdk/provider-utils': 3.0.44(zod@4.1.13)
+      '@ai-sdk/provider': 4.0.35
+      '@ai-sdk/provider-utils': 5.0.74(zod@4.1.13)
       zod: 4.1.13
 
   '@ai-sdk/gateway@2.0.174(zod@4.1.13)':
@@ -6774,7 +6791,20 @@ snapshots:
       undici: 5.29.0
       zod: 4.1.13
 
+  '@ai-sdk/provider-utils@5.0.74(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.35
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.1
+      undici: 7.30.2
+      zod: 4.1.13
+
   '@ai-sdk/provider@2.0.5':
+    dependencies:
+      json-schema: 0.4.0
+
+  '@ai-sdk/provider@4.0.35':
     dependencies:
       json-schema: 0.4.0
 
@@ -10023,6 +10053,8 @@ snapshots:
     dependencies:
       vue: 3.5.44(typescript@5.9.3)
 
+  '@workflow/serde@4.1.0': {}
+
   abbrev@3.0.1: {}
 
   abort-controller@3.0.0:
@@ -13171,6 +13203,8 @@ snapshots:
       '@fastify/busboy': 2.1.1
 
   undici@7.14.0: {}
+
+  undici@7.30.2: {}
 
   unenv@2.0.0-rc.24:
     dependencies:
