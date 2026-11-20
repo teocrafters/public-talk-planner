@@ -13,8 +13,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/anthropic':
-        specifier: 2.0.115
-        version: 2.0.115(zod@4.1.13)
+        specifier: 4.0.106
+        version: 4.0.106(zod@4.1.13)
       '@internationalized/date':
         specifier: 3.10.1
         version: 3.10.1
@@ -100,9 +100,9 @@ importers:
 
 packages:
 
-  '@ai-sdk/anthropic@2.0.115':
-    resolution: {integrity: sha512-wc1rU69QIqHksPKeWmcQiwdg1fYJXVFGa5wVlEvIqxqtFWeXe3arISBpX28A+IvS7MvbF7xL/fykr1mpbs/M1A==}
-    engines: {node: '>=18'}
+  '@ai-sdk/anthropic@4.0.106':
+    resolution: {integrity: sha512-CKqIoPG91+uqmZxxxQEaS2anQlDxA+4UPeYB0TgcHAit1HZgx0m2y9JJ7QwJVYmgBuZHO1OXowMovV0kwvrTcQ==}
+    engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
@@ -130,9 +130,19 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/provider-utils@5.0.82':
+    resolution: {integrity: sha512-9s3Le9LsTR0exy14H8SERw4uMgFhiP0yJVoLefzfQCnnptj71noYh1AoVEsjfJjmMH1y16+1OqBVTDpTpU6M3Q==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider@2.0.5':
     resolution: {integrity: sha512-cmG40u10QFEUrYXWYom6Lo6DLR+pND3wWABTTT9Nf7zg9F7BD46KNj+STekndp9Kg5ZAIPA0WxmTI0IwRvKvvQ==}
     engines: {node: '>=18'}
+
+  '@ai-sdk/provider@4.0.39':
+    resolution: {integrity: sha512-jRvAhvW23+TeMGVCME2WGejP/TjzyDg7TplUep3t8HcEYnC2/8zqhCy9RRrjjVs1ljcygABZ8pQ21MbCRdF01w==}
+    engines: {node: '>=22'}
 
   '@ai-sdk/vue@2.0.286':
     resolution: {integrity: sha512-TdvwpgvROPwiyDlKfxH7Qxcee8s7lfLOvysy4bSCAX6IftPB3oQXzhQYE/8973u8MXmF7KEoB+EXUGqI59LD0g==}
@@ -3227,6 +3237,9 @@ packages:
     resolution: {integrity: sha512-e89uuTLMh0U5cZ9iDpEI2senqPGfbPRTHM/0AaQkcxnpqjkZqDYP8rpfm7edOz8s+pOCOROEy1PIveSW8+fL5g==}
     peerDependencies:
       vue: ^3.5.0
+
+  '@workflow/serde@4.1.0':
+    resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
 
   abbrev@3.0.1:
     resolution: {integrity: sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg==}
@@ -6684,10 +6697,10 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/anthropic@2.0.115(zod@4.1.13)':
+  '@ai-sdk/anthropic@4.0.106(zod@4.1.13)':
     dependencies:
-      '@ai-sdk/provider': 2.0.5
-      '@ai-sdk/provider-utils': 3.0.46(zod@4.1.13)
+      '@ai-sdk/provider': 4.0.39
+      '@ai-sdk/provider-utils': 5.0.82(zod@4.1.13)
       zod: 4.1.13
 
   '@ai-sdk/gateway@2.0.177(zod@4.1.13)':
@@ -6720,7 +6733,19 @@ snapshots:
       undici: 5.29.0
       zod: 4.1.13
 
+  '@ai-sdk/provider-utils@5.0.82(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.39
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.1
+      zod: 4.1.13
+
   '@ai-sdk/provider@2.0.5':
+    dependencies:
+      json-schema: 0.4.0
+
+  '@ai-sdk/provider@4.0.39':
     dependencies:
       json-schema: 0.4.0
 
@@ -9953,6 +9978,8 @@ snapshots:
   '@vueuse/shared@13.9.0(vue@3.5.45(typescript@5.9.3))':
     dependencies:
       vue: 3.5.45(typescript@5.9.3)
+
+  '@workflow/serde@4.1.0': {}
 
   abbrev@3.0.1: {}
 
